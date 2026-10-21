@@ -81,5 +81,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          sha256sum dist/*.zip > dist/SHA256SUMS
+          (cd dist && sha256sum *.zip > SHA256SUMS)
           gh release create "$GITHUB_REF_NAME" dist/*.zip dist/SHA256SUMS preview/*.png --verify-tag --prerelease --title "$GITHUB_REF_NAME — Blender VFX Studio Preview" --notes 'Blender 5.2 LTS 预览版。下载下方 ZIP，在 Preferences → Get Extensions → Install from Disk 中安装。附带 CPU 渲染预览和 SHA256 校验值。完整功能与限制请阅读仓库 README。' --generate-notes
