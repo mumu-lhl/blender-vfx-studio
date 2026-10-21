@@ -2,18 +2,20 @@
 
 面向二次元 3D 动画的 Blender 原生 VFX 插件。目标 Blender **5.2 LTS**，优先 Eevee，兼容 Cycles。
 
-当前预览版 **0.1.0** 已实现：
+当前预览版 **0.2.0** 已实现：
 
 - **Shockwave / Energy Ring**：可编辑的程序化网格、UV 流动、噪声溶解、软边透明与发光。
 - 开始帧、持续时间、速度、循环；半径、宽度、扩张、颜色及着色器参数可关键帧化。
 - 原生 VFX 侧栏创建、独立复制、安全删除；32 / 64 / 128 段质量选项。
 - 不使用 Python 每帧处理器；保存后无需插件也能播放。
+- 用户参数预设 JSON 保存与加载，严格版本和数值校验；载入为独立实例。
 
-这只是首个纵向切片。Particle、Trail、Flipbook、Simulation、Screen 和用户预设管理尚未实现；详见 [ROADMAP.md](ROADMAP.md)。
+这只是首个纵向切片。Particle、Trail、Flipbook、Simulation、Screen 和可浏览的预设库尚未实现；详见 [ROADMAP.md](ROADMAP.md)。
 
 ## 安装
 
-从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载 `blender-vfx-studio-0.1.0.zip`。
+在 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 最新成功构建中下载 `blender-vfx-studio-extension` artifact，解压得到 `blender-vfx-studio-0.2.0.zip`。
+当前云端无法向 GitHub Releases 上传附件（uploads.github.com 返回 401）；也可从源码构建。
 Blender 5.2 → Edit → Preferences → Get Extensions → 右上角菜单 → Install from Disk，选择 ZIP 并启用。
 源码也可直接构建：
 
@@ -38,13 +40,22 @@ Emission 不自动添加屏幕辉光；如需辉光，请在自己的 Compositor
 选择 Layer 可直接编辑 Geometry Nodes、材质节点和基础网格。参数调整不会重建这些节点。
 请保留命名属性 `vfx_inner` 和节点输入驱动目标。质量只在创建时生效。
 
+## 保存与复用预设
+
+选择效果后点击 **Save Preset**，保存 `.json`；点击 **Load Preset** 可在当前 3D Cursor 和当前帧创建独立实例。
+保存当前帧的参数值、质量和名称，不包含原始开始帧、UUID、关键帧、变换、图片或手动编辑的节点拓扑。
+节点拓扑与动画的完整复用请保存 `.blend` 并使用 Blender 原生 Append。
+
+格式有独立的 format/module/asset 版本，严格校验缺失字段、未知字段、非有限数值和参数范围，文件最大 64 KiB。
+当前只支持预设格式 1 和 ring 资产版本 1；未支持的版本会明确报错，不会修改场景。
+
 ## 安全与限制
 
 - 使用 VFX **Duplicate**；Shift-D 会复制实例 UUID，插件会提示身份歧义。
 - 若外部对象共享了生成的 Mesh、Material 或 Node Group，Delete 会拒绝操作，先解除共享。
 - 删除保留用户子对象、外来材质和非空集合；自建约束/驱动器若引用 Controller，需自行处理这些外部依赖。
 - 保存的 `.blend` 可在未安装插件、禁用自动执行时播放；重新创作需要启用插件。
-- 本版仅支持 schema 1；用户预设文件和版本迁移尚未开放。
+- 本版仅支持实例 schema 1 和预设格式 1；旧版迁移尚未需要实现，未知版本会拒绝导入。
 - 自动化已验证 Blender 5.2.2 Linux。其他操作系统和完整交互 UI 操作仍需人工验证。
 
 ## 开发与验证

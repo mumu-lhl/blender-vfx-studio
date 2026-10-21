@@ -17,7 +17,8 @@
 - Mesh + Shader：Shockwave / Energy Ring，原生 Geometry Nodes 与 Shader Nodes，可关键帧化参数。
 - 独立复制（含 Action 与用户节点编辑）、保守删除、质量档位。
 - 通过 Cycles CPU 800×500 及 Eevee 200×125 后台预览；Eevee 出现 EGL 警告但渲染成功。
-- 待实现：用户预设导入导出和迁移协议（[#3](https://github.com/mumu-lhl/blender-vfx-studio/issues/3)）、更完整的 Layer 组合和绑定界面。
+- 用户参数预设 JSON 导入/导出、独立格式版本与严格校验（[#3](https://github.com/mumu-lhl/blender-vfx-studio/issues/3)）。
+- 待实现：更完整的 Layer 组合和绑定界面；未来增加新 schema 前实现逐版本迁移和历史固定样例。
 
 首次开发跟踪：[#1](https://github.com/mumu-lhl/blender-vfx-studio/issues/1)。
 
@@ -38,11 +39,16 @@ Simulation、参数变更引起的缓存失效、缓存烘焙与保存重开、�
 
 ## M5 — 尚未开始
 
-交互体验、跨平台、Eevee/Cycles 视觉回归与正式稳定发布。0.1.0 是早期预览，不代表正式版。
+交互体验、跨平台、Eevee/Cycles 视觉回归与正式稳定发布。0.2.0 是早期预览，不代表正式版。
 
 ## 本次验证记录
 
-Blender 5.2.2 Linux：时间表达式对照 60 个输入组合；6 个集成测试（包含多个子场景）；
+Blender 5.2.2 Linux：时间表达式对照 60 个输入组合；5 个预设测试；7 个集成测试（包含多个子场景）；
 独立进程禁用自动执行且不导入插件时的保存重开；安装包安装、启用、创建、卸载；Ruff 检查与格式校验。
 Cycles CPU 32 samples 800×500 与 Eevee 200×125 预览已人工检查，生成脚本 `tools/preview.py`。
 未进行图形界面的点击/Undo 操作验证，也未测试 Windows/macOS。
+
+## 发布状态
+
+PR #4 已通过 GitHub CI 并合并；0.2.0 增加可复用参数预设。
+GitHub Releases 附件上传当前返回 401，已保留构建脚本与 CI ZIP artifact；不以附件上传成功作为已完成事项。

@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "blender_vfx_studio"
-version = "0.1.0"
+version = "0.2.0"
 name = "Blender VFX Studio"
 tagline = "Create editable native shockwaves and energy rings"
 maintainer = "Blender VFX Studio contributors"
@@ -9,3 +9,6 @@ website = "https://github.com/mumu-lhl/blender-vfx-studio"
 tags = ["Animation", "Node"]
 blender_version_min = "5.2.0"
 license = ["SPDX:GPL-3.0-or-later"]
+
+[permissions]
+files = "Import and export user-selected VFX parameter preset JSON files"
