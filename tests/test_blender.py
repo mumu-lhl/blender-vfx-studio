@@ -94,6 +94,16 @@ class BlenderTests(unittest.TestCase):
         core.delete(root)
         self.assertAlmostEqual(radius(copy, 13), 4.5, places=5)
 
+    def test_duplicate_with_user_material_without_nodes(self):
+        root = core.create(bpy.context)
+        plain = bpy.data.materials.new("Plain User Material")
+        root.children[0].data.materials.append(plain)
+        clone = core.duplicate(bpy.context, root)
+        self.assertEqual(len(clone.children[0].data.materials), 2)
+        self.assertIsNot(clone.children[0].data.materials[1], plain)
+        core.delete(clone)
+        self.assertIn(plain.name, bpy.data.materials)
+
     def test_safe_delete_foreign_children_shared_assets_and_collection(self):
         root = core.create(bpy.context)
         layer = root.children[0]

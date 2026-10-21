@@ -171,7 +171,9 @@ def duplicate(context, root):
                 if slot.material:
                     slot.material = slot.material.copy()
                     _tag(slot.material, uid)
-                    private.extend([slot.material, slot.material.node_tree])
+                    private.append(slot.material)
+                    if slot.material.node_tree:
+                        private.append(slot.material.node_tree)
             for modifier in clone.modifiers:
                 if modifier.type == "NODES" and modifier.node_group:
                     modifier.node_group = modifier.node_group.copy()
