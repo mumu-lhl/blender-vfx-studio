@@ -1,0 +1,45 @@
+name: Blender extension
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  blender:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      BLENDER_VERSION: 5.2.2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install lint tools
+        run: python -m pip install ruff==0.14.1
+      - name: Lint
+        run: |
+          ruff check blender_vfx_studio tools tests
+          ruff format --check blender_vfx_studio tools tests
+      - name: Download official Blender with checksum verification
+        shell: bash
+        run: |
+          mkdir -p work
+          cd work
+          base=https://download.blender.org/release/Blender5.2
+          curl --fail --location --retry 3 -o blender.tar.xz "$base/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          curl --fail --location --retry 3 -o checksums.txt "$base/blender-${BLENDER_VERSION}.sha256"
+          mv blender.tar.xz "blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          sha256sum --check --ignore-missing checksums.txt
+          tar -xf "blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          echo "$PWD/blender-${BLENDER_VERSION}-linux-x64" >> "$GITHUB_PATH"
+      - name: Native behavior and persistence tests (CPU only)
+        run: python tools/test.py
+      - name: Package installation, enable and removal
+        run: python tools/test_install.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blender-vfx-studio-extension
+          path: dist/*.zip

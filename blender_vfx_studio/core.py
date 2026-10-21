@@ -195,6 +195,26 @@ def delete(root):
         for o in root.children_recursive
         if o.get("vfx_id") == uid and o.get("vfx_role") == "layer"
     ]
+    # Shared generated assets still depend on this controller. Refuse destructive
+    # unlinking rather than leave another object with broken native drivers.
+    meshes = {o.data for o in owned if o.type == "MESH"}
+    materials = {m for mesh in meshes for m in mesh.materials if m}
+    groups = {
+        m.node_group for o in owned for m in o.modifiers if m.type == "NODES" and m.node_group
+    }
+    for mesh in meshes:
+        if mesh.get("vfx_id") == uid and mesh.users > sum(o.data == mesh for o in owned):
+            raise ValueError("VFX mesh is shared; unlink external users before deleting")
+    for material in materials:
+        users = sum(sum(m == material for m in mesh.materials) for mesh in meshes)
+        if material.get("vfx_id") == uid and material.users > users:
+            raise ValueError("VFX material is shared; unlink external users before deleting")
+    for group in groups:
+        users = sum(
+            sum(m.type == "NODES" and m.node_group == group for m in o.modifiers) for o in owned
+        )
+        if group.get("vfx_id") == uid and group.users > users:
+            raise ValueError("VFX node group is shared; unlink external users before deleting")
     resources = []
     for obj in owned:
         # Retain foreign children and their world-space transforms.
@@ -203,7 +223,7 @@ def delete(root):
                 matrix = child.matrix_world.copy()
                 child.parent = None
                 child.matrix_world = matrix
-        if obj.data:
+        if obj.type == "MESH":
             resources.append((bpy.data.meshes, obj.data))
             resources.extend((bpy.data.materials, m) for m in obj.data.materials if m)
         resources.extend(
@@ -211,15 +231,11 @@ def delete(root):
             for m in obj.modifiers
             if m.type == "NODES" and m.node_group
         )
+    unique = {data.as_pointer(): (store, data) for store, data in resources}
     for obj in reversed(owned):
         bpy.data.objects.remove(obj, do_unlink=True)
-    # Meshes release material users first. Shared or foreign data is retained.
-    seen = set()
-    for store, data in resources:
-        pointer = data.as_pointer()
-        if pointer in seen:
-            continue
-        seen.add(pointer)
+    # Meshes release material users first. Foreign data is retained.
+    for store, data in unique.values():
         if data.get("vfx_id") == uid and data.users == 0:
             store.remove(data)
     for collection in list(bpy.data.collections):

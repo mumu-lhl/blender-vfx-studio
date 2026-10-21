@@ -15,5 +15,7 @@ with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
             info = zipfile.ZipInfo(path.relative_to(SOURCE).as_posix(), (2026, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(info, path.read_bytes())
-    archive.write(ROOT / "LICENSE", "LICENSE")
+    info = zipfile.ZipInfo("LICENSE", (2026, 1, 1, 0, 0, 0))
+    info.compress_type = zipfile.ZIP_DEFLATED
+    archive.writestr(info, (ROOT / "LICENSE").read_bytes())
 print(output)

@@ -104,16 +104,28 @@ class BlenderTests(unittest.TestCase):
         user.location = (2, 3, 4)
         bpy.context.view_layer.update()
         before = user.matrix_world.copy()
-        mat = layer.data.materials[0]
         group = layer.modifiers[0].node_group
         mod = user.modifiers.new("User GN", "NODES")
         mod.node_group = group
+        with self.assertRaisesRegex(ValueError, "shared"):
+            core.delete(root)
+        user.data = user.data.copy()
+        del user.data["vfx_id"]
+        with self.assertRaisesRegex(ValueError, "material is shared"):
+            core.delete(root)
+        foreign = bpy.data.materials.new("User Material")
+        user.data.materials.clear()
+        user.data.materials.append(foreign)
+        with self.assertRaisesRegex(ValueError, "node group is shared"):
+            core.delete(root)
+        user.modifiers.remove(mod)
+        # User-created nodes/materials assigned to a VFX layer must survive.
+        layer.data.materials.append(foreign)
         core.delete(root)
         self.assertIsNone(user.parent)
         self.assertEqual(user.matrix_world, before)
         self.assertEqual(len(user.data.vertices), 128)
-        self.assertEqual(user.data.materials[0], mat)
-        self.assertEqual(mod.node_group, group)
+        self.assertEqual(user.data.materials[0], foreign)
         self.assertIn(user.name, collection.objects)
 
     def test_manual_duplicate_identity_and_future_schema_rejected(self):
