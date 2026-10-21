@@ -14,8 +14,8 @@
 
 ## 安装
 
-在 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 最新成功构建中下载 `blender-vfx-studio-extension` artifact，解压得到 `blender-vfx-studio-0.2.0.zip`。
-当前云端无法向 GitHub Releases 上传附件（uploads.github.com 返回 401）；也可从源码构建。
+从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载 `blender-vfx-studio-0.2.0.zip`。
+未打 tag 的开发版本可从 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 最新成功构建中下载 `blender-vfx-studio-extension` artifact，解压后安装其中的 ZIP。
 Blender 5.2 → Edit → Preferences → Get Extensions → 右上角菜单 → Install from Disk，选择 ZIP 并启用。
 源码也可直接构建：
 
