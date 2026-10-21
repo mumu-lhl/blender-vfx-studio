@@ -1,0 +1,29 @@
+# 领域概念与约定
+
+- **Effect**：具有稳定 UUID 的一个特效实例，不等同于对象名。
+- **Controller**：Empty，拥有实例参数、可关键帧化的原生 ID 属性和变换。
+- **Layer**：一个实例内的原生对象；当前是 Mesh + Material + Geometry Nodes。
+- **Module**：效果生成能力，例如 `mesh.ring`；七大 VFX 类别是方向，不要求每类一个基类。
+- **Preset**：模块与参数的创建快照。内置 Shockwave / Energy Ring 可用；用户保存、导入与版本迁移尚未实现。
+- **Schema version**：实例持久化结构版本，当前为 1。
+- **Asset version**：模块生成节点/几何的资产协议版本，当前 ring 为 1。
+- **Ownership**：`vfx_id` 标记资源归属，`vfx_role` 区分 controller/layer；名称可任意修改。
+
+## 时间
+
+单位为帧，支持子帧。`elapsed = (frame - start) * max(speed, .001) / max(duration, 1)`。
+非循环时 progress 为 elapsed 限制到 [0, 1]，有效区间为 `[start, start + duration/speed)`。
+循环时 progress 为 `elapsed - floor(elapsed)`，start 之前仍隐藏。环在无效时间从求值几何中移除。
+
+speed 仅允许正数；speed=1 时 duration 是生命周期帧数。当前不提供倒放语义或秒制转换。
+参数可随帧关键帧化；动画 start/duration/speed 会直接改变当前帧的计算结果，不积累历史时间。
+
+`radius` 为出生时外半径，`expansion` 为一个周期增加的半径，`width` 为径向宽度。
+内半径限制为 .001；宽度超过当前半径时接近实心环，不产生负半径。
+RGB 为线性颜色分量；dissolve=1 完全透明，fade=1 在生命周期末淡出，fade=0 保持不透明度。
+Emission 亮度不等同于辉光；辉光需要用户自己的 Compositor，目前插件不修改它。
+
+## 状态
+
+当前 ring 是无状态函数：同一场景参数和帧产生同一几何结果，任意帧预览不需要预热或缓存。
+未来模拟模块需区分预览、已烘焙、失效缓存；保存重开后必须能解释其状态，不能默默使用过期缓存。
