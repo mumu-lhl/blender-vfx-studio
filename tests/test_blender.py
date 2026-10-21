@@ -10,7 +10,7 @@ import bpy
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 import blender_vfx_studio as addon
-from blender_vfx_studio import core
+from blender_vfx_studio import core, presets
 
 
 def radius(root, frame):
@@ -138,6 +138,29 @@ class BlenderTests(unittest.TestCase):
         self.assertEqual(user.data.materials[0], foreign)
         self.assertIn(user.name, collection.objects)
 
+    def test_preset_file_operators_and_invalid_import_are_isolated(self):
+        root = core.create(bpy.context, quality="LOW")
+        update(root, radius=0.8, speed=2.0, loop=True)
+        (ROOT / "work").mkdir(exist_ok=True)
+        filepath = str(ROOT / "work" / "roundtrip.json")
+        self.assertEqual(bpy.ops.vfx_studio.export_preset(filepath=filepath), {"FINISHED"})
+        data = presets.read(filepath)
+        self.assertNotIn("start", data["parameters"])
+        bpy.context.scene.frame_set(50)
+        self.assertEqual(bpy.ops.vfx_studio.import_preset(filepath=filepath), {"FINISHED"})
+        imported = bpy.context.object
+        self.assertNotEqual(root["vfx_id"], imported["vfx_id"])
+        self.assertEqual(imported["start"], 50)
+        self.assertEqual(imported["vfx_quality"], "LOW")
+        self.assertEqual(imported["loop"], True)
+        self.assertAlmostEqual(radius(imported, 56), 2.3, places=5)
+        count = len(bpy.data.objects)
+        data["parameters"]["radius"] = -1
+        with self.assertRaises(ValueError):
+            core.create_from_preset(bpy.context, data)
+        self.assertEqual(len(bpy.data.objects), count)
+        self.assertEqual(root["radius"], 0.8)
+
     def test_manual_duplicate_identity_and_future_schema_rejected(self):
         root = core.create(bpy.context)
         copy = root.copy()
@@ -163,6 +186,8 @@ root = core.create(bpy.context)
 copy = core.duplicate(bpy.context, root)
 copy.name = "Persisted Copy"
 update(copy, radius=1.0)
+imported = core.create_from_preset(bpy.context, core.preset_snapshot(copy))
+imported.name = "Persisted Preset"
 addon.unregister()
 addon.register()
 addon.unregister()

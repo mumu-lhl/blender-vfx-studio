@@ -8,10 +8,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 os.chdir(ROOT)
 blender = os.environ.get("BLENDER_BIN", "blender")
-subprocess.run(
-    [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_timing.py"],
-    check=True,
-)
+for pattern in ("test_timing.py", "test_presets.py"):
+    subprocess.run(
+        [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", pattern],
+        check=True,
+    )
+
 base = [blender, "-b", "--factory-startup", "--disable-autoexec", "--python-exit-code", "1"]
 subprocess.run(base + ["--python", "tests/test_blender.py"], check=True)
 subprocess.run(

@@ -6,27 +6,10 @@ import uuid
 import bpy
 
 from . import nodes
+from .parameters import PARAMETERS
 from .registry import MODULES, PRESETS
 
 SCHEMA_VERSION = 1
-
-# key: (default, min, max, description). ID properties survive UI unregistration.
-PARAMETERS = {
-    "start": (1.0, -100000.0, 100000.0, "Start frame"),
-    "duration": (24.0, 1.0, 100000.0, "Lifetime in frames at speed 1"),
-    "speed": (1.0, 0.001, 1000.0, "Playback multiplier"),
-    "loop": (False, None, None, "Repeat after duration; hidden before start"),
-    "radius": (0.2, 0.001, 10000.0, "Outer radius at birth"),
-    "width": (0.18, 0.001, 10000.0, "Ring width; inner radius clamps above zero"),
-    "expansion": (3.0, 0.0, 10000.0, "Added radius over one lifetime"),
-    "strength": (8.0, 0.0, 1000.0, "Emission strength"),
-    "dissolve": (0.25, 0.0, 1.0, "Noise cutoff; 1 fully dissolves"),
-    "noise_scale": (8.0, 0.01, 1000.0, "UV noise scale"),
-    "fade": (1.0, 0.0, 1.0, "Opacity loss over lifetime"),
-    "color_0": (0.08, 0.0, 1.0, "Linear red"),
-    "color_1": (0.5, 0.0, 1.0, "Linear green"),
-    "color_2": (1.0, 0.0, 1.0, "Linear blue"),
-}
 
 
 def resolve(obj):
@@ -243,3 +226,33 @@ def delete(root):
     for collection in list(bpy.data.collections):
         if collection.get("vfx_id") == uid and not collection.objects and not collection.children:
             bpy.data.collections.remove(collection)
+
+
+def preset_snapshot(root):
+    from . import presets
+
+    root = resolve(root)
+    if root is None:
+        raise ValueError("Select a VFX controller or layer")
+    return presets.validate(
+        {
+            "format_version": presets.FORMAT_VERSION,
+            "module": root["vfx_module"],
+            "asset_version": root["vfx_asset_version"],
+            "name": root.name[:80],
+            "quality": root["vfx_quality"],
+            "parameters": {key: root[key] for key in presets.PRESET_PARAMETERS},
+        }
+    )
+
+
+def create_from_preset(context, data):
+    from . import presets
+
+    data = presets.validate(data)  # Validate completely before mutating Blender data.
+    root = create(context, quality=data["quality"])
+    root.name = data["name"]
+    for key, value in data["parameters"].items():
+        root[key] = value
+    select(context, root)
+    return root

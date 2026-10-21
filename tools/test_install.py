@@ -4,12 +4,14 @@ import os
 import subprocess
 import sys
 import tempfile
+import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 blender = os.environ.get("BLENDER_BIN", "blender")
 subprocess.run([sys.executable, str(ROOT / "tools/build.py")], check=True)
-archive = ROOT / "dist/blender-vfx-studio-0.1.0.zip"
+version = tomllib.loads((ROOT / "blender_vfx_studio/blender_manifest.toml").read_text())["version"]
+archive = ROOT / "dist" / f"blender-vfx-studio-{version}.zip"
 (ROOT / "work").mkdir(exist_ok=True)
 with tempfile.TemporaryDirectory(prefix="install-", dir=ROOT / "work") as temporary:
     directory = Path(temporary)

@@ -1,9 +1,10 @@
 """Blender UI delegates lifecycle operations to core."""
 
 import bpy
-from bpy.props import EnumProperty
+from bpy.props import EnumProperty, StringProperty
+from bpy_extras.io_utils import ExportHelper, ImportHelper
 
-from . import core
+from . import core, presets
 from .registry import PRESETS
 
 
@@ -57,6 +58,37 @@ class VFX_OT_delete(bpy.types.Operator):
         return context.window_manager.invoke_confirm(self, event)
 
 
+class VFX_OT_export_preset(bpy.types.Operator, ExportHelper):
+    bl_idname = "vfx_studio.export_preset"
+    bl_label = "Save VFX Preset"
+    filename_ext = ".json"
+    filter_glob: StringProperty(default="*.json", options={"HIDDEN"})
+
+    def execute(self, context):
+        try:
+            presets.write(self.filepath, core.preset_snapshot(context.object))
+        except (ValueError, OSError) as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+
+class VFX_OT_import_preset(bpy.types.Operator, ImportHelper):
+    bl_idname = "vfx_studio.import_preset"
+    bl_label = "Load VFX Preset"
+    bl_options = {"REGISTER", "UNDO"}
+    filename_ext = ".json"
+    filter_glob: StringProperty(default="*.json", options={"HIDDEN"})
+
+    def execute(self, context):
+        try:
+            core.create_from_preset(context, presets.read(self.filepath))
+        except (ValueError, OSError) as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+
 class VFX_PT_main(bpy.types.Panel):
     bl_label = "Blender VFX Studio"
     bl_idname = "VFX_PT_main"
@@ -67,6 +99,7 @@ class VFX_PT_main(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         layout.operator("vfx_studio.create", icon="ADD")
+        layout.operator("vfx_studio.import_preset", text="Load Preset", icon="IMPORT")
         try:
             root = core.resolve(context.object)
         except ValueError as error:
@@ -76,6 +109,7 @@ class VFX_PT_main(bpy.types.Panel):
             layout.label(text="Select a VFX controller or layer")
             return
         layout.prop(root, "name", text="Effect")
+        layout.operator("vfx_studio.export_preset", text="Save Preset", icon="EXPORT")
         row = layout.row(align=True)
         row.operator("vfx_studio.duplicate", text="Duplicate", icon="DUPLICATE")
         row.operator("vfx_studio.delete", text="Delete", icon="TRASH")
@@ -91,7 +125,14 @@ class VFX_PT_main(bpy.types.Panel):
         layout.label(text="Material Preview / Rendered shows shader")
 
 
-CLASSES = (VFX_OT_create, VFX_OT_duplicate, VFX_OT_delete, VFX_PT_main)
+CLASSES = (
+    VFX_OT_create,
+    VFX_OT_duplicate,
+    VFX_OT_delete,
+    VFX_OT_export_preset,
+    VFX_OT_import_preset,
+    VFX_PT_main,
+)
 
 
 def register():
