@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+*.blend[0-9]*
+.blender/
+work/
+dist/
+.ruff_cache/
