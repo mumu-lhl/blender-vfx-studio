@@ -16,7 +16,7 @@
 - 原生无状态统一时间：开始、持续时间、速度、循环、任意帧求值。
 - Mesh + Shader：Shockwave / Energy Ring，原生 Geometry Nodes 与 Shader Nodes，可关键帧化参数。
 - 独立复制（含 Action 与用户节点编辑）、保守删除、质量档位。
-- 通过 Cycles CPU 预览；实际 Eevee 渲染受当前云端 EGL 上下文限制，尚未完成视觉验收。
+- 通过 Cycles CPU 800×500 及 Eevee 200×125 后台预览；Eevee 出现 EGL 警告但渲染成功。
 - 待实现：用户预设导入导出和迁移协议（[#3](https://github.com/mumu-lhl/blender-vfx-studio/issues/3)）、更完整的 Layer 组合和绑定界面。
 
 首次开发跟踪：[#1](https://github.com/mumu-lhl/blender-vfx-studio/issues/1)。
@@ -44,5 +44,5 @@ Simulation、参数变更引起的缓存失效、缓存烘焙与保存重开、�
 
 Blender 5.2.2 Linux：时间表达式对照 144 个输入组合；5 个集成测试（包含多个子场景）；
 独立进程禁用自动执行且不导入插件时的保存重开；安装包安装、启用、创建、卸载；Ruff 检查与格式校验。
-Cycles CPU 32 samples 800×500 预览已人工检查，生成脚本 `tools/preview.py`。
+Cycles CPU 32 samples 800×500 与 Eevee 200×125 预览已人工检查，生成脚本 `tools/preview.py`。
 未进行图形界面的点击/Undo 操作验证，也未测试 Windows/macOS。

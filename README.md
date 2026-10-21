@@ -55,6 +55,7 @@ Emission 不自动添加屏幕辉光；如需辉光，请在自己的 Compositor
 python tools/test.py
 python tools/test_install.py
 blender -b --factory-startup --python-exit-code 1 --python tools/preview.py
+blender -b --factory-startup --python-exit-code 1 --python tools/preview.py -- --engine BLENDER_EEVEE --scale 25
 ```
 
 测试在 CPU 后台验证真实 bpy、实例隔离、参数/时间、复制动画、删除安全、保存重开与插件安装生命周期。

@@ -1,5 +1,6 @@
 """Recreate a CPU Cycles preview: blender -b --python tools/preview.py."""
 
+import argparse
 import math
 import sys
 from pathlib import Path
@@ -10,6 +11,11 @@ from mathutils import Vector
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from blender_vfx_studio import core  # noqa: E402
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--engine", choices=("CYCLES", "BLENDER_EEVEE"), default="CYCLES")
+parser.add_argument("--scale", type=int, default=100)
+args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
@@ -44,19 +50,21 @@ bpy.context.object.data.size = 8
 scene.world = bpy.data.worlds.new("Preview World")
 scene.world.use_nodes = True
 scene.world.node_tree.nodes["Background"].inputs[0].default_value = (0.015, 0.02, 0.035, 1)
-scene.render.engine = "CYCLES"
+scene.render.engine = args.engine
 scene.cycles.device = "CPU"
 scene.cycles.samples = 32
 scene.cycles.use_denoising = False
 scene.render.resolution_x = 800
 scene.render.resolution_y = 500
-scene.render.resolution_percentage = 100
+scene.render.resolution_percentage = max(1, min(args.scale, 100))
 scene.view_settings.view_transform = "AgX"
 output = ROOT / "work"
 output.mkdir(exist_ok=True)
 scene.render.image_settings.file_format = "PNG"
-scene.render.filepath = str(output / "preview.png")
+scene.render.filepath = str(
+    output / ("preview.png" if args.engine == "CYCLES" else "preview-eevee.png")
+)
 core.select(bpy.context, left)
 bpy.ops.wm.save_as_mainfile(filepath=str(output / "preview.blend"))
 bpy.ops.render.render(write_still=True)
-print("CPU_PREVIEW_OK")
+print("PREVIEW_OK", args.engine)

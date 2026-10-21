@@ -52,4 +52,4 @@ Screen VFX 必须主动启用并隔离自身节点，不能改写用户已有 Co
 
 `python tools/test.py` 运行纯时间测试、真实 bpy 集成测试、全新进程无插件重开测试。
 `python tools/test_install.py` 构建、校验并在临时配置中安装/启用/创建/卸载扩展。
-`tools/preview.py` 生成可重复的 Cycles CPU 场景与预览。CI 固定 Blender 5.2.2，并校验官方二进制 SHA256。
+`tools/preview.py` 生成可重复的场景与预览，默认 Cycles CPU，可选择 Eevee。CI 固定 Blender 5.2.2，并校验官方二进制 SHA256。
