@@ -53,4 +53,4 @@ Cycles CPU 32 samples 800×500 与 Eevee 200×125 预览已人工检查，生成
 PR #4、#6 已通过 GitHub CI 并合并；0.2.0 增加可复用参数预设。
 云端直接上传 Releases 附件返回 401（[#5](https://github.com/mumu-lhl/blender-vfx-studio/issues/5)）；新增 tag 发布任务使用 GitHub Actions 仓库令牌上传经过同一工作流测试的 ZIP。
 发布前校验 tag 与 manifest 版本一致；构建/测试 job 只有读取权限，独立发布 job 才有 contents:write。
-实际附件状态以 GitHub Release 和 tag 工作流结果为准。
+tag 构建同时生成 Cycles CPU 预览；Release 附加 ZIP、SHA256SUMS 和 PNG。实际附件状态以 GitHub Release 和 tag 工作流结果为准。
