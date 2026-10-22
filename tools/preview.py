@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools"))
 from demo_atlas import create as demo_atlas  # noqa: E402
+from demo_sequence import create as demo_sequence  # noqa: E402
 
 from blender_vfx_studio import composition, core, simulation, trail  # noqa: E402
 
@@ -74,7 +75,14 @@ slash["start"], slash["duration"] = 7.0, 18.0
 slash["spin"] = 60.0
 slash["strength"] = 5.0
 slash.update_tag()
-group = composition.create(bpy.context, [left, right, sprite, particles, ribbon, cloth, slash])
+sequence = core.create_sequence(bpy.context, demo_sequence(output / "demo-sequence"), 16)
+sequence.location = (0, -1, 3.0)
+sequence.rotation_euler = (math.radians(70), 0, 0)
+sequence["strength"] = 3.0
+sequence.update_tag()
+group = composition.create(
+    bpy.context, [left, right, sprite, particles, ribbon, cloth, slash, sequence]
+)
 screen = core.create_screen(bpy.context)
 screen["strength"] = 0.6
 screen["glow_size"] = 0.25

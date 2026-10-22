@@ -24,7 +24,7 @@ Layer（效果层）是显示效果的对象或节点。当前每个空间效果
 
 ## 参数怎样驱动播放
 
-节点和修改器输入通过 Blender 驱动器读取控制器属性。驱动器是 Blender 自带的属性计算机制；本项目只使用它能直接计算的简单表达式，不注册 Python 回调或自定义驱动函数。循环用 `x - floor(x)`，因为 `%` 不属于这里使用的简单表达式范围。
+节点和修改器输入通过 Blender 驱动器读取控制器属性。驱动器是 Blender 自带的属性计算机制；本项目只使用它能直接计算的简单表达式，不注册 Python 回调或自定义驱动函数。每条驱动表达式最多 255 字符，构建工具会提前拒绝超长表达式，避免 Blender 静默截断。循环用 `x - floor(x)`，因为 `%` 不属于这里使用的简单表达式范围。
 
 创建时 Start 读取 `Scene.frame_current_final`，包含子帧和场景时间映射，与驱动器的 `frame` 相同；已有实例的 Start 不自动改变。
 例如默认场景映射下，Start=1、Duration=24、Speed=1 时，效果在第 1 帧出现，第 25 帧开始隐藏。把 Speed 改成 2，会在第 13 帧结束。跳到任意帧时，节点根据该帧及当前参数重新计算结果；时间细节见 [CONTEXT.md](CONTEXT.md)。
@@ -47,6 +47,13 @@ Geometry Nodes 只按半径和增长量缩放基础网格，并在生命周期�
 播放仍只依靠简单原生驱动表达式，没有相机引用或逐帧 Python 更新。
 
 Flipbook 使用四顶点网格。Geometry Nodes 控制尺寸和生命周期，材质把 UV 缩放、移动到指定图集格子。格子从左上开始逐行编号。选帧额外加百万分之一周期的容差，避免 CPU/GPU 浮点误差造成边界闪回上一格；此容差不改变生命周期。图片由用户持有，复制效果时共享图片，删除效果时保留图片。
+
+`flipbook.sequence` 使用独立的 Image 数据块，不将用户已有的静态图片改成序列。
+它复用 Sprite 的尺寸节点和透明发光材质，使用 ImageUser 的 `frame_offset` 驱动选帧。
+Blender 会先将场景整数帧限制到序列时长，再添加 offset；因此驱动必须抵消这段场景帧，再加上由统一 Progress 算出的文件编号。
+`CONTEXT_PROP` 变量读取正在求值场景的整数帧，不保存源 Scene 引用，跨场景仍使用正确时钟。
+这是 [Blender 5.2.2 的原生帧计算顺序](https://github.com/blender/blender/blob/v5.2.2/source/blender/blenkernel/intern/image.cc)，并用真实像素测试覆盖时间映射。
+Progress 先由效果层的原生自定义属性驱动计算，材质再读取它，以控制表达式长度；两段都不需要 Python 播放回调。
 
 粒子用 Mesh Line 生成点，用点 Index 作为稳定编号，并由 Seed 生成可重复的随机方向和速度。Set Position 根据当前进度直接计算重力弹道，再在点上实例化小型 Icosphere，最后输出网格。Count 在求值时限制为 1–2048，Low 每粒子使用 20 个三角面。Motion Seconds 控制轨迹包含多少物理运动时间，Duration 控制播放帧数；拉长播放时间不会改变轨迹。这不是依赖上一帧的物理模拟。
 

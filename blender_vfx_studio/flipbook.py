@@ -131,6 +131,25 @@ def shader(root, image):
         extension="CLIP",
     )
     link(coord.outputs[0], tex.inputs["Vector"])
+    surface(tree, root, tex)
+    return mat
+
+
+def surface(tree, root, tex):
+    """Shared tint, emission and alpha for atlas and sequence textures."""
+    link = tree.links.new
+
+    def value(name, expression, properties, x, y):
+        n = node(tree, "ShaderNodeValue", name, x, y)
+        drive(n.outputs[0], "default_value", root, expression, properties)
+        return n.outputs[0]
+
+    def math_node(name, operation, a, b, x, y):
+        n = node(tree, "ShaderNodeMath", name, x, y, operation=operation)
+        link(a, n.inputs[0])
+        link(b, n.inputs[1])
+        return n.outputs[0]
+
     tint = node(tree, "ShaderNodeMixRGB", "Sprite Tint", 1500, 500, blend_type="MULTIPLY")
     tint.inputs[0].default_value = 1
     for i in range(3):
@@ -141,8 +160,8 @@ def shader(root, image):
     link(tint.outputs[0], emission.inputs["Color"])
     opacity = value("Opacity", "p", {"p": "opacity"}, 1200, 0)
     fade = value("Lifetime Fade", f"1-{PROGRESS}*f", dict(TIME_PROPS, f="fade"), 1200, -200)
-    alpha = math("Image Alpha", "MULTIPLY", tex.outputs["Alpha"], opacity, 1500, 200)
-    alpha = math("Lifetime Alpha", "MULTIPLY", alpha, fade, 1750, 200)
+    alpha = math_node("Image Alpha", "MULTIPLY", tex.outputs["Alpha"], opacity, 1500, 200)
+    alpha = math_node("Lifetime Alpha", "MULTIPLY", alpha, fade, 1750, 200)
     transparent = node(tree, "ShaderNodeBsdfTransparent", "Transparent", 1750, 0)
     mix = node(tree, "ShaderNodeMixShader", "Sprite Surface", 1950, 400)
     out = node(tree, "ShaderNodeOutputMaterial", "Surface", 2150, 400)
@@ -150,4 +169,3 @@ def shader(root, image):
     link(transparent.outputs[0], mix.inputs[1])
     link(emission.outputs[0], mix.inputs[2])
     link(mix.outputs[0], out.inputs["Surface"])
-    return mat

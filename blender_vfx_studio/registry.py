@@ -12,6 +12,7 @@ class Module:
 
 
 MODULES = {
+    "flipbook.sequence": Module("flipbook.sequence", "Image Sequence Sprite", 1),
     "shader.shield": Module("shader.shield", "Fresnel Energy Shield", 1),
     "mesh.slash": Module("mesh.slash", "Arc Slash", 1),
     "simulation.cloth": Module("simulation.cloth", "Cloth Energy Sheet", 1, stateful=True),

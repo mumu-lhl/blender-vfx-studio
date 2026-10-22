@@ -366,6 +366,8 @@ def create_from_preset(context, data):
         root = create_screen(context)
     elif data["module"] == "particle.burst":
         root = create_particle(context, data["quality"])
+    elif data["module"] == "flipbook.sequence":
+        root = create_sequence(context, data["assets"]["image"], data["assets"]["frame_count"])
     elif data["module"] == "flipbook.atlas":
         image = load_atlas(data["assets"]["image"])
         root = create_flipbook(
@@ -423,6 +425,10 @@ def _preset_assets(root):
         raise ValueError(
             "Native paths, baked simulations and compositions require .blend Append or Duplicate"
         )
+    if root["vfx_module"] == "flipbook.sequence":
+        from . import sequence
+
+        return sequence.snapshot(root)
     if root["vfx_module"] != "flipbook.atlas":
         return {}
     image = atlas_node(root).image
@@ -499,3 +505,9 @@ def create_shield(context, quality="MEDIUM"):
     from . import shield
 
     return shield.create(context, quality)
+
+
+def create_sequence(context, filepath, frame_count=16):
+    from . import sequence
+
+    return sequence.create(context, filepath, frame_count)
