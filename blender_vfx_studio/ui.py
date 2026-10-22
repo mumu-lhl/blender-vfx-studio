@@ -425,6 +425,42 @@ class VFX_OT_import_preset(bpy.types.Operator, ImportHelper):
         return {"FINISHED"}
 
 
+class VFX_OT_export_asset(bpy.types.Operator, ExportHelper):
+    bl_idname = "vfx_studio.export_asset"
+    bl_label = "Save Complete Effect"
+    bl_description = "Save native nodes, animation and stored motion in a reusable .blend asset"
+    filename_ext = ".blend"
+    filter_glob: StringProperty(default="*.blend", options={"HIDDEN"})
+
+    def execute(self, context):
+        from . import assets
+
+        try:
+            assets.write(self.filepath, context.object)
+        except (ValueError, OSError, RuntimeError) as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+
+class VFX_OT_import_asset(bpy.types.Operator, ImportHelper):
+    bl_idname = "vfx_studio.import_asset"
+    bl_label = "Load Complete Effect"
+    bl_description = "Append a complete VFX .blend asset with fresh independent instance IDs"
+    bl_options = {"REGISTER", "UNDO"}
+    filter_glob: StringProperty(default="*.blend", options={"HIDDEN"})
+
+    def execute(self, context):
+        from . import assets
+
+        try:
+            assets.load(context, self.filepath)
+        except (ValueError, OSError, RuntimeError) as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+
 class VFX_PT_main(bpy.types.Panel):
     bl_label = "Blender VFX Studio"
     bl_idname = "VFX_PT_main"
@@ -451,6 +487,7 @@ class VFX_PT_main(bpy.types.Panel):
             "vfx_studio.compose", text="Compose Selected VFX", icon="OUTLINER_COLLECTION"
         )
         layout.operator("vfx_studio.import_preset", text="Load Preset", icon="IMPORT")
+        layout.operator("vfx_studio.import_asset", text="Load Complete Effect", icon="APPEND_BLEND")
         try:
             root = core.resolve(context.object)
         except ValueError as error:
@@ -460,10 +497,14 @@ class VFX_PT_main(bpy.types.Panel):
             layout.label(text="Select a VFX controller or layer")
             return
         layout.prop(root, "name", text="Effect")
+        if root["vfx_module"] != "screen.glare":
+            layout.operator(
+                "vfx_studio.export_asset", text="Save Complete Effect", icon="FILE_BLEND"
+            )
         if root["vfx_module"] not in {"trail.ribbon", "core.composition", "simulation.cloth"}:
             layout.operator("vfx_studio.export_preset", text="Save Preset", icon="EXPORT")
         else:
-            layout.label(text="Reuse with Duplicate or .blend Append")
+            layout.label(text="Reuse with Duplicate or Save Complete Effect")
         row = layout.row(align=True)
         row.operator("vfx_studio.duplicate", text="Duplicate", icon="DUPLICATE")
         row.operator("vfx_studio.delete", text="Delete", icon="TRASH")
@@ -628,6 +669,8 @@ CLASSES = (
     VFX_OT_delete,
     VFX_OT_export_preset,
     VFX_OT_import_preset,
+    VFX_OT_export_asset,
+    VFX_OT_import_asset,
     VFX_PT_main,
 )
 

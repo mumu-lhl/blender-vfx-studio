@@ -9,7 +9,7 @@ import bpy
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 import blender_vfx_studio as addon
-from blender_vfx_studio import composition, core, simulation
+from blender_vfx_studio import assets, composition, core, simulation
 
 
 def roots(module=None):
@@ -105,6 +105,28 @@ class UndoTests(unittest.TestCase):
         self.assertEqual(len(bpy.data.shape_keys), 0)
         bpy.ops.ed.undo()
         self.assertEqual(simulation.state(bpy.context, roots()[0]), "BAKED")
+
+    def test_native_asset_import_undo_redo_keeps_unique_ids_and_drivers(self):
+        original = core.create_shield(bpy.context)
+        original_id = original["vfx_id"]
+        path = ROOT / "work/undo-asset.blend"
+        assets.write(path, original)
+        push("Original Shield")
+        bpy.ops.vfx_studio.import_asset(filepath=str(path))
+        push("Imported Shield")
+        imported_id = bpy.context.object["vfx_id"]
+        self.assertNotEqual(imported_id, original_id)
+        bpy.ops.ed.undo()
+        self.assertEqual([r["vfx_id"] for r in roots()], [original_id])
+        bpy.ops.ed.redo()
+        self.assertEqual({r["vfx_id"] for r in roots()}, {original_id, imported_id})
+        imported = next(r for r in roots() if r["vfx_id"] == imported_id)
+        imported["radius"] = 3.0
+        imported.update_tag()
+        bpy.context.scene.frame_set(7)
+        mesh = imported.children[0].evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+        self.assertAlmostEqual(max(v.co.length for v in mesh.vertices), 3, places=5)
+        self.assertTrue(path.is_file())
 
     def test_screen_insertion_and_removal_undo_restore_scene_tree(self):
         self.assertIsNone(bpy.context.scene.compositing_node_group)
