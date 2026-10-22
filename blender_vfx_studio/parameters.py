@@ -17,3 +17,46 @@ PARAMETERS = {
     "color_1": (0.5, 0.0, 1.0, "Linear green"),
     "color_2": (1.0, 0.0, 1.0, "Linear blue"),
 }
+
+# Keep the original ring schema unchanged for saved instances and v1 presets.
+COMMON_PARAMETERS = {
+    key: PARAMETERS[key]
+    for key in (
+        "start",
+        "duration",
+        "speed",
+        "loop",
+        "strength",
+        "fade",
+        "color_0",
+        "color_1",
+        "color_2",
+    )
+}
+FLIPBOOK_PARAMETERS = {
+    **COMMON_PARAMETERS,
+    "strength": (1.0, 0.0, 1000.0, "Emission strength"),
+    "fade": (0.0, 0.0, 1.0, "Opacity loss over lifetime"),
+    "color_0": (1.0, 0.0, 1.0, "Linear red tint"),
+    "color_1": (1.0, 0.0, 1.0, "Linear green tint"),
+    "color_2": (1.0, 0.0, 1.0, "Linear blue tint"),
+    "columns": (4, 1, 256, "Atlas column count"),
+    "rows": (4, 1, 256, "Atlas row count"),
+    "first_frame": (0, 0, 65535, "First atlas cell, zero-based from top left"),
+    "last_frame": (15, 0, 65535, "Last atlas cell, inclusive; clamps to grid"),
+    "width": (2.0, 0.001, 10000.0, "Sprite width"),
+    "height": (2.0, 0.001, 10000.0, "Sprite height"),
+    "opacity": (1.0, 0.0, 1.0, "Sprite opacity"),
+}
+
+
+def parameters_for(module):
+    if module == "mesh.ring":
+        return PARAMETERS
+    if module == "flipbook.atlas":
+        return FLIPBOOK_PARAMETERS
+    raise ValueError("Unknown VFX module")
+
+
+def preset_parameters_for(module):
+    return {key: spec for key, spec in parameters_for(module).items() if key != "start"}

@@ -5,11 +5,13 @@ import unittest
 from pathlib import Path
 
 from blender_vfx_studio import presets
+from blender_vfx_studio.parameters import preset_parameters_for
 
 
 def sample():
     return {
-        "format_version": 1,
+        "format_version": 2,
+        "assets": {},
         "module": "mesh.ring",
         "asset_version": 1,
         "name": "能量环",
@@ -43,10 +45,67 @@ class PresetTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 presets.read(path)
 
+    def test_historical_v1_ring_migrates_without_mutating_input(self):
+        path = Path(__file__).parent / "fixtures/ring-preset-v1.json"
+        historical = json.loads(path.read_text())
+        before = copy.deepcopy(historical)
+        migrated = presets.validate(historical)
+        self.assertEqual(historical, before)
+        self.assertEqual(migrated["format_version"], 2)
+        self.assertEqual(migrated["assets"], {})
+        self.assertEqual(migrated["parameters"], before["parameters"])
+        self.assertEqual(presets.loads(presets.dumps(migrated)), migrated)
+        historical["module"] = "flipbook.atlas"
+        with self.assertRaisesRegex(ValueError, "legacy"):
+            presets.validate(historical)
+
+    def test_flipbook_assets_integer_parameters_and_relative_paths(self):
+        data = dict(
+            sample(),
+            module="flipbook.atlas",
+            assets={"image": "atlas.png"},
+            parameters={
+                key: spec[0] for key, spec in preset_parameters_for("flipbook.atlas").items()
+            },
+        )
+        self.assertEqual(presets.loads(presets.dumps(data)), data)
+        for key, value in [
+            ("columns", 2.5),
+            ("rows", True),
+            ("first_frame", -1),
+            ("last_frame", 65536),
+            ("opacity", 1.5),
+        ]:
+            invalid = copy.deepcopy(data)
+            invalid["parameters"][key] = value
+            with self.assertRaises(ValueError):
+                presets.validate(invalid)
+        for assets in [
+            {},
+            {"image": ""},
+            {"image": []},
+            {"image": "bad\npath"},
+            {"image": "atlas.png", "script": "exec"},
+        ]:
+            with self.assertRaises(ValueError):
+                presets.validate(dict(data, assets=assets))
+        scratch = Path(__file__).resolve().parents[1] / "work"
+        with tempfile.TemporaryDirectory(dir=scratch) as directory:
+            directory = Path(directory)
+            (directory / "presets").mkdir()
+            source = directory / "atlas.png"
+            data["assets"]["image"] = str(source)
+            before = copy.deepcopy(data)
+            path = directory / "presets/effect.json"
+            presets.write(path, data)
+            self.assertEqual(data, before)
+            self.assertEqual(presets.loads(path.read_text())["assets"]["image"], "../atlas.png")
+            self.assertEqual(presets.read(path)["assets"]["image"], str(source))
+
     def test_reject_versions_fields_and_types(self):
         for key, value in [
             ("format_version", 0),
-            ("format_version", 2),
+            ("format_version", 3),
             ("format_version", True),
             ("asset_version", 999),
             ("module", "python.exec"),

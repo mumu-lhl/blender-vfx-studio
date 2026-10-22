@@ -1,8 +1,8 @@
 schema_version = "1.0.0"
 id = "blender_vfx_studio"
-version = "0.2.0"
+version = "0.3.0"
 name = "Blender VFX Studio"
-tagline = "Create editable native shockwaves and energy rings"
+tagline = "Create editable native rings and flipbook sprite effects"
 maintainer = "Blender VFX Studio contributors"
 type = "add-on"
 website = "https://github.com/mumu-lhl/blender-vfx-studio"
@@ -11,4 +11,4 @@ blender_version_min = "5.2.0"
 license = ["SPDX:GPL-3.0-or-later"]
 
 [permissions]
-files = "Import and export user-selected VFX parameter preset JSON files"
+files = "Read atlas images and import or export VFX preset JSON files"

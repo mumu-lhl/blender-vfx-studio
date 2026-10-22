@@ -6,8 +6,8 @@
 - **Module**：效果生成能力，例如 `mesh.ring`；七大 VFX 类别是方向，不要求每类一个基类。
 - **Preset**：模块与参数的创建快照。内置 Shockwave / Energy Ring 及用户 JSON 保存/加载可用。预设不包含节点拓扑、Action、UUID、变换或开始帧；加载以当前帧为起点。
 - **Schema version**：实例持久化结构版本，当前为 1。
-- **Preset format version**：JSON 参数快照协议版本，当前为 1；导入严格拒绝未知版本，无历史格式需要迁移。
-- **Asset version**：模块生成节点/几何的资产协议版本，当前 ring 为 1。
+- **Preset format version**：JSON 参数快照协议版本，当前导出为 2；格式 1 环形预设迁移为 2，未知版本拒绝。
+- **Asset version**：模块生成节点/几何的资产协议版本，当前 ring / atlas 均为 1。
 - **Ownership**：`vfx_id` 标记资源归属，`vfx_role` 区分 controller/layer；名称可任意修改。
 
 ## 时间
@@ -26,5 +26,13 @@ Emission 亮度不等同于辉光；辉光需要用户自己的 Compositor，目
 
 ## 状态
 
-当前 ring 是无状态函数：同一场景参数和帧产生同一几何结果，任意帧预览不需要预热或缓存。
+当前 ring / atlas 均为无状态函数：同一场景参数和帧产生同一几何结果，任意帧预览不需要预热或缓存。
 未来模拟模块需区分预览、已烘焙、失效缓存；保存重开后必须能解释其状态，不能默默使用过期缓存。
+
+## 图集
+
+图集左上格编号 0，先向右再向下；First / Last 为包含端点的范围。
+First 限制到 [0, rows×columns−1]，Last 限制到 [First, rows×columns−1]。
+一生均匀播放此闭区间，选帧为 floor((progress+1e-6)×格数)，并限制到末格；容差只用于选帧，不修改生命周期。
+格数及边界为整数，网格最大 256×256；图片来源支持 FILE / GENERATED 静态图，不支持电影、序列或 UDIM。
+图片是用户资源，可在原生 `.blend` 中打包；JSON 只保存本地路径，不执行脚本，也不读取远程 URL。

@@ -1,15 +1,16 @@
 # 系统设计
 
 目标：Blender 5.2 LTS 原生二次元动画 VFX；优先 Eevee，兼容 Cycles，低配置默认可用。
-当前实现是完整的 Mesh + Shader 环形特效纵向切片，不是七类模块的空壳实现。
+当前实现 Mesh + Shader 环形效果和 Flipbook 图集动画两个完整纵向切片。
 
 ## 数据与边界
 
-- `registry.py`：模块描述和内置预设。当前仅注册 `mesh.ring`，资产版本 1；预设是创建时的参数快照。
+- `registry.py`：模块描述和内置预设。注册 `mesh.ring` 与 `flipbook.atlas`，资产版本均为 1；预设是创建时的参数快照。
 - `timing.py`：无 bpy 的时间约定及原生驱动表达式。
 - `parameters.py`：无 bpy 的参数元数据；`presets.py`：纯 Python 参数预设校验和原子文件写入。
 - `core.py`：实例创建、解析、复制、删除；所有权检查和参数预设实例化。
 - `nodes.py`：原生 Geometry Nodes、Shader Nodes 和驱动器构建。
+- `flipbook.py`：静态贴片、原生几何生命周期和 Shader Nodes 图集 UV 求值。
 - `ui.py`：原生侧栏与 Undo 操作，委托 core；不承担节点构建。
 
 Effect 对应一个 Empty Controller，一组原生 ID 属性控制一个或多个 Layer；当前实现一个 Mesh Layer。
@@ -42,10 +43,10 @@ Effect 复制会复制私有数据、节点和 Action，并重定向到新控制
 ## 演进接口
 
 schema 与 asset version 分离。当前仅支持 schema 1；未来版本或缺失版本拒绝编辑，不做猜测性迁移。
-用户预设采用独立 JSON 格式 1，导入前校验完整字段、参数范围、有限数值、模块和资产版本。
+用户预设采用独立 JSON 格式 2，导入前校验完整字段、参数范围、有限数值、模块和资产版本。
 64 KiB 有界读取；拒绝重复键；导出先验证，再以同目录临时文件原子替换，失败不损坏原文件。
 预设保存参数快照，不保存时间起点、变换、UUID、Action 或自定义拓扑；载入创建新实例而不改写选中效果。
-尚无历史格式，未来引入 schema 2 前必须增加逐版本迁移和历史固定样例测试。
+保留固定历史样例验证预设格式 1 → 2：环形参数不变，补充空 assets 字段。未知版本拒绝导入；实例 schema 未改变。
 目前不引入通用模块插件框架、专用节点编辑器、模拟管理器或资产数据库。
 
 Particle / Flipbook / Trail 等新模块复用 Controller、时间约定和所有权；新增之前先形成真实 bpy 的可用切片。
@@ -59,3 +60,12 @@ Screen VFX 必须主动启用并隔离自身节点，不能改写用户已有 Co
 `tools/preview.py` 生成可重复的场景与预览，默认 Cycles CPU，可选择 Eevee。CI 固定 Blender 5.2.2，并校验官方二进制 SHA256。
 
 版本 tag 触发同一 CI 验证，检查 manifest 版本一致，再由依赖测试成功的独立 job 发布 ZIP。PR 和测试 job 保持只读仓库权限。
+
+## Flipbook 资产
+
+控制器共享原生生命周期；私有四顶点 Mesh 与 Geometry Nodes 处理尺寸及生命周期隐藏。
+Shader Nodes 夹取起止格后均匀选帧，使用图集左上行序，将基础 UV 缩放/偏移到目标格。
+GPU/CPU 的 float32 边界误差用百万分之一周期的选帧容差修正；真实四色图集像素测试覆盖跳帧、速度、区间、循环和透明度。
+复制私有节点树并重定向所有驱动器，图片保持共享；删除永不清理图片 ID。
+JSON assets.image 为图片引用，导出优先写相对 JSON 目录的路径，导入相对此目录解析而非进程工作目录。
+图片内容不内嵌到 JSON；生成图片未写磁盘时明确拒绝导出。原生 `.blend` 可由用户打包图片实现独立播放。

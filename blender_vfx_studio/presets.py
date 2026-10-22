@@ -6,18 +6,28 @@ import os
 import tempfile
 from pathlib import Path
 
-from .parameters import PARAMETERS
+from .parameters import preset_parameters_for
 from .registry import MODULES
 
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2
 MAX_BYTES = 65536
 QUALITY = {"LOW", "MEDIUM", "HIGH"}
 # Birth frame is deliberately local to the destination scene.
-PRESET_PARAMETERS = {key: spec for key, spec in PARAMETERS.items() if key != "start"}
-FIELDS = {"format_version", "module", "asset_version", "name", "quality", "parameters"}
+PRESET_PARAMETERS = preset_parameters_for("mesh.ring")
+LEGACY_FIELDS = {"format_version", "module", "asset_version", "name", "quality", "parameters"}
+FIELDS = LEGACY_FIELDS | {"assets"}
 
 
 def validate(data):
+    # Format 1 shipped only ring parameter snapshots. Keep a fixed fixture in tests.
+    if (
+        isinstance(data, dict)
+        and type(data.get("format_version")) is int
+        and data["format_version"] == 1
+    ):
+        if data.keys() != LEGACY_FIELDS or data.get("module") != "mesh.ring":
+            raise ValueError("Invalid legacy ring preset")
+        data = dict(data, format_version=2, assets={})
     if not isinstance(data, dict) or data.keys() != FIELDS:
         raise ValueError("Invalid preset fields")
     if type(data["format_version"]) is not int or data["format_version"] != FORMAT_VERSION:
@@ -35,25 +45,40 @@ def validate(data):
         raise ValueError("Preset name must contain 1–80 printable characters")
     if not isinstance(data["quality"], str) or data["quality"] not in QUALITY:
         raise ValueError("Unknown quality setting")
+    assets = data["assets"]
+    expected_assets = {"image"} if module == "flipbook.atlas" else set()
+    if not isinstance(assets, dict) or assets.keys() != expected_assets:
+        raise ValueError("Preset assets are missing or unknown")
+    if "image" in assets:
+        path = assets["image"]
+        if (
+            not isinstance(path, str)
+            or not 1 <= len(path) <= 4096
+            or any(ord(c) < 32 for c in path)
+        ):
+            raise ValueError("Atlas image must be a local file path")
+    specs = preset_parameters_for(module)
     parameters = data["parameters"]
-    if not isinstance(parameters, dict) or parameters.keys() != PRESET_PARAMETERS.keys():
+    if not isinstance(parameters, dict) or parameters.keys() != specs.keys():
         raise ValueError("Preset parameters are missing or unknown")
     result = {}
-    for key, (default, minimum, maximum, _) in PRESET_PARAMETERS.items():
+    for key, (default, minimum, maximum, _) in specs.items():
         value = parameters[key]
         if type(default) is bool:
             if type(value) is not bool:
                 raise ValueError(f"{key} must be a boolean")
         else:
+            if type(default) is int and type(value) is not int:
+                raise ValueError(f"{key} must be an integer")
             if type(value) not in (int, float) or (
                 type(value) is float and not math.isfinite(value)
             ):
                 raise ValueError(f"{key} must be a finite number")
             if not minimum <= value <= maximum:
                 raise ValueError(f"{key} must be between {minimum} and {maximum}")
-            value = float(value)
+            value = int(value) if type(default) is int else float(value)
         result[key] = value
-    return dict(data, parameters=result)
+    return dict(data, parameters=result, assets=dict(assets))
 
 
 def dumps(data):
@@ -86,12 +111,26 @@ def read(filepath):
         content = stream.read(MAX_BYTES + 1)
     if len(content) > MAX_BYTES:
         raise ValueError("Preset exceeds 64 KiB")
-    return loads(content.decode("utf-8"))
+    data = loads(content.decode("utf-8"))
+    if "image" in data["assets"]:
+        path = Path(data["assets"]["image"])
+        data["assets"]["image"] = str((Path(filepath).resolve().parent / path).resolve())
+    return data
 
 
 def write(filepath, data):
-    content = dumps(data)
+    data = validate(data)
     destination = Path(filepath)
+    if "image" in data["assets"]:
+        path = Path(data["assets"]["image"])
+        if path.is_absolute():
+            try:
+                data["assets"]["image"] = Path(
+                    os.path.relpath(path, destination.resolve().parent)
+                ).as_posix()
+            except ValueError:  # Different Windows drives: retain the absolute reference.
+                pass
+    content = dumps(data)
     temporary = None
     try:
         with tempfile.NamedTemporaryFile(

@@ -6,7 +6,7 @@ import uuid
 import bpy
 
 from . import nodes
-from .parameters import PARAMETERS
+from .parameters import FLIPBOOK_PARAMETERS, PARAMETERS, preset_parameters_for
 from .registry import MODULES, PRESETS
 
 SCHEMA_VERSION = 1
@@ -37,26 +37,24 @@ def _tag(data, uid, role=None):
         data["vfx_role"] = role
 
 
-def create(context, preset="SHOCKWAVE", quality="MEDIUM"):
-    settings = PRESETS[preset]
-    segments = {"LOW": 32, "MEDIUM": 64, "HIGH": 128}[quality]
+def _controller(context, label, module, quality, parameters, settings):
     uid = str(uuid.uuid4())
-    collection = bpy.data.collections.new("VFX • " + settings["label"])
+    collection = bpy.data.collections.new("VFX • " + label)
     _tag(collection, uid)
     context.scene.collection.children.link(collection)
-    root = bpy.data.objects.new(settings["label"] + " • Controller", None)
+    root = bpy.data.objects.new(label + " • Controller", None)
     collection.objects.link(root)
     _tag(root, uid, "controller")
     root["vfx_schema"] = SCHEMA_VERSION
-    root["vfx_module"] = "mesh.ring"
-    root["vfx_asset_version"] = MODULES["mesh.ring"].asset_version
+    root["vfx_module"] = module
+    root["vfx_asset_version"] = MODULES[module].asset_version
     root["vfx_quality"] = quality
     root.empty_display_type = "PLAIN_AXES"
     root.empty_display_size = 0.5
     root.location = context.scene.cursor.location
-    for key, (default, minimum, maximum, description) in PARAMETERS.items():
+    for key, (default, minimum, maximum, description) in parameters.items():
         value = settings.get(key, default)
-        if key.startswith("color_"):
+        if key.startswith("color_") and "color" in settings:
             value = settings["color"][int(key[-1])]
         if key == "start":
             value = float(context.scene.frame_current)
@@ -65,6 +63,16 @@ def create(context, preset="SHOCKWAVE", quality="MEDIUM"):
         if minimum is not None:
             ui.update(min=minimum, max=maximum, soft_min=minimum, soft_max=min(maximum, 100))
         root.id_properties_ui(key).update(**ui)
+    return root, collection
+
+
+def create(context, preset="SHOCKWAVE", quality="MEDIUM"):
+    settings = PRESETS[preset]
+    segments = {"LOW": 32, "MEDIUM": 64, "HIGH": 128}[quality]
+    root, collection = _controller(
+        context, settings["label"], "mesh.ring", quality, PARAMETERS, settings
+    )
+    uid = root["vfx_id"]
     vertices = []
     faces = []
     for i in range(segments):
@@ -237,11 +245,12 @@ def preset_snapshot(root):
     return presets.validate(
         {
             "format_version": presets.FORMAT_VERSION,
+            "assets": _preset_assets(root),
             "module": root["vfx_module"],
             "asset_version": root["vfx_asset_version"],
             "name": root.name[:80],
             "quality": root["vfx_quality"],
-            "parameters": {key: root[key] for key in presets.PRESET_PARAMETERS},
+            "parameters": {key: root[key] for key in preset_parameters_for(root["vfx_module"])},
         }
     )
 
@@ -250,9 +259,92 @@ def create_from_preset(context, data):
     from . import presets
 
     data = presets.validate(data)  # Validate completely before mutating Blender data.
-    root = create(context, quality=data["quality"])
+    if data["module"] == "flipbook.atlas":
+        image = load_atlas(data["assets"]["image"])
+        root = create_flipbook(
+            context, image, data["parameters"]["columns"], data["parameters"]["rows"]
+        )
+    else:
+        root = create(context, quality=data["quality"])
     root.name = data["name"]
+    root["vfx_quality"] = data["quality"]
     for key, value in data["parameters"].items():
         root[key] = value
+    select(context, root)
+    return root
+
+
+def load_atlas(filepath):
+    from pathlib import Path
+
+    path = Path(filepath)
+    if not path.is_file():
+        raise ValueError("Atlas image not found: " + str(path))
+    try:
+        image = bpy.data.images.load(str(path.resolve()), check_existing=True)
+    except RuntimeError as error:
+        raise ValueError("Cannot load atlas image") from error
+    validate_atlas(image)
+    return image
+
+
+def validate_atlas(image):
+    if image is None or image.source not in {"FILE", "GENERATED"} or min(image.size) < 1:
+        raise ValueError("Choose a loaded still image for the atlas")
+
+
+def atlas_node(root):
+    for layer in root.children_recursive:
+        if layer.get("vfx_id") != root["vfx_id"] or layer.type != "MESH":
+            continue
+        for material in layer.data.materials:
+            if material and material.node_tree:
+                tex = material.node_tree.nodes.get("Atlas Image")
+                if tex and tex.type == "TEX_IMAGE":
+                    return tex
+    raise ValueError("Atlas Image node is missing; restore it before exporting a preset")
+
+
+def _preset_assets(root):
+    if root["vfx_module"] != "flipbook.atlas":
+        return {}
+    image = atlas_node(root).image
+    validate_atlas(image)
+    if not image.filepath:
+        raise ValueError("Save the atlas image to disk before exporting a parameter preset")
+    return {"image": bpy.path.abspath(image.filepath, library=image.library)}
+
+
+def create_flipbook(context, image, columns=4, rows=4):
+    from . import flipbook
+
+    validate_atlas(image)
+    if (
+        type(columns) is not int
+        or type(rows) is not int
+        or not 1 <= columns <= 256
+        or not 1 <= rows <= 256
+    ):
+        raise ValueError("Atlas rows and columns must be integers between 1 and 256")
+    settings = {"columns": columns, "rows": rows, "last_frame": columns * rows - 1}
+    root, collection = _controller(
+        context, "Flipbook", "flipbook.atlas", "LOW", FLIPBOOK_PARAMETERS, settings
+    )
+    uid = root["vfx_id"]
+    mesh = bpy.data.meshes.new("VFX • Sprite Quad")
+    _tag(mesh, uid)
+    mesh.from_pydata(
+        [(-0.5, -0.5, 0), (0.5, -0.5, 0), (0.5, 0.5, 0), (-0.5, 0.5, 0)], [], [(0, 1, 2, 3)]
+    )
+    mesh.update()
+    uv = mesh.uv_layers.new(name="VFX UV")
+    for index, coord in enumerate([(0, 0), (1, 0), (1, 1), (0, 1)]):
+        uv.data[index].uv = coord
+    layer = bpy.data.objects.new("VFX • Flipbook Layer", mesh)
+    collection.objects.link(layer)
+    layer.parent = root
+    _tag(layer, uid, "layer")
+    mesh.materials.append(flipbook.shader(root, image))
+    flipbook.geometry(layer, root)
     select(context, root)
     return root
