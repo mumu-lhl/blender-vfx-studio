@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools"))
 from demo_atlas import create as demo_atlas  # noqa: E402
 
-from blender_vfx_studio import core  # noqa: E402
+from blender_vfx_studio import core, trail  # noqa: E402
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--engine", choices=("CYCLES", "BLENDER_EEVEE"), default="CYCLES")
@@ -51,6 +51,17 @@ for key, value in {
 }.items():
     particles[key] = value
 particles.update_tag()
+emitter = bpy.data.objects.new("Ribbon Preview Source", None)
+scene.collection.objects.link(emitter)
+for frame in range(1, 25):
+    t = (frame - 1) / 23
+    emitter.location = (-3 + 6 * t, 0.3, 1.4 + 0.6 * math.sin(t * math.pi))
+    emitter.keyframe_insert(data_path="location", frame=frame)
+ribbon = trail.create(bpy.context, emitter, first=1, last=24)
+ribbon["width"] = 0.35
+ribbon["length"] = 0.65
+ribbon["color_0"], ribbon["color_1"], ribbon["color_2"] = 0.05, 1.0, 0.4
+ribbon.update_tag()
 screen = core.create_screen(bpy.context)
 screen["strength"] = 0.6
 screen["glow_size"] = 0.25

@@ -12,6 +12,7 @@ class Module:
 
 
 MODULES = {
+    "trail.ribbon": Module("trail.ribbon", "Sampled Ribbon Trail", 1),
     "mesh.ring": Module("mesh.ring", "Procedural Ring", 1),
     "flipbook.atlas": Module("flipbook.atlas", "Flipbook Atlas", 1),
     "particle.burst": Module("particle.burst", "Particle Burst", 1),

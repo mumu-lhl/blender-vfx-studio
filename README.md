@@ -2,8 +2,9 @@
 
 面向二次元 3D 动画的 Blender 原生 VFX 插件。目标 Blender **5.2 LTS**，优先 Eevee，兼容 Cycles。
 
-当前预览版 **0.5.0** 已实现：
+当前预览版 **0.6.0** 已实现：
 
+- **Ribbon Trail**：显式采样对象或骨骼动画，原生刀带回放、宽度、长度、重新采样。
 - **Particle Burst**：确定性原生粒子生成、随机方向/速度/尺寸、重力轨迹和网格实例化。
 - **Screen VFX**：主动启用的原生合成辉光、时间闪光，可叠加、复制和安全移除。
 - **Flipbook Atlas**：用户静态图集、行列与起止格、透明贴片和发光，原生 UV 选帧。
@@ -13,11 +14,11 @@
 - 不使用 Python 每帧处理器；保存后无需插件也能播放。
 - 用户参数预设 JSON 保存与加载，严格版本和数值校验；载入为独立实例。
 
-这只是首个纵向切片。Trail、Simulation 和可浏览的预设库尚未实现；详见 [ROADMAP.md](ROADMAP.md)。
+这只是首个纵向切片。Simulation 和可浏览的预设库尚未实现；详见 [ROADMAP.md](ROADMAP.md)。
 
 ## 安装
 
-从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载 `blender-vfx-studio-0.5.0.zip`。
+从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载 `blender-vfx-studio-0.6.0.zip`。
 未打 tag 的开发版本可从 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 最新成功构建中下载 `blender-vfx-studio-extension` artifact，解压后安装其中的 ZIP。
 Blender 5.2 → Edit → Preferences → Get Extensions → 右上角菜单 → Install from Disk，选择 ZIP 并启用。
 源码也可直接构建：
@@ -30,7 +31,7 @@ python tools/build.py
 
 ## 使用
 
-1. 在 3D 视图按 **N**，打开 **VFX** 标签页，点击 **Create VFX**。
+1. 在 3D 视图按 **N**，打开 **VFX** 标签页，点击 **Create Ring**。
 2. 选择 Shockwave 或 Energy Ring，以及质量级别。特效在 3D Cursor 处创建，以当前帧为开始帧。
 3. 切换 **Material Preview** 或 **Rendered** 查看材质。Eevee 用户需要自有环境/灯光以查看场景；发光环本身不需要灯光。
 4. 在 VFX 面板调整时间、网格和 Shader 参数。右键参数 → Insert Keyframe，可使用 Blender 原生动画编辑器。
@@ -59,6 +60,26 @@ Width / Height 控制贴片尺寸，Opacity / Fade 控制透明度，RGB 与 Str
 `.blend` 默认保留外部图片引用；跨机器分享前使用 Blender 的 **File → External Data → Pack Resources**。
 JSON 预设引用图片文件，不内嵌图片；把图片与 JSON 一同移动可保持相对路径。
 未保存到磁盘的生成图片可保存到 `.blend`，导出参数预设前需先保存图片文件。
+
+## Ribbon Trail 动画轨迹 / 刀带
+
+选择动画对象，或在 Pose Mode 选择活动骨骼，点击 **Bake Ribbon Trail**。
+设置 First / Last / Sample Step；范围必须能被步长整除，最多 2048 个采样点。
+采样对象原点或骨骼 head 的求值世界位置，包含父级和约束；完成后恢复当前帧与子帧，不改源 Action。
+物理或模拟驱动的源动画须先用 Blender 原生工具完成缓存，本功能不负责预热模拟。
+
+采样结果是可编辑网格，Geometry Nodes 按时间在采样点间线性插值；不按弧长匀速重放。
+Duration 默认等于采样区间，Start 默认等于 First；Speed / Loop 与其他模块一致。
+生命周期右端不包含 Last 帧；循环在右端重置。采样间的 Bezier 细节取决于采样步长。
+Width 为全宽，Length 为可见尾带占完整采样时间的比例，Fade 控制随生命周期缩窄。
+初始带宽方向由轨迹切线和世界 Z（退化时 Y）生成，保持相邻侧向一致；不自动朝向镜头，不模拟布料扭转。
+急转弯、交叉与回头路径可能出现重叠，允许手动修改基础网格和 `vfx_side` 向量属性。
+
+移动控制器可整体变换已烘焙路径。源动画变更不会自动覆盖结果；明确点击 **Rebake Ribbon** 才替换基础网格，
+保留材质、节点、修改器和当前变换，重新采样前请保存有价值的手动网格编辑。
+Source / Bone / First / Last / Step 决定下一次采样；改变范围不会自动改变回放 Start / Duration。
+删除源对象后仍可回放，重新采样需要重新指定有效源。复制生成独立资产，删除不会修改源对象或骨骼。
+Ribbon 暂不支持 JSON 参数预设；完整路径使用 Duplicate 或 Blender 的 `.blend` Append 复用。
 
 ## Particle Burst 粒子爆发
 

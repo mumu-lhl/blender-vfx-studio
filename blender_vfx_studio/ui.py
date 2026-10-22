@@ -76,6 +76,49 @@ class VFX_OT_create_particle(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self)
 
 
+class VFX_OT_create_trail(bpy.types.Operator):
+    bl_idname = "vfx_studio.create_trail"
+    bl_label = "Bake Ribbon from Active Object / Bone"
+    bl_options = {"REGISTER", "UNDO"}
+    first: IntProperty(name="First Frame", default=1, min=-100000, max=100000)
+    last: IntProperty(name="Last Frame", default=25, min=-100000, max=100000)
+    step: IntProperty(name="Sample Step", default=1, min=1, max=100000)
+
+    def execute(self, context):
+        from . import trail
+
+        bone = context.active_pose_bone.name if context.active_pose_bone else ""
+        try:
+            trail.create(context, context.object, bone, self.first, self.last, self.step)
+        except ValueError as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        self.first, self.last = context.scene.frame_start, context.scene.frame_end
+        return context.window_manager.invoke_props_dialog(self)
+
+
+class VFX_OT_rebake_trail(bpy.types.Operator):
+    bl_idname = "vfx_studio.rebake_trail"
+    bl_label = "Rebake Ribbon (Replace Edited Mesh)"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        from . import trail
+
+        try:
+            trail.rebake(context, context.object)
+        except ValueError as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_confirm(self, event)
+
+
 class VFX_OT_duplicate(bpy.types.Operator):
     bl_idname = "vfx_studio.duplicate"
     bl_label = "Duplicate VFX"
@@ -153,6 +196,7 @@ class VFX_PT_main(bpy.types.Panel):
             "vfx_studio.create_particle", text="Create Particle Burst", icon="PARTICLES"
         )
         layout.operator("vfx_studio.create_screen", text="Add Screen VFX", icon="RENDERLAYERS")
+        layout.operator("vfx_studio.create_trail", text="Bake Ribbon Trail", icon="CURVE_PATH")
         layout.operator("vfx_studio.import_preset", text="Load Preset", icon="IMPORT")
         try:
             root = core.resolve(context.object)
@@ -163,14 +207,26 @@ class VFX_PT_main(bpy.types.Panel):
             layout.label(text="Select a VFX controller or layer")
             return
         layout.prop(root, "name", text="Effect")
-        layout.operator("vfx_studio.export_preset", text="Save Preset", icon="EXPORT")
+        if root["vfx_module"] != "trail.ribbon":
+            layout.operator("vfx_studio.export_preset", text="Save Preset", icon="EXPORT")
+        else:
+            layout.label(text="Reuse path with Duplicate or .blend Append")
         row = layout.row(align=True)
         row.operator("vfx_studio.duplicate", text="Duplicate", icon="DUPLICATE")
         row.operator("vfx_studio.delete", text="Delete", icon="TRASH")
         layout.label(text="Timing · frames")
         for key in ("start", "duration", "speed", "loop"):
             layout.prop(root, f'["{key}"]', text=key.title())
-        if root["vfx_module"] == "particle.burst":
+        if root["vfx_module"] == "trail.ribbon":
+            layout.label(text="Ribbon · explicit sampled animation")
+            layout.prop(root, '["vfx_source"]', text="Source")
+            layout.prop(root, '["vfx_bone"]', text="Bone (head)")
+            for key in ("vfx_bake_first", "vfx_bake_last", "vfx_bake_step"):
+                layout.prop(root, f'["{key}"]', text=key.removeprefix("vfx_bake_").title())
+            layout.label(text=f"{root['vfx_samples']} baked samples; source edits need Rebake")
+            layout.operator("vfx_studio.rebake_trail", icon="FILE_REFRESH")
+            keys = ("width", "length", "fade", "strength")
+        elif root["vfx_module"] == "particle.burst":
             layout.label(text="Particle Burst · stateless")
             keys = (
                 "count",
@@ -222,6 +278,8 @@ CLASSES = (
     VFX_OT_create_flipbook,
     VFX_OT_create_screen,
     VFX_OT_create_particle,
+    VFX_OT_create_trail,
+    VFX_OT_rebake_trail,
     VFX_OT_duplicate,
     VFX_OT_delete,
     VFX_OT_export_preset,

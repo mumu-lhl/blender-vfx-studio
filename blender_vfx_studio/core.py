@@ -368,6 +368,10 @@ def atlas_node(root):
 
 
 def _preset_assets(root):
+    if root["vfx_module"] == "trail.ribbon":
+        raise ValueError(
+            "Ribbon paths require native mesh data; reuse via .blend Append or Duplicate"
+        )
     if root["vfx_module"] != "flipbook.atlas":
         return {}
     image = atlas_node(root).image
