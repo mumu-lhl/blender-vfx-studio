@@ -142,7 +142,7 @@ def _remap_drivers(data, mapping):
                     target.id = mapping[target.id]
 
 
-def duplicate(context, root):
+def duplicate(context, root, *, _standalone=True, _references=None):
     root = resolve(root)
     if root is None:
         raise ValueError("Select a VFX controller or layer")
@@ -150,6 +150,14 @@ def duplicate(context, root):
         from . import screen
 
         return screen.duplicate(context, root)
+    if root["vfx_module"] == "core.composition":
+        from . import composition
+
+        return composition.duplicate(context, root)
+    if _standalone and root.get("vfx_composition"):
+        from . import composition
+
+        composition.check_detach(root)
     uid = str(uuid.uuid4())
     collection = bpy.data.collections.new("VFX • Copy")
     _tag(collection, uid)
@@ -194,7 +202,7 @@ def duplicate(context, root):
                     modifier.node_group = assets[original]
     for source, clone in mapping.items():
         clone.parent = mapping.get(source.parent, source.parent)
-    references = mapping | assets
+    references = dict(_references or {}) | mapping | assets
     for data in private:
         _remap_drivers(data, references)
         if isinstance(data, bpy.types.Object):
@@ -214,6 +222,10 @@ def duplicate(context, root):
                     original = getattr(socket, "default_value", None)
                     if isinstance(original, bpy.types.ID) and original in references:
                         socket.default_value = references[original]
+    if _standalone and root.get("vfx_composition"):
+        from . import composition
+
+        composition.detach(context, mapping[root])
     select(context, mapping[root])
     return mapping[root]
 
@@ -222,10 +234,18 @@ def delete(root):
     root = resolve(root)
     if root is None:
         raise ValueError("Select a VFX controller or layer")
+    if root["vfx_module"] == "core.composition":
+        from . import composition
+
+        return composition.remove(root)
     if root["vfx_module"] == "screen.glare":
         from . import screen
 
         screen.remove(root)
+    _delete_spatial(root)
+
+
+def _delete_spatial(root, validate_only=False):
     uid = root["vfx_id"]
     owned = [root] + [
         o
@@ -261,6 +281,8 @@ def delete(root):
         )
         if group.get("vfx_id") == uid and group.users > users:
             raise ValueError("VFX node group is shared; unlink external users before deleting")
+    if validate_only:
+        return
     # UUID ownership also discovers generated assets detached during native editing.
     resources = (
         [(bpy.data.meshes, m) for m in meshes]
@@ -368,10 +390,8 @@ def atlas_node(root):
 
 
 def _preset_assets(root):
-    if root["vfx_module"] == "trail.ribbon":
-        raise ValueError(
-            "Ribbon paths require native mesh data; reuse via .blend Append or Duplicate"
-        )
+    if root["vfx_module"] in {"trail.ribbon", "core.composition"}:
+        raise ValueError("Native paths and compositions require .blend Append or Duplicate")
     if root["vfx_module"] != "flipbook.atlas":
         return {}
     image = atlas_node(root).image

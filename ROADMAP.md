@@ -12,7 +12,7 @@
 
 已有统一控制器、实例 UUID、参数范围、版本检查、开始帧/时长/速度/循环，以及 Mesh + Shader 环形效果。冲击波和能量环支持参数关键帧、独立复制、安全删除和创建时质量选择。参数 JSON 可以保存、读取并创建新实例。
 
-后续仍需完善多层组合。将来修改实例保存结构前，要先补充明确的逐版本迁移和旧数据测试，不能只改变版本号。首次开发及参数预设分别见 [#1](https://github.com/mumu-lhl/blender-vfx-studio/issues/1)、[#3](https://github.com/mumu-lhl/blender-vfx-studio/issues/3)。
+已有空间效果多层组合，后续继续完善完整资产复用。将来修改实例保存结构前，要先补充明确的逐版本迁移和旧数据测试，不能只改变版本号。首次开发及参数预设分别见 [#1](https://github.com/mumu-lhl/blender-vfx-studio/issues/1)、[#3](https://github.com/mumu-lhl/blender-vfx-studio/issues/3)。
 
 ## M2：基础效果库——已覆盖主要类型，继续扩展
 
@@ -30,7 +30,7 @@
 
 用户参数预设库已实现命名保存、列表创建、重命名、文件删除和损坏文件报告，并完成本地及 CI 验证（[#17](https://github.com/mumu-lhl/blender-vfx-studio/issues/17)、[PR #18](https://github.com/mumu-lhl/blender-vfx-studio/pull/18)）。它保存参数，不代替完整 Blender 资产库。
 
-接下来实现多个空间效果的统一控制、分层时间设置和整体复制/删除（[#19](https://github.com/mumu-lhl/blender-vfx-studio/issues/19)）。之后再完善路径、节点和资源的整体复用。
+已实现多个空间效果的统一控制、分层时间设置和整体复制/删除（[#19](https://github.com/mumu-lhl/blender-vfx-studio/issues/19)）。下一步完善路径、节点和资源的整体复用，并开始第一个原生模拟效果。
 
 ## M4：模拟和缓存——尚未实现
 
@@ -48,6 +48,8 @@ Blender 5.2.2 Linux 已通过时间公式的 60 组输入对照、9 项 JSON 预
 
 `tools/preview.py` 可重新生成组合场景。Cycles CPU 800×500 和 Eevee 预览已查看；最新 Trail 构图另检查了 Eevee 400×250 图像。尚未进行图形界面点击/Undo 操作和 Windows/macOS 测试。
 
-v0.2–v0.5 已发布，分别覆盖环形与参数预设、图集、合成、粒子。v0.6 增加轨迹，v0.7 增加绑定；两版均已发布并下载校验，v0.6 的 ZIP 也与干净源码构建一致。用户库的开发版本为 0.8.0，发布情况以 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 为准。
+v0.2–v0.5 已发布，分别覆盖环形与参数预设、图集、合成、粒子。v0.6 增加轨迹，v0.7 增加绑定；两版均已发布并下载校验，v0.6 的 ZIP 也与干净源码构建一致。用户库版本为 0.8.0，组合开发版本为 0.9.0，发布情况以 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 为准。
 
 版本标签会触发测试和 CPU 预览，再上传 ZIP、SHA256SUMS 和 PNG。云端直接上传附件曾返回 401，现由 GitHub Actions 的独立发布任务完成（[#5](https://github.com/mumu-lhl/blender-vfx-studio/issues/5)）。v0.6 首次标签误指旧提交，被版本校验拦截；未发布的标签修正后已通过完整发布流程，没有发布错误安装包。
+
+组合新增 7 项 Blender 测试，覆盖统一时间、协调循环、独立副本、脱离、用户动画保护和整组删除预检查；另验证无插件新进程重开。

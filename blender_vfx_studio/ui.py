@@ -168,6 +168,60 @@ class VFX_OT_unbind(bpy.types.Operator):
         return {"FINISHED"}
 
 
+class VFX_OT_compose(bpy.types.Operator):
+    bl_idname = "vfx_studio.compose"
+    bl_label = "Compose Selected VFX"
+    bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        return context.mode == "OBJECT"
+
+    def execute(self, context):
+        from . import composition
+
+        try:
+            composition.create(context, context.selected_objects)
+        except ValueError as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+
+class VFX_OT_detach_member(bpy.types.Operator):
+    bl_idname = "vfx_studio.detach_member"
+    bl_label = "Detach Layer as Independent VFX"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        from . import composition
+
+        try:
+            composition.detach(context, context.object)
+        except ValueError as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+
+class VFX_OT_select_member(bpy.types.Operator):
+    bl_idname = "vfx_studio.select_member"
+    bl_label = "Edit Composition Layer"
+    uid: StringProperty()
+
+    def execute(self, context):
+        roots = [
+            o
+            for o in context.scene.objects
+            if o.get("vfx_id") == self.uid and o.get("vfx_role") == "controller"
+        ]
+        if len(roots) != 1:
+            self.report({"ERROR"}, "Layer is missing or its ID was copied")
+            return {"CANCELLED"}
+        core.select(context, roots[0])
+        return {"FINISHED"}
+
+
 class VFX_OT_duplicate(bpy.types.Operator):
     bl_idname = "vfx_studio.duplicate"
     bl_label = "Duplicate VFX"
@@ -246,6 +300,9 @@ class VFX_PT_main(bpy.types.Panel):
         )
         layout.operator("vfx_studio.create_screen", text="Add Screen VFX", icon="RENDERLAYERS")
         layout.operator("vfx_studio.create_trail", text="Bake Ribbon Trail", icon="CURVE_PATH")
+        layout.operator(
+            "vfx_studio.compose", text="Compose Selected VFX", icon="OUTLINER_COLLECTION"
+        )
         layout.operator("vfx_studio.import_preset", text="Load Preset", icon="IMPORT")
         try:
             root = core.resolve(context.object)
@@ -256,7 +313,7 @@ class VFX_PT_main(bpy.types.Panel):
             layout.label(text="Select a VFX controller or layer")
             return
         layout.prop(root, "name", text="Effect")
-        if root["vfx_module"] != "trail.ribbon":
+        if root["vfx_module"] not in {"trail.ribbon", "core.composition"}:
             layout.operator("vfx_studio.export_preset", text="Save Preset", icon="EXPORT")
         else:
             layout.label(text="Reuse path with Duplicate or .blend Append")
@@ -269,9 +326,35 @@ class VFX_PT_main(bpy.types.Panel):
                 layout.operator("vfx_studio.unbind", text="Unbind", icon="UNLINKED")
             else:
                 layout.operator("vfx_studio.bind", text="Bind Object / Bone", icon="CONSTRAINT")
-        layout.label(text="Timing · frames")
-        for key in ("start", "duration", "speed", "loop"):
-            layout.prop(root, f'["{key}"]', text=key.title())
+        if root.get("vfx_composition"):
+            layout.label(text="Timing follows composition")
+            for key, label in (
+                ("vfx_offset_ratio", "Start Offset Ratio"),
+                ("vfx_duration_ratio", "Duration Ratio"),
+                ("vfx_local_speed", "Local Speed"),
+            ):
+                layout.prop(root, f'["{key}"]', text=label)
+            layout.operator("vfx_studio.detach_member", text="Detach Layer", icon="UNLINKED")
+            layout.operator("vfx_studio.select_member", text="Edit Composition").uid = root[
+                "vfx_composition"
+            ]["vfx_id"]
+        else:
+            layout.label(text="Timing · frames")
+            for key in ("start", "duration", "speed", "loop"):
+                layout.prop(root, f'["{key}"]', text=key.title())
+        if root["vfx_module"] == "core.composition":
+            from . import composition
+
+            try:
+                children = composition.members(root)
+            except ValueError as error:
+                layout.label(text=str(error), icon="ERROR")
+                return
+            layout.label(text=f"{len(children)} spatial layers")
+            for child in children:
+                layout.operator("vfx_studio.select_member", text=child.name).uid = child["vfx_id"]
+            layout.label(text="Loop restarts all layers each group cycle")
+            return
         if root["vfx_module"] == "trail.ribbon":
             layout.label(text="Ribbon · explicit sampled animation")
             layout.prop(root, '["vfx_source"]', text="Source")
@@ -337,6 +420,9 @@ CLASSES = (
     VFX_OT_rebake_trail,
     VFX_OT_bind,
     VFX_OT_unbind,
+    VFX_OT_compose,
+    VFX_OT_detach_member,
+    VFX_OT_select_member,
     VFX_OT_duplicate,
     VFX_OT_delete,
     VFX_OT_export_preset,

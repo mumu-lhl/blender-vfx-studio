@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools"))
 from demo_atlas import create as demo_atlas  # noqa: E402
 
-from blender_vfx_studio import core, trail  # noqa: E402
+from blender_vfx_studio import composition, core, trail  # noqa: E402
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--engine", choices=("CYCLES", "BLENDER_EEVEE"), default="CYCLES")
@@ -62,6 +62,7 @@ ribbon["width"] = 0.35
 ribbon["length"] = 0.65
 ribbon["color_0"], ribbon["color_1"], ribbon["color_2"] = 0.05, 1.0, 0.4
 ribbon.update_tag()
+group = composition.create(bpy.context, [left, right, sprite, particles, ribbon])
 screen = core.create_screen(bpy.context)
 screen["strength"] = 0.6
 screen["glow_size"] = 0.25
@@ -103,7 +104,7 @@ scene.render.image_settings.file_format = "PNG"
 scene.render.filepath = str(
     output / ("preview.png" if args.engine == "CYCLES" else "preview-eevee.png")
 )
-core.select(bpy.context, left)
+core.select(bpy.context, group)
 bpy.ops.wm.save_as_mainfile(filepath=str(output / "preview.blend"))
 bpy.ops.render.render(write_still=True)
 print("PREVIEW_OK", args.engine)
