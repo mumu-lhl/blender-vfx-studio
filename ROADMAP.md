@@ -42,9 +42,10 @@ Cloth Energy Sheet 使用原生布面求解，显式烘焙为保存在 `.blend` 
 
 ## M5：交互、兼容性和正式发布——尚未完成
 
-Windows x64、Apple Silicon macOS 和 Linux x64 的 75 项基础后台测试、无插件重开和安装/卸载均已通过（[#24](https://github.com/mumu-lhl/blender-vfx-studio/issues/24)，工作流 39798116469）。
-新增 Arc Slash 和后台 Undo/Redo 的跨平台验证随相应 PR 继续运行。
-已增加复制/删除、组合、Cloth 烘焙/清除和合成树的后台 Undo/Redo 检查；仍需图形界面点击检查、更系统的 Eevee/Cycles 视觉比较和稳定性修复。完成这些验证前，不将预览版标为正式稳定版。
+Windows x64、Apple Silicon macOS 和 Linux x64 的后台套件、无插件重开和安装/卸载均已通过（[#24](https://github.com/mumu-lhl/blender-vfx-studio/issues/24)）。
+Arc Slash 和后台 Undo/Redo 也已加入，当前 84 项基线在三平台通过，工作流 39799085288；后续修改继续由相同 CI 检查。
+已增加复制/删除、组合、Cloth 烘焙/清除和合成树的后台 Undo/Redo 检查。Linux 的基本侧栏、创建、撤销/重做、用户库和 Cloth 状态已做实际鼠标/键盘检查，见 [GUI 记录](docs/GUI_CHECKS.md)。
+仍需文件选择器、骨骼及其他平台窗口交互、更系统的 Eevee/Cycles 视觉比较和稳定性修复。完成这些验证前，不将预览版标为正式稳定版。
 
 ## 已验证的范围与发布状态
 
@@ -55,7 +56,7 @@ Blender 5.2.2 Linux 已通过 84 项测试，包括时间公式的 60 组输入�
 图集、合成和粒子还有 CPU 渲染像素检查；Cloth 重开时会删除模拟源，验证已存姿态独立可用。
 安装包已验证安装、启用、创建和卸载，Ruff 检查与格式校验通过。
 
-`tools/preview.py` 可重新生成组合场景。Cycles CPU 800×500 和 Eevee 预览已查看；最新 Trail 构图另检查了 Eevee 400×250 图像。尚未进行图形界面点击/Undo 操作和 Windows/macOS 测试。
+`tools/preview.py` 可重新生成组合场景。Cycles CPU 800×500 和 Eevee 预览已查看；最新 Trail 构图另检查了 Eevee 400×250 图像。Linux 基本界面操作和后台 Undo/Redo 已检查；Windows/macOS 的后台套件已通过，实际窗口交互仍待检查。
 
 v0.2–v0.5 已发布，分别覆盖环形与参数预设、图集、合成、粒子。v0.6 增加轨迹，v0.7 增加绑定；两版均已发布并下载校验，v0.6 的 ZIP 也与干净源码构建一致。用户库版本 0.8.0 和组合版本 0.9.0 已发布并下载校验，Cloth 开发版本为 0.10.0，Arc Slash 开发版本为 0.11.0，发布情况以 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 为准。
 
