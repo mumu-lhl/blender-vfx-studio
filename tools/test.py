@@ -65,3 +65,8 @@ subprocess.run(
 )
 
 subprocess.run(base + ["--python", "tests/test_undo_blender.py"], check=True)
+
+subprocess.run(base + ["--python", "tests/test_shield_blender.py"], check=True)
+subprocess.run(
+    base + [str(ROOT / "work/shield.blend"), "--python", "tests/shield_reopen.py"], check=True
+)

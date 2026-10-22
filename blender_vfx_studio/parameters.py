@@ -108,12 +108,34 @@ SLASH_PARAMETERS = {
     "taper": (0.5, 0.01, 4.0, "Tip narrowing; larger values make a thinner crescent"),
 }
 
+SHIELD_PARAMETERS = {
+    **COMMON_PARAMETERS,
+    "loop": (True, None, None, "Repeat shield animation; hidden before start"),
+    "fade": (0.0, 0.0, 1.0, "Opacity loss over lifetime"),
+    "radius": (1.5, 0.001, 10000.0, "Sphere radius at birth"),
+    "expansion": (0.0, 0.0, 10000.0, "Added radius over lifetime"),
+    "opacity": (0.85, 0.0, 1.0, "Maximum exterior surface opacity"),
+    "ior": (
+        1.15,
+        1.001,
+        3.0,
+        "Index of refraction; larger values strengthen the face-on reflection",
+    ),
+    "rim_power": (0.5, 0.05, 8.0, "Fresnel power; larger values narrow the bright rim"),
+    "strength": (3.0, 0.0, 1000.0, "Emission strength; glow requires a compositor"),
+    "dissolve": (0.15, 0.0, 1.0, "Noise cutoff; 1 fully dissolves"),
+    "noise_scale": (6.0, 0.01, 1000.0, "Generated-coordinate noise scale"),
+    "flow": (2.0, -100.0, 100.0, "Noise evolution over one lifetime; zero holds still"),
+}
+
 SIMULATION_PARAMETERS = {key: spec for key, spec in COMMON_PARAMETERS.items() if key != "fade"}
 
 GROUP_PARAMETERS = {key: PARAMETERS[key] for key in ("start", "duration", "speed", "loop")}
 
 
 def parameters_for(module):
+    if module == "shader.shield":
+        return SHIELD_PARAMETERS
     if module == "mesh.slash":
         return SLASH_PARAMETERS
     if module == "simulation.cloth":

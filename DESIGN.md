@@ -18,7 +18,7 @@ Layer（效果层）是显示效果的对象或节点。当前每个空间效果
 
 不需要启动 Blender 的代码集中在 `registry.py`、`parameters.py`、`timing.py`、`presets.py` 和 `library.py`。它们分别定义模块及内置预设、参数范围、时间公式、JSON 校验，以及用户预设文件管理。这些部分可以直接用普通 Python 测试。
 
-`core.py` 负责创建、查找、复制和删除实例。具体效果由 `nodes.py`（环形网格和材质）、`slash.py`（弧形刀光）、`flipbook.py`（图集）、`particle.py`（粒子）、`trail.py`（轨迹刀带）和 `screen.py`（合成）、`simulation.py`（布面模拟与烘焙）构建。`binding.py` 负责挂接到对象或骨骼。新增效果应复用控制器、时间和删除规则，不另建一套实例管理代码。
+`core.py` 负责创建、查找、复制和删除实例。具体效果由 `nodes.py`（环形网格和材质）、`slash.py`（弧形刀光）、`shield.py`（护盾）、`flipbook.py`（图集）、`particle.py`（粒子）、`trail.py`（轨迹刀带）和 `screen.py`（合成）、`simulation.py`（布面模拟与烘焙）构建。`binding.py` 负责挂接到对象或骨骼。新增效果应复用控制器、时间和删除规则，不另建一套实例管理代码。
 
 `composition.py` 管理多个效果的组合。`ui.py` 提供主侧栏和操作按钮，`library_ui.py` 提供用户预设列表。界面调用上述代码，不在面板绘制时构建节点、读取预设文件或修改动画。
 
@@ -39,6 +39,12 @@ Blender 5.2 的修改器输入使用 `modifiers[...].properties.inputs.Socket_N.
 
 Arc Slash 在开口弧线上生成内外两排顶点。`vfx_arc` 保存 0–1 的沿弧位置，节点据此计算角度、生命周期旋转和正弦收尖的宽度；
 内半径同样限制为正数，避免宽度过大导致翻转。它复用环形的流动、溶解和发光材质，不需要先采样对象动画。
+
+`shader.shield` 是独立版本的球面护盾，不改变已有环形材质的资产结构。创建脚本生成平滑 UV Sphere，
+Geometry Nodes 只按半径和增长量缩放基础网格，并在生命周期外删除几何。
+材质将原生 Fresnel 的输出取幂，乘以噪声溶解、生命周期透明度和朝外表面遮罩，再混合透明与发光着色器。
+三维生成坐标和四维噪声的 W 输入避免 UV 接缝；W 随 Progress 变化。朝内表面保持透明，防止背面 Fresnel 盖住正面轮廓。
+播放仍只依靠简单原生驱动表达式，没有相机引用或逐帧 Python 更新。
 
 Flipbook 使用四顶点网格。Geometry Nodes 控制尺寸和生命周期，材质把 UV 缩放、移动到指定图集格子。格子从左上开始逐行编号。选帧额外加百万分之一周期的容差，避免 CPU/GPU 浮点误差造成边界闪回上一格；此容差不改变生命周期。图片由用户持有，复制效果时共享图片，删除效果时保留图片。
 

@@ -48,7 +48,9 @@ jobs:
         run: python tools/test_install.py
       - name: Render CPU release preview
         if: github.ref_type == 'tag' && runner.os == 'Linux'
-        run: blender -b --factory-startup --python-exit-code 1 --python tools/preview.py
+        run: |
+          blender -b --factory-startup --python-exit-code 1 --python tools/preview.py
+          blender -b --factory-startup --python-exit-code 1 --python tools/shield_preview.py
       - uses: actions/upload-artifact@v4
         if: runner.os == 'Linux'
         with:
@@ -58,7 +60,9 @@ jobs:
         if: github.ref_type == 'tag' && runner.os == 'Linux'
         with:
           name: blender-vfx-studio-preview
-          path: work/preview.png
+          path: |
+            work/preview.png
+            work/shield-preview.png
 
   release:
     if: github.event_name == 'push' && github.ref_type == 'tag'
