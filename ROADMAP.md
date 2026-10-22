@@ -20,7 +20,10 @@
 - Particle：最多 2048 个粒子的可重复随机爆发、重力弹道和实例化；尚无连续发射或碰撞（[#11](https://github.com/mumu-lhl/blender-vfx-studio/issues/11)）。
 - Screen：主动添加辉光和时间闪光，保留现有合成链，支持叠加、复制和安全移除（[#9](https://github.com/mumu-lhl/blender-vfx-studio/issues/9)）。
 
-下一步继续扩展 Mesh / Shader 预设，改善刀光、冲击波等常用效果的外观。已实现独立的 Arc Slash 程序化弧形刀光：弧度、生命周期旋转、收尖、溶解和预设复用（[#26](https://github.com/mumu-lhl/blender-vfx-studio/issues/26)）；Trail 继续用于动画采样路径。
+继续扩展 Mesh / Shader 预设，改善常用效果的外观。已实现独立的 Arc Slash 程序化弧形刀光：弧度、生命周期旋转、收尖、溶解和预设复用（[#26](https://github.com/mumu-lhl/blender-vfx-studio/issues/26)）；Trail 继续用于动画采样路径。
+
+新增 Fresnel 能量护盾，支持球面半径、增长、透明度、亮边、流动噪声溶解和参数预设（[#34](https://github.com/mumu-lhl/blender-vfx-studio/issues/34)）。
+第一版显示外表面，摄像机进入球内不可见；Cycles CPU 与 Eevee 预览分别检查。
 
 ## M3：轨迹、绑定、组合与复用——进行中
 
@@ -30,7 +33,7 @@
 
 用户参数预设库已实现命名保存、列表创建、重命名、文件删除和损坏文件报告，并完成本地及 CI 验证（[#17](https://github.com/mumu-lhl/blender-vfx-studio/issues/17)、[PR #18](https://github.com/mumu-lhl/blender-vfx-studio/pull/18)）。它保存参数，不代替完整 Blender 资产库。
 
-已实现多个空间效果的统一控制、分层时间设置和整体复制/删除（[#19](https://github.com/mumu-lhl/blender-vfx-studio/issues/19)）。下一步完善路径、节点和资源的整体复用，并开始第一个原生模拟效果。
+已实现多个空间效果的统一控制、分层时间设置和整体复制/删除（[#19](https://github.com/mumu-lhl/blender-vfx-studio/issues/19)）。下一步完善路径、节点和资源的整体复用，继续完善预设库中的完整原生资产复用。
 
 ## M4：模拟和缓存——首个布面效果已实现
 
@@ -43,13 +46,13 @@ Cloth Energy Sheet 使用原生布面求解，显式烘焙为保存在 `.blend` 
 ## M5：交互、兼容性和正式发布——尚未完成
 
 Windows x64、Apple Silicon macOS 和 Linux x64 的后台套件、无插件重开和安装/卸载均已通过（[#24](https://github.com/mumu-lhl/blender-vfx-studio/issues/24)）。
-Arc Slash 和后台 Undo/Redo 也已加入，当前 84 项基线在三平台通过，工作流 39799085288；后续修改继续由相同 CI 检查。
+Arc Slash、后台 Undo/Redo 和子帧时间修复已通过三平台 CI；护盾继续由相同工作流检查。
 已增加复制/删除、组合、Cloth 烘焙/清除和合成树的后台 Undo/Redo 检查。Linux 的基本侧栏、创建、撤销/重做、用户库和 Cloth 状态已做实际鼠标/键盘检查，见 [GUI 记录](docs/GUI_CHECKS.md)。
 仍需文件选择器、骨骼及其他平台窗口交互、更系统的 Eevee/Cycles 视觉比较和稳定性修复。完成这些验证前，不将预览版标为正式稳定版。
 
 ## 已验证的范围与发布状态
 
-Blender 5.2.2 Linux 已通过 85 项测试，包括时间公式的 60 组输入对照、参数文件和用户库检查，以及真实 Blender 中的各模块行为。
+Blender 5.2.2 Linux 的时间修复版本已通过 85 项测试，包括时间公式的 60 组输入对照、参数文件和用户库检查，以及真实 Blender 中的各模块行为。
 用户库另有隔离目录中的界面操作验证，包含图片缺失时不创建残缺实例。
 
 环形、图集、合成、粒子、轨迹、绑定、组合、Cloth 和 Arc Slash 分别在新进程中重开 `.blend`，不加载插件且关闭脚本自动执行。
@@ -58,8 +61,11 @@ Blender 5.2.2 Linux 已通过 85 项测试，包括时间公式的 60 组输入�
 
 `tools/preview.py` 可重新生成组合场景。Cycles CPU 800×500 和 Eevee 预览已查看；最新 Trail 构图另检查了 Eevee 400×250 图像。Linux 基本界面操作和后台 Undo/Redo 已检查；Windows/macOS 的后台套件已通过，实际窗口交互仍待检查。
 
-v0.2–v0.5 已发布，分别覆盖环形与参数预设、图集、合成、粒子。v0.6 增加轨迹，v0.7 增加绑定；两版均已发布并下载校验，v0.6 的 ZIP 也与干净源码构建一致。用户库版本 0.8.0 和组合版本 0.9.0 已发布并下载校验，Cloth 开发版本为 0.10.0，Arc Slash 开发版本为 0.11.0，发布情况以 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 为准。
+v0.2–v0.5 已发布，分别覆盖环形与参数预设、图集、合成、粒子。v0.6 增加轨迹，v0.7 增加绑定；两版均已发布并下载校验，v0.6 的 ZIP 也与干净源码构建一致。用户库版本 0.8.0 和组合版本 0.9.0 已发布并下载校验，Cloth 版本 0.10.0、Arc Slash 与界面修复版本 0.11.0，以及时间修复版本 0.11.1 已发布并下载校验；0.11.1 安装包与全新克隆构建逐字节一致。最新发布情况见 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 为准。
 
 版本标签会触发测试和 CPU 预览，再上传 ZIP、SHA256SUMS 和 PNG。云端直接上传附件曾返回 401，现由 GitHub Actions 的独立发布任务完成（[#5](https://github.com/mumu-lhl/blender-vfx-studio/issues/5)）。v0.6 首次标签误指旧提交，被版本校验拦截；未发布的标签修正后已通过完整发布流程，没有发布错误安装包。
 
 0.11.1 修复子帧或场景时间重映射下创建效果会提前播放的问题；新实例对齐原生驱动时间，旧实例和显式轨迹采样区间不变。
+
+护盾版本 0.12.0 已在 Linux 通过 89 项测试、安装/卸载与 Ruff；三平台 CI 继续检查。该版增加 4 项 Blender 行为检查和第 10 个无插件重开进程，覆盖 CPU 像素透明度、球内视角和完全溶解。
+新增外观预览生成脚本，不把临时渲染或测试 `.blend` 提交到源码。后续优先改进完整效果的原生资产保存与复用，并补齐文件选择器和骨骼交互验证。

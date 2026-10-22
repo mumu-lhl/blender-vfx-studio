@@ -204,6 +204,7 @@ class BlenderTests(unittest.TestCase):
                 ring,
                 core.create(bpy.context, "ARC_SLASH"),
                 core.create_particle(bpy.context),
+                core.create_shield(bpy.context),
                 core.create_flipbook(bpy.context, image, 1, 1),
                 core.create_screen(bpy.context),
             ]

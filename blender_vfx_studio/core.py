@@ -371,6 +371,8 @@ def create_from_preset(context, data):
         root = create_flipbook(
             context, image, data["parameters"]["columns"], data["parameters"]["rows"]
         )
+    elif data["module"] == "shader.shield":
+        root = create_shield(context, data["quality"])
     elif data["module"] == "mesh.slash":
         root = create(context, "ARC_SLASH", data["quality"])
     elif data["module"] == "mesh.ring":
@@ -491,3 +493,9 @@ def create_particle(context, quality="LOW"):
     particle.geometry(layer, root, material, quality)
     select(context, root)
     return root
+
+
+def create_shield(context, quality="MEDIUM"):
+    from . import shield
+
+    return shield.create(context, quality)

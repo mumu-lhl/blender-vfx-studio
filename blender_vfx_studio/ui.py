@@ -87,6 +87,29 @@ class VFX_OT_create_particle(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self)
 
 
+class VFX_OT_create_shield(bpy.types.Operator):
+    bl_idname = "vfx_studio.create_shield"
+    bl_description = "Create an editable sphere with a bright Fresnel rim and noise dissolve"
+    bl_label = "Create Energy Shield"
+    bl_options = {"REGISTER", "UNDO"}
+    quality: EnumProperty(
+        name="Sphere Quality",
+        items=[
+            ("LOW", "Low", "16 segments"),
+            ("MEDIUM", "Medium", "32 segments"),
+            ("HIGH", "High", "64 segments"),
+        ],
+        default="MEDIUM",
+    )
+
+    def execute(self, context):
+        core.create_shield(context, self.quality)
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+
+
 class VFX_OT_create_trail(bpy.types.Operator):
     bl_idname = "vfx_studio.create_trail"
     bl_description = "Sample the active object or pose bone animation into an editable ribbon"
@@ -418,6 +441,9 @@ class VFX_PT_main(bpy.types.Panel):
         )
         layout.operator("vfx_studio.create_screen", text="Add Screen VFX", icon="RENDERLAYERS")
         layout.operator(
+            "vfx_studio.create_shield", text="Create Energy Shield", icon="SHADING_RENDERED"
+        )
+        layout.operator(
             "vfx_studio.create_simulation", text="Create Cloth Simulation", icon="MOD_CLOTH"
         )
         layout.operator("vfx_studio.create_trail", text="Bake Ribbon Trail", icon="CURVE_PATH")
@@ -476,7 +502,21 @@ class VFX_PT_main(bpy.types.Panel):
                 layout.operator("vfx_studio.select_member", text=child.name).uid = child["vfx_id"]
             layout.label(text="Loop restarts all layers each group cycle")
             return
-        if root["vfx_module"] == "mesh.slash":
+        if root["vfx_module"] == "shader.shield":
+            layout.label(text="Fresnel shield · exterior surface")
+            keys = (
+                "radius",
+                "expansion",
+                "opacity",
+                "ior",
+                "rim_power",
+                "strength",
+                "dissolve",
+                "noise_scale",
+                "flow",
+                "fade",
+            )
+        elif root["vfx_module"] == "mesh.slash":
             layout.label(text="Procedural crescent slash")
             keys = (
                 "radius",
@@ -572,6 +612,7 @@ CLASSES = (
     VFX_OT_create_flipbook,
     VFX_OT_create_screen,
     VFX_OT_create_particle,
+    VFX_OT_create_shield,
     VFX_OT_create_trail,
     VFX_OT_rebake_trail,
     VFX_OT_bind,

@@ -12,6 +12,7 @@ class Module:
 
 
 MODULES = {
+    "shader.shield": Module("shader.shield", "Fresnel Energy Shield", 1),
     "mesh.slash": Module("mesh.slash", "Arc Slash", 1),
     "simulation.cloth": Module("simulation.cloth", "Cloth Energy Sheet", 1, stateful=True),
     "core.composition": Module("core.composition", "VFX Composition", 1),
