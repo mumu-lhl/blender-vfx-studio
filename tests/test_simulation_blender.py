@@ -30,6 +30,58 @@ class SimulationTests(unittest.TestCase):
     def setUp(self):
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
+    def test_damaged_cloth_copy_refuses_before_allocating_data(self):
+        for damage in ("source", "output", "ambiguous", "modifier"):
+            with self.subTest(damage=damage):
+                bpy.ops.wm.read_factory_settings(use_empty=True)
+                root = simulation.create(bpy.context)
+                simulation.bake(bpy.context, root)
+                source, output, cloth = simulation.parts(root)
+                bpy.context.scene.frame_set(13)
+                expected = [
+                    tuple(v.co)
+                    for v in output.evaluated_get(
+                        bpy.context.evaluated_depsgraph_get()
+                    ).data.vertices
+                ]
+                if damage == "source":
+                    bpy.data.objects.remove(source, do_unlink=True)
+                elif damage == "output":
+                    bpy.data.objects.remove(output, do_unlink=True)
+                elif damage == "ambiguous":
+                    extra = source.copy()
+                    root.users_collection[0].objects.link(extra)
+                else:
+                    source.modifiers.remove(cloth)
+                before = set(bpy.data.all_ids)
+                with self.assertRaises(ValueError):
+                    core.duplicate(bpy.context, root)
+                self.assertEqual(set(bpy.data.all_ids), before)
+                if damage != "output":
+                    bpy.context.scene.frame_set(7)
+                    bpy.context.scene.frame_set(13)
+                    actual = [
+                        tuple(v.co)
+                        for v in output.evaluated_get(
+                            bpy.context.evaluated_depsgraph_get()
+                        ).data.vertices
+                    ]
+                    self.assertEqual(actual, expected)
+
+    def test_composition_checks_cloth_before_creating_group_or_other_copies(self):
+        ring = core.create(bpy.context)
+        ring.name = "A Good Ring"
+        cloth = simulation.create(bpy.context)
+        cloth.name = "Z Broken Cloth"
+        group = composition.create(bpy.context, [ring, cloth])
+        source = simulation.parts(cloth)[0]
+        bpy.data.objects.remove(source, do_unlink=True)
+        before = set(bpy.data.all_ids)
+        with self.assertRaisesRegex(ValueError, "missing or ambiguous"):
+            core.duplicate(bpy.context, group)
+        self.assertEqual(set(bpy.data.all_ids), before)
+        self.assertEqual(composition.members(group), [ring, cloth])
+
     def test_real_cloth_deformation_native_retime_and_loop(self):
         root = simulation.create(bpy.context)
         self.assertEqual(simulation.state(bpy.context, root), "UNBAKED")

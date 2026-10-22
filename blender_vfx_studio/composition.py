@@ -168,6 +168,11 @@ def detach(context, root):
 
 def duplicate(context, group):
     sources = members(group)
+    for source in sources:
+        if source["vfx_module"] == "simulation.cloth":
+            from . import simulation
+
+            simulation.parts(source)
     uid = str(uuid.uuid4())
     collection = bpy.data.collections.new("VFX • Composition Copy")
     core._tag(collection, uid)
