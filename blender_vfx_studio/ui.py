@@ -53,6 +53,25 @@ class VFX_OT_create_flipbook(bpy.types.Operator, ImportHelper):
         return {"FINISHED"}
 
 
+class VFX_OT_create_sequence(bpy.types.Operator, ImportHelper):
+    bl_idname = "vfx_studio.create_sequence"
+    bl_label = "Create Sprite from Image Sequence"
+    bl_description = "Load consecutive numbered images and animate them with shared VFX timing"
+    bl_options = {"REGISTER", "UNDO"}
+    filter_glob: StringProperty(
+        default="*.png;*.tga;*.jpg;*.jpeg;*.exr;*.tif;*.tiff;*.webp", options={"HIDDEN"}
+    )
+    frame_count: IntProperty(name="File Count", default=16, min=1, max=4096)
+
+    def execute(self, context):
+        try:
+            core.create_sequence(context, self.filepath, self.frame_count)
+        except (ValueError, OSError, RuntimeError) as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+
 class VFX_OT_create_screen(bpy.types.Operator):
     bl_idname = "vfx_studio.create_screen"
     bl_description = "Insert a timed glow and flash layer into the current scene compositor"
@@ -473,6 +492,9 @@ class VFX_PT_main(bpy.types.Panel):
         layout.operator("vfx_studio.create", text="Create Mesh VFX", icon="ADD")
         layout.operator("vfx_studio.create_flipbook", text="Create Flipbook", icon="IMAGE_DATA")
         layout.operator(
+            "vfx_studio.create_sequence", text="Create Image Sequence", icon="FILE_IMAGE"
+        )
+        layout.operator(
             "vfx_studio.create_particle", text="Create Particle Burst", icon="PARTICLES"
         )
         layout.operator("vfx_studio.create_screen", text="Add Screen VFX", icon="RENDERLAYERS")
@@ -497,7 +519,7 @@ class VFX_PT_main(bpy.types.Panel):
             layout.label(text="Select a VFX controller or layer")
             return
         layout.prop(root, "name", text="Effect")
-        if root["vfx_module"] != "screen.glare":
+        if root["vfx_module"] not in {"screen.glare", "flipbook.sequence"}:
             layout.operator(
                 "vfx_studio.export_asset", text="Save Complete Effect", icon="FILE_BLEND"
             )
@@ -619,6 +641,10 @@ class VFX_PT_main(bpy.types.Panel):
         elif root["vfx_module"] == "screen.glare":
             layout.label(text="Screen · scene compositor")
             keys = ("strength", "threshold", "glow_size", "flash", "fade")
+        elif root["vfx_module"] == "flipbook.sequence":
+            layout.label(text=f"Sequence · {root['vfx_sequence_count']} external files")
+            layout.label(text="Image indices start at zero")
+            keys = ("first_frame", "last_frame", "width", "height", "opacity", "strength", "fade")
         elif root["vfx_module"] == "flipbook.atlas":
             layout.label(text="Flipbook · top-left row order")
             try:
@@ -651,6 +677,7 @@ class VFX_PT_main(bpy.types.Panel):
 CLASSES = (
     VFX_OT_create,
     VFX_OT_create_flipbook,
+    VFX_OT_create_sequence,
     VFX_OT_create_screen,
     VFX_OT_create_particle,
     VFX_OT_create_shield,

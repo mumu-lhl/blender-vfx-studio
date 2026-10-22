@@ -50,6 +50,22 @@ FLIPBOOK_PARAMETERS = {
 }
 
 
+SEQUENCE_PARAMETERS = {
+    key: spec for key, spec in FLIPBOOK_PARAMETERS.items() if key not in {"columns", "rows"}
+}
+SEQUENCE_PARAMETERS["last_frame"] = (
+    15,
+    0,
+    4095,
+    "Last image index relative to the selected first file",
+)
+SEQUENCE_PARAMETERS["first_frame"] = (
+    0,
+    0,
+    4095,
+    "First image index relative to the selected first file",
+)
+
 SCREEN_PARAMETERS = {
     **COMMON_PARAMETERS,
     "duration": (24.0, 1.0, 100000.0, "Flash lifetime in frames at speed 1"),
@@ -134,6 +150,8 @@ GROUP_PARAMETERS = {key: PARAMETERS[key] for key in ("start", "duration", "speed
 
 
 def parameters_for(module):
+    if module == "flipbook.sequence":
+        return SEQUENCE_PARAMETERS
     if module == "shader.shield":
         return SHIELD_PARAMETERS
     if module == "mesh.slash":

@@ -51,8 +51,13 @@ def validate(data):
         raise ValueError("Unknown quality setting")
     assets = data["assets"]
     expected_assets = {"image"} if module == "flipbook.atlas" else set()
+    if module == "flipbook.sequence":
+        expected_assets = {"image", "frame_count"}
     if not isinstance(assets, dict) or assets.keys() != expected_assets:
         raise ValueError("Preset assets are missing or unknown")
+    if "frame_count" in assets:
+        if type(assets["frame_count"]) is not int or not 1 <= assets["frame_count"] <= 4096:
+            raise ValueError("Sequence frame count must be an integer between 1 and 4096")
     if "image" in assets:
         path = assets["image"]
         if (

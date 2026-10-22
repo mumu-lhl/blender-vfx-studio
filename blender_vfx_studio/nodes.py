@@ -13,6 +13,8 @@ def node(tree, kind, name, x, y, **attrs):
 
 
 def drive(owner, path, controller, expression, properties, index=None):
+    if len(expression) > 255:
+        raise ValueError("Blender driver expressions must not exceed 255 characters")
     curve = owner.driver_add(path) if index is None else owner.driver_add(path, index)
     driver = curve.driver
     driver.type = "SCRIPTED"

@@ -88,6 +88,10 @@ def _validate(root, objects, dependencies):
         if isinstance(data, bpy.types.Collection):
             if set(data.all_objects) - expected:
                 raise ValueError("A referenced collection contains objects outside this effect")
+        if isinstance(data, bpy.types.Image) and data.source == "SEQUENCE":
+            raise ValueError(
+                "Image sequences stay external; save a JSON preset and copy the sequence files"
+            )
         if isinstance(data, bpy.types.Image) and not (
             data.source == "GENERATED" or (data.source == "FILE" and data.packed_file)
         ):

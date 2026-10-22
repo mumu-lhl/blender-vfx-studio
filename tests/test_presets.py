@@ -104,6 +104,22 @@ class PresetTests(unittest.TestCase):
             )
             self.assertEqual(presets.read(path)["assets"]["image"], str(source))
 
+    def test_sequence_assets_require_bounded_integer_file_count(self):
+        data = dict(
+            sample(),
+            module="flipbook.sequence",
+            assets={"image": "burst0010.png", "frame_count": 4},
+            parameters={k: v[0] for k, v in preset_parameters_for("flipbook.sequence").items()},
+        )
+        self.assertEqual(presets.loads(presets.dumps(data)), data)
+        for count in (True, 0, -1, 4097, 2.5, "4", None):
+            with self.assertRaises(ValueError):
+                presets.validate(
+                    dict(data, assets={"image": "burst0010.png", "frame_count": count})
+                )
+        with self.assertRaises(ValueError):
+            presets.validate(dict(data, assets={"image": "burst0010.png"}))
+
     def test_screen_module_roundtrip_and_asset_isolation(self):
         data = dict(
             sample(),
