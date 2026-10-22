@@ -228,6 +228,7 @@ bpy.ops.wm.read_factory_settings(use_empty=True)
 root = simulation.create(bpy.context)
 simulation.bake(bpy.context, root)
 root.name = "Persisted Cloth"
+root["test_expected_z"] = [coordinates(root, f)[0][2] for f in (13, 1, 24)]
 addon.unregister()
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "work/simulation.blend"))
 print("SIMULATION_INTEGRATION_OK")
