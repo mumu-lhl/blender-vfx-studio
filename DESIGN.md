@@ -95,3 +95,14 @@ Count 在驱动器中限制到 [1, 2048]；默认 Low 使用 20 三角面的粒�
 真实双色粒子渲染与资源删除测试验证实例互不串色、无私有材质残留。该规则同时用于 Mesh / Shader / Flipbook。
 
 UUID 还用于发现手动编辑中从对象上拆下的生成资产。材质释放前复查真实 datablock 消费者，处理 5.2 移除修改器 ID 输入后可能残留的引用计数；保留 Fake User / Extra User 和所有实际外部消费者。
+
+### Sampled Ribbon Trail (asset v1)
+
+`trail.ribbon` separates explicit authoring-time sampling from stateless native playback.
+Sample a bounded, uniformly spaced frame range into a private paired-vertex Mesh, restoring scene frame/subframe in `finally`.
+Object origins and evaluated pose-bone heads use world space; the initial controller is identity.
+No source Action is copied or mutated. Source Object ID and bone/range metadata are optional rebake inputs, never playback dependencies.
+Geometry Nodes clamp each sample index into a moving temporal window, Sample Index and linearly interpolate center/side fields, then offset width.
+This preserves sampled variable-speed timing rather than converting it to arc-length timing. The common half-open lifetime applies.
+Rebake replaces only an owned, unshared mesh after successful sampling, converting world points to current layer-local coordinates.
+Native node edits survive; manual path edits are replaced only by explicit Rebake. JSON presets reject this module until path assets have a supported schema.

@@ -88,7 +88,17 @@ PARTICLE_PARAMETERS = {
 }
 
 
+TRAIL_PARAMETERS = {
+    **COMMON_PARAMETERS,
+    "width": (0.2, 0.001, 100.0, "Full ribbon width"),
+    "length": (0.35, 0.001, 1.0, "Visible trailing fraction of the sampled timeline"),
+    "fade": (0.0, 0.0, 1.0, "Width loss over lifetime"),
+}
+
+
 def parameters_for(module):
+    if module == "trail.ribbon":
+        return TRAIL_PARAMETERS
     if module == "mesh.ring":
         return PARAMETERS
     if module == "flipbook.atlas":

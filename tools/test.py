@@ -34,3 +34,8 @@ subprocess.run(base + ["--python", "tests/test_particle_blender.py"], check=True
 subprocess.run(
     base + [str(ROOT / "work/particle.blend"), "--python", "tests/particle_reopen.py"], check=True
 )
+
+subprocess.run(base + ["--python", "tests/test_trail_blender.py"], check=True)
+subprocess.run(
+    base + [str(ROOT / "work/trail.blend"), "--python", "tests/trail_reopen.py"], check=True
+)
