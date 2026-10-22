@@ -97,8 +97,9 @@ VFX Duplicate 会复制对象、私有网格、材质、节点组，以及保存
 
 ## 如何验证与继续扩展
 
-`python tools/test.py` 运行普通 Python 测试、真实 Blender 后台测试，以及新进程中的无插件重开测试。`python tools/test_install.py` 在临时用户配置中验证安装、启用、创建和卸载。`tools/preview.py` 生成可重建的场景和 PNG，默认 Cycles CPU，也可选 Eevee。CI 固定 Blender 5.2.2，并校验官方安装包的 SHA256。
+`python tools/test.py` 运行普通 Python 测试、真实 Blender 后台测试，以及新进程中的无插件重开测试。`python tools/test_install.py` 在临时用户配置中验证安装、启用、创建和卸载。`tools/preview.py` 生成可重建的场景和 PNG，默认 Cycles CPU，也可选 Eevee。CI 固定 Blender 5.2.2，按 Linux x64、Windows x64 和 macOS ARM 选择官方安装包，校验 SHA256 后才解压、运行。
+`tools/fetch_blender.py` 设置实际可执行文件路径，测试脚本通过 `BLENDER_BIN` 使用它；macOS 的 DMG 只挂载到临时目录并复制 Blender.app。
 
-版本标签必须与 manifest 中的版本相同。测试和安装验证通过后，独立发布任务上传 ZIP、校验文件和 CPU 预览；PR 测试只有读取仓库的权限。
+版本标签必须与 manifest 中的版本相同。所有平台的测试和安装验证通过后，独立发布任务上传 ZIP、校验文件和 CPU 预览；PR 测试只有读取仓库的权限。
 
 后续模拟类型也要像 Cloth 一样明确记录模拟区间、存储格式、烘焙状态和失效规则。不能因为其他模块支持任意帧预览，就承诺未烘焙模拟也能直接跳帧。目前不引入专用节点编辑器或通用模块框架；先完成能在 Blender 中使用和验证的效果，再根据实际问题扩展。

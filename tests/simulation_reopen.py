@@ -6,7 +6,9 @@ root = bpy.data.objects["Persisted Cloth"]
 output = next(o for o in root.children if o.get("vfx_sim_part") == "output")
 source = next(o for o in root.children if o.get("vfx_sim_part") == "source")
 bpy.data.objects.remove(source, do_unlink=True)
-for frame, expected_z in ((13, 1.029477), (1, 1.5), (24, 0.154403), (13, 1.029477)):
+for frame, expected_z in zip(
+    (13, 1, 24, 13), list(root["test_expected_z"]) + [root["test_expected_z"][0]]
+):
     bpy.context.scene.frame_set(frame)
     mesh = output.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
     assert abs(mesh.vertices[0].co.z - expected_z) < 1e-5, (frame, mesh.vertices[0].co.z)
