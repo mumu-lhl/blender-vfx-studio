@@ -22,9 +22,9 @@
 
 首次开发跟踪：[#1](https://github.com/mumu-lhl/blender-vfx-studio/issues/1)。
 
-## M2 — 下一阶段
+## M2 — 进行中
 
-1. Flipbook 原生图集动画：复用统一时间，明确 UV 行列顺序与外部图片所有权（[#2](https://github.com/mumu-lhl/blender-vfx-studio/issues/2)）。
+1. 已实现 Flipbook 图集动画：原生时间、UV 左上行序、区间、尺寸、透明度、独立复制和图片保留；支持 JSON 图片相对引用及格式 1 → 2 迁移（[#2](https://github.com/mumu-lhl/blender-vfx-studio/issues/2)）。
 2. 扩展基础 Mesh / Shader 库，优先刀光与冲击波的视觉表现。
 3. Geometry Nodes 粒子切片，先实现可确定性求值的生成、寿命、随机与实例化。
 4. 主动启用的 Screen 辉光/闪光，保留用户 Compositor 链。
@@ -39,18 +39,18 @@ Simulation、参数变更引起的缓存失效、缓存烘焙与保存重开、�
 
 ## M5 — 尚未开始
 
-交互体验、跨平台、Eevee/Cycles 视觉回归与正式稳定发布。0.2.0 是早期预览，不代表正式版。
+交互体验、跨平台、Eevee/Cycles 视觉回归与正式稳定发布。0.3.0 是早期预览，不代表正式版。
 
 ## 本次验证记录
 
-Blender 5.2.2 Linux：时间表达式对照 60 个输入组合；5 个预设测试；7 个集成测试（包含多个子场景）；
-独立进程禁用自动执行且不导入插件时的保存重开；安装包安装、启用、创建、卸载；Ruff 检查与格式校验。
+Blender 5.2.2 Linux：时间表达式对照 60 个输入组合；7 个预设测试；7 个环形/Core 和 5 个 Flipbook 集成测试（包含多个子场景）；
+两个独立进程禁用自动执行且不导入插件时的环形/图集保存重开；Flipbook 另有实际 CPU 像素选帧校验；安装包安装、启用、创建、卸载；Ruff 检查与格式校验。
 Cycles CPU 32 samples 800×500 与 Eevee 200×125 预览已人工检查，生成脚本 `tools/preview.py`。
 未进行图形界面的点击/Undo 操作验证，也未测试 Windows/macOS。
 
 ## 发布状态
 
-PR #4、#6 已通过 GitHub CI 并合并；0.2.0 增加可复用参数预设。
+PR #4、#6、#7 已通过 GitHub CI 并合并，v0.2.0 已发布并下载校验；0.3.0 增加 Flipbook 和预设版本迁移。
 云端直接上传 Releases 附件返回 401（[#5](https://github.com/mumu-lhl/blender-vfx-studio/issues/5)）；新增 tag 发布任务使用 GitHub Actions 仓库令牌上传经过同一工作流测试的 ZIP。
 发布前校验 tag 与 manifest 版本一致；构建/测试 job 只有读取权限，独立发布 job 才有 contents:write。
 tag 构建同时生成 Cycles CPU 预览；Release 附加 ZIP、SHA256SUMS 和 PNG。实际附件状态以 GitHub Release 和 tag 工作流结果为准。

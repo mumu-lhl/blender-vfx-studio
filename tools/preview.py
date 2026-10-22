@@ -10,6 +10,9 @@ from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tools"))
+from demo_atlas import create as demo_atlas  # noqa: E402
+
 from blender_vfx_studio import core  # noqa: E402
 
 parser = argparse.ArgumentParser()
@@ -28,6 +31,13 @@ right.rotation_euler = (math.radians(70), 0, 0)
 for key, value in {"color_0": 0.6, "color_1": 0.05, "color_2": 1.0, "dissolve": 0.52}.items():
     right[key] = value
 right.update_tag()
+output = ROOT / "work"
+output.mkdir(exist_ok=True)
+sprite = core.create_flipbook(bpy.context, demo_atlas(output / "demo-atlas.png"))
+sprite.location = (0, -2.5, 1.4)
+sprite.rotation_euler = (math.radians(70), 0, 0)
+sprite["strength"] = 3.0
+sprite.update_tag()
 scene.frame_set(13)
 bpy.ops.mesh.primitive_plane_add(size=200)
 floor = bpy.context.object

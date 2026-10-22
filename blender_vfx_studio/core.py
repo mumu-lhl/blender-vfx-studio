@@ -267,6 +267,7 @@ def create_from_preset(context, data):
     else:
         root = create(context, quality=data["quality"])
     root.name = data["name"]
+    root["vfx_quality"] = data["quality"]
     for key, value in data["parameters"].items():
         root[key] = value
     select(context, root)
