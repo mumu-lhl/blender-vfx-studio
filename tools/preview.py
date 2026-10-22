@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools"))
 from demo_atlas import create as demo_atlas  # noqa: E402
 
-from blender_vfx_studio import composition, core, trail  # noqa: E402
+from blender_vfx_studio import composition, core, simulation, trail  # noqa: E402
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--engine", choices=("CYCLES", "BLENDER_EEVEE"), default="CYCLES")
@@ -62,7 +62,13 @@ ribbon["width"] = 0.35
 ribbon["length"] = 0.65
 ribbon["color_0"], ribbon["color_1"], ribbon["color_2"] = 0.05, 1.0, 0.4
 ribbon.update_tag()
-group = composition.create(bpy.context, [left, right, sprite, particles, ribbon])
+cloth = simulation.create(bpy.context)
+cloth.location = (2.7, -1.8, 1.0)
+cloth.scale = (0.65, 0.65, 0.65)
+cloth["color_0"], cloth["color_1"], cloth["color_2"] = 0.8, 0.04, 0.35
+cloth["strength"] = 2.0
+simulation.bake(bpy.context, cloth)
+group = composition.create(bpy.context, [left, right, sprite, particles, ribbon, cloth])
 screen = core.create_screen(bpy.context)
 screen["strength"] = 0.6
 screen["glow_size"] = 0.25

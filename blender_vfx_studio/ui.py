@@ -168,6 +168,86 @@ class VFX_OT_unbind(bpy.types.Operator):
         return {"FINISHED"}
 
 
+class VFX_OT_create_simulation(bpy.types.Operator):
+    bl_idname = "vfx_studio.create_simulation"
+    bl_label = "Create Cloth Energy Sheet"
+    bl_options = {"REGISTER", "UNDO"}
+    quality: EnumProperty(
+        items=[
+            ("LOW", "Low · 81 vertices", ""),
+            ("MEDIUM", "Medium · 169 vertices", ""),
+            ("HIGH", "High · 289 vertices", ""),
+        ],
+        default="LOW",
+    )
+
+    def execute(self, context):
+        from . import simulation
+
+        simulation.create(context, self.quality)
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+
+
+class VFX_OT_bake_simulation(bpy.types.Operator):
+    bl_idname = "vfx_studio.bake_simulation"
+    bl_label = "Bake / Replace Stored Cloth Motion"
+    bl_description = "Solve the cloth and replace its stored shape-key animation"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        from . import simulation
+
+        try:
+            simulation.bake(context, context.object)
+        except (ValueError, RuntimeError) as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_confirm(self, event)
+
+
+class VFX_OT_clear_simulation(bpy.types.Operator):
+    bl_idname = "vfx_studio.clear_simulation"
+    bl_label = "Clear Stored Cloth Motion"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        from . import simulation
+
+        try:
+            simulation.clear(context.object)
+        except ValueError as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_confirm(self, event)
+
+
+class VFX_OT_edit_simulation_source(bpy.types.Operator):
+    bl_idname = "vfx_studio.edit_simulation_source"
+    bl_label = "Show Cloth Source for Native Editing"
+
+    def execute(self, context):
+        from . import simulation
+
+        try:
+            source, _, _ = simulation.parts(context.object)
+        except ValueError as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        source.hide_set(False)
+        source.display_type = "WIRE"
+        core.select(context, source)
+        return {"FINISHED"}
+
+
 class VFX_OT_compose(bpy.types.Operator):
     bl_idname = "vfx_studio.compose"
     bl_label = "Compose Selected VFX"
@@ -299,6 +379,9 @@ class VFX_PT_main(bpy.types.Panel):
             "vfx_studio.create_particle", text="Create Particle Burst", icon="PARTICLES"
         )
         layout.operator("vfx_studio.create_screen", text="Add Screen VFX", icon="RENDERLAYERS")
+        layout.operator(
+            "vfx_studio.create_simulation", text="Create Cloth Simulation", icon="MOD_CLOTH"
+        )
         layout.operator("vfx_studio.create_trail", text="Bake Ribbon Trail", icon="CURVE_PATH")
         layout.operator(
             "vfx_studio.compose", text="Compose Selected VFX", icon="OUTLINER_COLLECTION"
@@ -313,10 +396,10 @@ class VFX_PT_main(bpy.types.Panel):
             layout.label(text="Select a VFX controller or layer")
             return
         layout.prop(root, "name", text="Effect")
-        if root["vfx_module"] not in {"trail.ribbon", "core.composition"}:
+        if root["vfx_module"] not in {"trail.ribbon", "core.composition", "simulation.cloth"}:
             layout.operator("vfx_studio.export_preset", text="Save Preset", icon="EXPORT")
         else:
-            layout.label(text="Reuse path with Duplicate or .blend Append")
+            layout.label(text="Reuse with Duplicate or .blend Append")
         row = layout.row(align=True)
         row.operator("vfx_studio.duplicate", text="Duplicate", icon="DUPLICATE")
         row.operator("vfx_studio.delete", text="Delete", icon="TRASH")
@@ -355,7 +438,28 @@ class VFX_PT_main(bpy.types.Panel):
                 layout.operator("vfx_studio.select_member", text=child.name).uid = child["vfx_id"]
             layout.label(text="Loop restarts all layers each group cycle")
             return
-        if root["vfx_module"] == "trail.ribbon":
+        if root["vfx_module"] == "simulation.cloth":
+            from . import simulation
+
+            try:
+                _, _, cloth = simulation.parts(root)
+                status = simulation.state(context, root)
+            except ValueError as error:
+                layout.label(text=str(error), icon="ERROR")
+                return
+            layout.label(
+                text=f"Stored motion: {status}", icon="ERROR" if status == "STALE" else "INFO"
+            )
+            layout.label(text="Source edits require an explicit Bake")
+            for key in ("vfx_sim_first", "vfx_sim_last", "vfx_sim_step"):
+                layout.prop(root, f'["{key}"]', text=key.removeprefix("vfx_sim_").title())
+            for key in ("quality", "mass", "tension_stiffness", "bending_stiffness", "air_damping"):
+                layout.prop(cloth.settings, key)
+            layout.operator("vfx_studio.bake_simulation", icon="REC")
+            layout.operator("vfx_studio.clear_simulation", icon="TRASH")
+            layout.operator("vfx_studio.edit_simulation_source", icon="EDITMODE_HLT")
+            keys = ("strength",)
+        elif root["vfx_module"] == "trail.ribbon":
             layout.label(text="Ribbon · explicit sampled animation")
             layout.prop(root, '["vfx_source"]', text="Source")
             layout.prop(root, '["vfx_bone"]', text="Bone (head)")
@@ -420,6 +524,10 @@ CLASSES = (
     VFX_OT_rebake_trail,
     VFX_OT_bind,
     VFX_OT_unbind,
+    VFX_OT_create_simulation,
+    VFX_OT_bake_simulation,
+    VFX_OT_clear_simulation,
+    VFX_OT_edit_simulation_source,
     VFX_OT_compose,
     VFX_OT_detach_member,
     VFX_OT_select_member,

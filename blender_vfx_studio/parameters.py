@@ -96,10 +96,14 @@ TRAIL_PARAMETERS = {
 }
 
 
+SIMULATION_PARAMETERS = {key: spec for key, spec in COMMON_PARAMETERS.items() if key != "fade"}
+
 GROUP_PARAMETERS = {key: PARAMETERS[key] for key in ("start", "duration", "speed", "loop")}
 
 
 def parameters_for(module):
+    if module == "simulation.cloth":
+        return SIMULATION_PARAMETERS
     if module == "core.composition":
         return GROUP_PARAMETERS
     if module == "trail.ribbon":

@@ -181,6 +181,10 @@ def duplicate(context, root, *, _standalone=True, _references=None):
             assets[source.data] = clone.data
             _tag(clone.data, uid)
             private.append(clone.data)
+            if getattr(clone.data, "shape_keys", None):
+                assets[source.data.shape_keys] = clone.data.shape_keys
+                _tag(clone.data.shape_keys, uid)
+                private.append(clone.data.shape_keys)
             for slot in clone.material_slots:
                 if slot.material:
                     original = slot.material
@@ -222,6 +226,10 @@ def duplicate(context, root, *, _standalone=True, _references=None):
                     original = getattr(socket, "default_value", None)
                     if isinstance(original, bpy.types.ID) and original in references:
                         socket.default_value = references[original]
+    if root["vfx_module"] == "simulation.cloth":
+        from . import simulation
+
+        simulation.after_duplicate(mapping[root])
     if _standalone and root.get("vfx_composition"):
         from . import composition
 
@@ -267,6 +275,17 @@ def _delete_spatial(root, validate_only=False):
             raise ValueError("VFX mesh is shared; unlink external users before deleting")
     # Private GN Set Material references are internal consumers, not external sharing.
     internal = set(owned) | {data for data in meshes | groups if data.get("vfx_id") == uid}
+    keys = {mesh.shape_keys for mesh in meshes if mesh.shape_keys}
+    key_users = bpy.data.user_map(subset=keys) if keys else {}
+    key_internal = internal | {m for m in materials if m.get("vfx_id") == uid}
+    key_internal.update(m.node_tree for m in materials if m.get("vfx_id") == uid and m.node_tree)
+    for key in keys:
+        if (
+            key.use_fake_user
+            or key.use_extra_user
+            or any(user not in key_internal for user in key_users.get(key, set()))
+        ):
+            raise ValueError("VFX shape keys are shared; unlink external users before deleting")
     consumers = bpy.data.user_map(subset=materials) if materials else {}
     for material in materials:
         if material.get("vfx_id") == uid and (
@@ -390,8 +409,10 @@ def atlas_node(root):
 
 
 def _preset_assets(root):
-    if root["vfx_module"] in {"trail.ribbon", "core.composition"}:
-        raise ValueError("Native paths and compositions require .blend Append or Duplicate")
+    if root["vfx_module"] in {"trail.ribbon", "core.composition", "simulation.cloth"}:
+        raise ValueError(
+            "Native paths, baked simulations and compositions require .blend Append or Duplicate"
+        )
     if root["vfx_module"] != "flipbook.atlas":
         return {}
     image = atlas_node(root).image

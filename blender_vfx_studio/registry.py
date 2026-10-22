@@ -12,6 +12,7 @@ class Module:
 
 
 MODULES = {
+    "simulation.cloth": Module("simulation.cloth", "Cloth Energy Sheet", 1, stateful=True),
     "core.composition": Module("core.composition", "VFX Composition", 1),
     "trail.ribbon": Module("trail.ribbon", "Sampled Ribbon Trail", 1),
     "mesh.ring": Module("mesh.ring", "Procedural Ring", 1),
