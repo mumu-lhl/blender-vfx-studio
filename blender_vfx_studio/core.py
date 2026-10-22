@@ -66,7 +66,7 @@ def _controller(context, label, module, quality, parameters, settings):
         if key.startswith("color_") and "color" in settings:
             value = settings["color"][int(key[-1])]
         if key == "start":
-            value = float(context.scene.frame_current)
+            value = float(context.scene.frame_current_final)
         root[key] = value
         ui = {"description": description}
         if minimum is not None:
