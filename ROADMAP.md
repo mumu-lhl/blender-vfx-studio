@@ -42,20 +42,20 @@ Cloth Energy Sheet 使用原生布面求解，显式烘焙为保存在 `.blend` 
 
 ## M5：交互、兼容性和正式发布——尚未完成
 
-仍需图形界面点击/Undo 检查、Windows/macOS 验证、更系统的 Eevee/Cycles 视觉比较和稳定性修复。完成这些验证前，不将预览版标为正式稳定版。
+正在增加 Windows x64、Apple Silicon macOS 和 Linux x64 的完整后台测试（[#24](https://github.com/mumu-lhl/blender-vfx-studio/issues/24)），目前跨平台结果尚待 CI。
+仍需图形界面点击/Undo 检查、更系统的 Eevee/Cycles 视觉比较和稳定性修复。完成这些验证前，不将预览版标为正式稳定版。
 
 ## 已验证的范围与发布状态
 
-Blender 5.2.2 Linux 已通过时间公式的 60 组输入对照、9 项 JSON 预设测试、6 项用户库文件测试，以及 Core 8 项、Flipbook 5 项、Screen 10 项、Particle 5 项、Trail 7 项、Binding 5 项真实 Blender 测试。用户库另有隔离目录中的界面操作验证，包含图片缺失时不创建残缺实例。
+Blender 5.2.2 Linux 已通过 71 项测试，包括时间公式的 60 组输入对照、参数文件和用户库检查，以及真实 Blender 中的各模块行为。
+用户库另有隔离目录中的界面操作验证，包含图片缺失时不创建残缺实例。
 
-环形、图集、合成、粒子、轨迹和绑定分别在新进程中重开 `.blend`，不加载插件且关闭脚本自动执行。图集、合成和粒子还有 CPU 渲染像素检查。安装包已验证安装、启用、创建和卸载。Ruff 检查与格式校验通过。
+环形、图集、合成、粒子、轨迹、绑定、组合和 Cloth 分别在新进程中重开 `.blend`，不加载插件且关闭脚本自动执行。
+图集、合成和粒子还有 CPU 渲染像素检查；Cloth 重开时会删除模拟源，验证已存姿态独立可用。
+安装包已验证安装、启用、创建和卸载，Ruff 检查与格式校验通过。
 
 `tools/preview.py` 可重新生成组合场景。Cycles CPU 800×500 和 Eevee 预览已查看；最新 Trail 构图另检查了 Eevee 400×250 图像。尚未进行图形界面点击/Undo 操作和 Windows/macOS 测试。
 
-v0.2–v0.5 已发布，分别覆盖环形与参数预设、图集、合成、粒子。v0.6 增加轨迹，v0.7 增加绑定；两版均已发布并下载校验，v0.6 的 ZIP 也与干净源码构建一致。用户库版本为 0.8.0，组合版本为 0.9.0，Cloth 开发版本为 0.10.0，发布情况以 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 为准。
+v0.2–v0.5 已发布，分别覆盖环形与参数预设、图集、合成、粒子。v0.6 增加轨迹，v0.7 增加绑定；两版均已发布并下载校验，v0.6 的 ZIP 也与干净源码构建一致。用户库版本 0.8.0 和组合版本 0.9.0 已发布并下载校验，Cloth 开发版本为 0.10.0，发布情况以 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 为准。
 
 版本标签会触发测试和 CPU 预览，再上传 ZIP、SHA256SUMS 和 PNG。云端直接上传附件曾返回 401，现由 GitHub Actions 的独立发布任务完成（[#5](https://github.com/mumu-lhl/blender-vfx-studio/issues/5)）。v0.6 首次标签误指旧提交，被版本校验拦截；未发布的标签修正后已通过完整发布流程，没有发布错误安装包。
-
-组合新增 7 项 Blender 测试，覆盖统一时间、协调循环、独立副本、脱离、用户动画保护和整组删除预检查；另验证无插件新进程重开。
-
-Cloth 新增 8 项真实 Blender 测试及无插件重开验证，覆盖求解变形、固定边、重烘焙、过期检测、中断恢复、独立形态键、组合和外部引用保护。

@@ -178,7 +178,9 @@ class FlipbookTests(unittest.TestCase):
         root = bpy.context.object
         path = WORK / "flipbook-preset.json"
         self.assertEqual(bpy.ops.vfx_studio.export_preset(filepath=str(path)), {"FINISHED"})
-        self.assertEqual(presets.loads(path.read_text())["assets"]["image"], "test-atlas.png")
+        self.assertEqual(
+            presets.loads(path.read_text(encoding="utf-8"))["assets"]["image"], "test-atlas.png"
+        )
         bpy.context.scene.frame_set(50)
         self.assertEqual(bpy.ops.vfx_studio.import_preset(filepath=str(path)), {"FINISHED"})
         clone = bpy.context.object

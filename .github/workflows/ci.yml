@@ -9,8 +9,16 @@ permissions:
   contents: read
 jobs:
   blender:
-    runs-on: ubuntu-24.04
+    name: Blender · ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025, macos-15]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
     env:
       BLENDER_VERSION: 5.2.2
     steps:
@@ -33,30 +41,21 @@ jobs:
           ruff check blender_vfx_studio tools tests
           ruff format --check blender_vfx_studio tools tests
       - name: Download official Blender with checksum verification
-        shell: bash
-        run: |
-          mkdir -p work
-          cd work
-          base=https://download.blender.org/release/Blender5.2
-          curl --fail --location --retry 3 -o blender.tar.xz "$base/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
-          curl --fail --location --retry 3 -o checksums.txt "$base/blender-${BLENDER_VERSION}.sha256"
-          mv blender.tar.xz "blender-${BLENDER_VERSION}-linux-x64.tar.xz"
-          sha256sum --check --ignore-missing checksums.txt
-          tar -xf "blender-${BLENDER_VERSION}-linux-x64.tar.xz"
-          echo "$PWD/blender-${BLENDER_VERSION}-linux-x64" >> "$GITHUB_PATH"
+        run: python tools/fetch_blender.py --version "$BLENDER_VERSION"
       - name: Native behavior and persistence tests (CPU only)
         run: python tools/test.py
       - name: Package installation, enable and removal
         run: python tools/test_install.py
       - name: Render CPU release preview
-        if: github.ref_type == 'tag'
+        if: github.ref_type == 'tag' && runner.os == 'Linux'
         run: blender -b --factory-startup --python-exit-code 1 --python tools/preview.py
       - uses: actions/upload-artifact@v4
+        if: runner.os == 'Linux'
         with:
           name: blender-vfx-studio-extension
           path: dist/*.zip
       - uses: actions/upload-artifact@v4
-        if: github.ref_type == 'tag'
+        if: github.ref_type == 'tag' && runner.os == 'Linux'
         with:
           name: blender-vfx-studio-preview
           path: work/preview.png
