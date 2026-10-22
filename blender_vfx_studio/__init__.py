@@ -2,12 +2,14 @@
 
 
 def register():
-    from . import ui
+    from . import library_ui, ui
 
     ui.register()
+    library_ui.register()
 
 
 def unregister():
-    from . import ui
+    from . import library_ui, ui
 
+    library_ui.unregister()
     ui.unregister()
