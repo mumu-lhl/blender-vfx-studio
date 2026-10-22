@@ -151,6 +151,7 @@ class ParticleTests(unittest.TestCase):
         material = root.children[0].data.materials[0]
         external = bpy.data.meshes.new("User Mesh")
         external.materials.append(material)
+        root.children[0].data.materials.clear()  # GN still uses this generated material.
         with self.assertRaisesRegex(ValueError, "shared"):
             core.delete(root)
         external.materials.clear()

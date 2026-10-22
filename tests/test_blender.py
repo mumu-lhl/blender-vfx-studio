@@ -180,6 +180,8 @@ class BlenderTests(unittest.TestCase):
             getattr(target.modifiers[0].properties.inputs, interface.identifier).value,
             target.data.materials[0],
         )
+        layer.modifiers.clear()
+        layer.data.materials.clear()
         core.delete(root)
         core.delete(clone)
         self.assertEqual(len(bpy.data.materials), 0)

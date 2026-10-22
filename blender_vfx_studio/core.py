@@ -235,10 +235,13 @@ def delete(root):
     # Shared generated assets still depend on this controller. Refuse destructive
     # unlinking rather than leave another object with broken native drivers.
     meshes = {o.data for o in owned if o.type == "MESH"}
+    meshes.update(m for m in bpy.data.meshes if m.get("vfx_id") == uid)
     materials = {m for mesh in meshes for m in mesh.materials if m}
+    materials.update(m for m in bpy.data.materials if m.get("vfx_id") == uid)
     groups = {
         m.node_group for o in owned for m in o.modifiers if m.type == "NODES" and m.node_group
     }
+    groups.update(g for g in bpy.data.node_groups if g.get("vfx_id") == uid)
     for mesh in meshes:
         if mesh.get("vfx_id") == uid and mesh.users > sum(o.data == mesh for o in owned):
             raise ValueError("VFX mesh is shared; unlink external users before deleting")
@@ -248,6 +251,7 @@ def delete(root):
     for material in materials:
         if material.get("vfx_id") == uid and (
             material.use_fake_user
+            or material.use_extra_user
             or any(user not in internal for user in consumers.get(material, set()))
         ):
             raise ValueError("VFX material is shared; unlink external users before deleting")
@@ -257,22 +261,18 @@ def delete(root):
         )
         if group.get("vfx_id") == uid and group.users > users:
             raise ValueError("VFX node group is shared; unlink external users before deleting")
-    resources = []
+    # UUID ownership also discovers generated assets detached during native editing.
+    resources = (
+        [(bpy.data.meshes, m) for m in meshes]
+        + [(bpy.data.node_groups, g) for g in groups]
+        + [(bpy.data.materials, m) for m in materials]
+    )
     for obj in owned:
-        # Retain foreign children and their world-space transforms.
         for child in list(obj.children):
             if child not in owned:
                 matrix = child.matrix_world.copy()
                 child.parent = None
                 child.matrix_world = matrix
-        if obj.type == "MESH":
-            resources.append((bpy.data.meshes, obj.data))
-            resources.extend((bpy.data.materials, m) for m in obj.data.materials if m)
-        resources.extend(
-            (bpy.data.node_groups, m.node_group)
-            for m in obj.modifiers
-            if m.type == "NODES" and m.node_group
-        )
     unique = {data.as_pointer(): (store, data) for store, data in resources}
     for obj in reversed(owned):
         bpy.data.objects.remove(obj, do_unlink=True)
@@ -280,7 +280,14 @@ def delete(root):
     for store, data in sorted(
         unique.values(), key=lambda item: isinstance(item[1], bpy.types.Material)
     ):
-        if data.get("vfx_id") == uid and data.users == 0:
+        if data.get("vfx_id") != uid:
+            continue
+        if isinstance(data, bpy.types.Material):
+            # Blender 5.2 can retain a stale count after removing a modifier's ID input.
+            # All real external consumers were rejected before mutation; check again.
+            if not bpy.data.user_map(subset={data}).get(data):
+                store.remove(data)
+        elif data.users == 0:
             store.remove(data)
     for collection in list(bpy.data.collections):
         if collection.get("vfx_id") == uid and not collection.objects and not collection.children:
