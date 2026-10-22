@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "blender_vfx_studio"
-version = tomllib.loads((SOURCE / "blender_manifest.toml").read_text())["version"]
+version = tomllib.loads((SOURCE / "blender_manifest.toml").read_text(encoding="utf-8"))["version"]
 output = ROOT / "dist" / f"blender-vfx-studio-{version}.zip"
 output.parent.mkdir(exist_ok=True)
 with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:

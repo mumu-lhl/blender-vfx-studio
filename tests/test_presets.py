@@ -47,7 +47,7 @@ class PresetTests(unittest.TestCase):
 
     def test_historical_v1_ring_migrates_without_mutating_input(self):
         path = Path(__file__).parent / "fixtures/ring-preset-v1.json"
-        historical = json.loads(path.read_text())
+        historical = json.loads(path.read_text(encoding="utf-8"))
         before = copy.deepcopy(historical)
         migrated = presets.validate(historical)
         self.assertEqual(historical, before)
@@ -99,7 +99,9 @@ class PresetTests(unittest.TestCase):
             path = directory / "presets/effect.json"
             presets.write(path, data)
             self.assertEqual(data, before)
-            self.assertEqual(presets.loads(path.read_text())["assets"]["image"], "../atlas.png")
+            self.assertEqual(
+                presets.loads(path.read_text(encoding="utf-8"))["assets"]["image"], "../atlas.png"
+            )
             self.assertEqual(presets.read(path)["assets"]["image"], str(source))
 
     def test_screen_module_roundtrip_and_asset_isolation(self):
