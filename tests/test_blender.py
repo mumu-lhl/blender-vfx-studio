@@ -161,6 +161,21 @@ class BlenderTests(unittest.TestCase):
         self.assertEqual(len(bpy.data.objects), count)
         self.assertEqual(root["radius"], 0.8)
 
+    def test_private_node_material_references_copy_and_delete_together(self):
+        root = core.create(bpy.context)
+        layer = root.children[0]
+        material = layer.data.materials[0]
+        setter = layer.modifiers[0].node_group.nodes.new("GeometryNodeSetMaterial")
+        setter.inputs["Material"].default_value = material
+        clone = core.duplicate(bpy.context, root)
+        target = clone.children[0]
+        copied = next(n for n in target.modifiers[0].node_group.nodes if n.type == "SET_MATERIAL")
+        self.assertEqual(copied.inputs["Material"].default_value, target.data.materials[0])
+        self.assertNotEqual(copied.inputs["Material"].default_value, material)
+        core.delete(root)
+        core.delete(clone)
+        self.assertEqual(len(bpy.data.materials), 0)
+
     def test_manual_duplicate_identity_and_future_schema_rejected(self):
         root = core.create(bpy.context)
         copy = root.copy()

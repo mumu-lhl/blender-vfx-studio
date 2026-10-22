@@ -38,6 +38,19 @@ sprite.location = (0, -2.5, 1.4)
 sprite.rotation_euler = (math.radians(70), 0, 0)
 sprite["strength"] = 3.0
 sprite.update_tag()
+particles = core.create_particle(bpy.context)
+particles.location = (-0.5, 1, 2)
+for key, value in {
+    "count": 48,
+    "size": 0.08,
+    "velocity": 2.0,
+    "gravity": 1.5,
+    "spawn_radius": 0.2,
+    "fade": 0.3,
+    "strength": 6.0,
+}.items():
+    particles[key] = value
+particles.update_tag()
 screen = core.create_screen(bpy.context)
 screen["strength"] = 0.6
 screen["glow_size"] = 0.25

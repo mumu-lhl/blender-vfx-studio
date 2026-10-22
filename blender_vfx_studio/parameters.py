@@ -65,6 +65,29 @@ SCREEN_PARAMETERS = {
 }
 
 
+PARTICLE_PARAMETERS = {
+    **COMMON_PARAMETERS,
+    "strength": (4.0, 0.0, 1000.0, "Particle emission strength"),
+    "color_0": (1.0, 0.0, 1.0, "Linear red"),
+    "color_1": (0.35, 0.0, 1.0, "Linear green"),
+    "color_2": (0.04, 0.0, 1.0, "Linear blue"),
+    "count": (64, 1, 2048, "Particle count; bounded to 2048 at evaluation"),
+    "seed": (1, 0, 1000000, "Deterministic random seed"),
+    "motion_seconds": (
+        1.0,
+        0.001,
+        100.0,
+        "Physical trajectory time; timeline stretches this motion",
+    ),
+    "velocity": (3.0, 0.0, 100.0, "Initial velocity in units per motion second"),
+    "gravity": (2.0, 0.0, 1000.0, "Downward acceleration in units per motion second squared"),
+    "spread": (1.0, 0.0, 1.0, "Direction spread: zero points up, one covers all directions"),
+    "randomness": (0.5, 0.0, 1.0, "Velocity and size variation"),
+    "spawn_radius": (0.05, 0.0, 1000.0, "Initial radial offset"),
+    "size": (0.06, 0.001, 100.0, "Particle radius at birth"),
+}
+
+
 def parameters_for(module):
     if module == "mesh.ring":
         return PARAMETERS
@@ -72,6 +95,8 @@ def parameters_for(module):
         return FLIPBOOK_PARAMETERS
     if module == "screen.glare":
         return SCREEN_PARAMETERS
+    if module == "particle.burst":
+        return PARTICLE_PARAMETERS
     raise ValueError("Unknown VFX module")
 
 

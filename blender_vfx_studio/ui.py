@@ -60,6 +60,22 @@ class VFX_OT_create_screen(bpy.types.Operator):
         return {"FINISHED"}
 
 
+class VFX_OT_create_particle(bpy.types.Operator):
+    bl_idname = "vfx_studio.create_particle"
+    bl_label = "Create Particle Burst"
+    bl_options = {"REGISTER", "UNDO"}
+    quality: EnumProperty(
+        items=[("LOW", "Low", ""), ("MEDIUM", "Medium", ""), ("HIGH", "High", "")], default="LOW"
+    )
+
+    def execute(self, context):
+        core.create_particle(context, self.quality)
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+
+
 class VFX_OT_duplicate(bpy.types.Operator):
     bl_idname = "vfx_studio.duplicate"
     bl_label = "Duplicate VFX"
@@ -133,6 +149,9 @@ class VFX_PT_main(bpy.types.Panel):
         layout = self.layout
         layout.operator("vfx_studio.create", text="Create Ring", icon="ADD")
         layout.operator("vfx_studio.create_flipbook", text="Create Flipbook", icon="IMAGE_DATA")
+        layout.operator(
+            "vfx_studio.create_particle", text="Create Particle Burst", icon="PARTICLES"
+        )
         layout.operator("vfx_studio.create_screen", text="Add Screen VFX", icon="RENDERLAYERS")
         layout.operator("vfx_studio.import_preset", text="Load Preset", icon="IMPORT")
         try:
@@ -151,7 +170,22 @@ class VFX_PT_main(bpy.types.Panel):
         layout.label(text="Timing · frames")
         for key in ("start", "duration", "speed", "loop"):
             layout.prop(root, f'["{key}"]', text=key.title())
-        if root["vfx_module"] == "screen.glare":
+        if root["vfx_module"] == "particle.burst":
+            layout.label(text="Particle Burst · stateless")
+            keys = (
+                "count",
+                "seed",
+                "motion_seconds",
+                "velocity",
+                "gravity",
+                "spread",
+                "randomness",
+                "spawn_radius",
+                "size",
+                "fade",
+                "strength",
+            )
+        elif root["vfx_module"] == "screen.glare":
             layout.label(text="Screen · scene compositor")
             keys = ("strength", "threshold", "glow_size", "flash", "fade")
         elif root["vfx_module"] == "flipbook.atlas":
@@ -187,6 +221,7 @@ CLASSES = (
     VFX_OT_create,
     VFX_OT_create_flipbook,
     VFX_OT_create_screen,
+    VFX_OT_create_particle,
     VFX_OT_duplicate,
     VFX_OT_delete,
     VFX_OT_export_preset,

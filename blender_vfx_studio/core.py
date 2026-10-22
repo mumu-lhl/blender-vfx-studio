@@ -161,6 +161,7 @@ def duplicate(context, root):
     ]
     mapping = {}
     private = []
+    assets = {}
     for source in sources:
         clone = source.copy()
         _tag(clone, uid)
@@ -169,24 +170,39 @@ def duplicate(context, root):
         private.append(clone)
         if source.data:
             clone.data = source.data.copy()
+            assets[source.data] = clone.data
             _tag(clone.data, uid)
             private.append(clone.data)
             for slot in clone.material_slots:
                 if slot.material:
-                    slot.material = slot.material.copy()
-                    _tag(slot.material, uid)
-                    private.append(slot.material)
-                    if slot.material.node_tree:
-                        private.append(slot.material.node_tree)
+                    original = slot.material
+                    if original not in assets:
+                        assets[original] = original.copy()
+                        _tag(assets[original], uid)
+                        private.append(assets[original])
+                        if original.node_tree:
+                            assets[original.node_tree] = assets[original].node_tree
+                            private.append(assets[original].node_tree)
+                    slot.material = assets[original]
             for modifier in clone.modifiers:
                 if modifier.type == "NODES" and modifier.node_group:
-                    modifier.node_group = modifier.node_group.copy()
-                    _tag(modifier.node_group, uid)
-                    private.append(modifier.node_group)
+                    original = modifier.node_group
+                    if original not in assets:
+                        assets[original] = original.copy()
+                        _tag(assets[original], uid)
+                        private.append(assets[original])
+                    modifier.node_group = assets[original]
     for source, clone in mapping.items():
         clone.parent = mapping.get(source.parent, source.parent)
+    references = mapping | assets
     for data in private:
-        _remap_drivers(data, mapping)
+        _remap_drivers(data, references)
+        if isinstance(data, bpy.types.NodeTree):
+            for n in data.nodes:
+                for socket in n.inputs:
+                    original = getattr(socket, "default_value", None)
+                    if isinstance(original, bpy.types.ID) and original in references:
+                        socket.default_value = references[original]
     select(context, mapping[root])
     return mapping[root]
 
@@ -215,9 +231,14 @@ def delete(root):
     for mesh in meshes:
         if mesh.get("vfx_id") == uid and mesh.users > sum(o.data == mesh for o in owned):
             raise ValueError("VFX mesh is shared; unlink external users before deleting")
+    # Private GN Set Material references are internal consumers, not external sharing.
+    internal = set(owned) | {data for data in meshes | groups if data.get("vfx_id") == uid}
+    consumers = bpy.data.user_map(subset=materials) if materials else {}
     for material in materials:
-        users = sum(sum(m == material for m in mesh.materials) for mesh in meshes)
-        if material.get("vfx_id") == uid and material.users > users:
+        if material.get("vfx_id") == uid and (
+            material.use_fake_user
+            or any(user not in internal for user in consumers.get(material, set()))
+        ):
             raise ValueError("VFX material is shared; unlink external users before deleting")
     for group in groups:
         users = sum(
@@ -245,7 +266,9 @@ def delete(root):
     for obj in reversed(owned):
         bpy.data.objects.remove(obj, do_unlink=True)
     # Meshes release material users first. Foreign data is retained.
-    for store, data in unique.values():
+    for store, data in sorted(
+        unique.values(), key=lambda item: isinstance(item[1], bpy.types.Material)
+    ):
         if data.get("vfx_id") == uid and data.users == 0:
             store.remove(data)
     for collection in list(bpy.data.collections):
@@ -278,6 +301,8 @@ def create_from_preset(context, data):
     data = presets.validate(data)  # Validate completely before mutating Blender data.
     if data["module"] == "screen.glare":
         root = create_screen(context)
+    elif data["module"] == "particle.burst":
+        root = create_particle(context, data["quality"])
     elif data["module"] == "flipbook.atlas":
         image = load_atlas(data["assets"]["image"])
         root = create_flipbook(
@@ -373,3 +398,25 @@ def create_screen(context):
     from . import screen
 
     return screen.create(context)
+
+
+def create_particle(context, quality="LOW"):
+    from . import particle
+    from .parameters import PARTICLE_PARAMETERS
+
+    if quality not in {"LOW", "MEDIUM", "HIGH"}:
+        raise ValueError("Unknown particle quality")
+    root, collection = _controller(
+        context, "Particle Burst", "particle.burst", quality, PARTICLE_PARAMETERS, {}
+    )
+    mesh = bpy.data.meshes.new("VFX • Particle Source")
+    _tag(mesh, root["vfx_id"])
+    layer = bpy.data.objects.new("VFX • Particle Layer", mesh)
+    _tag(layer, root["vfx_id"], "layer")
+    collection.objects.link(layer)
+    layer.parent = root
+    material = particle.material(root)
+    mesh.materials.append(material)
+    particle.geometry(layer, root, material, quality)
+    select(context, root)
+    return root
