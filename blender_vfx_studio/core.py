@@ -162,6 +162,10 @@ def duplicate(context, root, *, _standalone=True, _references=None):
         from . import composition
 
         composition.check_detach(root)
+    if root["vfx_module"] == "simulation.cloth":
+        from . import simulation
+
+        simulation.parts(root)  # Refuse damaged source/output before allocating any clone data.
     uid = str(uuid.uuid4())
     collection = bpy.data.collections.new("VFX • Copy")
     _tag(collection, uid)
