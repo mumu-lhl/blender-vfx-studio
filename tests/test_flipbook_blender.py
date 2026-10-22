@@ -133,6 +133,15 @@ class FlipbookTests(unittest.TestCase):
         update(root, opacity=1.0, first_frame=65000, last_frame=0)
         # Out-of-grid first and reversed range clamp to the final cell.
         self.assertTrue(all(value > 0.97 for value in center_pixel(2)))
+        # The texture's alpha must matter even when the controller opacity is one.
+        transparent = self.image.copy()
+        pixels = list(transparent.pixels)
+        for offset in range(3, len(pixels), 4):
+            pixels[offset] = 0
+        transparent.pixels.foreach_set(pixels)
+        transparent.update()
+        core.atlas_node(root).image = transparent
+        self.assertTrue(all(value < 0.03 for value in center_pixel(2)))
 
     def test_copy_is_independent_and_never_deletes_user_image(self):
         root = core.create_flipbook(bpy.context, self.image, 2, 2)
