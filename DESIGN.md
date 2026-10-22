@@ -1,126 +1,71 @@
 # 系统设计
 
-目标：Blender 5.2 LTS 原生二次元动画 VFX；优先 Eevee，兼容 Cycles，低配置默认可用。
-当前实现 Mesh + Shader 环形效果、Flipbook 图集动画、Screen 合成及无状态粒子爆发。
+Blender VFX Studio 用 Python 创建 Blender 原生对象、节点和动画。插件负责创作操作，Blender 负责播放和渲染。因此，保存好的效果在没有安装插件、关闭脚本自动执行时仍能播放。
 
-## 数据与边界
+目标版本是 Blender 5.2 LTS，优先 Eevee，同时支持 Cycles。默认网格和粒子数量保持较低，避免要求独立显卡。当前已有环形特效、图集动画、粒子爆发、轨迹刀带和屏幕合成；模拟缓存尚未实现。已完成和待开发的范围见 [ROADMAP.md](ROADMAP.md)。
 
-- `registry.py`：模块描述和内置预设。注册 `mesh.ring`、`flipbook.atlas` 、`screen.glare` 与 `particle.burst`，资产版本均为 1；预设是创建时的参数快照。
-- `timing.py`：无 bpy 的时间约定及原生驱动表达式。
-- `parameters.py`：无 bpy 的参数元数据；`presets.py`：纯 Python 参数预设校验和原子文件写入。
-- `core.py`：实例创建、解析、复制、删除；所有权检查和参数预设实例化。
-- `nodes.py`：原生 Geometry Nodes、Shader Nodes 和驱动器构建。
-- `flipbook.py`：静态贴片、原生几何生命周期和 Shader Nodes 图集 UV 求值。
-- `screen.py`：场景级合成 Layer，负责保守插入、透传恢复和私有节点组复制。
-- `particle.py`：有界、确定性的 Geometry Nodes 粒子爆发，原生实例化与弹道求值。
-- `ui.py`：原生侧栏与 Undo 操作，委托 core；不承担节点构建。
+## 一个效果如何保存
 
-Effect 对应一个 Empty Controller，一组原生 ID 属性控制 Layer；当前每实例一个空间 Mesh Layer 或场景级 Compositor Layer。
-每实例具有 UUID；空间效果拥有私有网格、材质和 Geometry Node Tree，Screen 拥有私有合成节点组。Collection 仅负责组织；名称不承担身份语义。
-Layer 使用命名点属性标记内外边缘，由 Geometry Nodes 重建径向位置；UV 沿圆周和宽度展开。
-材质包含 UV 流动、噪声阈值溶解、边缘透明、发光和生命周期淡出；节点保留描述和布局供编辑。
+每个效果都有一个 Empty 对象作为 Controller（控制器）。开始帧、持续时间、颜色、宽度等参数存放在它的 Blender 自定义属性中，可以直接插入关键帧。移动控制器会移动整个空间效果。
 
-## 原生求值与编辑
+Layer（效果层）是显示效果的对象或节点。当前每个空间效果有一个 Mesh 对象，使用材质和 Geometry Nodes（Blender 的几何节点系统）修改器；Screen 效果则在场景的合成节点树中添加一个节点组。集合 Collection 只负责整理对象。
 
-Controller 的原生 ID 属性是持久化真值，可使用 Blender 原生关键帧。
-对象驱动器连接 Geometry Nodes 输入，材质驱动器连接节点值；没有 Python 帧处理器、驱动命名空间函数或插件运行依赖。
-5.2 修改器输入路径为 `modifiers[...].properties.inputs.Socket_N.value`；使用实际 bpy 测试验证，不套用旧版 IDProperty 写法。
-驱动器使用 Blender 的 simple expressions。循环用 `x-floor(x)`，因为 `%` 会落入 Python 求值路径。
-插件停用或未安装时，保存的几何、着色器、动画和简单驱动器仍可由 Blender 求值，禁用自动执行也可播放。
+控制器和生成的网格、材质、节点组用 `vfx_id` 保存同一个 UUID，即不依赖名称的唯一编号。`vfx_role` 区分控制器和效果层。这样用户可以重命名对象，插件仍能找到它们。每个实例的网格和节点组都是独立副本，编辑一个效果不会改动另一个效果。
 
-参数更新只改变输入，不重建节点。自定义节点和拓扑可保留；若用户删除驱动目标或命名属性，相应功能可能失效。
-质量级别仅在创建时选择 32/64/128 段，避免修改参数时重建用户编辑的网格。
+版本分别记录三件事：实例如何保存（`vfx_schema`，当前为 1）、模块生成的网格和节点如何组织（`vfx_asset_version`，当前各模块均为 1），以及参数 JSON 文件的格式（当前为 2）。遇到未知版本会拒绝编辑或导入，不根据名称猜测数据结构。目前只实现了旧环形参数预设格式 1 到格式 2 的迁移，尚无实例结构迁移。
 
-## 生命周期与安全
+## 代码各自负责什么
 
-生命周期定义见 [CONTEXT.md](CONTEXT.md)。当前环形效果为无状态效果，可直接跳到任意帧；循环会在周期边界重置，不承诺连续外观。
-Effect 复制会复制私有数据、节点和 Action，并重定向到新控制器；保留手动节点编辑。
-外部父对象/骨骼绑定沿用 Blender 原生关系，尚无专用绑定 UI。
+不需要启动 Blender 的代码集中在 `registry.py`、`parameters.py`、`timing.py`、`presets.py` 和 `library.py`。它们分别定义模块及内置预设、参数范围、时间公式、JSON 校验，以及用户预设文件管理。这些部分可以直接用普通 Python 测试。
 
-删除只处理该控制器层级中的自有 Layer 和零用户的自有资源；保留其他子对象并保持世界变换，保留外来材质和非空集合。
-共享生成资产仍依赖原控制器，因此删除前拒绝外部共享网格、材质和节点组；解除共享后重试。
-外部自建驱动器或约束若引用控制器，需要用户自行处理；当前没有通用依赖迁移。
-使用 Blender 的 Shift-D 复制控制器会复制 UUID；检测到歧义即拒绝管理操作，使用 VFX Duplicate 创建独立实例。
+`core.py` 负责创建、查找、复制和删除实例。具体效果由 `nodes.py`（环形网格和材质）、`flipbook.py`（图集）、`particle.py`（粒子）、`trail.py`（轨迹刀带）和 `screen.py`（合成）构建。`binding.py` 负责挂接到对象或骨骼。新增效果应复用控制器、时间和删除规则，不另建一套实例管理代码。
 
-## 演进接口
+`ui.py` 提供主侧栏和操作按钮，`library_ui.py` 提供用户预设列表。界面调用上述代码，不在面板绘制时构建节点、读取预设文件或修改动画。
 
-schema 与 asset version 分离。当前仅支持 schema 1；未来版本或缺失版本拒绝编辑，不做猜测性迁移。
-用户预设采用独立 JSON 格式 2，导入前校验完整字段、参数范围、有限数值、模块和资产版本。
-64 KiB 有界读取；拒绝重复键；导出先验证，再以同目录临时文件原子替换，失败不损坏原文件。
-预设保存参数快照，不保存时间起点、变换、UUID、Action 或自定义拓扑；载入创建新实例而不改写选中效果。
-保留固定历史样例验证预设格式 1 → 2：环形参数不变，补充空 assets 字段。未知版本拒绝导入；实例 schema 未改变。
-目前不引入通用模块插件框架、专用节点编辑器、模拟管理器或资产数据库。
+## 参数怎样驱动播放
 
-Particle / Flipbook / Trail 等新模块复用 Controller、时间约定和所有权；新增之前先形成真实 bpy 的可用切片。
-Simulation 必须显式声明有状态，记录模拟区间、缓存版本、参数失效规则及烘焙状态，不能套用无状态任意帧承诺。
-Screen VFX 必须主动启用并隔离自身节点，不能改写用户已有 Compositor 输出链。
+节点和修改器输入通过 Blender 驱动器读取控制器属性。驱动器是 Blender 自带的属性计算机制；本项目只使用它能直接计算的简单表达式，不注册 Python 回调或自定义驱动函数。循环用 `x - floor(x)`，因为 `%` 不属于这里使用的简单表达式范围。
 
-## 验证
+例如 Start=1、Duration=24、Speed=1 时，效果在第 1 帧出现，第 25 帧开始隐藏。把 Speed 改成 2，会在第 13 帧结束。跳到任意帧时，节点根据该帧及当前参数重新计算结果；时间细节见 [CONTEXT.md](CONTEXT.md)。
 
-`python tools/test.py` 运行纯时间测试、真实 bpy 集成测试、全新进程无插件重开测试。
-`python tools/test_install.py` 构建、校验并在临时配置中安装/启用/创建/卸载扩展。
-`tools/preview.py` 生成可重复的场景与预览，默认 Cycles CPU，可选择 Eevee。CI 固定 Blender 5.2.2，并校验官方二进制 SHA256。
+调整参数不会重建网格或节点，因此手动添加的节点会保留。删除被驱动的输入或所需命名属性，仍可能破坏效果。质量只在创建时决定：环形为 32/64/128 段，粒子为不同细分级别，避免改参数时覆盖用户编辑。
 
-版本 tag 触发同一 CI 验证，检查 manifest 版本一致，再由依赖测试成功的独立 job 发布 ZIP。PR 和测试 job 保持只读仓库权限。
+Blender 5.2 的修改器输入使用 `modifiers[...].properties.inputs.Socket_N.value`，不能直接套用旧版本的 IDProperty 写法。相关行为以真实 bpy 测试为准。
 
-## Flipbook 资产
+## 各种效果怎样实现
 
-控制器共享原生生命周期；私有四顶点 Mesh 与 Geometry Nodes 处理尺寸及生命周期隐藏。
-Shader Nodes 夹取起止格后均匀选帧，使用图集左上行序，将基础 UV 缩放/偏移到目标格。
-GPU/CPU 的 float32 边界误差用百万分之一周期的选帧容差修正；真实四色图集像素测试覆盖跳帧、速度、区间、循环和透明度。
-复制私有节点树并重定向所有驱动器，图片保持共享；删除永不清理图片 ID。
-JSON assets.image 为图片引用，导出优先写相对 JSON 目录的路径，导入相对此目录解析而非进程工作目录。
-图片内容不内嵌到 JSON；生成图片未写磁盘时明确拒绝导出。原生 `.blend` 可由用户打包图片实现独立播放。
+环形网格用 `vfx_inner` 点属性区分内外边缘。Geometry Nodes 根据半径、宽度和进度计算位置；UV（将贴图映射到网格的坐标）沿圆周和宽度展开，材质用它做流动、噪声溶解、软边透明和发光。无效时间的几何会被移除，循环边界直接回到出生状态。
 
-## Screen VFX
+Flipbook 使用四顶点网格。Geometry Nodes 控制尺寸和生命周期，材质把 UV 缩放、移动到指定图集格子。格子从左上开始逐行编号。选帧额外加百万分之一周期的容差，避免 CPU/GPU 浮点误差造成边界闪回上一格；此容差不改变生命周期。图片由用户持有，复制效果时共享图片，删除效果时保留图片。
 
-Screen Controller 使用同一 UUID、参数、时间、Action、预设协议；Layer 是其所属 Scene 合成树内的 Compositor Group Node。
-Controller 的原生 Scene ID 指针标明归属；几何变换不影响屏幕效果。私有节点组使用低质量 Fog Glow 和带 alpha 的颜色覆盖。
-Blender 5.2 使用 `Scene.compositing_node_group`、Group Output Image 及菜单输入形式的 Glare。
-复用共享的 ShaderNodeMath / ShaderNodeValue；不使用旧版 Scene.node_tree 或旧版 Glare RNA 属性。
+粒子用 Mesh Line 生成点，用点 Index 作为稳定编号，并由 Seed 生成可重复的随机方向和速度。Set Position 根据当前进度直接计算重力弹道，再在点上实例化小型 Icosphere，最后输出网格。Count 在求值时限制为 1–2048，Low 每粒子使用 20 个三角面。Motion Seconds 控制轨迹包含多少物理运动时间，Duration 控制播放帧数；拉长播放时间不会改变轨迹。这不是依赖上一帧的物理模拟。
 
-插入前验证输出和单用户树；现有用户节点保持原样。移除时用该层当前输入恢复所有 Image 下游分支，额外自定义输出有连接则拒绝删除。
-共享节点组、缺失或歧义的 Layer、断开的输入均明确拒绝。仅在生成基础树结构/关键设置未改变时恢复无合成树状态。
-记录首次插入前的 use_compositing，移除末层后恢复；合成设备保持用户选择。测试和发布预览显式设 CPU。
-多个实例顺序串联，复制保留私有节点编辑和独立 Action、驱动器；保存后无插件亦可播放。
+Trail 先在指定帧区间读取对象原点或求值后的骨骼 head 世界位置，保存为成对顶点的刀带网格；采样结束或失败都会恢复原来的帧和子帧。Geometry Nodes 在采样点之间按时间插值，并把顶点限制在前端和尾端之间，再添加宽度偏移。因此源运动有快有慢时，轨迹不会被改成匀速。源对象引用只供下一次采样使用，删除源对象不影响已保存路径。Rebake 只替换独占的基础网格，保留材质和节点；它会覆盖手动修改过的路径，所以必须明确触发。路径暂用 `.blend` 复用，不导出为参数 JSON。
 
-## 无状态粒子与私有材质引用
+Screen 在场景合成链中插入私有节点组，包含低质量 Fog Glow 和随时间衰减的颜色覆盖。控制器通过原生 Scene 引用记录所属场景。Blender 5.2 使用 `Scene.compositing_node_group` 和 Group Output 的 Image 输出；Glare 类型等设置通过节点输入配置，不使用旧版 `Scene.node_tree` 接口。
 
-粒子由 Mesh Line 提供稳定 Index，确定性 Random Value 计算方向和变化，Set Position 根据当前 Motion Time 直接计算弹道。
-Motion Time = Progress × Motion Seconds；播放时长与物理轨迹时长分离，重定时保持路径形状。末帧删除点，再实例化小型 Icosphere 并实现网格输出。
-Count 在驱动器中限制到 [1, 2048]；默认 Low 使用 20 三角面的粒子网格，所有粒子共用实例内的私有材质。
+插入前检查输出唯一且节点树未被共享。移除时，将当前输入接回所有 Image 下游分支；输入断开、额外输出仍被使用或节点组被外部共享时会拒绝操作。首次启用前的合成开关会被记录，最后一层移除后恢复；只有未被用户改过的默认基础树才会被清理。合成设备沿用用户设置，测试显式选择 CPU。
 
-复制建立对象、网格、材质和节点树的 ID 映射；除驱动目标外，原生节点的 ID 输入及修改器界面的 ID 输入也重定向到私有副本。
-删除通过 bpy user_map 区分内部 Set Material 引用与外部用户引用，并先释放节点组再释放材质；外部共享仍拒绝删除。
-真实双色粒子渲染与资源删除测试验证实例互不串色、无私有材质残留。该规则同时用于 Mesh / Shader / Flipbook。
+绑定用 Child Of 约束让控制器跟随目标对象或骨骼。计算目标当前变换的逆矩阵，使挂接瞬间的位置、旋转和缩放保持不变。解绑保留当前帧的世界变换；若控制器还有其他约束或变换动画，则要求先烘焙，避免破坏动画。颜色、时间等自定义参数的动画可保留。检查会沿父级、对象及骨骼约束和对象驱动目标寻找常见依赖环，不能识别任意用户 Geometry Nodes 中的全部依赖。
 
-UUID 还用于发现手动编辑中从对象上拆下的生成资产。材质释放前复查真实 datablock 消费者，处理 5.2 移除修改器 ID 输入后可能残留的引用计数；保留 Fake User / Extra User 和所有实际外部消费者。
+## 复制、删除和复用
 
-### Sampled Ribbon Trail (asset v1)
+VFX Duplicate 会复制对象、私有网格、材质、节点组，以及保存关键帧的 Action 动画数据。它建立旧数据到新数据的对应关系，重新连接驱动器、节点中的对象/材质引用和修改器输入。用户改过的节点也会一起复制，外部图片和绑定目标则继续共享。
 
-`trail.ribbon` separates explicit authoring-time sampling from stateless native playback.
-Sample a bounded, uniformly spaced frame range into a private paired-vertex Mesh, restoring scene frame/subframe in `finally`.
-Object origins and evaluated pose-bone heads use world space; the initial controller is identity.
-No source Action is copied or mutated. Source Object ID and bone/range metadata are optional rebake inputs, never playback dependencies.
-Geometry Nodes clamp each sample index into a moving temporal window, Sample Index and linearly interpolate center/side fields, then offset width.
-This preserves sampled variable-speed timing rather than converting it to arc-length timing. The common half-open lifetime applies.
-Rebake replaces only an owned, unshared mesh after successful sampling, converting world points to current layer-local coordinates.
-Native node edits survive; manual path edits are replaced only by explicit Rebake. JSON presets reject this module until path assets have a supported schema.
+删除前先检查资源是否还被效果之外的数据使用。网格、材质或节点组被共享时会拒绝删除，避免留下缺少驱动目标的外部对象。删除会保留用户添加的子对象及其世界变换，也会保留外来材质和非空集合。UUID 还用于找到手动拆下但仍属于实例的生成资源。
 
-### Native spatial binding
+材质共享检查使用 `bpy.data.user_map` 列出实际引用者，以区分效果内部的 Set Material 节点和外部对象。Blender 5.2 删除修改器的材质输入后可能残留引用计数，因此释放前再次检查实际引用者，并保留 Fake User、Extra User 标记的资源。先移除对象、网格和节点组，最后释放材质。
 
-`binding.py` adds one opt-in Child Of constraint with an evaluated target inverse, preserving the current world pose.
-Targets and optional pose bones remain external native ID references; duplication keeps targets and copies constraints.
-Known parenting, constraint (including pose bone), and object driver target dependencies are traversed before mutation.
-Managed constraint name is persisted on the controller; ambiguous/renamed constraints are refused rather than guessed.
-Unbind retains the evaluated pose, refusing additional constraints or transform/constraint animation that cannot be solved without baking.
-Layered Action/NLA and driver paths for custom ID parameters are safe to retain. Screen controllers reject spatial binding.
-No runtime handlers or new persistence schema are needed. Arbitrary user Geometry Nodes dependency cycles are outside the dependency preflight.
+手动 Shift-D 会连同 UUID 一起复制；发现两个控制器使用同一编号时，插件会拒绝管理操作。用户自建驱动或约束若引用某控制器，仍需自行处理，插件目前不会迁移所有外部依赖。
 
-### User parameter preset library
+参数预设只保存创建效果所需的数值、名称、质量，以及 Flipbook 图片路径。它不包含开始帧、对象变换、UUID、绑定、关键帧或手动编辑的节点。导入始终创建新实例。完整效果请保存为 `.blend` 并使用 Blender 的 Append。JSON 读入上限为 64 KiB，拒绝未知字段、重复键、无穷值、NaN 和越界参数；写入先验证，再用同目录临时文件替换目标，避免写坏旧文件。图片路径相对 JSON 所在目录解析，不相对启动进程的目录；生成图片导出前必须先保存到磁盘。
 
-`library.py` is a bpy-free filesystem boundary over validated v2 snapshots. UUID filenames avoid name collisions; rename uses atomic preset writes.
-All selected keys are confined to a single directory and symlinks rejected. Scans are capped at 256 JSON files and report invalid entries separately.
-`library_ui.py` maintains a WindowManager UIList refreshed only by explicit operations. It never scans from panel draw or frame handlers.
-Blender's user DATAFILES path owns the durable library, independent of install versions and scene data. Deletion is explicit, file-only and not Blender Undo.
-Material images remain external resources; failed instantiation never edits the preset. Native trail meshes, bindings, Actions and node edits are outside parameter snapshots.
+用户预设库复用同一 JSON 格式，放在 Blender 用户 DATAFILES 目录。文件名使用随机 UUID，所以同名预设不会互相覆盖。库最多扫描 256 个 JSON 文件，报告损坏条目并拒绝符号链接和越界路径。只有点击刷新、保存、重命名或删除时才访问文件。删除预设文件不删除已创建的效果，也不能通过 Blender Undo 恢复。
+
+## 如何验证与继续扩展
+
+`python tools/test.py` 运行普通 Python 测试、真实 Blender 后台测试，以及新进程中的无插件重开测试。`python tools/test_install.py` 在临时用户配置中验证安装、启用、创建和卸载。`tools/preview.py` 生成可重建的场景和 PNG，默认 Cycles CPU，也可选 Eevee。CI 固定 Blender 5.2.2，并校验官方安装包的 SHA256。
+
+版本标签必须与 manifest 中的版本相同。测试和安装验证通过后，独立发布任务上传 ZIP、校验文件和 CPU 预览；PR 测试只有读取仓库的权限。
+
+后续 Simulation 需要单独记录模拟区间、缓存版本、烘焙状态，以及哪些修改会使缓存失效。不能因为其他模块支持任意帧预览，就承诺未烘焙模拟也能直接跳帧。目前不引入专用节点编辑器或通用模块框架；先完成能在 Blender 中使用和验证的效果，再根据实际问题扩展。

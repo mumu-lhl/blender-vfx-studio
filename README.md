@@ -1,178 +1,118 @@
 # Blender VFX Studio
 
-面向二次元 3D 动画的 Blender 原生 VFX 插件。目标 Blender **5.2 LTS**，优先 Eevee，兼容 Cycles。
+面向二次元 3D 动画的 Blender 特效插件，目标版本为 **Blender 5.2 LTS**。插件创建 Blender 原生网格、材质、节点和动画；保存后的效果不需要插件持续运行，也能播放和渲染。优先支持 Eevee，同时兼容 Cycles。
 
-当前预览版 **0.8.0** 已实现：
+目前可以创建冲击波、能量环、图集动画、粒子爆发、轨迹刀带和屏幕辉光/闪光，还可以绑定到对象或骨骼、复制效果，以及管理参数预设。模拟缓存和多层统一控制尚未实现。当前仍是早期预览版，完整进度见 [ROADMAP.md](ROADMAP.md)。
 
-- **Ribbon Trail**：显式采样对象或骨骼动画，原生刀带回放、宽度、长度、重新采样。
-- **Particle Burst**：确定性原生粒子生成、随机方向/速度/尺寸、重力轨迹和网格实例化。
-- **Screen VFX**：主动启用的原生合成辉光、时间闪光，可叠加、复制和安全移除。
-- **Flipbook Atlas**：用户静态图集、行列与起止格、透明贴片和发光，原生 UV 选帧。
-- **Shockwave / Energy Ring**：可编辑的程序化网格、UV 流动、噪声溶解、软边透明与发光。
-- 开始帧、持续时间、速度、循环；半径、宽度、扩张、颜色及着色器参数可关键帧化。
-- 原生 VFX 侧栏创建、独立复制、安全删除；32 / 64 / 128 段质量选项。
-- 不使用 Python 每帧处理器；保存后无需插件也能播放。
-- 用户参数预设 JSON 保存与加载，严格版本和数值校验；载入为独立实例。
+## 安装和第一次使用
 
-这只是首个纵向切片。Simulation 尚未实现；详见 [ROADMAP.md](ROADMAP.md)。
-
-## 安装
-
-从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载 `blender-vfx-studio-0.8.0.zip`。
-未打 tag 的开发版本可从 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 最新成功构建中下载 `blender-vfx-studio-extension` artifact，解压后安装其中的 ZIP。
-Blender 5.2 → Edit → Preferences → Get Extensions → 右上角菜单 → Install from Disk，选择 ZIP 并启用。
-源码也可直接构建：
-
-```sh
-python tools/build.py
-```
-
-安装 `dist/` 中生成的 ZIP；不要安装 GitHub 的源码 ZIP。
-
-## 使用
+从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载最新版本的 `blender-vfx-studio-版本号.zip`。在 Blender 5.2 打开 **Edit → Preferences → Get Extensions → 右上角菜单 → Install from Disk**，选择 ZIP 并启用。不要安装 GitHub 的源码 ZIP。
 
 1. 在 3D 视图按 **N**，打开 **VFX** 标签页，点击 **Create Ring**。
-2. 选择 Shockwave 或 Energy Ring，以及质量级别。特效在 3D Cursor 处创建，以当前帧为开始帧。
-3. 切换 **Material Preview** 或 **Rendered** 查看材质。Eevee 用户需要自有环境/灯光以查看场景；发光环本身不需要灯光。
-4. 在 VFX 面板调整时间、网格和 Shader 参数。右键参数 → Insert Keyframe，可使用 Blender 原生动画编辑器。
-5. 移动/旋转/缩放 Controller 控制整个效果。选择 Controller 或 Layer 均可编辑参数。
-6. 使用 **Duplicate** 创建独立效果；使用 **Delete** 删除。支持 Blender Undo。
+2. 选择 Shockwave（冲击波）或 Energy Ring（能量环），以及质量。效果会出现在 3D Cursor 处，以当前帧开始播放。
+3. 切换到 **Material Preview** 或 **Rendered** 查看材质，播放时间轴。
+4. 调整面板中的时间、宽度、颜色等参数。右键参数选择 **Insert Keyframe**，即可制作参数动画。
+5. 移动、旋转或缩放 Controller（Empty 控制器），控制整个空间效果。选中效果网格也能显示同一组参数。
+6. 使用插件的 **Duplicate** 创建独立副本，使用 **Delete** 删除效果。这些场景操作支持 Blender Undo。
 
-Energy Ring 默认一个 48 帧周期；启用 Loop 可持续显示。循环会重置到出生状态，Shockwave 不保证边界连续。
-Emission 不自动添加屏幕辉光；如需辉光，请在自己的 Compositor 中配置 Glare。
+Start 是开始帧，Duration 是播放帧数，Speed 是播放倍速，Loop 控制循环。例如 Start=1、Duration=24、Speed=1 时，第 1–24 帧可见，第 25 帧隐藏；Speed=2 时，第 13 帧开始隐藏。循环会回到出生状态，不保证画面首尾连续。
 
-选择 Layer 可直接编辑 Geometry Nodes、材质节点和基础网格。参数调整不会重建这些节点。
-请保留命名属性 `vfx_inner` 和节点输入驱动目标。质量只在创建时生效。
+生成的效果保留原生可编辑性。选择效果网格后，可以编辑基础网格、Geometry Nodes（几何节点）和材质节点；调整面板参数不会重新生成节点。请保留驱动器引用的输入和所需属性。完整节点编辑和动画请保存在 `.blend` 中。
 
-## 对象 / 骨骼绑定
+## 环形效果
 
-选择空间效果后点击 **Bind Object / Bone**，搜索当前场景中的目标对象；目标为骨架时可选骨骼。
-也可先选目标，再以效果为活动对象打开对话框，自动填入唯一目标。
-绑定添加原生 Child Of 约束并计算逆矩阵，保持当前求值世界变换，不修改目标 Action、骨骼或约束。
-可在原生 Object Constraints 中查看约束；目标重命名不影响绑定，保存后无需插件即可跟随。
-Screen 效果没有空间绑定。禁止绑定到 VFX 层级，并检查常见父级、约束和对象驱动依赖环。
-复杂自定义 Geometry Nodes 依赖仍需用户避免闭环。
+Shockwave 随时间向外扩张，Energy Ring 默认保持半径，播放一个 48 帧周期。启用 Loop 可重复播放。
 
-**Unbind** 移除托管约束并保留当前世界变换。若还有其他约束或控制器变换/约束动画，则明确拒绝，
-请先用 Blender 原生 Bake Action 等工具处理；参数、颜色和时间等自定义属性动画可保留。
-不要重命名托管约束 `VFX • Binding`；若已重命名，恢复到控制器自定义属性 `vfx_binding_constraint` 记录的名称后重试。
-Duplicate 保留相同目标但复制独立约束，解绑或删除副本不会修改原实例和目标。
+Radius 是出生时外半径，Width 是环宽，Expansion 是一个周期增加的半径。内半径至少为 0.001，宽度过大时会接近实心圆。Dissolve 控制噪声溶解，Fade 控制生命周期内的淡出，Strength 控制表面发光强度。
+
+质量只在创建时选择，分别使用 32、64、128 段。环形依赖网格的 `vfx_inner` 属性来区分内外边缘；删除该属性会破坏宽度计算。发光材质本身不需要灯光，但不会自动产生光晕。需要光晕时添加下文的 Screen VFX，或使用自己的 Glare 合成节点。
 
 ## Flipbook 图集动画
 
-点击 **Create Flipbook** 选择静态图集图片，在文件选择器中设定 Columns / Rows。
-图集按**左上开始、向右后向下**编号，First Frame / Last Frame 为从 0 开始的闭区间。
-统一生命周期内均匀播放所选格；持续时间、速度和循环与环形效果一致。
-起止格限制在当前网格内；Last 小于 First 时保持 First 格，不倒放。
+图集是一张按网格排列多帧画面的静态图片。点击 **Create Flipbook** 选择图片，并设置 Columns（列数）和 Rows（行数）。格子从左上开始编号为 0，先向右再向下。First Frame / Last Frame 指定包含两端的播放范围。例如 4×4 图集有 16 格，完整范围为 0–15。
 
-Width / Height 控制贴片尺寸，Opacity / Fade 控制透明度，RGB 与 Strength 控制染色和发光。
-平面位于控制器局部 XY，手动旋转使其面向镜头；本版不提供自动朝向相机或独立 FPS 模式。
-图片 alpha 与 Opacity 相乘；采用最近邻采样，图片色彩空间和 alpha 模式保持用户设置。
-极接近切格边界时使用百万分之一周期容差，消除渲染求值浮点误差造成的上一格闪烁。
+效果在一个生命周期内均匀播放所选格子。超出网格的编号会被限制；Last 小于 First 时保持 First 格，不倒放。Width / Height 控制贴片尺寸，Opacity / Fade 控制透明度，RGB / Strength 控制染色和发光。贴片位于控制器局部 XY 平面，请旋转它面向镜头；目前没有自动朝向相机或单独的图集 FPS 设置。
 
-复制共享原图片、独立复制网格和材质；删除效果保留图片。图片可在侧栏数据块选择框或材质节点中替换。
-`.blend` 默认保留外部图片引用；跨机器分享前使用 Blender 的 **File → External Data → Pack Resources**。
-JSON 预设引用图片文件，不内嵌图片；把图片与 JSON 一同移动可保持相对路径。
-未保存到磁盘的生成图片可保存到 `.blend`，导出参数预设前需先保存图片文件。
+图片 alpha 与 Opacity 相乘。采样使用最近邻，保留原图片的色彩空间和 alpha 设置。选帧边界使用百万分之一周期的容差，避免渲染中的浮点误差导致偶尔显示上一格。只支持静态图片，不支持电影、图片序列或 UDIM 多块纹理。
 
-## Ribbon Trail 动画轨迹 / 刀带
+复制效果时共享图片，网格和材质则各自独立；删除效果不会删除图片。可以在侧栏图片选择框或材质节点中换图。分享 `.blend` 前使用 **File → External Data → Pack Resources** 打包图片。JSON 预设只引用图片文件；把图片与 JSON 一同迁移可保留相对路径。生成图片若尚未保存到磁盘，需要先保存才能导出参数预设。
 
-选择动画对象，或在 Pose Mode 选择活动骨骼，点击 **Bake Ribbon Trail**。
-设置 First / Last / Sample Step；范围必须能被步长整除，最多 2048 个采样点。
-采样对象原点或骨骼 head 的求值世界位置，包含父级和约束；完成后恢复当前帧与子帧，不改源 Action。
-物理或模拟驱动的源动画须先用 Blender 原生工具完成缓存，本功能不负责预热模拟。
+## Ribbon Trail 轨迹刀带
 
-采样结果是可编辑网格，Geometry Nodes 按时间在采样点间线性插值；不按弧长匀速重放。
-Duration 默认等于采样区间，Start 默认等于 First；Speed / Loop 与其他模块一致。
-生命周期右端不包含 Last 帧；循环在右端重置。采样间的 Bezier 细节取决于采样步长。
-Width 为全宽，Length 为可见尾带占完整采样时间的比例，Fade 控制随生命周期缩窄。
-初始带宽方向由轨迹切线和世界 Z（退化时 Y）生成，保持相邻侧向一致；不自动朝向镜头，不模拟布料扭转。
-急转弯、交叉与回头路径可能出现重叠，允许手动修改基础网格和 `vfx_side` 向量属性。
+选择动画对象，或在 Pose Mode 选中活动骨骼，点击 **Bake Ribbon Trail**。设置 First / Last / Sample Step（采样步长）；范围必须能被步长整除，最多 2048 个点。例如 1–25 帧、步长 2，会保存第 1、3、5……25 帧共 13 个位置。
 
-移动控制器可整体变换已烘焙路径。源动画变更不会自动覆盖结果；明确点击 **Rebake Ribbon** 才替换基础网格，
-保留材质、节点、修改器和当前变换，重新采样前请保存有价值的手动网格编辑。
-Source / Bone / First / Last / Step 决定下一次采样；改变范围不会自动改变回放 Start / Duration。
-删除源对象后仍可回放，重新采样需要重新指定有效源。复制生成独立资产，删除不会修改源对象或骨骼。
-Ribbon 暂不支持 JSON 参数预设；完整路径使用 Duplicate 或 Blender 的 `.blend` Append 复用。
+插件读取对象原点或骨骼 head（骨骼起点）在各采样帧的世界位置，包含父级和约束的影响。操作结束后恢复原来的帧和子帧，不修改源动画。若源对象由物理模拟驱动，请先用 Blender 完成模拟缓存；轨迹工具不负责预热模拟。
+
+结果是可编辑的刀带网格，播放时在采样点间按时间直线插值，保留快慢变化。采样步长越大，越可能丢失源动画的细节。Start 默认等于 First，Duration 默认等于 Last−First。与其他效果一样，生命周期不包含右端帧；循环会在右端重新开始。
+
+Width 是全宽，Length 是尾带占完整采样时间的比例，Fade 控制随时间缩窄。例如 Length=0.25 只显示最近四分之一采样时间的路径。初始宽度方向由轨迹切线和世界 Z 轴计算，退化时改用 Y 轴，并尽量保持相邻方向一致。目前不自动朝向镜头，也不模拟扭转；急转弯、回头和交叉可能重叠，可手动编辑网格及 `vfx_side` 向量属性。
+
+移动控制器可整体变换已保存路径。修改源动画后，只有明确点击 **Rebake Ribbon** 才会重新采样：材质、节点、修改器和当前变换保留，手动路径编辑会被替换。Source / Bone / First / Last / Step 决定下一次采样，修改它们不会自动改变回放 Start / Duration。删除源对象后仍能播放已有刀带，但重新采样需要有效源。
+
+Ribbon 暂不支持 JSON 参数预设。使用 Duplicate 复制，或通过 Blender 的 `.blend` Append（追加外部文件中的数据）复用完整路径。
 
 ## Particle Burst 粒子爆发
 
-点击 **Create Particle Burst**。默认 64 个低面数球形粒子，每实例只有控制器和一个网格对象；不逐帧创建对象。
-Count 上限为 2048，默认 Low 质量；Medium / High 增加单粒子网格细分，仅在创建时选择。
-Seed 决定随机方向及速度/尺寸变化；相同参数与帧得到相同结果，跳帧不需要预热或缓存。
+点击 **Create Particle Burst**，默认生成 64 个低面数球形粒子。每个效果只有控制器和一个网格对象，不会为每个粒子创建独立对象。Count 最多 2048；Low / Medium / High 在创建时决定单粒子的细分级别。
 
-Velocity / Gravity 使用控制器局部空间的单位/秒和单位/秒²。
-**Motion Seconds** 是完整轨迹的物理时长；**Duration** 是播放这段轨迹的帧数。
-例如 Motion Seconds=1、Duration=24，即在 24 帧内播放 1 秒运动；修改 Duration 或 Speed 可拉伸播放，轨迹形状保持。
-Spread=0 指向局部 +Z，Spread=1 向各方向散射。Randomness 控制速度及尺寸变化，Spawn Radius 控制初始径向位置。
-Size 为出生半径，Fade 控制生命周期内的尺寸缩减；结束后隐藏，循环时重置整组爆发。
-RGB / Strength 控制发光材质，可结合 Screen Glare 使用。
+Seed 决定可重复的随机方向、速度和尺寸变化。Spread=0 沿控制器局部 +Z 发射，Spread=1 向各方向散射；Randomness 控制变化幅度，Spawn Radius 控制初始径向距离，Size 是出生半径，Fade 控制逐渐缩小。
 
-本版是同时出生的无状态爆发；不包含连续发射、碰撞、逐粒子出生时间或缓存模拟。
-关键帧修改运动参数会重新计算当前轨迹，不积累历史受力。
-Geometry Nodes 保留可编辑；应用修改器后可得到当前帧的普通网格。
+Velocity / Gravity 使用控制器局部空间的单位/秒和单位/秒²。**Motion Seconds** 是轨迹包含多少秒的物理运动，**Duration** 是用多少帧播放它。例如 Motion Seconds=1、Duration=24，会在 24 帧里播放一秒的弹道；改成 Duration=48，只会放慢播放，不改变轨迹形状。RGB / Strength 控制发光，可结合 Screen VFX 添加辉光。
 
-## Screen VFX 合成
+目前所有粒子同时出生，直接根据当前帧计算弹道，因此跳帧不需要缓存。改变运动参数会重新计算当前轨迹，不累积之前的受力。尚无连续发射、碰撞或逐粒子出生时间；循环会重置整组粒子。Geometry Nodes 可继续编辑，应用修改器可得到当前帧的普通网格。
 
-点击 **Add Screen VFX**，为当前场景添加原生 Fog Glow 与闪光合成层；创建 3D 特效不会自动改写合成链。
-没有合成树时创建 Render Layers → VFX → Image 输出；已有合成树时插入到其活动 Image 输出前。
-必须有唯一活动的彩色 Image 输出和已连接的上游；共享或链接的合成树需先在 Blender 中 Make Single User。
+## Screen 辉光和闪光
 
-Strength / Threshold / Glow Size 控制辉光。Flash 默认 0；调高可显示从出生帧开始、按 Fade 衰减的全屏颜色覆盖。
-默认 Loop 开启；关闭后仅在生命周期内生效，结束后透传原图。
-RGB 控制闪光颜色，控制器在 3D 场景中的位置/旋转不影响屏幕效果。
-支持原生关键帧、JSON 参数预设与 Duplicate；多个 Screen VFX 按插入顺序串联。
+点击 **Add Screen VFX**，为当前场景添加 Glare 辉光和随时间变化的全屏颜色覆盖。只有这个操作会插入合成节点，创建其他 3D 特效不会自动改写合成链。
 
-Delete 会移除自身合成节点，并把当前上游重新连接到下游。保留用户节点、改线及分支；
-若额外自定义输出仍有连线、输入断开或节点组被共享，则先报错，修复后可重试。
-插件创建的空合成基础树在未被用户修改时一并恢复为空；编辑过的基础树会保留。
-合成设备沿用场景设置；无独显设备可在原生渲染设置中把 **Compositor Device** 设为 **CPU**。
-测试和发布预览显式使用 CPU 合成。
+没有合成节点树时，会创建 Render Layers → VFX → Image 输出；已有节点树时，插入到活动 Image 输出之前。节点树必须只有一个活动的彩色 Image 输出，且输入已连接。共享或链接的节点树需先在 Blender 中 **Make Single User**，使当前场景使用独立副本。
 
-## 用户预设库
+Strength / Threshold / Glow Size 控制辉光强度、亮部阈值和范围。Flash 控制开始时的全屏颜色覆盖，RGB 决定颜色，Fade 控制衰减。默认 Flash=0，避免创建时白屏；默认 Loop 开启。关闭循环后，生命周期结束即输出原图。移动控制器不影响屏幕效果。
 
-打开 VFX 侧栏的 **User Preset Library**，点击 Refresh 显式扫描用户库。
-Save New 保存当前效果的参数快照并可命名；Create 创建独立实例；Rename 修改条目名称；Delete File 删除选中的 JSON 文件。
-同名条目不会覆盖，列表的短标识区分同名条目。文件删除会先确认且不可 Undo；已创建的场景实例不受影响。
-文件读写只发生在操作时；最多 256 个 JSON 条目，损坏、超大和符号链接条目会被报告并跳过。
+可以复制或叠加多个 Screen 效果。删除时只移除自己的合成层，并将当前上游重新接到下游；用户新增节点和分支会保留。如果输入断开、额外输出仍被使用或节点组被共享，插件会先报错。只有没有被用户改过的默认基础树才会一并清理。
 
-库位于 Blender `bpy.utils.user_resource('DATAFILES')` 下的 `blender_vfx_studio/presets/`，独立于 `.blend` 和安装包；
-卸载插件不会自动删除用户预设。外部 JSON 使用 Load Preset；也可把已有参数 JSON 复制到该文件夹后 Refresh。
-Flipbook 保留图片相对引用，移动到其他机器时需要一同迁移图片；缺失图片会明确报错，不创建残缺实例或删除预设。
-库保留参数，不保存绑定、动画、手动节点编辑或 Trail 路径；完整编辑资产继续使用 `.blend` Append。
+合成设备沿用场景设置。没有独立显卡时，可在渲染设置中将 **Compositor Device** 设为 **CPU**；自动测试和发布预览都使用 CPU 合成。
 
-## 保存与复用预设
+## 对象和骨骼绑定
 
-选择效果后点击 **Save Preset**，保存 `.json`；点击 **Load Preset** 可在当前 3D Cursor 和当前帧创建独立实例。
-保存当前帧的参数值、质量和名称，不包含原始开始帧、UUID、关键帧、变换、图片内容或手动编辑的节点拓扑；Flipbook 另保存图片文件路径。
-节点拓扑与动画的完整复用请保存 `.blend` 并使用 Blender 原生 Append。
+选择空间效果后点击 **Bind Object / Bone**，搜索当前场景中的目标对象；目标是骨架时还可选择骨骼。也可先选目标，再以效果为活动对象打开对话框，自动填入唯一目标。
 
-格式有独立的 format/module/asset 版本，严格校验缺失字段、未知字段、非有限数值和参数范围，文件最大 64 KiB。
-当前导出预设格式 2，支持 ring / atlas / screen / burst 资产版本 1；可迁移 v0.2 的格式 1 环形预设。未知版本会明确报错，不会修改场景。
+绑定使用 Blender 原生 Child Of 约束，让控制器跟随目标。挂接瞬间保持当前世界位置、旋转和缩放，不修改目标动画、骨骼或约束。可在 Object Constraints 中查看约束；目标重命名或没有安装插件都不影响已保存的跟随关系。Screen 不提供空间绑定。
 
-## 安全与限制
+**Unbind** 移除插件添加的约束，保留当前帧的世界姿态。控制器若还有其他约束或变换/约束动画，会要求先用 Blender 的 Bake Action 等工具烘焙，避免丢失动画。颜色、时间等自定义参数动画可以保留。请勿重命名 `VFX • Binding` 约束；若已改名，恢复为控制器 `vfx_binding_constraint` 属性记录的名称后重试。
 
-- 使用 VFX **Duplicate**；Shift-D 会复制实例 UUID，插件会提示身份歧义。
-- 若外部对象共享了生成的 Mesh、Material 或 Node Group，Delete 会拒绝操作，先解除共享。
-- 删除保留用户子对象、外来材质和非空集合；自建约束/驱动器若引用 Controller，需自行处理这些外部依赖。
-- 保存的 `.blend` 可在未安装插件、禁用自动执行时播放；重新创作需要启用插件。
-- 本版实例 schema 保持 1；预设格式 1 → 2 迁移已有历史固定样例测试。未知版本会拒绝导入。
-- 自动化已验证 Blender 5.2.2 Linux。其他操作系统和完整交互 UI 操作仍需人工验证。
+副本保留相同目标，但约束独立，解绑或删除副本不影响原效果及目标。插件拒绝绑定到其他 VFX 层级，并检查常见父级、约束和对象驱动依赖环；用户自己搭建的 Geometry Nodes 仍需避免产生间接闭环。
 
-## 开发与验证
+## 保存和管理预设
 
-需要 Python 3.11+ 和 Blender 5.2.2（可通过 `BLENDER_BIN` 指定路径）；无第三方运行依赖。
+选择效果后点击 **Save Preset** 导出参数 JSON，点击 **Load Preset** 读取文件，在当前帧和 3D Cursor 创建独立实例。它保存当前参数值、名称和质量，Flipbook 另存图片路径；不保存开始帧、绑定、变换、关键帧、图片内容或编辑后的节点。完整资产使用 `.blend` Append。
+
+**User Preset Library** 面板提供用户库。点击 Refresh 读取列表，Save New 保存并命名，Create 创建效果，Rename 改名，Delete File 删除选中的 JSON。短标识用于区分同名条目。同名保存不会覆盖旧文件。文件删除先确认且不能 Undo，也不影响已创建的场景效果。
+
+库放在 Blender 用户 DATAFILES 目录下的 `blender_vfx_studio/presets/`，不随 `.blend` 保存，卸载插件也不会自动删除。可以把外部参数 JSON 复制到该目录后刷新。最多 256 个 JSON 文件；损坏、超大和符号链接条目会被报告。Flipbook 图片缺失时会报错，不创建残缺实例，也不修改预设文件。
+
+参数文件最大 64 KiB，使用独立格式版本，严格检查字段、数值范围和模块版本。当前格式 2 支持 ring / atlas / screen / burst 的资产版本 1，也能读取并转换旧格式 1 环形预设。未知版本会明确报错，不修改场景。轨迹路径暂不纳入参数 JSON。
+
+## 删除与兼容性限制
+
+使用插件的 **Duplicate**，不要用 Shift-D 代替；后者会复制实例编号，让插件无法区分两个效果。若外部对象共享了生成的网格、材质或节点组，Delete 会拒绝删除，请先解除共享。用户添加的子对象、外来材质和非空集合会保留；自行建立的外部约束或驱动若引用控制器，仍需自行处理。
+
+当前实例保存结构版本为 1。保存的 `.blend` 可在未安装插件、关闭自动执行时播放，使用插件继续创作则需要重新启用。自动验证覆盖 Blender 5.2.2 Linux；尚未完成 Windows/macOS、图形界面点击和 Undo 的人工验证。
+
+## 从源码构建与验证
+
+需要 Python 3.11+ 和 Blender 5.2.2，没有第三方运行依赖。`BLENDER_BIN` 可指定 Blender 路径。
 
 ```sh
+python tools/build.py
 python tools/test.py
 python tools/test_install.py
 blender -b --factory-startup --python-exit-code 1 --python tools/preview.py
 blender -b --factory-startup --python-exit-code 1 --python tools/preview.py -- --engine BLENDER_EEVEE --scale 25
 ```
 
-测试在 CPU 后台验证真实 bpy、实例隔离、参数/时间、复制动画、删除安全、保存重开与插件安装生命周期。
-预览场景及 PNG 写入忽略的 `work/`。CI 构建的 ZIP 在 Actions artifacts 中提供。
-使用 Ruff 进行静态检查和格式校验；安装版本见 CI 配置。
+构建的安装包在 `dist/`。未发布开发版本也可从 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 成功构建的 `blender-vfx-studio-extension` 附件下载，解压后安装其中的 ZIP。
 
-架构见 [DESIGN.md](DESIGN.md)，领域约定见 [CONTEXT.md](CONTEXT.md)。
-许可证：**GPL-3.0-or-later**。
+测试使用真实 Blender 后台模式检查参数、时间、实例隔离、安全删除、保存重开和安装/卸载。预览场景及 PNG 写入不提交到 Git 的 `work/`。静态检查使用 Ruff，固定版本见 CI 配置。
+
+代码分工见 [DESIGN.md](DESIGN.md)，参数和时间约定见 [CONTEXT.md](CONTEXT.md)。许可证：**GPL-3.0-or-later**。

@@ -1,58 +1,47 @@
 # 领域概念与约定
 
-- **Effect**：具有稳定 UUID 的一个特效实例，不等同于对象名。
-- **Controller**：Empty，拥有实例参数、可关键帧化的原生 ID 属性和变换。
-- **Layer**：实例内的原生对象或合成节点。空间效果使用 Mesh + Material + Geometry Nodes，Screen 使用 Compositor Group Node。
-- **Module**：效果生成能力，例如 `mesh.ring`；七大 VFX 类别是方向，不要求每类一个基类。
-- **Preset**：模块与参数的创建快照。内置 Shockwave / Energy Ring 及用户 JSON 保存/加载可用。预设不包含节点拓扑、Action、UUID、变换或开始帧；加载以当前帧为起点。
-- **Schema version**：实例持久化结构版本，当前为 1。
-- **Preset format version**：JSON 参数快照协议版本，当前导出为 2；格式 1 环形预设迁移为 2，未知版本拒绝。
-- **Asset version**：模块生成节点/几何的资产协议版本，当前 ring / atlas / screen / burst 均为 1。
-- **Ownership**：`vfx_id` 标记资源归属，`vfx_role` 区分 controller/layer；名称可任意修改。
+本文定义代码和文档中常用的名称，以及不同效果对时间、参数和资源的解释。具体代码分工见 [DESIGN.md](DESIGN.md)。
 
-## 时间
+## 实例、控制器和资源
 
-单位为帧，支持子帧。`elapsed = (frame - start) * max(speed, .001) / max(duration, 1)`。
-非循环时 progress 为 elapsed 限制到 [0, 1]，有效区间为 `[start, start + duration/speed)`。
-循环时 progress 为 `elapsed - floor(elapsed)`，start 之前仍隐藏。环在无效时间从求值几何中移除。
+**Effect（效果实例）** 是用户创建的一次效果，例如场景里的一个冲击波。每个实例有 UUID，即不会因对象重命名而改变的唯一编号。**Controller（控制器）** 是存放参数和整体变换的 Empty 对象。**Layer（效果层）** 是显示效果的网格对象，或 Screen 使用的合成节点组。当前每个实例只有一层，多个效果的统一组合还在开发。
 
-speed 仅允许正数；speed=1 时 duration 是生命周期帧数。当前不提供倒放语义或秒制转换。
-参数可随帧关键帧化；动画 start/duration/speed 会直接改变当前帧的计算结果，不积累历史时间。
+**Module（模块）** 是一种效果的生成代码，例如 `mesh.ring` 生成环形效果，`trail.ribbon` 生成轨迹刀带。七大 VFX 类别用于规划功能，不要求每类都定义一个 Python 基类。
 
-`radius` 为出生时外半径，`expansion` 为一个周期增加的半径，`width` 为径向宽度。
-内半径限制为 .001；宽度超过当前半径时接近实心环，不产生负半径。
-RGB 为线性颜色分量；dissolve=1 完全透明，fade=1 在生命周期末淡出，fade=0 保持不透明度。
-Emission 亮度不等同于辉光；辉光需要用户自己的 Compositor，目前插件不修改它。
+插件在生成资源上保存 `vfx_id` 表示归属，在对象上保存 `vfx_role` 表示角色。删除前还要检查其他对象或节点是否在使用资源；有相同归属标记不代表可以无条件删除。对象名和集合名只供人阅读，不承担身份识别。
 
-## 状态
+**参数预设** 是再次创建效果所需的参数值，而不是完整场景资产。它不保存绑定、关键帧、节点结构、UUID、变换或开始帧；载入时使用当前帧和 3D Cursor。完整轨迹或编辑后的节点用 `.blend` 复用。
 
-当前 ring / atlas / screen / burst 均为无状态函数：同一场景参数和帧产生同一几何结果，任意帧预览不需要预热或缓存。
-未来模拟模块需区分预览、已烘焙、失效缓存；保存重开后必须能解释其状态，不能默默使用过期缓存。
+实例结构版本 `vfx_schema` 当前为 1；各模块生成资产的 `vfx_asset_version` 当前均为 1；JSON 参数文件当前为格式 2。格式 1 的旧环形预设可以转换为格式 2，其他未知版本会报错。这三个版本各管一件事，不能互相替代。
 
-## 图集
+## 统一时间
 
-图集左上格编号 0，先向右再向下；First / Last 为包含端点的范围。
-First 限制到 [0, rows×columns−1]，Last 限制到 [First, rows×columns−1]。
-一生均匀播放此闭区间，选帧为 floor((progress+1e-6)×格数)，并限制到末格；容差只用于选帧，不修改生命周期。
-格数及边界为整数，网格最大 256×256；图片来源支持 FILE / GENERATED 静态图，不支持电影、序列或 UDIM。
-图片是用户资源，可在原生 `.blend` 中打包；JSON 只保存本地路径，不执行脚本，也不读取远程 URL。
+Start 是开始帧，Duration 是 Speed=1 时的播放帧数，Speed 是正数播放倍速。支持子帧，不支持倒放。
 
-## 屏幕合成
+```text
+elapsed = (frame - start) * max(speed, 0.001) / max(duration, 1)
+```
 
-Screen Layer 是所属 Scene 的合成节点，不是 Mesh 子对象；Controller 的 vfx_scene 为原生 Scene ID 引用。
-Strength 为生命周期内的辉光强度；Flash 为出生时全屏颜色覆盖，实际系数为 Flash × Active × (1−Progress×Fade)。
-结束后 Glare Strength 与 Flash 都为 0，原图透传；默认循环且 Flash=0，避免创建时出现白屏。
-多个 Screen Layer 按输出链顺序叠加；Duplicate 使用当前场景作为目标，Delete 只处理控制器记录的所属场景。
+不循环时，Progress 是把 elapsed 限制在 0 到 1 的结果；可见区间为 `[start, start + duration / speed)`，包括左端，不包括右端。比如 Start=1、Duration=24、Speed=1，第 1–24 整数帧可见，第 25 帧隐藏。
 
-## 粒子爆发
+循环时，Progress 为 `elapsed - floor(elapsed)`，每到新周期回到 0，Start 之前仍隐藏。循环只保证时间重置，不保证画面首尾连续。对 Start、Duration 或 Speed 插关键帧会立即改变当前帧的计算结果，不会累积之前的播放时间。
 
-整组粒子在 Start 出生，粒子 ID 为原生点 Index；Count 不超过 2048，Seed 决定可重复的方向和变化。
-Motion Time = Progress × Motion Seconds；位置为 Direction × (Spawn Radius + Varied Velocity × Motion Time) − (0,0,Gravity×Motion Time²/2)。
-Motion Seconds 使用轨迹秒，Duration 使用播放帧；修改帧率不改变这两个参数的数值语义。
-Fade 在此模块表示尺寸缩减而非透明度；一个周期结束后全体消失，循环重新从出生状态开始。
-用户编辑的参数是当前帧的输入，不是模拟历史；连续发射、碰撞和缓存属于后续 Simulation/Particle 功能。
+**无状态效果** 根据当前帧和当前参数直接计算结果，不需要先播放前面的帧。当前所有已实现效果的播放都属于这种方式，包括事先采样好路径的 Trail。Screen 在有效区间外透传原图，空间效果则移除求值后的几何。
 
-- **Sampled trail**: explicit object-origin or pose-bone-head positions stored in an owned native mesh. Playback is stateless; sampling a simulation requires a valid upstream Blender cache.
-- **Rebake**: explicit replacement of trail base geometry, preserving native nodes/materials. Source metadata changes do not implicitly alter playback timing or invalidate stored samples.
+**模拟效果** 需要上一帧的结果，通常必须逐帧计算或先烘焙缓存。模拟模块尚未实现；未来需要明确区分未烘焙、已烘焙和已失效缓存，不能无提示地继续使用旧结果。Trail 从模拟对象采样时，也要求源模拟已有有效缓存。
 
-- **Binding**: native Child Of on an effect controller; target object / pose bone stays user-owned. Bind preserves current world pose. Unbind preserves that frame's pose and refuses unresolved transform animation/other constraints.
+## 各模块的参数含义
+
+环形的 Radius 是出生时外半径，Expansion 是一周期增加的半径，Width 是径向宽度。内半径至少为 0.001，宽度过大时接近实心圆。Dissolve=1 表示完全溶解；Fade=1 表示到周期末淡出，Fade=0 保持透明度。RGB 使用线性颜色分量。Emission 表示表面发光，并不自动产生周围的光晕；需要辉光时添加 Screen VFX 或用户自己的 Glare。
+
+图集左上格编号为 0，先向右再向下。First / Last 都包含在播放范围内，超出网格时会被限制；Last 小于 First 时保持 First 格。每个周期均匀播放选中格子，选帧公式为 `floor((Progress + 1e-6) × 格数)`，再限制到末格。`1e-6` 只修正浮点选帧误差，不改变生命周期。
+
+图集最多 256×256 格，使用静态 FILE / GENERATED 图片，不支持电影、图片序列或 UDIM 多块纹理。图片可以打包到 `.blend`，JSON 只记录本地文件路径，不执行脚本或读取远程 URL。
+
+粒子整组在 Start 出生，以原生点 Index 作为编号，Seed 决定可重复的随机变化，Count 不超过 2048。Motion Time = Progress × Motion Seconds；位置由初速度、初始径向距离和重力公式直接计算。Motion Seconds 表示轨迹中的秒数，Duration 表示播放帧数，修改场景帧率不会自动改变二者。Fade 在粒子模块表示尺寸缩减，不是透明度。一个周期结束后全体消失，循环从出生状态重新开始；尚无连续发射、碰撞或历史受力。
+
+Trail 保存对象原点或骨骼 head 在指定帧区间的世界位置，播放时在采样点间按时间线性插值。Length 是可见尾带占完整采样时间的比例，Width 是全宽，Fade 表示逐渐缩窄。Rebake 是明确重新采样并替换基础网格的操作，会覆盖手动路径编辑，但保留材质和节点。修改源引用或采样区间不会自动更新路径，也不会自动修改回放 Start / Duration。
+
+Screen 的效果层是控制器记录的 Scene 中的合成节点，不是 Mesh 子对象。Strength 控制有效时间内的辉光，Flash 控制开始时的全屏颜色覆盖；实际覆盖系数为 `Flash × Active × (1 − Progress × Fade)`。区间外两者为 0，原图不变。默认 Loop 开启且 Flash=0。多个 Screen 层按合成链顺序叠加；Duplicate 在当前场景创建副本，Delete 处理控制器记录的原场景。
+
+**绑定** 是控制器上的原生 Child Of 约束。目标对象或骨骼仍由用户持有，挂接时保持当前世界变换。解绑只保留当前帧的姿态；若其他约束或变换动画让这一操作不明确，插件会拒绝并要求先烘焙。参数动画不受此限制。
