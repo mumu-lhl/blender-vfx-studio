@@ -74,21 +74,10 @@ def bind(context, root, target, bone=""):
 
 
 def _has_transform_animation(root):
-    animation = root.animation_data
-    if animation is None:
-        return False
-    curves = list(animation.drivers)
-    actions = [animation.action] if animation.action else []
-    for track in animation.nla_tracks:
-        actions.extend(strip.action for strip in track.strips if strip.action)
-    for action in actions:
-        for layer in action.layers:
-            for strip in layer.strips:
-                for bag in getattr(strip, "channelbags", ()):
-                    curves.extend(bag.fcurves)
-    # Custom ID properties (time, color, shape) do not control the object transform.
-    # Other paths may include transform or constraint animation; preserve them intact.
-    return any(not curve.data_path.startswith('["') for curve in curves)
+    from .animation import curves
+
+    # Custom parameter animation does not change the object's transform.
+    return any(not curve.data_path.startswith('["') for curve in curves(root))
 
 
 def unbind(context, root):

@@ -46,3 +46,9 @@ subprocess.run(
 )
 
 subprocess.run(base + ["--python", "tests/test_library_blender.py"], check=True)
+
+subprocess.run(base + ["--python", "tests/test_composition_blender.py"], check=True)
+subprocess.run(
+    base + [str(ROOT / "work/composition.blend"), "--python", "tests/composition_reopen.py"],
+    check=True,
+)

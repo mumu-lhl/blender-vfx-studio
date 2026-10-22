@@ -96,7 +96,12 @@ TRAIL_PARAMETERS = {
 }
 
 
+GROUP_PARAMETERS = {key: PARAMETERS[key] for key in ("start", "duration", "speed", "loop")}
+
+
 def parameters_for(module):
+    if module == "core.composition":
+        return GROUP_PARAMETERS
     if module == "trail.ribbon":
         return TRAIL_PARAMETERS
     if module == "mesh.ring":

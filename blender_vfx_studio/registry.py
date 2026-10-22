@@ -12,6 +12,7 @@ class Module:
 
 
 MODULES = {
+    "core.composition": Module("core.composition", "VFX Composition", 1),
     "trail.ribbon": Module("trail.ribbon", "Sampled Ribbon Trail", 1),
     "mesh.ring": Module("mesh.ring", "Procedural Ring", 1),
     "flipbook.atlas": Module("flipbook.atlas", "Flipbook Atlas", 1),
