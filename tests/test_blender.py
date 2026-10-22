@@ -186,6 +186,36 @@ class BlenderTests(unittest.TestCase):
         core.delete(clone)
         self.assertEqual(len(bpy.data.materials), 0)
 
+    def test_creation_uses_evaluated_time_including_subframes_and_remapping(self):
+        for mapped in (False, True):
+            bpy.ops.wm.read_factory_settings(use_empty=True)
+            scene = bpy.context.scene
+            if mapped:
+                scene.render.frame_map_old, scene.render.frame_map_new = 100, 50
+            scene.frame_set(7, subframe=0.5)
+            ring = core.create(bpy.context)
+            layer = ring.children[0]
+            geometry = layer.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+            self.assertAlmostEqual(
+                max(v.co.length for v in geometry.vertices), ring["radius"], places=5
+            )
+            image = bpy.data.images.new("Birth Atlas", 2, 2)
+            created = [
+                ring,
+                core.create(bpy.context, "ARC_SLASH"),
+                core.create_particle(bpy.context),
+                core.create_flipbook(bpy.context, image, 1, 1),
+                core.create_screen(bpy.context),
+            ]
+            from blender_vfx_studio import simulation
+
+            created.append(simulation.create(bpy.context))
+            created.append(core.create_from_preset(bpy.context, core.preset_snapshot(ring)))
+            for root in created:
+                self.assertAlmostEqual(root["start"], scene.frame_current_final)
+            clone = core.duplicate(bpy.context, ring)
+            self.assertEqual(clone["start"], ring["start"])
+
     def test_manual_duplicate_identity_and_future_schema_rejected(self):
         root = core.create(bpy.context)
         copy = root.copy()
@@ -220,6 +250,9 @@ copy.name = "Persisted Copy"
 update(copy, radius=1.0)
 imported = core.create_from_preset(bpy.context, core.preset_snapshot(copy))
 imported.name = "Persisted Preset"
+bpy.context.scene.frame_set(7, subframe=0.5)
+birth = core.create(bpy.context)
+birth.name = "Persisted Fractional Birth"
 addon.unregister()
 addon.register()
 addon.unregister()

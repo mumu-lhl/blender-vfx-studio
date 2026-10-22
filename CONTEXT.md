@@ -17,6 +17,9 @@
 ## 统一时间
 
 Start 是开始帧，Duration 是 Speed=1 时的播放帧数，Speed 是正数播放倍速。支持子帧，不支持倒放。
+创建时读取包含子帧的 `Scene.frame_current_final`，与原生驱动器看到的时间一致，避免在第 7.5 帧创建却从第 7 帧开始。
+场景的 Time Remapping（时间重映射）会先改变这个时间坐标；Start 和 Duration 也使用该坐标。默认映射 100:100 时与时间轴一致。
+轨迹采样和 Cloth 求解当前要求 1:1 映射，因为它们按指定帧区间逐帧记录；生成后的路径和姿态可以按场景映射播放，已有结果不会因此自动重烘焙。
 
 ```text
 elapsed = (frame - start) * max(speed, 0.001) / max(duration, 1)

@@ -104,6 +104,12 @@ class TrailTests(unittest.TestCase):
                 counts, (len(bpy.data.objects), len(bpy.data.meshes), len(bpy.data.node_groups))
             )
         self.assertEqual(bpy.context.scene.frame_current, 1)
+        bpy.context.scene.render.frame_map_new = 50
+        with self.assertRaisesRegex(ValueError, "1:1"):
+            trail.create(bpy.context, obj, first=1, last=21)
+        self.assertEqual(
+            counts, (len(bpy.data.objects), len(bpy.data.meshes), len(bpy.data.node_groups))
+        )
 
     def test_duplicate_delete_preserves_source_and_manual_nodes(self):
         obj = source()

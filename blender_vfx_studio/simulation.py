@@ -160,6 +160,10 @@ def _private_output(root, output):
 
 
 def bake(context, root):
+    if context.scene.render.frame_map_old != context.scene.render.frame_map_new:
+        raise ValueError(
+            "Bake cloth with 1:1 scene Time Remapping; retime the stored motion afterwards"
+        )
     if context.mode != "OBJECT":
         raise ValueError("Leave Edit/Pose Mode before baking")
     root = core.resolve(root)

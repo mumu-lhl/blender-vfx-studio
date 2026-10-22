@@ -134,6 +134,12 @@ class SimulationTests(unittest.TestCase):
         simulation.bake(bpy.context, root)
         source, output, cloth = simulation.parts(root)
         old = output.data
+        bpy.context.scene.render.frame_map_new = 50
+        with self.assertRaisesRegex(ValueError, "1:1"):
+            simulation.bake(bpy.context, root)
+        self.assertEqual(output.data, old)
+        self.assertEqual(simulation.state(bpy.context, root), "BAKED")
+        bpy.context.scene.render.frame_map_new = 100
         update(root, vfx_sim_last=1000)
         with self.assertRaisesRegex(ValueError, "121"):
             simulation.bake(bpy.context, root)

@@ -11,6 +11,10 @@ from .parameters import TRAIL_PARAMETERS
 
 
 def sample(context, source, bone, first, last, step):
+    if context.scene.render.frame_map_old != context.scene.render.frame_map_new:
+        raise ValueError(
+            "Sample trails with 1:1 scene Time Remapping; retime the stored path afterwards"
+        )
     if (
         source is None
         or source.name not in context.scene.objects
