@@ -172,4 +172,6 @@ blender -b --factory-startup --python-exit-code 1 --python tools/preview.py -- -
 
 测试使用真实 Blender 后台模式检查参数、时间、实例隔离、安全删除、保存重开和安装/卸载。预览场景及 PNG 写入不提交到 Git 的 `work/`。静态检查使用 Ruff，固定版本见 CI 配置。
 
+默认效果的 CPU 求值测量和限制见 [性能记录](docs/PERFORMANCE.md)。
+
 代码分工见 [DESIGN.md](DESIGN.md)，参数和时间约定见 [CONTEXT.md](CONTEXT.md)。许可证：**GPL-3.0-or-later**。
