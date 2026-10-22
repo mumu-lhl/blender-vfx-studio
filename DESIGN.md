@@ -1,16 +1,17 @@
 # 系统设计
 
 目标：Blender 5.2 LTS 原生二次元动画 VFX；优先 Eevee，兼容 Cycles，低配置默认可用。
-当前实现 Mesh + Shader 环形效果和 Flipbook 图集动画两个完整纵向切片。
+当前实现 Mesh + Shader 环形效果、Flipbook 图集动画与 Screen 合成效果。
 
 ## 数据与边界
 
-- `registry.py`：模块描述和内置预设。注册 `mesh.ring` 与 `flipbook.atlas`，资产版本均为 1；预设是创建时的参数快照。
+- `registry.py`：模块描述和内置预设。注册 `mesh.ring`、`flipbook.atlas` 与 `screen.glare`，资产版本均为 1；预设是创建时的参数快照。
 - `timing.py`：无 bpy 的时间约定及原生驱动表达式。
 - `parameters.py`：无 bpy 的参数元数据；`presets.py`：纯 Python 参数预设校验和原子文件写入。
 - `core.py`：实例创建、解析、复制、删除；所有权检查和参数预设实例化。
 - `nodes.py`：原生 Geometry Nodes、Shader Nodes 和驱动器构建。
 - `flipbook.py`：静态贴片、原生几何生命周期和 Shader Nodes 图集 UV 求值。
+- `screen.py`：场景级合成 Layer，负责保守插入、透传恢复和私有节点组复制。
 - `ui.py`：原生侧栏与 Undo 操作，委托 core；不承担节点构建。
 
 Effect 对应一个 Empty Controller，一组原生 ID 属性控制一个或多个 Layer；当前实现一个 Mesh Layer。
@@ -69,3 +70,15 @@ GPU/CPU 的 float32 边界误差用百万分之一周期的选帧容差修正；
 复制私有节点树并重定向所有驱动器，图片保持共享；删除永不清理图片 ID。
 JSON assets.image 为图片引用，导出优先写相对 JSON 目录的路径，导入相对此目录解析而非进程工作目录。
 图片内容不内嵌到 JSON；生成图片未写磁盘时明确拒绝导出。原生 `.blend` 可由用户打包图片实现独立播放。
+
+## Screen VFX
+
+Screen Controller 使用同一 UUID、参数、时间、Action、预设协议；Layer 是其所属 Scene 合成树内的 Compositor Group Node。
+Controller 的原生 Scene ID 指针标明归属；几何变换不影响屏幕效果。私有节点组使用低质量 Fog Glow 和带 alpha 的颜色覆盖。
+Blender 5.2 使用 `Scene.compositing_node_group`、Group Output Image 及菜单输入形式的 Glare。
+复用共享的 ShaderNodeMath / ShaderNodeValue；不使用旧版 Scene.node_tree 或旧版 Glare RNA 属性。
+
+插入前验证输出和单用户树；现有用户节点保持原样。移除时用该层当前输入恢复所有 Image 下游分支，额外自定义输出有连接则拒绝删除。
+共享节点组、缺失或歧义的 Layer、断开的输入均明确拒绝。仅在生成基础树结构/关键设置未改变时恢复无合成树状态。
+记录首次插入前的 use_compositing，移除末层后恢复；合成设备保持用户选择。测试和发布预览显式设 CPU。
+多个实例顺序串联，复制保留私有节点编辑和独立 Action、驱动器；保存后无插件亦可播放。

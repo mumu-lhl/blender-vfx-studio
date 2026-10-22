@@ -2,8 +2,9 @@
 
 面向二次元 3D 动画的 Blender 原生 VFX 插件。目标 Blender **5.2 LTS**，优先 Eevee，兼容 Cycles。
 
-当前预览版 **0.3.0** 已实现：
+当前预览版 **0.4.0** 已实现：
 
+- **Screen VFX**：主动启用的原生合成辉光、时间闪光，可叠加、复制和安全移除。
 - **Flipbook Atlas**：用户静态图集、行列与起止格、透明贴片和发光，原生 UV 选帧。
 - **Shockwave / Energy Ring**：可编辑的程序化网格、UV 流动、噪声溶解、软边透明与发光。
 - 开始帧、持续时间、速度、循环；半径、宽度、扩张、颜色及着色器参数可关键帧化。
@@ -11,11 +12,11 @@
 - 不使用 Python 每帧处理器；保存后无需插件也能播放。
 - 用户参数预设 JSON 保存与加载，严格版本和数值校验；载入为独立实例。
 
-这只是首个纵向切片。Particle、Trail、Simulation、Screen 和可浏览的预设库尚未实现；详见 [ROADMAP.md](ROADMAP.md)。
+这只是首个纵向切片。Particle、Trail、Simulation 和可浏览的预设库尚未实现；详见 [ROADMAP.md](ROADMAP.md)。
 
 ## 安装
 
-从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载 `blender-vfx-studio-0.3.0.zip`。
+从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载 `blender-vfx-studio-0.4.0.zip`。
 未打 tag 的开发版本可从 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 最新成功构建中下载 `blender-vfx-studio-extension` artifact，解压后安装其中的 ZIP。
 Blender 5.2 → Edit → Preferences → Get Extensions → 右上角菜单 → Install from Disk，选择 ZIP 并启用。
 源码也可直接构建：
@@ -58,6 +59,23 @@ Width / Height 控制贴片尺寸，Opacity / Fade 控制透明度，RGB 与 Str
 JSON 预设引用图片文件，不内嵌图片；把图片与 JSON 一同移动可保持相对路径。
 未保存到磁盘的生成图片可保存到 `.blend`，导出参数预设前需先保存图片文件。
 
+## Screen VFX 合成
+
+点击 **Add Screen VFX**，为当前场景添加原生 Fog Glow 与闪光合成层；创建 3D 特效不会自动改写合成链。
+没有合成树时创建 Render Layers → VFX → Image 输出；已有合成树时插入到其活动 Image 输出前。
+必须有唯一活动的彩色 Image 输出和已连接的上游；共享或链接的合成树需先在 Blender 中 Make Single User。
+
+Strength / Threshold / Glow Size 控制辉光。Flash 默认 0；调高可显示从出生帧开始、按 Fade 衰减的全屏颜色覆盖。
+默认 Loop 开启；关闭后仅在生命周期内生效，结束后透传原图。
+RGB 控制闪光颜色，控制器在 3D 场景中的位置/旋转不影响屏幕效果。
+支持原生关键帧、JSON 参数预设与 Duplicate；多个 Screen VFX 按插入顺序串联。
+
+Delete 会移除自身合成节点，并把当前上游重新连接到下游。保留用户节点、改线及分支；
+若额外自定义输出仍有连线、输入断开或节点组被共享，则先报错，修复后可重试。
+插件创建的空合成基础树在未被用户修改时一并恢复为空；编辑过的基础树会保留。
+合成设备沿用场景设置；无独显设备可在原生渲染设置中把 **Compositor Device** 设为 **CPU**。
+测试和发布预览显式使用 CPU 合成。
+
 ## 保存与复用预设
 
 选择效果后点击 **Save Preset**，保存 `.json`；点击 **Load Preset** 可在当前 3D Cursor 和当前帧创建独立实例。
@@ -65,7 +83,7 @@ JSON 预设引用图片文件，不内嵌图片；把图片与 JSON 一同移动
 节点拓扑与动画的完整复用请保存 `.blend` 并使用 Blender 原生 Append。
 
 格式有独立的 format/module/asset 版本，严格校验缺失字段、未知字段、非有限数值和参数范围，文件最大 64 KiB。
-当前导出预设格式 2，支持 ring / atlas 资产版本 1；可迁移 v0.2 的格式 1 环形预设。未知版本会明确报错，不会修改场景。
+当前导出预设格式 2，支持 ring / atlas / screen 资产版本 1；可迁移 v0.2 的格式 1 环形预设。未知版本会明确报错，不会修改场景。
 
 ## 安全与限制
 

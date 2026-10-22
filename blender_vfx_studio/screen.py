@@ -169,6 +169,10 @@ def remove(root):
     group = layer.node_tree
     if group and (group.users > 1 or group.get("vfx_id") != root["vfx_id"]):
         raise ValueError("Screen node group is shared or replaced; restore it before deletion")
+    if any(socket.name != "Image" and socket.links for socket in layer.outputs):
+        raise ValueError(
+            "Screen extra outputs are connected; disconnect them before removing this layer"
+        )
     inputs = layer.inputs.get("Image")
     outputs = layer.outputs.get("Image")
     if inputs is None or outputs is None or (outputs.links and len(inputs.links) != 1):

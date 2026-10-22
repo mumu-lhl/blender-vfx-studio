@@ -45,6 +45,7 @@ def render_setup():
     scene.world = bpy.data.worlds.new("Black")
     scene.world.use_nodes = True
     scene.world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0
+    scene.render.compositor_device = "CPU"
     scene.render.engine = "CYCLES"
     scene.cycles.device = "CPU"
     scene.cycles.samples = 1
@@ -135,6 +136,21 @@ class ScreenTests(unittest.TestCase):
         self.assertIn(root.name, bpy.data.objects)
         tree.links.new(source, layer.inputs["Image"])
         core.delete(root)
+
+    def test_extra_user_output_connections_are_not_silently_removed(self):
+        root = core.create_screen(bpy.context)
+        _, tree, layer = screen._layer(root)
+        layer.node_tree.interface.new_socket(
+            name="User Mask", in_out="OUTPUT", socket_type="NodeSocketFloat"
+        )
+        consumer = tree.nodes.new("ShaderNodeMath")
+        connection = tree.links.new(layer.outputs["User Mask"], consumer.inputs[0])
+        with self.assertRaisesRegex(ValueError, "extra outputs"):
+            core.delete(root)
+        self.assertTrue(consumer.inputs[0].is_linked)
+        tree.links.remove(connection)
+        core.delete(root)
+        self.assertIn(consumer.name, tree.nodes)
 
     def test_generated_base_user_edits_are_retained(self):
         root = core.create_screen(bpy.context)

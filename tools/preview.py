@@ -64,6 +64,7 @@ bpy.context.object.data.size = 8
 scene.world = bpy.data.worlds.new("Preview World")
 scene.world.use_nodes = True
 scene.world.node_tree.nodes["Background"].inputs[0].default_value = (0.015, 0.02, 0.035, 1)
+scene.render.compositor_device = "CPU"
 scene.render.engine = args.engine
 scene.cycles.device = "CPU"
 scene.cycles.samples = 32
