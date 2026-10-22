@@ -2,8 +2,9 @@
 
 面向二次元 3D 动画的 Blender 原生 VFX 插件。目标 Blender **5.2 LTS**，优先 Eevee，兼容 Cycles。
 
-当前预览版 **0.4.0** 已实现：
+当前预览版 **0.5.0** 已实现：
 
+- **Particle Burst**：确定性原生粒子生成、随机方向/速度/尺寸、重力轨迹和网格实例化。
 - **Screen VFX**：主动启用的原生合成辉光、时间闪光，可叠加、复制和安全移除。
 - **Flipbook Atlas**：用户静态图集、行列与起止格、透明贴片和发光，原生 UV 选帧。
 - **Shockwave / Energy Ring**：可编辑的程序化网格、UV 流动、噪声溶解、软边透明与发光。
@@ -12,11 +13,11 @@
 - 不使用 Python 每帧处理器；保存后无需插件也能播放。
 - 用户参数预设 JSON 保存与加载，严格版本和数值校验；载入为独立实例。
 
-这只是首个纵向切片。Particle、Trail、Simulation 和可浏览的预设库尚未实现；详见 [ROADMAP.md](ROADMAP.md)。
+这只是首个纵向切片。Trail、Simulation 和可浏览的预设库尚未实现；详见 [ROADMAP.md](ROADMAP.md)。
 
 ## 安装
 
-从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载 `blender-vfx-studio-0.4.0.zip`。
+从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载 `blender-vfx-studio-0.5.0.zip`。
 未打 tag 的开发版本可从 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 最新成功构建中下载 `blender-vfx-studio-extension` artifact，解压后安装其中的 ZIP。
 Blender 5.2 → Edit → Preferences → Get Extensions → 右上角菜单 → Install from Disk，选择 ZIP 并启用。
 源码也可直接构建：
@@ -59,6 +60,23 @@ Width / Height 控制贴片尺寸，Opacity / Fade 控制透明度，RGB 与 Str
 JSON 预设引用图片文件，不内嵌图片；把图片与 JSON 一同移动可保持相对路径。
 未保存到磁盘的生成图片可保存到 `.blend`，导出参数预设前需先保存图片文件。
 
+## Particle Burst 粒子爆发
+
+点击 **Create Particle Burst**。默认 64 个低面数球形粒子，每实例只有控制器和一个网格对象；不逐帧创建对象。
+Count 上限为 2048，默认 Low 质量；Medium / High 增加单粒子网格细分，仅在创建时选择。
+Seed 决定随机方向及速度/尺寸变化；相同参数与帧得到相同结果，跳帧不需要预热或缓存。
+
+Velocity / Gravity 使用控制器局部空间的单位/秒和单位/秒²。
+**Motion Seconds** 是完整轨迹的物理时长；**Duration** 是播放这段轨迹的帧数。
+例如 Motion Seconds=1、Duration=24，即在 24 帧内播放 1 秒运动；修改 Duration 或 Speed 可拉伸播放，轨迹形状保持。
+Spread=0 指向局部 +Z，Spread=1 向各方向散射。Randomness 控制速度及尺寸变化，Spawn Radius 控制初始径向位置。
+Size 为出生半径，Fade 控制生命周期内的尺寸缩减；结束后隐藏，循环时重置整组爆发。
+RGB / Strength 控制发光材质，可结合 Screen Glare 使用。
+
+本版是同时出生的无状态爆发；不包含连续发射、碰撞、逐粒子出生时间或缓存模拟。
+关键帧修改运动参数会重新计算当前轨迹，不积累历史受力。
+Geometry Nodes 保留可编辑；应用修改器后可得到当前帧的普通网格。
+
 ## Screen VFX 合成
 
 点击 **Add Screen VFX**，为当前场景添加原生 Fog Glow 与闪光合成层；创建 3D 特效不会自动改写合成链。
@@ -83,7 +101,7 @@ Delete 会移除自身合成节点，并把当前上游重新连接到下游。�
 节点拓扑与动画的完整复用请保存 `.blend` 并使用 Blender 原生 Append。
 
 格式有独立的 format/module/asset 版本，严格校验缺失字段、未知字段、非有限数值和参数范围，文件最大 64 KiB。
-当前导出预设格式 2，支持 ring / atlas / screen 资产版本 1；可迁移 v0.2 的格式 1 环形预设。未知版本会明确报错，不会修改场景。
+当前导出预设格式 2，支持 ring / atlas / screen / burst 资产版本 1；可迁移 v0.2 的格式 1 环形预设。未知版本会明确报错，不会修改场景。
 
 ## 安全与限制
 

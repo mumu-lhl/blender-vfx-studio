@@ -167,11 +167,19 @@ class BlenderTests(unittest.TestCase):
         material = layer.data.materials[0]
         setter = layer.modifiers[0].node_group.nodes.new("GeometryNodeSetMaterial")
         setter.inputs["Material"].default_value = material
+        interface = layer.modifiers[0].node_group.interface.new_socket(
+            name="User Material Input", in_out="INPUT", socket_type="NodeSocketMaterial"
+        )
+        getattr(layer.modifiers[0].properties.inputs, interface.identifier).value = material
         clone = core.duplicate(bpy.context, root)
         target = clone.children[0]
         copied = next(n for n in target.modifiers[0].node_group.nodes if n.type == "SET_MATERIAL")
         self.assertEqual(copied.inputs["Material"].default_value, target.data.materials[0])
         self.assertNotEqual(copied.inputs["Material"].default_value, material)
+        self.assertEqual(
+            getattr(target.modifiers[0].properties.inputs, interface.identifier).value,
+            target.data.materials[0],
+        )
         core.delete(root)
         core.delete(clone)
         self.assertEqual(len(bpy.data.materials), 0)

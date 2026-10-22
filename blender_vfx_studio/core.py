@@ -197,6 +197,17 @@ def duplicate(context, root):
     references = mapping | assets
     for data in private:
         _remap_drivers(data, references)
+        if isinstance(data, bpy.types.Object):
+            for modifier in data.modifiers:
+                if modifier.type != "NODES" or modifier.node_group is None:
+                    continue
+                for item in modifier.node_group.interface.items_tree:
+                    if item.item_type != "SOCKET" or item.in_out != "INPUT":
+                        continue
+                    setting = getattr(modifier.properties.inputs, item.identifier, None)
+                    original = getattr(setting, "value", None)
+                    if isinstance(original, bpy.types.ID) and original in references:
+                        setting.value = references[original]
         if isinstance(data, bpy.types.NodeTree):
             for n in data.nodes:
                 for socket in n.inputs:

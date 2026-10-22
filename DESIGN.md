@@ -1,17 +1,18 @@
 # 系统设计
 
 目标：Blender 5.2 LTS 原生二次元动画 VFX；优先 Eevee，兼容 Cycles，低配置默认可用。
-当前实现 Mesh + Shader 环形效果、Flipbook 图集动画与 Screen 合成效果。
+当前实现 Mesh + Shader 环形效果、Flipbook 图集动画、Screen 合成及无状态粒子爆发。
 
 ## 数据与边界
 
-- `registry.py`：模块描述和内置预设。注册 `mesh.ring`、`flipbook.atlas` 与 `screen.glare`，资产版本均为 1；预设是创建时的参数快照。
+- `registry.py`：模块描述和内置预设。注册 `mesh.ring`、`flipbook.atlas` 、`screen.glare` 与 `particle.burst`，资产版本均为 1；预设是创建时的参数快照。
 - `timing.py`：无 bpy 的时间约定及原生驱动表达式。
 - `parameters.py`：无 bpy 的参数元数据；`presets.py`：纯 Python 参数预设校验和原子文件写入。
 - `core.py`：实例创建、解析、复制、删除；所有权检查和参数预设实例化。
 - `nodes.py`：原生 Geometry Nodes、Shader Nodes 和驱动器构建。
 - `flipbook.py`：静态贴片、原生几何生命周期和 Shader Nodes 图集 UV 求值。
 - `screen.py`：场景级合成 Layer，负责保守插入、透传恢复和私有节点组复制。
+- `particle.py`：有界、确定性的 Geometry Nodes 粒子爆发，原生实例化与弹道求值。
 - `ui.py`：原生侧栏与 Undo 操作，委托 core；不承担节点构建。
 
 Effect 对应一个 Empty Controller，一组原生 ID 属性控制一个或多个 Layer；当前实现一个 Mesh Layer。
@@ -82,3 +83,13 @@ Blender 5.2 使用 `Scene.compositing_node_group`、Group Output Image 及菜单
 共享节点组、缺失或歧义的 Layer、断开的输入均明确拒绝。仅在生成基础树结构/关键设置未改变时恢复无合成树状态。
 记录首次插入前的 use_compositing，移除末层后恢复；合成设备保持用户选择。测试和发布预览显式设 CPU。
 多个实例顺序串联，复制保留私有节点编辑和独立 Action、驱动器；保存后无插件亦可播放。
+
+## 无状态粒子与私有材质引用
+
+粒子由 Mesh Line 提供稳定 Index，确定性 Random Value 计算方向和变化，Set Position 根据当前 Motion Time 直接计算弹道。
+Motion Time = Progress × Motion Seconds；播放时长与物理轨迹时长分离，重定时保持路径形状。末帧删除点，再实例化小型 Icosphere 并实现网格输出。
+Count 在驱动器中限制到 [1, 2048]；默认 Low 使用 20 三角面的粒子网格，所有粒子共用实例内的私有材质。
+
+复制建立对象、网格、材质和节点树的 ID 映射；除驱动目标外，原生节点的 ID 输入及修改器界面的 ID 输入也重定向到私有副本。
+删除通过 bpy user_map 区分内部 Set Material 引用与外部用户引用，并先释放节点组再释放材质；外部共享仍拒绝删除。
+真实双色粒子渲染与资源删除测试验证实例互不串色、无私有材质残留。该规则同时用于 Mesh / Shader / Flipbook。
