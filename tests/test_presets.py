@@ -102,6 +102,20 @@ class PresetTests(unittest.TestCase):
             self.assertEqual(presets.loads(path.read_text())["assets"]["image"], "../atlas.png")
             self.assertEqual(presets.read(path)["assets"]["image"], str(source))
 
+    def test_screen_module_roundtrip_and_asset_isolation(self):
+        data = dict(
+            sample(),
+            module="screen.glare",
+            parameters={k: spec[0] for k, spec in preset_parameters_for("screen.glare").items()},
+        )
+        self.assertEqual(presets.loads(presets.dumps(data)), data)
+        with self.assertRaises(ValueError):
+            presets.validate(dict(data, assets={"image": "unused.png"}))
+        invalid = copy.deepcopy(data)
+        invalid["parameters"]["glow_size"] = 1.01
+        with self.assertRaises(ValueError):
+            presets.validate(invalid)
+
     def test_reject_versions_fields_and_types(self):
         for key, value in [
             ("format_version", 0),

@@ -50,11 +50,28 @@ FLIPBOOK_PARAMETERS = {
 }
 
 
+SCREEN_PARAMETERS = {
+    **COMMON_PARAMETERS,
+    "duration": (24.0, 1.0, 100000.0, "Flash lifetime in frames at speed 1"),
+    "loop": (True, None, None, "Repeat screen effect and flash"),
+    "strength": (0.3, 0.0, 100.0, "Glare strength during lifetime"),
+    "fade": (1.0, 0.0, 1.0, "Flash fade over lifetime"),
+    "color_0": (1.0, 0.0, 1.0, "Flash red"),
+    "color_1": (1.0, 0.0, 1.0, "Flash green"),
+    "color_2": (1.0, 0.0, 1.0, "Flash blue"),
+    "threshold": (1.0, 0.0, 10000.0, "Glare highlight threshold"),
+    "glow_size": (0.25, 0.0, 1.0, "Glare size"),
+    "flash": (0.0, 0.0, 1.0, "Flash overlay opacity at birth"),
+}
+
+
 def parameters_for(module):
     if module == "mesh.ring":
         return PARAMETERS
     if module == "flipbook.atlas":
         return FLIPBOOK_PARAMETERS
+    if module == "screen.glare":
+        return SCREEN_PARAMETERS
     raise ValueError("Unknown VFX module")
 
 
