@@ -63,3 +63,5 @@ subprocess.run(base + ["--python", "tests/test_slash_blender.py"], check=True)
 subprocess.run(
     base + [str(ROOT / "work/slash.blend"), "--python", "tests/slash_reopen.py"], check=True
 )
+
+subprocess.run(base + ["--python", "tests/test_undo_blender.py"], check=True)

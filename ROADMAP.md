@@ -42,12 +42,13 @@ Cloth Energy Sheet 使用原生布面求解，显式烘焙为保存在 `.blend` 
 
 ## M5：交互、兼容性和正式发布——尚未完成
 
-正在增加 Windows x64、Apple Silicon macOS 和 Linux x64 的完整后台测试（[#24](https://github.com/mumu-lhl/blender-vfx-studio/issues/24)），目前跨平台结果尚待 CI。
-仍需图形界面点击/Undo 检查、更系统的 Eevee/Cycles 视觉比较和稳定性修复。完成这些验证前，不将预览版标为正式稳定版。
+Windows x64、Apple Silicon macOS 和 Linux x64 的 75 项基础后台测试、无插件重开和安装/卸载均已通过（[#24](https://github.com/mumu-lhl/blender-vfx-studio/issues/24)，工作流 39798116469）。
+新增 Arc Slash 和后台 Undo/Redo 的跨平台验证随相应 PR 继续运行。
+已增加复制/删除、组合、Cloth 烘焙/清除和合成树的后台 Undo/Redo 检查；仍需图形界面点击检查、更系统的 Eevee/Cycles 视觉比较和稳定性修复。完成这些验证前，不将预览版标为正式稳定版。
 
 ## 已验证的范围与发布状态
 
-Blender 5.2.2 Linux 已通过 80 项测试，包括时间公式的 60 组输入对照、参数文件和用户库检查，以及真实 Blender 中的各模块行为。
+Blender 5.2.2 Linux 已通过 84 项测试，包括时间公式的 60 组输入对照、参数文件和用户库检查，以及真实 Blender 中的各模块行为。
 用户库另有隔离目录中的界面操作验证，包含图片缺失时不创建残缺实例。
 
 环形、图集、合成、粒子、轨迹、绑定、组合、Cloth 和 Arc Slash 分别在新进程中重开 `.blend`，不加载插件且关闭脚本自动执行。
