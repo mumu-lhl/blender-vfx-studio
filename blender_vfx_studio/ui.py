@@ -46,6 +46,20 @@ class VFX_OT_create_flipbook(bpy.types.Operator, ImportHelper):
         return {"FINISHED"}
 
 
+class VFX_OT_create_screen(bpy.types.Operator):
+    bl_idname = "vfx_studio.create_screen"
+    bl_label = "Add Screen Glare + Flash"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        try:
+            core.create_screen(context)
+        except ValueError as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+
 class VFX_OT_duplicate(bpy.types.Operator):
     bl_idname = "vfx_studio.duplicate"
     bl_label = "Duplicate VFX"
@@ -119,6 +133,7 @@ class VFX_PT_main(bpy.types.Panel):
         layout = self.layout
         layout.operator("vfx_studio.create", text="Create Ring", icon="ADD")
         layout.operator("vfx_studio.create_flipbook", text="Create Flipbook", icon="IMAGE_DATA")
+        layout.operator("vfx_studio.create_screen", text="Add Screen VFX", icon="RENDERLAYERS")
         layout.operator("vfx_studio.import_preset", text="Load Preset", icon="IMPORT")
         try:
             root = core.resolve(context.object)
@@ -136,7 +151,10 @@ class VFX_PT_main(bpy.types.Panel):
         layout.label(text="Timing · frames")
         for key in ("start", "duration", "speed", "loop"):
             layout.prop(root, f'["{key}"]', text=key.title())
-        if root["vfx_module"] == "flipbook.atlas":
+        if root["vfx_module"] == "screen.glare":
+            layout.label(text="Screen · scene compositor")
+            keys = ("strength", "threshold", "glow_size", "flash", "fade")
+        elif root["vfx_module"] == "flipbook.atlas":
             layout.label(text="Flipbook · top-left row order")
             try:
                 tex = core.atlas_node(root)
@@ -168,6 +186,7 @@ class VFX_PT_main(bpy.types.Panel):
 CLASSES = (
     VFX_OT_create,
     VFX_OT_create_flipbook,
+    VFX_OT_create_screen,
     VFX_OT_duplicate,
     VFX_OT_delete,
     VFX_OT_export_preset,

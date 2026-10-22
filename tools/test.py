@@ -24,3 +24,8 @@ subprocess.run(base + ["--python", "tests/test_flipbook_blender.py"], check=True
 subprocess.run(
     base + [str(ROOT / "work/flipbook.blend"), "--python", "tests/flipbook_reopen.py"], check=True
 )
+
+subprocess.run(base + ["--python", "tests/test_screen_blender.py"], check=True)
+subprocess.run(
+    base + [str(ROOT / "work/screen.blend"), "--python", "tests/screen_reopen.py"], check=True
+)

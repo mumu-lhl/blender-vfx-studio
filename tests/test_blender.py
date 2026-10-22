@@ -171,6 +171,13 @@ class BlenderTests(unittest.TestCase):
         root["vfx_schema"] = 999
         with self.assertRaisesRegex(ValueError, "schema"):
             core.duplicate(bpy.context, root)
+        root["vfx_schema"] = 1
+        root["vfx_asset_version"] = 999
+        with self.assertRaisesRegex(ValueError, "asset version"):
+            core.duplicate(bpy.context, root)
+        with self.assertRaisesRegex(ValueError, "asset version"):
+            core.delete(root)
+        self.assertIn(root.name, bpy.data.objects)
 
 
 addon.register()

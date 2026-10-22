@@ -26,6 +26,15 @@ def resolve(obj):
                 raise ValueError("Ambiguous VFX ID: use VFX Duplicate instead of Shift-D")
             if obj.get("vfx_schema") != SCHEMA_VERSION:
                 raise ValueError("Unsupported VFX schema; update the extension before editing")
+            module = obj.get("vfx_module")
+            if (
+                not isinstance(module, str)
+                or module not in MODULES
+                or obj.get("vfx_asset_version") != MODULES[module].asset_version
+            ):
+                raise ValueError(
+                    "Unsupported VFX module or asset version; update the extension before editing"
+                )
             return obj
         obj = obj.parent
     return None
@@ -137,6 +146,10 @@ def duplicate(context, root):
     root = resolve(root)
     if root is None:
         raise ValueError("Select a VFX controller or layer")
+    if root["vfx_module"] == "screen.glare":
+        from . import screen
+
+        return screen.duplicate(context, root)
     uid = str(uuid.uuid4())
     collection = bpy.data.collections.new("VFX • Copy")
     _tag(collection, uid)
@@ -182,6 +195,10 @@ def delete(root):
     root = resolve(root)
     if root is None:
         raise ValueError("Select a VFX controller or layer")
+    if root["vfx_module"] == "screen.glare":
+        from . import screen
+
+        screen.remove(root)
     uid = root["vfx_id"]
     owned = [root] + [
         o
@@ -259,7 +276,9 @@ def create_from_preset(context, data):
     from . import presets
 
     data = presets.validate(data)  # Validate completely before mutating Blender data.
-    if data["module"] == "flipbook.atlas":
+    if data["module"] == "screen.glare":
+        root = create_screen(context)
+    elif data["module"] == "flipbook.atlas":
         image = load_atlas(data["assets"]["image"])
         root = create_flipbook(
             context, image, data["parameters"]["columns"], data["parameters"]["rows"]
@@ -348,3 +367,9 @@ def create_flipbook(context, image, columns=4, rows=4):
     flipbook.geometry(layer, root)
     select(context, root)
     return root
+
+
+def create_screen(context):
+    from . import screen
+
+    return screen.create(context)
