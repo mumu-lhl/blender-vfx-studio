@@ -15,6 +15,8 @@
 5. 移动、旋转或缩放 Controller（Empty 控制器），控制整个空间效果。选中效果网格也能显示同一组参数。
 6. 使用插件的 **Duplicate** 创建独立副本，使用 **Delete** 删除效果。这些场景操作支持 Blender Undo。
 
+默认场景的 Cube 可能遮住平面特效。在 Outliner 选中 Cube 按 **H** 可临时隐藏它，或先把 3D Cursor 移到空处再创建。
+
 Start 是开始帧，Duration 是播放帧数，Speed 是播放倍速，Loop 控制循环。例如 Start=1、Duration=24、Speed=1 时，第 1–24 帧可见，第 25 帧隐藏；Speed=2 时，第 13 帧开始隐藏。循环会回到出生状态，不保证画面首尾连续。
 创建会对齐包含子帧的实际驱动时间；启用场景 Time Remapping 后，播放时间也跟随该映射。上面的整帧示例采用默认映射。
 
