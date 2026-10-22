@@ -15,8 +15,8 @@
 - `particle.py`：有界、确定性的 Geometry Nodes 粒子爆发，原生实例化与弹道求值。
 - `ui.py`：原生侧栏与 Undo 操作，委托 core；不承担节点构建。
 
-Effect 对应一个 Empty Controller，一组原生 ID 属性控制一个或多个 Layer；当前实现一个 Mesh Layer。
-每个实例具有 UUID 和私有网格、材质、Geometry Node Tree。Collection 仅负责组织；对象名和集合名不承担身份语义。
+Effect 对应一个 Empty Controller，一组原生 ID 属性控制 Layer；当前每实例一个空间 Mesh Layer 或场景级 Compositor Layer。
+每实例具有 UUID；空间效果拥有私有网格、材质和 Geometry Node Tree，Screen 拥有私有合成节点组。Collection 仅负责组织；名称不承担身份语义。
 Layer 使用命名点属性标记内外边缘，由 Geometry Nodes 重建径向位置；UV 沿圆周和宽度展开。
 材质包含 UV 流动、噪声阈值溶解、边缘透明、发光和生命周期淡出；节点保留描述和布局供编辑。
 
@@ -93,3 +93,5 @@ Count 在驱动器中限制到 [1, 2048]；默认 Low 使用 20 三角面的粒�
 复制建立对象、网格、材质和节点树的 ID 映射；除驱动目标外，原生节点的 ID 输入及修改器界面的 ID 输入也重定向到私有副本。
 删除通过 bpy user_map 区分内部 Set Material 引用与外部用户引用，并先释放节点组再释放材质；外部共享仍拒绝删除。
 真实双色粒子渲染与资源删除测试验证实例互不串色、无私有材质残留。该规则同时用于 Mesh / Shader / Flipbook。
+
+UUID 还用于发现手动编辑中从对象上拆下的生成资产。材质释放前复查真实 datablock 消费者，处理 5.2 移除修改器 ID 输入后可能残留的引用计数；保留 Fake User / Extra User 和所有实际外部消费者。

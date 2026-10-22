@@ -2,7 +2,7 @@
 
 - **Effect**：具有稳定 UUID 的一个特效实例，不等同于对象名。
 - **Controller**：Empty，拥有实例参数、可关键帧化的原生 ID 属性和变换。
-- **Layer**：一个实例内的原生对象；当前是 Mesh + Material + Geometry Nodes。
+- **Layer**：实例内的原生对象或合成节点。空间效果使用 Mesh + Material + Geometry Nodes，Screen 使用 Compositor Group Node。
 - **Module**：效果生成能力，例如 `mesh.ring`；七大 VFX 类别是方向，不要求每类一个基类。
 - **Preset**：模块与参数的创建快照。内置 Shockwave / Energy Ring 及用户 JSON 保存/加载可用。预设不包含节点拓扑、Action、UUID、变换或开始帧；加载以当前帧为起点。
 - **Schema version**：实例持久化结构版本，当前为 1。
