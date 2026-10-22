@@ -55,7 +55,7 @@ emitter = bpy.data.objects.new("Ribbon Preview Source", None)
 scene.collection.objects.link(emitter)
 for frame in range(1, 25):
     t = (frame - 1) / 23
-    emitter.location = (-3 + 6 * t, 1.5, 2.5 + math.sin(t * math.pi))
+    emitter.location = (-3 + 6 * t, 0.3, 1.4 + 0.6 * math.sin(t * math.pi))
     emitter.keyframe_insert(data_path="location", frame=frame)
 ribbon = trail.create(bpy.context, emitter, first=1, last=24)
 ribbon["width"] = 0.35
