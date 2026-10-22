@@ -21,6 +21,11 @@ with tempfile.TemporaryDirectory(dir=ROOT / "work") as folder:
         root["count"] = 17
         assert bpy.ops.vfx_studio.library_save() == {"FINISHED"}
         assert len(bpy.context.window_manager.vfx_library_entries) == 1
+        assert bpy.ops.vfx_studio.library_save(name="Second Preset") == {"FINISHED"}
+        manager = bpy.context.window_manager
+        assert manager.vfx_library_entries[manager.vfx_library_index].name == "Second Preset"
+        assert bpy.ops.vfx_studio.library_delete() == {"FINISHED"}
+        assert len(manager.vfx_library_entries) == 1
         assert bpy.ops.vfx_studio.library_rename(name="Particle Preset") == {"FINISHED"}
         assert bpy.context.window_manager.vfx_library_entries[0].name == "Particle Preset"
         assert bpy.ops.vfx_studio.library_refresh() == {"FINISHED"}

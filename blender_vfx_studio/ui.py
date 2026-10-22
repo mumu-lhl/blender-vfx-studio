@@ -10,13 +10,17 @@ from .registry import PRESETS
 
 class VFX_OT_create(bpy.types.Operator):
     bl_idname = "vfx_studio.create"
-    bl_label = "Create VFX"
+    bl_description = "Create an editable ring or crescent slash at the 3D Cursor"
+    bl_label = "Create Mesh VFX"
     bl_options = {"REGISTER", "UNDO"}
 
     preset: EnumProperty(
-        items=[(key, p["label"], "") for key, p in PRESETS.items()], default="SHOCKWAVE"
+        name="Effect",
+        items=[(key, p["label"], "") for key, p in PRESETS.items()],
+        default="SHOCKWAVE",
     )
     quality: EnumProperty(
+        name="Quality",
         items=[("LOW", "Low · 32", ""), ("MEDIUM", "Medium · 64", ""), ("HIGH", "High · 128", "")],
         default="MEDIUM",
     )
@@ -31,6 +35,7 @@ class VFX_OT_create(bpy.types.Operator):
 
 class VFX_OT_create_flipbook(bpy.types.Operator, ImportHelper):
     bl_idname = "vfx_studio.create_flipbook"
+    bl_description = "Create an animated sprite from a still image containing a grid of frames"
     bl_label = "Create Flipbook from Atlas"
     bl_options = {"REGISTER", "UNDO"}
     filter_glob: StringProperty(
@@ -50,6 +55,7 @@ class VFX_OT_create_flipbook(bpy.types.Operator, ImportHelper):
 
 class VFX_OT_create_screen(bpy.types.Operator):
     bl_idname = "vfx_studio.create_screen"
+    bl_description = "Insert a timed glow and flash layer into the current scene compositor"
     bl_label = "Add Screen Glare + Flash"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -64,10 +70,13 @@ class VFX_OT_create_screen(bpy.types.Operator):
 
 class VFX_OT_create_particle(bpy.types.Operator):
     bl_idname = "vfx_studio.create_particle"
+    bl_description = "Create a repeatable particle burst with native motion and no simulation cache"
     bl_label = "Create Particle Burst"
     bl_options = {"REGISTER", "UNDO"}
     quality: EnumProperty(
-        items=[("LOW", "Low", ""), ("MEDIUM", "Medium", ""), ("HIGH", "High", "")], default="LOW"
+        name="Quality",
+        items=[("LOW", "Low", ""), ("MEDIUM", "Medium", ""), ("HIGH", "High", "")],
+        default="LOW",
     )
 
     def execute(self, context):
@@ -80,6 +89,7 @@ class VFX_OT_create_particle(bpy.types.Operator):
 
 class VFX_OT_create_trail(bpy.types.Operator):
     bl_idname = "vfx_studio.create_trail"
+    bl_description = "Sample the active object or pose bone animation into an editable ribbon"
     bl_label = "Bake Ribbon from Active Object / Bone"
     bl_options = {"REGISTER", "UNDO"}
     first: IntProperty(name="First Frame", default=1, min=-100000, max=100000)
@@ -104,6 +114,9 @@ class VFX_OT_create_trail(bpy.types.Operator):
 
 class VFX_OT_rebake_trail(bpy.types.Operator):
     bl_idname = "vfx_studio.rebake_trail"
+    bl_description = (
+        "Replace the stored ribbon mesh from its source animation; keep materials and nodes"
+    )
     bl_label = "Rebake Ribbon (Replace Edited Mesh)"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -123,6 +136,7 @@ class VFX_OT_rebake_trail(bpy.types.Operator):
 
 class VFX_OT_bind(bpy.types.Operator):
     bl_idname = "vfx_studio.bind"
+    bl_description = "Follow an object or pose bone while keeping the current world transform"
     bl_label = "Bind VFX to Object / Bone"
     bl_options = {"REGISTER", "UNDO"}
     target: StringProperty(name="Target")
@@ -156,6 +170,9 @@ class VFX_OT_bind(bpy.types.Operator):
 
 class VFX_OT_unbind(bpy.types.Operator):
     bl_idname = "vfx_studio.unbind"
+    bl_description = (
+        "Remove the managed binding and keep the current pose; animated transforms need baking"
+    )
     bl_label = "Unbind VFX (Keep World Transform)"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -172,9 +189,11 @@ class VFX_OT_unbind(bpy.types.Operator):
 
 class VFX_OT_create_simulation(bpy.types.Operator):
     bl_idname = "vfx_studio.create_simulation"
+    bl_description = "Create a pinned energy sheet ready for an explicit Cloth bake"
     bl_label = "Create Cloth Energy Sheet"
     bl_options = {"REGISTER", "UNDO"}
     quality: EnumProperty(
+        name="Quality",
         items=[
             ("LOW", "Low · 81 vertices", ""),
             ("MEDIUM", "Medium · 169 vertices", ""),
@@ -215,6 +234,7 @@ class VFX_OT_bake_simulation(bpy.types.Operator):
 
 class VFX_OT_clear_simulation(bpy.types.Operator):
     bl_idname = "vfx_studio.clear_simulation"
+    bl_description = "Remove stored cloth poses and keep the static reference mesh"
     bl_label = "Clear Stored Cloth Motion"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -234,6 +254,7 @@ class VFX_OT_clear_simulation(bpy.types.Operator):
 
 class VFX_OT_edit_simulation_source(bpy.types.Operator):
     bl_idname = "vfx_studio.edit_simulation_source"
+    bl_description = "Show the hidden source as wireframe for mesh, pin and Cloth editing"
     bl_label = "Show Cloth Source for Native Editing"
 
     def execute(self, context):
@@ -252,6 +273,7 @@ class VFX_OT_edit_simulation_source(bpy.types.Operator):
 
 class VFX_OT_compose(bpy.types.Operator):
     bl_idname = "vfx_studio.compose"
+    bl_description = "Control 2–32 selected spatial effects with one parent and shared timing"
     bl_label = "Compose Selected VFX"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -272,6 +294,9 @@ class VFX_OT_compose(bpy.types.Operator):
 
 class VFX_OT_detach_member(bpy.types.Operator):
     bl_idname = "vfx_studio.detach_member"
+    bl_description = (
+        "Remove group timing and parenting while keeping current timing values and world pose"
+    )
     bl_label = "Detach Layer as Independent VFX"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -288,6 +313,7 @@ class VFX_OT_detach_member(bpy.types.Operator):
 
 class VFX_OT_select_member(bpy.types.Operator):
     bl_idname = "vfx_studio.select_member"
+    bl_description = "Select a composition controller or member to edit its own controls"
     bl_label = "Edit Composition Layer"
     uid: StringProperty()
 
@@ -306,6 +332,9 @@ class VFX_OT_select_member(bpy.types.Operator):
 
 class VFX_OT_duplicate(bpy.types.Operator):
     bl_idname = "vfx_studio.duplicate"
+    bl_description = (
+        "Copy the selected effect or composition with independent generated assets and animation"
+    )
     bl_label = "Duplicate VFX"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -320,6 +349,9 @@ class VFX_OT_duplicate(bpy.types.Operator):
 
 class VFX_OT_delete(bpy.types.Operator):
     bl_idname = "vfx_studio.delete"
+    bl_description = (
+        "Delete owned effect data after checking external users; preserve unrelated scene objects"
+    )
     bl_label = "Delete VFX"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -337,6 +369,9 @@ class VFX_OT_delete(bpy.types.Operator):
 
 class VFX_OT_export_preset(bpy.types.Operator, ExportHelper):
     bl_idname = "vfx_studio.export_preset"
+    bl_description = (
+        "Save current parameter values to JSON; use .blend Append for edited nodes or paths"
+    )
     bl_label = "Save VFX Preset"
     filename_ext = ".json"
     filter_glob: StringProperty(default="*.json", options={"HIDDEN"})
@@ -352,6 +387,7 @@ class VFX_OT_export_preset(bpy.types.Operator, ExportHelper):
 
 class VFX_OT_import_preset(bpy.types.Operator, ImportHelper):
     bl_idname = "vfx_studio.import_preset"
+    bl_description = "Create an independent effect from a validated parameter JSON file"
     bl_label = "Load VFX Preset"
     bl_options = {"REGISTER", "UNDO"}
     filename_ext = ".json"

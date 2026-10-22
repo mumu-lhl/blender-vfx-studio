@@ -4,6 +4,7 @@ import bpy
 from bpy.props import CollectionProperty, IntProperty, StringProperty
 
 from . import core, library
+from .registry import MODULES
 
 
 def directory():
@@ -23,6 +24,11 @@ def refresh(context):
         (i for i, entry in enumerate(entries) if entry.key == key), 0
     )
     context.window_manager.vfx_library_errors = len(errors)
+    # CollectionProperty edits do not reliably notify every visible UIList.
+    for window in context.window_manager.windows:
+        for area in window.screen.areas:
+            if area.type == "VIEW_3D":
+                area.tag_redraw()
     return errors
 
 
@@ -43,13 +49,14 @@ class VFX_PG_library_entry(bpy.types.PropertyGroup):
 
 class VFX_UL_library(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
-        layout.label(text=item.name, icon="PRESET")
-        layout.label(text=item.module)
-        layout.label(text=item.key[:6])
+        columns = layout.split(factor=0.78)
+        columns.label(text=item.name, icon="PRESET")
+        columns.label(text=item.key[:6])
 
 
 class VFX_OT_library_refresh(bpy.types.Operator):
     bl_idname = "vfx_studio.library_refresh"
+    bl_description = "Read preset files from the user library and report invalid entries"
     bl_label = "Refresh Preset Library"
 
     def execute(self, context):
@@ -68,6 +75,7 @@ class VFX_OT_library_refresh(bpy.types.Operator):
 
 class VFX_OT_library_save(bpy.types.Operator):
     bl_idname = "vfx_studio.library_save"
+    bl_description = "Save a named parameter preset without overwriting entries with the same name"
     bl_label = "Save New Library Preset"
     name: StringProperty(name="Preset Name", maxlen=80)
 
@@ -84,8 +92,13 @@ class VFX_OT_library_save(bpy.types.Operator):
             data = core.preset_snapshot(context.object)
             if self.name:
                 data["name"] = self.name
-            library.save(directory(), data)
+            key = library.save(directory(), data)
             refresh(context)
+            context.window_manager.vfx_library_index = next(
+                i
+                for i, entry in enumerate(context.window_manager.vfx_library_entries)
+                if entry.key == key
+            )
         except (ValueError, OSError) as error:
             self.report({"ERROR"}, str(error))
             return {"CANCELLED"}
@@ -94,6 +107,7 @@ class VFX_OT_library_save(bpy.types.Operator):
 
 class VFX_OT_library_load(bpy.types.Operator):
     bl_idname = "vfx_studio.library_load"
+    bl_description = "Create an independent effect from the selected library entry"
     bl_label = "Create from Library Preset"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -111,6 +125,7 @@ class VFX_OT_library_load(bpy.types.Operator):
 
 class VFX_OT_library_rename(bpy.types.Operator):
     bl_idname = "vfx_studio.library_rename"
+    bl_description = "Change the selected preset name inside its JSON file"
     bl_label = "Rename Preset File Entry"
     name: StringProperty(name="Preset Name", maxlen=80)
 
@@ -136,6 +151,9 @@ class VFX_OT_library_rename(bpy.types.Operator):
 
 class VFX_OT_library_delete(bpy.types.Operator):
     bl_idname = "vfx_studio.library_delete"
+    bl_description = (
+        "Permanently delete only the selected preset file; existing scene effects remain"
+    )
     bl_label = "Delete Preset File (Not Undoable)"
 
     def execute(self, context):
@@ -174,9 +192,25 @@ class VFX_PT_library(bpy.types.Panel):
             "vfx_library_index",
             rows=4,
         )
+        item = selected(context)
+        if item:
+            module = MODULES.get(item.module)
+            layout.label(text=module.label if module else item.module)
         row = layout.row(align=True)
-        row.operator("vfx_studio.library_save", text="Save New", icon="ADD")
-        row.operator("vfx_studio.library_load", text="Create", icon="IMPORT")
+        save = row.row(align=True)
+        try:
+            root = core.resolve(context.object)
+            save.enabled = root is not None and root["vfx_module"] not in {
+                "trail.ribbon",
+                "core.composition",
+                "simulation.cloth",
+            }
+        except ValueError:
+            save.enabled = False
+        save.operator("vfx_studio.library_save", text="Save New", icon="ADD")
+        create = row.row(align=True)
+        create.enabled = item is not None
+        create.operator("vfx_studio.library_load", text="Create", icon="IMPORT")
         row = layout.row()
         row.enabled = selected(context) is not None
         row.operator("vfx_studio.library_rename", text="Rename")
