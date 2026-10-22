@@ -116,6 +116,25 @@ class PresetTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             presets.validate(invalid)
 
+    def test_particle_parameters_are_bounded_and_portable(self):
+        data = dict(
+            sample(),
+            module="particle.burst",
+            parameters={k: spec[0] for k, spec in preset_parameters_for("particle.burst").items()},
+        )
+        self.assertEqual(presets.loads(presets.dumps(data)), data)
+        for key, value in [
+            ("count", 2049),
+            ("count", 0),
+            ("seed", 1.5),
+            ("spread", 2),
+            ("motion_seconds", 0),
+        ]:
+            invalid = copy.deepcopy(data)
+            invalid["parameters"][key] = value
+            with self.assertRaises(ValueError):
+                presets.validate(invalid)
+
     def test_reject_versions_fields_and_types(self):
         for key, value in [
             ("format_version", 0),

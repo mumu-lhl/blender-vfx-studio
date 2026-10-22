@@ -14,6 +14,7 @@ class Module:
 MODULES = {
     "mesh.ring": Module("mesh.ring", "Procedural Ring", 1),
     "flipbook.atlas": Module("flipbook.atlas", "Flipbook Atlas", 1),
+    "particle.burst": Module("particle.burst", "Particle Burst", 1),
     "screen.glare": Module("screen.glare", "Screen Glare + Flash", 1),
 }
 PRESETS = {
