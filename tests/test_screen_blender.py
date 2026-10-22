@@ -152,6 +152,20 @@ class ScreenTests(unittest.TestCase):
         core.delete(root)
         self.assertIn(consumer.name, tree.nodes)
 
+    def test_manual_cross_scene_layer_copies_are_ambiguous(self):
+        root = core.create_screen(bpy.context)
+        _, tree, _ = screen._layer(root)
+        other = bpy.data.scenes.new("Manual Scene Copy")
+        other.compositing_node_group = tree.copy()
+        copied = next(
+            n for n in other.compositing_node_group.nodes if n.get("vfx_id") == root["vfx_id"]
+        )
+        copied.node_tree = copied.node_tree.copy()
+        with self.assertRaisesRegex(ValueError, "ambiguous"):
+            core.delete(root)
+        self.assertIn(root.name, bpy.data.objects)
+        self.assertIsNotNone(other.compositing_node_group)
+
     def test_generated_base_user_edits_are_retained(self):
         root = core.create_screen(bpy.context)
         _, tree, layer = screen._layer(root)

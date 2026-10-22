@@ -43,7 +43,7 @@ Simulation、参数变更引起的缓存失效、缓存烘焙与保存重开、�
 
 ## 本次验证记录
 
-Blender 5.2.2 Linux：时间表达式对照 60 个输入组合；8 个预设测试；7 个 Core、5 个 Flipbook 和 9 个 Screen 集成测试（包含多个子场景）；
+Blender 5.2.2 Linux：时间表达式对照 60 个输入组合；8 个预设测试；7 个 Core、5 个 Flipbook 和 10 个 Screen 集成测试（包含多个子场景）；
 三个独立进程禁用自动执行且不导入插件时的环形/图集/合成保存重开；Flipbook 另有实际 CPU 像素选帧校验；安装包安装、启用、创建、卸载；Ruff 检查与格式校验。
 Cycles CPU 32 samples 800×500 与 Eevee 200×125 预览已人工检查，生成脚本 `tools/preview.py`。
 未进行图形界面的点击/Undo 操作验证，也未测试 Windows/macOS。

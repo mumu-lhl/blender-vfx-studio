@@ -123,14 +123,24 @@ def _layer(root):
     if not isinstance(scene, bpy.types.Scene) or scene.compositing_node_group is None:
         raise ValueError("Screen compositor is missing; restore it before removing the controller")
     tree = scene.compositing_node_group
-    layers = [
-        n
-        for n in tree.nodes
-        if n.get("vfx_id") == root["vfx_id"] and n.get("vfx_role") == "screen_layer"
-    ]
-    if len(layers) != 1:
-        raise ValueError("Screen layer is missing or ambiguous; restore the compositor graph")
-    return scene, tree, layers[0]
+    # Manual scene/node-tree copies can duplicate layer IDs without copying the controller.
+    layers = []
+    visited = set()
+    for candidate in bpy.data.scenes:
+        graph = candidate.compositing_node_group
+        if graph is None or graph.as_pointer() in visited:
+            continue
+        visited.add(graph.as_pointer())
+        layers.extend(
+            (graph, n)
+            for n in graph.nodes
+            if n.get("vfx_id") == root["vfx_id"] and n.get("vfx_role") == "screen_layer"
+        )
+    if len(layers) != 1 or layers[0][0] != tree:
+        raise ValueError(
+            "Screen layer is missing or ambiguous; use VFX Duplicate for independent copies"
+        )
+    return scene, tree, layers[0][1]
 
 
 def duplicate(context, root):
@@ -215,7 +225,11 @@ def _untouched_base(tree, scene):
         or render.layer != tree.get("vfx_base_layer")
     ):
         return False
-    if len(tree.interface.items_tree) != 1 or tree.interface.items_tree[0].name != "Image":
+    if (
+        len(tree.interface.items_tree) != 1
+        or tree.interface.items_tree[0].name != "Image"
+        or tree.interface.items_tree[0].socket_type != "NodeSocketColor"
+    ):
         return False
     link = tree.links[0]
     return (
