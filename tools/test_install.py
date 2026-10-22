@@ -10,7 +10,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 blender = os.environ.get("BLENDER_BIN", "blender")
 subprocess.run([sys.executable, str(ROOT / "tools/build.py")], check=True)
-version = tomllib.loads((ROOT / "blender_vfx_studio/blender_manifest.toml").read_text())["version"]
+version = tomllib.loads(
+    (ROOT / "blender_vfx_studio/blender_manifest.toml").read_text(encoding="utf-8")
+)["version"]
 archive = ROOT / "dist" / f"blender-vfx-studio-{version}.zip"
 (ROOT / "work").mkdir(exist_ok=True)
 with tempfile.TemporaryDirectory(prefix="install-", dir=ROOT / "work") as temporary:
