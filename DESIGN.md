@@ -116,3 +116,11 @@ Managed constraint name is persisted on the controller; ambiguous/renamed constr
 Unbind retains the evaluated pose, refusing additional constraints or transform/constraint animation that cannot be solved without baking.
 Layered Action/NLA and driver paths for custom ID parameters are safe to retain. Screen controllers reject spatial binding.
 No runtime handlers or new persistence schema are needed. Arbitrary user Geometry Nodes dependency cycles are outside the dependency preflight.
+
+### User parameter preset library
+
+`library.py` is a bpy-free filesystem boundary over validated v2 snapshots. UUID filenames avoid name collisions; rename uses atomic preset writes.
+All selected keys are confined to a single directory and symlinks rejected. Scans are capped at 256 JSON files and report invalid entries separately.
+`library_ui.py` maintains a WindowManager UIList refreshed only by explicit operations. It never scans from panel draw or frame handlers.
+Blender's user DATAFILES path owns the durable library, independent of install versions and scene data. Deletion is explicit, file-only and not Blender Undo.
+Material images remain external resources; failed instantiation never edits the preset. Native trail meshes, bindings, Actions and node edits are outside parameter snapshots.

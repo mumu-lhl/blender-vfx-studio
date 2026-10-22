@@ -2,7 +2,7 @@
 
 面向二次元 3D 动画的 Blender 原生 VFX 插件。目标 Blender **5.2 LTS**，优先 Eevee，兼容 Cycles。
 
-当前预览版 **0.7.0** 已实现：
+当前预览版 **0.8.0** 已实现：
 
 - **Ribbon Trail**：显式采样对象或骨骼动画，原生刀带回放、宽度、长度、重新采样。
 - **Particle Burst**：确定性原生粒子生成、随机方向/速度/尺寸、重力轨迹和网格实例化。
@@ -14,11 +14,11 @@
 - 不使用 Python 每帧处理器；保存后无需插件也能播放。
 - 用户参数预设 JSON 保存与加载，严格版本和数值校验；载入为独立实例。
 
-这只是首个纵向切片。Simulation 和可浏览的预设库尚未实现；详见 [ROADMAP.md](ROADMAP.md)。
+这只是首个纵向切片。Simulation 尚未实现；详见 [ROADMAP.md](ROADMAP.md)。
 
 ## 安装
 
-从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载 `blender-vfx-studio-0.7.0.zip`。
+从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载 `blender-vfx-studio-0.8.0.zip`。
 未打 tag 的开发版本可从 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 最新成功构建中下载 `blender-vfx-studio-extension` artifact，解压后安装其中的 ZIP。
 Blender 5.2 → Edit → Preferences → Get Extensions → 右上角菜单 → Install from Disk，选择 ZIP 并启用。
 源码也可直接构建：
@@ -128,6 +128,18 @@ Delete 会移除自身合成节点，并把当前上游重新连接到下游。�
 插件创建的空合成基础树在未被用户修改时一并恢复为空；编辑过的基础树会保留。
 合成设备沿用场景设置；无独显设备可在原生渲染设置中把 **Compositor Device** 设为 **CPU**。
 测试和发布预览显式使用 CPU 合成。
+
+## 用户预设库
+
+打开 VFX 侧栏的 **User Preset Library**，点击 Refresh 显式扫描用户库。
+Save New 保存当前效果的参数快照并可命名；Create 创建独立实例；Rename 修改条目名称；Delete File 删除选中的 JSON 文件。
+同名条目不会覆盖，列表的短标识区分同名条目。文件删除会先确认且不可 Undo；已创建的场景实例不受影响。
+文件读写只发生在操作时；最多 256 个 JSON 条目，损坏、超大和符号链接条目会被报告并跳过。
+
+库位于 Blender `bpy.utils.user_resource('DATAFILES')` 下的 `blender_vfx_studio/presets/`，独立于 `.blend` 和安装包；
+卸载插件不会自动删除用户预设。外部 JSON 使用 Load Preset；也可把已有参数 JSON 复制到该文件夹后 Refresh。
+Flipbook 保留图片相对引用，移动到其他机器时需要一同迁移图片；缺失图片会明确报错，不创建残缺实例或删除预设。
+库保留参数，不保存绑定、动画、手动节点编辑或 Trail 路径；完整编辑资产继续使用 `.blend` Append。
 
 ## 保存与复用预设
 
