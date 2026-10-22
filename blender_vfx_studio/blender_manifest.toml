@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "blender_vfx_studio"
-version = "0.6.0"
+version = "0.7.0"
 name = "Blender VFX Studio"
 tagline = "Create native rings, particles, sprites and compositor effects"
 maintainer = "Blender VFX Studio contributors"

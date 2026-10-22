@@ -54,3 +54,5 @@ Fade 在此模块表示尺寸缩减而非透明度；一个周期结束后全体
 
 - **Sampled trail**: explicit object-origin or pose-bone-head positions stored in an owned native mesh. Playback is stateless; sampling a simulation requires a valid upstream Blender cache.
 - **Rebake**: explicit replacement of trail base geometry, preserving native nodes/materials. Source metadata changes do not implicitly alter playback timing or invalidate stored samples.
+
+- **Binding**: native Child Of on an effect controller; target object / pose bone stays user-owned. Bind preserves current world pose. Unbind preserves that frame's pose and refuses unresolved transform animation/other constraints.
