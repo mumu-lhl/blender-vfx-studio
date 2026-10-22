@@ -13,7 +13,9 @@ class VFX_OT_create(bpy.types.Operator):
     bl_label = "Create VFX"
     bl_options = {"REGISTER", "UNDO"}
 
-    preset: EnumProperty(items=[(key, p["label"], "") for key, p in PRESETS.items()])
+    preset: EnumProperty(
+        items=[(key, p["label"], "") for key, p in PRESETS.items()], default="SHOCKWAVE"
+    )
     quality: EnumProperty(
         items=[("LOW", "Low · 32", ""), ("MEDIUM", "Medium · 64", ""), ("HIGH", "High · 128", "")],
         default="MEDIUM",
@@ -373,7 +375,7 @@ class VFX_PT_main(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator("vfx_studio.create", text="Create Ring", icon="ADD")
+        layout.operator("vfx_studio.create", text="Create Mesh VFX", icon="ADD")
         layout.operator("vfx_studio.create_flipbook", text="Create Flipbook", icon="IMAGE_DATA")
         layout.operator(
             "vfx_studio.create_particle", text="Create Particle Burst", icon="PARTICLES"
@@ -438,7 +440,21 @@ class VFX_PT_main(bpy.types.Panel):
                 layout.operator("vfx_studio.select_member", text=child.name).uid = child["vfx_id"]
             layout.label(text="Loop restarts all layers each group cycle")
             return
-        if root["vfx_module"] == "simulation.cloth":
+        if root["vfx_module"] == "mesh.slash":
+            layout.label(text="Procedural crescent slash")
+            keys = (
+                "radius",
+                "width",
+                "arc",
+                "spin",
+                "taper",
+                "expansion",
+                "strength",
+                "dissolve",
+                "noise_scale",
+                "fade",
+            )
+        elif root["vfx_module"] == "simulation.cloth":
             from . import simulation
 
             try:

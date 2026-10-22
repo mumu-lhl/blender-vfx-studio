@@ -34,6 +34,9 @@ elapsed = (frame - start) * max(speed, 0.001) / max(duration, 1)
 
 环形的 Radius 是出生时外半径，Expansion 是一周期增加的半径，Width 是径向宽度。内半径至少为 0.001，宽度过大时接近实心圆。Dissolve=1 表示完全溶解；Fade=1 表示到周期末淡出，Fade=0 保持透明度。RGB 使用线性颜色分量。Emission 表示表面发光，并不自动产生周围的光晕；需要辉光时添加 Screen VFX 或用户自己的 Glare。
 
+Arc Slash 的 Arc 是开口弧线覆盖的度数，居中朝向局部 +X；Spin 是一周期绕局部 Z 旋转的度数。
+Taper 控制两端宽度收窄，中段宽度为 Width，内半径至少为 0.001。它使用参数生成形状，和保存武器采样路径的 Trail 是两种不同创作方式。
+
 图集左上格编号为 0，先向右再向下。First / Last 都包含在播放范围内，超出网格时会被限制；Last 小于 First 时保持 First 格。每个周期均匀播放选中格子，选帧公式为 `floor((Progress + 1e-6) × 格数)`，再限制到末格。`1e-6` 只修正浮点选帧误差，不改变生命周期。
 
 图集最多 256×256 格，使用静态 FILE / GENERATED 图片，不支持电影、图片序列或 UDIM 多块纹理。图片可以打包到 `.blend`，JSON 只记录本地文件路径，不执行脚本或读取远程 URL。

@@ -20,7 +20,7 @@
 - Particle：最多 2048 个粒子的可重复随机爆发、重力弹道和实例化；尚无连续发射或碰撞（[#11](https://github.com/mumu-lhl/blender-vfx-studio/issues/11)）。
 - Screen：主动添加辉光和时间闪光，保留现有合成链，支持叠加、复制和安全移除（[#9](https://github.com/mumu-lhl/blender-vfx-studio/issues/9)）。
 
-下一步继续扩展 Mesh / Shader 预设，改善刀光、冲击波等常用效果的外观。当前刀带已可由 Trail 生成，但尚无单独的程序化弧形刀光预设。
+下一步继续扩展 Mesh / Shader 预设，改善刀光、冲击波等常用效果的外观。已实现独立的 Arc Slash 程序化弧形刀光：弧度、生命周期旋转、收尖、溶解和预设复用（[#26](https://github.com/mumu-lhl/blender-vfx-studio/issues/26)）；Trail 继续用于动画采样路径。
 
 ## M3：轨迹、绑定、组合与复用——进行中
 
@@ -47,15 +47,15 @@ Cloth Energy Sheet 使用原生布面求解，显式烘焙为保存在 `.blend` 
 
 ## 已验证的范围与发布状态
 
-Blender 5.2.2 Linux 已通过 71 项测试，包括时间公式的 60 组输入对照、参数文件和用户库检查，以及真实 Blender 中的各模块行为。
+Blender 5.2.2 Linux 已通过 80 项测试，包括时间公式的 60 组输入对照、参数文件和用户库检查，以及真实 Blender 中的各模块行为。
 用户库另有隔离目录中的界面操作验证，包含图片缺失时不创建残缺实例。
 
-环形、图集、合成、粒子、轨迹、绑定、组合和 Cloth 分别在新进程中重开 `.blend`，不加载插件且关闭脚本自动执行。
+环形、图集、合成、粒子、轨迹、绑定、组合、Cloth 和 Arc Slash 分别在新进程中重开 `.blend`，不加载插件且关闭脚本自动执行。
 图集、合成和粒子还有 CPU 渲染像素检查；Cloth 重开时会删除模拟源，验证已存姿态独立可用。
 安装包已验证安装、启用、创建和卸载，Ruff 检查与格式校验通过。
 
 `tools/preview.py` 可重新生成组合场景。Cycles CPU 800×500 和 Eevee 预览已查看；最新 Trail 构图另检查了 Eevee 400×250 图像。尚未进行图形界面点击/Undo 操作和 Windows/macOS 测试。
 
-v0.2–v0.5 已发布，分别覆盖环形与参数预设、图集、合成、粒子。v0.6 增加轨迹，v0.7 增加绑定；两版均已发布并下载校验，v0.6 的 ZIP 也与干净源码构建一致。用户库版本 0.8.0 和组合版本 0.9.0 已发布并下载校验，Cloth 开发版本为 0.10.0，发布情况以 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 为准。
+v0.2–v0.5 已发布，分别覆盖环形与参数预设、图集、合成、粒子。v0.6 增加轨迹，v0.7 增加绑定；两版均已发布并下载校验，v0.6 的 ZIP 也与干净源码构建一致。用户库版本 0.8.0 和组合版本 0.9.0 已发布并下载校验，Cloth 开发版本为 0.10.0，Arc Slash 开发版本为 0.11.0，发布情况以 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 为准。
 
 版本标签会触发测试和 CPU 预览，再上传 ZIP、SHA256SUMS 和 PNG。云端直接上传附件曾返回 401，现由 GitHub Actions 的独立发布任务完成（[#5](https://github.com/mumu-lhl/blender-vfx-studio/issues/5)）。v0.6 首次标签误指旧提交，被版本校验拦截；未发布的标签修正后已通过完整发布流程，没有发布错误安装包。

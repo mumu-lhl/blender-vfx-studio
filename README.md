@@ -2,14 +2,14 @@
 
 面向二次元 3D 动画的 Blender 特效插件，目标版本为 **Blender 5.2 LTS**。插件创建 Blender 原生网格、材质、节点和动画；保存后的效果不需要插件持续运行，也能播放和渲染。优先支持 Eevee，同时兼容 Cycles。
 
-目前可以创建冲击波、能量环、图集动画、粒子爆发、轨迹刀带和屏幕辉光/闪光，还可以绑定到对象或骨骼、复制效果，以及管理参数预设。可以把多个空间效果组合起来统一调整，并用原生 Cloth 烘焙布面运动。当前仍是早期预览版，完整进度见 [ROADMAP.md](ROADMAP.md)。
+目前可以创建冲击波、能量环、弧形刀光、图集动画、粒子爆发、轨迹刀带和屏幕辉光/闪光，还可以绑定到对象或骨骼、复制效果，以及管理参数预设。可以把多个空间效果组合起来统一调整，并用原生 Cloth 烘焙布面运动。当前仍是早期预览版，完整进度见 [ROADMAP.md](ROADMAP.md)。
 
 ## 安装和第一次使用
 
 从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载最新版本的 `blender-vfx-studio-版本号.zip`。在 Blender 5.2 打开 **Edit → Preferences → Get Extensions → 右上角菜单 → Install from Disk**，选择 ZIP 并启用。不要安装 GitHub 的源码 ZIP。
 
-1. 在 3D 视图按 **N**，打开 **VFX** 标签页，点击 **Create Ring**。
-2. 选择 Shockwave（冲击波）或 Energy Ring（能量环），以及质量。效果会出现在 3D Cursor 处，以当前帧开始播放。
+1. 在 3D 视图按 **N**，打开 **VFX** 标签页，点击 **Create Mesh VFX**。
+2. 选择 Shockwave（冲击波）、Energy Ring（能量环）或 Arc Slash（弧形刀光），以及质量。效果会出现在 3D Cursor 处，以当前帧开始播放。
 3. 切换到 **Material Preview** 或 **Rendered** 查看材质，播放时间轴。
 4. 调整面板中的时间、宽度、颜色等参数。右键参数选择 **Insert Keyframe**，即可制作参数动画。
 5. 移动、旋转或缩放 Controller（Empty 控制器），控制整个空间效果。选中效果网格也能显示同一组参数。
@@ -19,13 +19,20 @@ Start 是开始帧，Duration 是播放帧数，Speed 是播放倍速，Loop 控
 
 生成的效果保留原生可编辑性。选择效果网格后，可以编辑基础网格、Geometry Nodes（几何节点）和材质节点；调整面板参数不会重新生成节点。请保留驱动器引用的输入和所需属性。完整节点编辑和动画请保存在 `.blend` 中。
 
-## 环形效果
+## 环形与弧形刀光
 
 Shockwave 随时间向外扩张，Energy Ring 默认保持半径，播放一个 48 帧周期。启用 Loop 可重复播放。
 
 Radius 是出生时外半径，Width 是环宽，Expansion 是一个周期增加的半径。内半径至少为 0.001，宽度过大时会接近实心圆。Dissolve 控制噪声溶解，Fade 控制生命周期内的淡出，Strength 控制表面发光强度。
 
 质量只在创建时选择，分别使用 32、64、128 段。环形依赖网格的 `vfx_inner` 属性来区分内外边缘；删除该属性会破坏宽度计算。发光材质本身不需要灯光，但不会自动产生光晕。需要光晕时添加下文的 Screen VFX，或使用自己的 Glare 合成节点。
+
+Arc Slash 无需源动画，直接生成两端收尖的月牙形刀光。Arc 控制弧度（1–359 度），Spin 控制一生旋转多少度，
+正负值控制方向，Taper 越大则尖端收窄越明显。Radius / Width / Expansion 和材质参数与环形相同。
+例如 Arc=180、Spin=180 会在一个周期里转过半圈；Start / Duration / Speed / Loop 控制播放。
+刀光位于局部 XY 平面，中心朝局部 +X；旋转控制器即可改变斩击平面。
+保留 `vfx_arc` 和 `vfx_inner` 属性，它们分别控制沿弧位置和内外边缘；需要直接雕改最终形状时，可在副本上应用 Geometry Nodes 修改器。
+支持参数 JSON 和用户库；若需要跟随武器动画生成实际运动路径，请使用 Ribbon Trail。
 
 ## Flipbook 图集动画
 
@@ -140,7 +147,7 @@ Duplicate 单层会得到脱离组合的独立效果，Detach Layer 则将原层
 
 库放在 Blender 用户 DATAFILES 目录下的 `blender_vfx_studio/presets/`，不随 `.blend` 保存，卸载插件也不会自动删除。可以把外部参数 JSON 复制到该目录后刷新。最多 256 个 JSON 文件；损坏、超大和符号链接条目会被报告。Flipbook 图片缺失时会报错，不创建残缺实例，也不修改预设文件。
 
-参数文件最大 64 KiB，使用独立格式版本，严格检查字段、数值范围和模块版本。当前格式 2 支持 ring / atlas / screen / burst 的资产版本 1，也能读取并转换旧格式 1 环形预设。未知版本会明确报错，不修改场景。轨迹路径暂不纳入参数 JSON。
+参数文件最大 64 KiB，使用独立格式版本，严格检查字段、数值范围和模块版本。当前格式 2 支持 ring / slash / atlas / screen / burst 的资产版本 1，也能读取并转换旧格式 1 环形预设。未知版本会明确报错，不修改场景。轨迹路径暂不纳入参数 JSON。
 
 ## 删除与兼容性限制
 

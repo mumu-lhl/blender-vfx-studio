@@ -68,7 +68,13 @@ cloth.scale = (0.65, 0.65, 0.65)
 cloth["color_0"], cloth["color_1"], cloth["color_2"] = 0.8, 0.04, 0.35
 cloth["strength"] = 2.0
 simulation.bake(bpy.context, cloth)
-group = composition.create(bpy.context, [left, right, sprite, particles, ribbon, cloth])
+slash = core.create(bpy.context, "ARC_SLASH")
+slash.location = (-2.0, 0.0, 1.3)
+slash["start"], slash["duration"] = 7.0, 18.0
+slash["spin"] = 60.0
+slash["strength"] = 5.0
+slash.update_tag()
+group = composition.create(bpy.context, [left, right, sprite, particles, ribbon, cloth, slash])
 screen = core.create_screen(bpy.context)
 screen["strength"] = 0.6
 screen["glow_size"] = 0.25

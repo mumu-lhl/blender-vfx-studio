@@ -76,6 +76,10 @@ def _controller(context, label, module, quality, parameters, settings):
 
 
 def create(context, preset="SHOCKWAVE", quality="MEDIUM"):
+    if preset == "ARC_SLASH":
+        from . import slash
+
+        return slash.create(context, quality)
     settings = PRESETS[preset]
     segments = {"LOW": 32, "MEDIUM": 64, "HIGH": 128}[quality]
     root, collection = _controller(
@@ -367,8 +371,12 @@ def create_from_preset(context, data):
         root = create_flipbook(
             context, image, data["parameters"]["columns"], data["parameters"]["rows"]
         )
-    else:
+    elif data["module"] == "mesh.slash":
+        root = create(context, "ARC_SLASH", data["quality"])
+    elif data["module"] == "mesh.ring":
         root = create(context, quality=data["quality"])
+    else:
+        raise ValueError("No parameter preset builder for this module")
     root.name = data["name"]
     root["vfx_quality"] = data["quality"]
     for key, value in data["parameters"].items():

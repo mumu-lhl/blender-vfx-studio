@@ -12,6 +12,7 @@ class Module:
 
 
 MODULES = {
+    "mesh.slash": Module("mesh.slash", "Arc Slash", 1),
     "simulation.cloth": Module("simulation.cloth", "Cloth Energy Sheet", 1, stateful=True),
     "core.composition": Module("core.composition", "VFX Composition", 1),
     "trail.ribbon": Module("trail.ribbon", "Sampled Ribbon Trail", 1),
@@ -21,6 +22,7 @@ MODULES = {
     "screen.glare": Module("screen.glare", "Screen Glare + Flash", 1),
 }
 PRESETS = {
+    "ARC_SLASH": {"label": "Arc Slash"},
     "SHOCKWAVE": {
         "label": "Shockwave",
         "radius": 0.2,
