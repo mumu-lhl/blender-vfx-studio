@@ -11,4 +11,4 @@ blender_version_min = "5.2.0"
 license = ["SPDX:GPL-3.0-or-later"]
 
 [permissions]
-files = "Read atlas images and import or export user-selected VFX preset JSON files"
+files = "Read atlas images and import or export VFX preset JSON files"
