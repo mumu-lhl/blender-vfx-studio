@@ -96,12 +96,26 @@ TRAIL_PARAMETERS = {
 }
 
 
+SLASH_PARAMETERS = {
+    **PARAMETERS,
+    "radius": (1.8, 0.001, 10000.0, "Outer radius at birth"),
+    "width": (0.45, 0.001, 10000.0, "Maximum radial width"),
+    "expansion": (0.2, 0.0, 10000.0, "Added radius over lifetime"),
+    "duration": (16.0, 1.0, 100000.0, "Lifetime in frames at speed 1"),
+    "dissolve": (0.15, 0.0, 1.0, "Noise cutoff; 1 fully dissolves"),
+    "arc": (150.0, 1.0, 359.0, "Arc angle in degrees, centered on local +X"),
+    "spin": (120.0, -1440.0, 1440.0, "Rotation in degrees over lifetime"),
+    "taper": (0.5, 0.01, 4.0, "Tip narrowing; larger values make a thinner crescent"),
+}
+
 SIMULATION_PARAMETERS = {key: spec for key, spec in COMMON_PARAMETERS.items() if key != "fade"}
 
 GROUP_PARAMETERS = {key: PARAMETERS[key] for key in ("start", "duration", "speed", "loop")}
 
 
 def parameters_for(module):
+    if module == "mesh.slash":
+        return SLASH_PARAMETERS
     if module == "simulation.cloth":
         return SIMULATION_PARAMETERS
     if module == "core.composition":

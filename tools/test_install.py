@@ -33,7 +33,8 @@ with tempfile.TemporaryDirectory(prefix="install-", dir=ROOT / "work") as tempor
         "1",
         "--python-expr",
         "import bpy; assert 'bl_ext.user_default.blender_vfx_studio' in bpy.context.preferences.addons; "
-        "assert bpy.ops.vfx_studio.create()=={'FINISHED'}; print('INSTALLED_ENABLED_OK')",
+        "assert bpy.ops.vfx_studio.create()=={'FINISHED'}; "
+        "assert bpy.context.object['vfx_module']=='mesh.ring'; print('INSTALLED_ENABLED_OK')",
     )
     run("--command", "extension", "remove", "blender_vfx_studio")
     run(
