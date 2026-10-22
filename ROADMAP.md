@@ -32,7 +32,8 @@
 ## M3 — 进行中
 
 - 已实现对象 / 骨骼动画显式采样的 Ribbon Trail：最多 2048 点，按采样时间插值的原生回放，宽度、尾长、统一时间，独立复制与明确重新采样（[#13](https://github.com/mumu-lhl/blender-vfx-studio/issues/13)）。
-- 待实现：角色骨骼绑定界面、多层组合、可浏览预设库与更完整资源引用。
+- 已实现对象 / 骨骼绑定界面：原生 Child Of、保持当前世界变换、独立复制、保守解绑（[#15](https://github.com/mumu-lhl/blender-vfx-studio/issues/15)）。
+- 待实现：多层组合、可浏览预设库与更完整资源引用。
 - Trail 目前通过 `.blend` 复用，不支持 JSON 路径资产；没有自动相机朝向或布料扭转。
 
 ## M4 — 尚未开始
@@ -41,12 +42,12 @@ Simulation、参数变更引起的缓存失效、缓存烘焙与保存重开、�
 
 ## M5 — 尚未开始
 
-交互体验、跨平台、Eevee/Cycles 视觉回归与正式稳定发布。0.6.0 是早期预览，不代表正式版。
+交互体验、跨平台、Eevee/Cycles 视觉回归与正式稳定发布。0.7.0 是早期预览，不代表正式版。
 
 ## 本次验证记录
 
-Blender 5.2.2 Linux：时间表达式对照 60 个输入组合；9 个预设测试；8 个 Core、5 个 Flipbook、10 个 Screen 、5 个 Particle 和 7 个 Trail 集成测试（包含多个子场景）；
-五个独立进程禁用自动执行且不导入插件时的环形/图集/合成/粒子/轨迹保存重开；Flipbook 另有实际 CPU 像素选帧校验；安装包安装、启用、创建、卸载；Ruff 检查与格式校验。
+Blender 5.2.2 Linux：时间表达式对照 60 个输入组合；9 个预设测试；8 个 Core、5 个 Flipbook、10 个 Screen 、5 个 Particle 、7 个 Trail 和 5 个 Binding 集成测试（包含多个子场景）；
+六个独立进程禁用自动执行且不导入插件时的环形/图集/合成/粒子/轨迹/绑定保存重开；Flipbook 另有实际 CPU 像素选帧校验；安装包安装、启用、创建、卸载；Ruff 检查与格式校验。
 Cycles CPU 32 samples 800×500 与 Eevee 200×125 预览已人工检查，生成脚本 `tools/preview.py`。
 未进行图形界面的点击/Undo 操作验证，也未测试 Windows/macOS。
 
@@ -58,3 +59,5 @@ PR #4、#6、#7 已通过 GitHub CI 并合并，v0.2.0 已发布并下载校验�
 tag 构建同时生成 Cycles CPU 预览；Release 附加 ZIP、SHA256SUMS 和 PNG。实际附件状态以 GitHub Release 和 tag 工作流结果为准。
 
 0.6.0 开发阶段增加原生 Ribbon Trail，包含骨骼世界空间采样、子帧恢复、源删除后回放、时间插值、复制/删除和重新采样验证。发布状态以对应 PR 和 Release 为准。
+
+0.6.0 Ribbon PR #14 已通过 CI 并合并；0.7.0 开发阶段增加对象/骨骼原生绑定和禁用插件后的保存重开验证。

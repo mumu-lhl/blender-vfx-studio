@@ -2,7 +2,7 @@
 
 面向二次元 3D 动画的 Blender 原生 VFX 插件。目标 Blender **5.2 LTS**，优先 Eevee，兼容 Cycles。
 
-当前预览版 **0.6.0** 已实现：
+当前预览版 **0.7.0** 已实现：
 
 - **Ribbon Trail**：显式采样对象或骨骼动画，原生刀带回放、宽度、长度、重新采样。
 - **Particle Burst**：确定性原生粒子生成、随机方向/速度/尺寸、重力轨迹和网格实例化。
@@ -18,7 +18,7 @@
 
 ## 安装
 
-从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载 `blender-vfx-studio-0.6.0.zip`。
+从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载 `blender-vfx-studio-0.7.0.zip`。
 未打 tag 的开发版本可从 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 最新成功构建中下载 `blender-vfx-studio-extension` artifact，解压后安装其中的 ZIP。
 Blender 5.2 → Edit → Preferences → Get Extensions → 右上角菜单 → Install from Disk，选择 ZIP 并启用。
 源码也可直接构建：
@@ -43,6 +43,20 @@ Emission 不自动添加屏幕辉光；如需辉光，请在自己的 Compositor
 
 选择 Layer 可直接编辑 Geometry Nodes、材质节点和基础网格。参数调整不会重建这些节点。
 请保留命名属性 `vfx_inner` 和节点输入驱动目标。质量只在创建时生效。
+
+## 对象 / 骨骼绑定
+
+选择空间效果后点击 **Bind Object / Bone**，搜索当前场景中的目标对象；目标为骨架时可选骨骼。
+也可先选目标，再以效果为活动对象打开对话框，自动填入唯一目标。
+绑定添加原生 Child Of 约束并计算逆矩阵，保持当前求值世界变换，不修改目标 Action、骨骼或约束。
+可在原生 Object Constraints 中查看约束；目标重命名不影响绑定，保存后无需插件即可跟随。
+Screen 效果没有空间绑定。禁止绑定到 VFX 层级，并检查常见父级、约束和对象驱动依赖环。
+复杂自定义 Geometry Nodes 依赖仍需用户避免闭环。
+
+**Unbind** 移除托管约束并保留当前世界变换。若还有其他约束或控制器变换/约束动画，则明确拒绝，
+请先用 Blender 原生 Bake Action 等工具处理；参数、颜色和时间等自定义属性动画可保留。
+不要重命名托管约束 `VFX • Binding`；若已重命名，恢复到控制器自定义属性 `vfx_binding_constraint` 记录的名称后重试。
+Duplicate 保留相同目标但复制独立约束，解绑或删除副本不会修改原实例和目标。
 
 ## Flipbook 图集动画
 

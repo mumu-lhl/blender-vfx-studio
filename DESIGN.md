@@ -106,3 +106,13 @@ Geometry Nodes clamp each sample index into a moving temporal window, Sample Ind
 This preserves sampled variable-speed timing rather than converting it to arc-length timing. The common half-open lifetime applies.
 Rebake replaces only an owned, unshared mesh after successful sampling, converting world points to current layer-local coordinates.
 Native node edits survive; manual path edits are replaced only by explicit Rebake. JSON presets reject this module until path assets have a supported schema.
+
+### Native spatial binding
+
+`binding.py` adds one opt-in Child Of constraint with an evaluated target inverse, preserving the current world pose.
+Targets and optional pose bones remain external native ID references; duplication keeps targets and copies constraints.
+Known parenting, constraint (including pose bone), and object driver target dependencies are traversed before mutation.
+Managed constraint name is persisted on the controller; ambiguous/renamed constraints are refused rather than guessed.
+Unbind retains the evaluated pose, refusing additional constraints or transform/constraint animation that cannot be solved without baking.
+Layered Action/NLA and driver paths for custom ID parameters are safe to retain. Screen controllers reject spatial binding.
+No runtime handlers or new persistence schema are needed. Arbitrary user Geometry Nodes dependency cycles are outside the dependency preflight.

@@ -119,6 +119,55 @@ class VFX_OT_rebake_trail(bpy.types.Operator):
         return context.window_manager.invoke_confirm(self, event)
 
 
+class VFX_OT_bind(bpy.types.Operator):
+    bl_idname = "vfx_studio.bind"
+    bl_label = "Bind VFX to Object / Bone"
+    bl_options = {"REGISTER", "UNDO"}
+    target: StringProperty(name="Target")
+    bone: StringProperty(name="Bone (optional)")
+
+    def draw(self, context):
+        self.layout.prop_search(self, "target", context.scene, "objects")
+        target = context.scene.objects.get(self.target)
+        if target and target.type == "ARMATURE":
+            self.layout.prop_search(self, "bone", target.pose, "bones")
+        else:
+            self.layout.prop(self, "bone")
+
+    def invoke(self, context, event):
+        root = core.resolve(context.object)
+        targets = [o for o in context.selected_objects if o != root and core.resolve(o) is None]
+        if len(targets) == 1:
+            self.target = targets[0].name
+        return context.window_manager.invoke_props_dialog(self)
+
+    def execute(self, context):
+        from . import binding
+
+        try:
+            binding.bind(context, context.object, context.scene.objects.get(self.target), self.bone)
+        except ValueError as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+
+class VFX_OT_unbind(bpy.types.Operator):
+    bl_idname = "vfx_studio.unbind"
+    bl_label = "Unbind VFX (Keep World Transform)"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        from . import binding
+
+        try:
+            binding.unbind(context, context.object)
+        except ValueError as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+
 class VFX_OT_duplicate(bpy.types.Operator):
     bl_idname = "vfx_studio.duplicate"
     bl_label = "Duplicate VFX"
@@ -214,6 +263,12 @@ class VFX_PT_main(bpy.types.Panel):
         row = layout.row(align=True)
         row.operator("vfx_studio.duplicate", text="Duplicate", icon="DUPLICATE")
         row.operator("vfx_studio.delete", text="Delete", icon="TRASH")
+        if root["vfx_module"] != "screen.glare":
+            if root.get("vfx_binding_constraint"):
+                layout.label(text="Native Child Of binding (Object Constraints)")
+                layout.operator("vfx_studio.unbind", text="Unbind", icon="UNLINKED")
+            else:
+                layout.operator("vfx_studio.bind", text="Bind Object / Bone", icon="CONSTRAINT")
         layout.label(text="Timing · frames")
         for key in ("start", "duration", "speed", "loop"):
             layout.prop(root, f'["{key}"]', text=key.title())
@@ -280,6 +335,8 @@ CLASSES = (
     VFX_OT_create_particle,
     VFX_OT_create_trail,
     VFX_OT_rebake_trail,
+    VFX_OT_bind,
+    VFX_OT_unbind,
     VFX_OT_duplicate,
     VFX_OT_delete,
     VFX_OT_export_preset,
