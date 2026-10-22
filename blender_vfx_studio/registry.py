@@ -11,7 +11,10 @@ class Module:
     stateful: bool = False
 
 
-MODULES = {"mesh.ring": Module("mesh.ring", "Procedural Ring", 1)}
+MODULES = {
+    "mesh.ring": Module("mesh.ring", "Procedural Ring", 1),
+    "flipbook.atlas": Module("flipbook.atlas", "Flipbook Atlas", 1),
+}
 PRESETS = {
     "SHOCKWAVE": {
         "label": "Shockwave",

@@ -1,7 +1,7 @@
 """Blender UI delegates lifecycle operations to core."""
 
 import bpy
-from bpy.props import EnumProperty, StringProperty
+from bpy.props import EnumProperty, IntProperty, StringProperty
 from bpy_extras.io_utils import ExportHelper, ImportHelper
 
 from . import core, presets
@@ -25,6 +25,25 @@ class VFX_OT_create(bpy.types.Operator):
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
+
+
+class VFX_OT_create_flipbook(bpy.types.Operator, ImportHelper):
+    bl_idname = "vfx_studio.create_flipbook"
+    bl_label = "Create Flipbook from Atlas"
+    bl_options = {"REGISTER", "UNDO"}
+    filter_glob: StringProperty(
+        default="*.png;*.tga;*.jpg;*.jpeg;*.exr;*.tif;*.tiff;*.webp", options={"HIDDEN"}
+    )
+    columns: IntProperty(name="Columns", default=4, min=1, max=256)
+    rows: IntProperty(name="Rows", default=4, min=1, max=256)
+
+    def execute(self, context):
+        try:
+            core.create_flipbook(context, core.load_atlas(self.filepath), self.columns, self.rows)
+        except (ValueError, OSError) as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
 
 
 class VFX_OT_duplicate(bpy.types.Operator):
@@ -98,7 +117,8 @@ class VFX_PT_main(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator("vfx_studio.create", icon="ADD")
+        layout.operator("vfx_studio.create", text="Create Ring", icon="ADD")
+        layout.operator("vfx_studio.create_flipbook", text="Create Flipbook", icon="IMAGE_DATA")
         layout.operator("vfx_studio.import_preset", text="Load Preset", icon="IMPORT")
         try:
             root = core.resolve(context.object)
@@ -116,8 +136,28 @@ class VFX_PT_main(bpy.types.Panel):
         layout.label(text="Timing · frames")
         for key in ("start", "duration", "speed", "loop"):
             layout.prop(root, f'["{key}"]', text=key.title())
-        layout.label(text="Mesh + Shader")
-        for key in ("radius", "width", "expansion", "strength", "dissolve", "noise_scale", "fade"):
+        if root["vfx_module"] == "flipbook.atlas":
+            layout.label(text="Flipbook · top-left row order")
+            try:
+                tex = core.atlas_node(root)
+                layout.template_ID(tex, "image")
+            except ValueError as error:
+                layout.label(text=str(error), icon="ERROR")
+            keys = (
+                "columns",
+                "rows",
+                "first_frame",
+                "last_frame",
+                "width",
+                "height",
+                "opacity",
+                "strength",
+                "fade",
+            )
+        else:
+            layout.label(text="Mesh + Shader")
+            keys = ("radius", "width", "expansion", "strength", "dissolve", "noise_scale", "fade")
+        for key in keys:
             layout.prop(root, f'["{key}"]', text=key.replace("_", " ").title())
         for i, color in enumerate(("Red", "Green", "Blue")):
             layout.prop(root, f'["color_{i}"]', text=color)
@@ -127,6 +167,7 @@ class VFX_PT_main(bpy.types.Panel):
 
 CLASSES = (
     VFX_OT_create,
+    VFX_OT_create_flipbook,
     VFX_OT_duplicate,
     VFX_OT_delete,
     VFX_OT_export_preset,
