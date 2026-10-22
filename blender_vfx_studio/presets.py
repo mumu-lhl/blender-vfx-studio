@@ -40,8 +40,10 @@ def validate(data):
         or data["asset_version"] != MODULES[module].asset_version
     ):
         raise ValueError("Unsupported module asset version")
-    if module in {"trail.ribbon", "core.composition"}:
-        raise ValueError("Native paths and compositions require .blend Append or Duplicate")
+    if module in {"trail.ribbon", "core.composition", "simulation.cloth"}:
+        raise ValueError(
+            "Native paths, baked simulations and compositions require .blend Append or Duplicate"
+        )
     name = data["name"]
     if not isinstance(name, str) or not 1 <= len(name) <= 80 or any(ord(c) < 32 for c in name):
         raise ValueError("Preset name must contain 1–80 printable characters")
