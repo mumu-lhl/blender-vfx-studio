@@ -15,7 +15,7 @@ jobs:
       matrix:
         os: [ubuntu-24.04, windows-2025, macos-15]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
+    timeout-minutes: 30
     defaults:
       run:
         shell: bash
@@ -57,7 +57,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends libegl1 libegl-mesa0 libgl1-mesa-dri
+          sudo apt-get install -y --no-install-recommends libegl1 libegl-mesa0 libgl1-mesa-dri ffmpeg
       - name: Render Arc Slash visual review (960x540, CPU, no bloom)
         if: runner.os == 'Linux'
         env:
@@ -86,12 +86,22 @@ jobs:
         with:
           name: impact-burst-visual-review
           path: work/visual-impact/*.png
-      - name: Review slash-to-hit shot with native proxies (CPU, no bloom)
+      - name: Build combat playback evidence (960x540, CPU, no bloom)
         if: runner.os == 'Linux'
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: surfaceless
         run: |
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --sequence
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --light
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --engine BLENDER_EEVEE
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --wide
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --light
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --wide --light --sequence
+          python tools/combat_video.py work/visual-combat/dark
+          python tools/combat_video.py work/visual-combat/blender_eevee-wide-light
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-combat/dark/combat.blend --python tests/combat_reopen.py
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-combat/blender_eevee-wide-light/combat.blend --python tests/combat_reopen.py
       - uses: actions/upload-artifact@v7.0.2
         if: runner.os == 'Linux'
         with:
@@ -99,6 +109,9 @@ jobs:
           path: |
             work/visual-combat/*/combat-*.png
             work/visual-combat/*/combat.blend
+            work/visual-combat/*/combat.mp4
+            work/visual-combat/*/render-settings.json
+            work/visual-combat/*/video-info.json
       - name: Build and validate starter assets (CPU only)
         if: github.ref_type == 'tag' && runner.os == 'Linux'
         run: |

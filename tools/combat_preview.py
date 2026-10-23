@@ -1,6 +1,7 @@
 """Review slash-to-hit timing with native weapon/target proxies, without bloom."""
 
 import argparse
+import json
 import math
 import sys
 from pathlib import Path
@@ -31,12 +32,21 @@ def proxy(name, location, scale, color, *, sphere=False, parent=None):
     return obj
 
 
-def setup(*, light=False):
-    impact = impact_setup(light=light)
+def setup(*, light=False, wide=False, engine="CYCLES"):
+    impact = impact_setup(light=light, engine=engine)
     impact.location = (1.3, -0.17, 0.92)
     impact["start"] = 7.0
     impact.update_tag()
     scene = bpy.context.scene
+    # Match a modest viewport sample budget for software Eevee review.
+    scene.eevee.taa_render_samples = 16
+    if light:
+        scene.world.node_tree.nodes["Background"].inputs["Color"].default_value = (
+            0.55,
+            0.60,
+            0.68,
+            1,
+        )
     scene.cursor.location = (-1, 0, 0.92)
     slash = core.create(bpy.context, "ARC_SLASH", "LOW")
     for key, value in dict(
@@ -70,10 +80,12 @@ def setup(*, light=False):
     scene.camera.rotation_euler = (
         (focus - scene.camera.location).to_track_quat("-Z", "Y").to_euler()
     )
-    scene.camera.data.ortho_scale = 9.5
+    scene.camera.data.ortho_scale = 19.0 if wide else 9.5
     lamp = bpy.data.objects.new("Proxy area light", bpy.data.lights.new("Proxy area light", "AREA"))
     scene.collection.objects.link(lamp)
     lamp.location, lamp.data.energy, lamp.data.shape, lamp.data.size = (0, -3, 6), 500, "DISK", 5
+    for label, frame in (("Slash begins", 3), ("Hit", 7), ("Recovery", 15), ("Tail ends", 31)):
+        scene.timeline_markers.new(label, frame=frame)
     scene.frame_start, scene.frame_end, scene.render.fps = 1, 36, 24
     return slash, impact
 
@@ -81,18 +93,42 @@ def setup(*, light=False):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--light", action="store_true")
+    parser.add_argument(
+        "--wide", action="store_true", help="Double the visible width without resizing effects"
+    )
+    parser.add_argument("--engine", choices=("CYCLES", "BLENDER_EEVEE"), default="CYCLES")
     parser.add_argument("--sequence", action="store_true", help="Render every frame from 1 to 36")
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
     if not bpy.app.background or "--factory-startup" not in sys.argv or bpy.data.filepath:
         raise RuntimeError("Use a fresh background process with --factory-startup and no project")
-    setup(light=args.light)
-    folder = ROOT / "work/visual-combat" / ("light" if args.light else "dark")
+    setup(light=args.light, wide=args.wide, engine=args.engine)
+    background = "light" if args.light else "dark"
+    variant = (
+        background
+        if args.engine == "CYCLES" and not args.wide
+        else (f"{args.engine.lower()}-{'wide' if args.wide else 'near'}-{background}")
+    )
+    folder = ROOT / "work/visual-combat" / variant
     folder.mkdir(parents=True, exist_ok=True)
-    for frame in range(1, 37) if args.sequence else (4, 8, 12, 23):
+    frames = list(range(1, 37)) if args.sequence else [4, 8, 12, 23]
+    for frame in frames:
         bpy.context.scene.frame_set(frame)
         bpy.context.scene.render.filepath = str(folder / f"combat-{frame:04d}.png")
         bpy.ops.render.render(write_still=True)
     bpy.ops.wm.save_as_mainfile(filepath=str(folder / "combat.blend"))
+    settings = {
+        "engine": args.engine,
+        "background": background,
+        "camera_width": 19.0 if args.wide else 9.5,
+        "resolution": [960, 540],
+        "fps": 24,
+        "rendered_frames": frames,
+        "samples": 16 if args.engine == "BLENDER_EEVEE" else 24,
+        "bloom": False,
+    }
+    (folder / "render-settings.json").write_text(
+        json.dumps(settings, indent=2) + "\n", encoding="utf-8"
+    )
 
 
 if __name__ == "__main__":
