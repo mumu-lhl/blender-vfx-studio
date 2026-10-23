@@ -30,7 +30,7 @@ def benchmark(instances, frames):
         "quality": "LOW",
         "cases": [],
     }
-    for kind in ("ring", "slash", "particle", "cloth", "composition"):
+    for kind in ("ring", "slash", "particle", "emitter", "cloth", "composition"):
         bpy.ops.wm.read_factory_settings(use_empty=True)
         roots = []
         bake_seconds = 0.0
@@ -42,6 +42,8 @@ def benchmark(instances, frames):
                 root = core.create(bpy.context, "ARC_SLASH", "LOW")
             elif kind == "particle":
                 root = core.create_particle(bpy.context)
+            elif kind == "emitter":
+                root = core.create_emitter(bpy.context)
             elif kind == "cloth":
                 root = simulation.create(bpy.context)
                 start = time.perf_counter()

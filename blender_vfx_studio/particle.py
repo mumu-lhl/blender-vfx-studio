@@ -20,10 +20,11 @@ def material(root):
     return mat
 
 
-def geometry(obj, root, mat, quality):
+def geometry(obj, root, mat, quality, *, emitter=False):
     import bpy
 
-    tree = bpy.data.node_groups.new("VFX • Deterministic Burst", "GeometryNodeTree")
+    name = "Continuous Emitter" if emitter else "Deterministic Burst"
+    tree = bpy.data.node_groups.new("VFX • " + name, "GeometryNodeTree")
     tree["vfx_id"] = root["vfx_id"]
     tree.interface.new_socket(name="Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
     link = tree.links.new
@@ -49,10 +50,18 @@ def geometry(obj, root, mat, quality):
             link(b, n.inputs["Scale"] if operation == "SCALE" else n.inputs[1])
         return n.outputs[0]
 
-    line = node(tree, "GeometryNodeMeshLine", "Burst Points", -800, 800)
-    line.inputs["Offset"].default_value = (0, 0, 0)
-    drive(line.inputs["Count"], "default_value", root, "min(max(floor(p),1),2048)", {"p": "count"})
-    index = node(tree, "GeometryNodeInputIndex", "Particle ID", -1400, 500)
+    if emitter:
+        from .emitter import fields
+
+        line, identity, time, progress, alive = fields(tree, root, value, math)
+    else:
+        line = node(tree, "GeometryNodeMeshLine", "Burst Points", -800, 800)
+        line.inputs["Offset"].default_value = (0, 0, 0)
+        drive(
+            line.inputs["Count"], "default_value", root, "min(max(floor(p),1),2048)", {"p": "count"}
+        )
+        index = node(tree, "GeometryNodeInputIndex", "Particle ID", -1400, 500)
+        identity = index.outputs[0]
     random = node(
         tree, "FunctionNodeRandomValue", "Random Direction", -1200, 400, data_type="FLOAT_VECTOR"
     )
@@ -72,7 +81,7 @@ def geometry(obj, root, mat, quality):
     next(s for s in scalar.inputs if s.name == "Min" and s.type == "VALUE").default_value = 0.5
     next(s for s in scalar.inputs if s.name == "Max" and s.type == "VALUE").default_value = 1.5
     for n, offset in [(random, 0), (scalar, 17)]:
-        link(index.outputs[0], n.inputs["ID"])
+        link(identity, n.inputs["ID"])
         drive(
             n.inputs["Seed"],
             "default_value",
@@ -116,9 +125,10 @@ def geometry(obj, root, mat, quality):
         -500,
         -450,
     )
-    progress = value("Progress", None, -1200, -700, PROGRESS, TIME_PROPS)
-    seconds = value("Motion Seconds", "motion_seconds", -1200, -900)
-    time = math("Motion Time", "MULTIPLY", progress, seconds, -900, -700)
+    if not emitter:
+        progress = value("Progress", None, -1200, -700, PROGRESS, TIME_PROPS)
+        seconds = value("Motion Seconds", "motion_seconds", -1200, -900)
+        time = math("Motion Time", "MULTIPLY", progress, seconds, -900, -700)
     velocity = value("Velocity", "velocity", -700, -900)
     speed = math("Varied Velocity", "MULTIPLY", velocity, variation, -300, -450)
     distance = math("Travel", "MULTIPLY", speed, time, -100, -450)
@@ -141,9 +151,16 @@ def geometry(obj, root, mat, quality):
     link(line.outputs["Mesh"], setpos.inputs["Geometry"])
     link(location, setpos.inputs["Position"])
     active = value("Active", None, 300, -1100, ACTIVE, TIME_PROPS)
-    delete = node(tree, "GeometryNodeDeleteGeometry", "Outside Lifetime", 950, 800, domain="POINT")
-    link(setpos.outputs["Geometry"], delete.inputs["Geometry"])
-    link(math("Inactive", "LESS_THAN", active, 0.5, 500, -1100), delete.inputs["Selection"])
+    if emitter:
+        points = setpos.outputs["Geometry"]
+        selection = math("Alive During Effect", "MULTIPLY", alive, active, 500, -1500)
+    else:
+        delete = node(
+            tree, "GeometryNodeDeleteGeometry", "Outside Lifetime", 950, 800, domain="POINT"
+        )
+        link(setpos.outputs["Geometry"], delete.inputs["Geometry"])
+        link(math("Inactive", "LESS_THAN", active, 0.5, 500, -1100), delete.inputs["Selection"])
+        points = delete.outputs["Geometry"]
     ico = node(tree, "GeometryNodeMeshIcoSphere", "Particle Mesh", 700, 500)
     ico.inputs["Radius"].default_value = 1
     ico.inputs["Subdivisions"].default_value = {"LOW": 1, "MEDIUM": 2, "HIGH": 3}[quality]
@@ -169,12 +186,15 @@ def geometry(obj, root, mat, quality):
         -1100,
     )
     instance = node(tree, "GeometryNodeInstanceOnPoints", "Particle Instances", 1200, 800)
-    link(delete.outputs["Geometry"], instance.inputs["Points"])
+    link(points, instance.inputs["Points"])
+    if emitter:
+        # Selection evaluates on the original pool: deleting points first would renumber Index.
+        link(selection, instance.inputs["Selection"])
     link(material_node.outputs["Geometry"], instance.inputs["Instance"])
     link(scale, instance.inputs["Scale"])
     realize = node(tree, "GeometryNodeRealizeInstances", "Editable Mesh Output", 1450, 800)
     out = node(tree, "NodeGroupOutput", "Output", 1700, 800)
     link(instance.outputs["Instances"], realize.inputs["Geometry"])
     link(realize.outputs["Geometry"], out.inputs["Geometry"])
-    obj.modifiers.new("VFX • Native Burst", "NODES").node_group = tree
+    obj.modifiers.new("VFX • " + name, "NODES").node_group = tree
     return tree

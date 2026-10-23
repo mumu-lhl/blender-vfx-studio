@@ -56,7 +56,7 @@ Opacity 和 Fade 控制透明度，Dissolve 为噪声阈值。Flow 是一个周�
 例如首文件编号 10，First=1 表示使用编号 11 的文件。图片序列与图集共用选帧容差、透明度和生命周期规则。
 序列文件不打包到完整效果资产中，JSON 记录第一张图片路径及数量；分享时需要迁移全部文件。
 
-粒子整组在 Start 出生，以原生点 Index 作为编号，Seed 决定可重复的随机变化，Count 不超过 2048。Motion Time = Progress × Motion Seconds；位置由初速度、初始径向距离和重力公式直接计算。Motion Seconds 表示轨迹中的秒数，Duration 表示播放帧数，修改场景帧率不会自动改变二者。Fade 在粒子模块表示尺寸缩减，不是透明度。一个周期结束后全体消失，循环从出生状态重新开始；尚无连续发射、碰撞或历史受力。
+Burst 粒子整组在 Start 出生，以原生点 Index 作为编号，Seed 决定可重复的随机变化，Count 不超过 2048。Motion Time = Progress × Motion Seconds；位置由初速度、初始径向距离和重力公式直接计算。Motion Seconds 表示轨迹中的秒数，Duration 表示播放帧数，修改场景帧率不会自动改变二者。Fade 在粒子模块表示尺寸缩减，不是透明度。一个周期结束后全体消失，循环从出生状态重新开始；不处理碰撞或历史受力。
 
 Trail 保存对象原点或骨骼 head 在指定帧区间的世界位置，播放时在采样点间按时间线性插值。Length 是可见尾带占完整采样时间的比例，Width 是全宽，Fade 表示逐渐缩窄。Rebake 是明确重新采样并替换基础网格的操作，会覆盖手动路径编辑，但保留材质和节点。修改源引用或采样区间不会自动更新路径，也不会自动修改回放 Start / Duration。
 
@@ -73,3 +73,8 @@ Screen 的效果层是控制器记录的 Scene 中的合成节点，不是 Mesh 
 播放 Start / Duration / Speed / Loop 决定怎样重放，二者独立。UNBAKED 没有存储动画，BAKED 的输入与上次烘焙一致，
 STALE 表示输入已变化但仍保留旧动画。只有明确重新烘焙才更新结果，不能把过期标记等同于自动重算。
 模拟在控制器局部空间计算；控制器变换和播放动画不使已存结果过期。
+
+连续发射模块 `particle.emitter` 使用每个粒子的独立出生时间和寿命，不使用 Burst 的 Count / Motion Seconds。
+运动时钟为 `Progress × (Emission Seconds + Lifetime)`，出生编号 n 的时间为 `n / Effective Rate`，只接受出生时间小于 Emission Seconds 的粒子；年龄达到 Lifetime 即消失。
+Rate 为 0 时全部隐藏；有效发射率为 `min(Rate, 2048 / Lifetime)`，最多分配 2048 个循环使用的点。Rate 的界面上限为 10000，Lifetime 范围为 0.001–100 运动秒。
+修改或动画化发射参数会按当前值重算整个安排，不积分历史参数。移动控制器会移动已出生粒子；循环重新播放发射及寿命尾段，不能理解成无缝的无限喷射。

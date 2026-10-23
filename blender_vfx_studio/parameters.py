@@ -104,6 +104,25 @@ PARTICLE_PARAMETERS = {
 }
 
 
+EMITTER_PARAMETERS = {
+    key: spec for key, spec in PARTICLE_PARAMETERS.items() if key not in {"count", "motion_seconds"}
+}
+EMITTER_PARAMETERS.update(
+    {
+        "duration": (48.0, 1.0, 100000.0, "Playback frames for emission plus the lifetime tail"),
+        "rate": (
+            64.0,
+            0.0,
+            10000.0,
+            "Requested particles per motion second; limited by the 2048-slot pool",
+        ),
+        "emission_seconds": (1.5, 0.0, 100.0, "Motion seconds during which particles are born"),
+        "lifetime": (0.6, 0.001, 100.0, "Individual particle lifetime in motion seconds"),
+        "fade": (1.0, 0.0, 1.0, "Size loss over each particle's own lifetime"),
+    }
+)
+
+
 TRAIL_PARAMETERS = {
     **COMMON_PARAMETERS,
     "width": (0.2, 0.001, 100.0, "Full ribbon width"),
@@ -150,6 +169,8 @@ GROUP_PARAMETERS = {key: PARAMETERS[key] for key in ("start", "duration", "speed
 
 
 def parameters_for(module):
+    if module == "particle.emitter":
+        return EMITTER_PARAMETERS
     if module == "flipbook.sequence":
         return SEQUENCE_PARAMETERS
     if module == "shader.shield":

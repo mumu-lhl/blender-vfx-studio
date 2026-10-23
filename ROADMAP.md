@@ -1,6 +1,6 @@
 # 开发进度与后续计划
 
-更新：2026-10-22（Asia/Shanghai）。以下区分已实现代码、已验证范围和尚未完成的工作；早期预览版不等同于正式稳定版。
+更新：2026-10-23（Asia/Shanghai）。以下区分已实现代码、已验证范围和尚未完成的工作；早期预览版不等同于正式稳定版。
 
 ## M0：插件与开发基础——已实现
 
@@ -17,7 +17,7 @@
 ## M2：基础效果库——已覆盖主要类型，继续扩展
 
 - Flipbook：静态图集选帧、尺寸、透明度、独立复制和图片保留；新增编号图片序列模块，支持统一时间、相对图片范围和外部文件 JSON 预设（[#38](https://github.com/mumu-lhl/blender-vfx-studio/issues/38)）；JSON 支持图片相对路径及旧格式转换（[#2](https://github.com/mumu-lhl/blender-vfx-studio/issues/2)）。
-- Particle：最多 2048 个粒子的可重复随机爆发、重力弹道和实例化；尚无连续发射或碰撞（[#11](https://github.com/mumu-lhl/blender-vfx-studio/issues/11)）。
+- Particle：最多 2048 个粒子的可重复随机爆发、重力弹道和实例化；增加了连续发射、逐粒子寿命和有界数量控制，尚无碰撞（[#11](https://github.com/mumu-lhl/blender-vfx-studio/issues/11)）。
 - Screen：主动添加辉光和时间闪光，保留现有合成链，支持叠加、复制和安全移除（[#9](https://github.com/mumu-lhl/blender-vfx-studio/issues/9)）。
 
 继续扩展 Mesh / Shader 预设，改善常用效果的外观。已实现独立的 Arc Slash 程序化弧形刀光：弧度、生命周期旋转、收尖、溶解和预设复用（[#26](https://github.com/mumu-lhl/blender-vfx-studio/issues/26)）；Trail 继续用于动画采样路径。
@@ -82,6 +82,12 @@ v0.2–v0.5 已发布，分别覆盖环形与参数预设、图集、合成、�
 
 0.14.1 修复损坏的 Cloth 复制会留下半份实例的问题（[#41](https://github.com/mumu-lhl/blender-vfx-studio/issues/41)）。
 单个及组合复制在创建数据前检查源/输出结构，拒绝操作时保留已有数据和烘焙播放；新增 2 项行为测试。
-下一项功能为连续粒子发射与逐粒子寿命，见 [#40](https://github.com/mumu-lhl/blender-vfx-studio/issues/40)。
+连续粒子发射与逐粒子寿命已实现，见 [#40](https://github.com/mumu-lhl/blender-vfx-studio/issues/40)。
 
-v0.14.0 已发布并下载校验，与全新克隆构建逐字节一致。0.14.1 已通过本地 10 项 Cloth 测试、无插件重开、安装/卸载及 Ruff；完整三平台检查由 CI 执行。
+v0.14.0 已发布并下载校验，与全新克隆构建逐字节一致。0.14.1 已通过三平台 105 项测试、12 个无插件重开检查及安装/卸载，并已发布；下载 ZIP 与全新克隆构建逐字节一致。
+
+0.15.0 增加 Continuous Emitter：独立出生时间、寿命、年龄缩小、确定性随机弹道、停止发射后的尾段，以及最多 2048 个存活槽的发射率限制。
+支持参数预设、完整资产、组合及独立复制。局部空间运动，不保留参数或控制器运动的历史；修改 Rate / Lifetime 会重新安排当前粒子，Loop 重播整个发射及尾段。
+本地已通过 114 项测试、13 个无插件重开检查、安装/卸载与 Ruff；新增 8 项 Blender 行为测试和 1 项参数格式测试。Cycles CPU 三阶段预览已查看，三平台 CI 和发布尚待完成。
+
+接下来优先验证连续发射的 Eevee 和实际侧栏操作，再完善复杂动画骨架的采样与绑定验证，以及旧资产升级的明确规则。完整效果缩略图库、世界空间粒子历史和碰撞仍未实现。

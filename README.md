@@ -105,7 +105,21 @@ Seed 决定可重复的随机方向、速度和尺寸变化。Spread=0 沿控制
 
 Velocity / Gravity 使用控制器局部空间的单位/秒和单位/秒²。**Motion Seconds** 是轨迹包含多少秒的物理运动，**Duration** 是用多少帧播放它。例如 Motion Seconds=1、Duration=24，会在 24 帧里播放一秒的弹道；改成 Duration=48，只会放慢播放，不改变轨迹形状。RGB / Strength 控制发光，可结合 Screen VFX 添加辉光。
 
-目前所有粒子同时出生，直接根据当前帧计算弹道，因此跳帧不需要缓存。改变运动参数会重新计算当前轨迹，不累积之前的受力。尚无连续发射、碰撞或逐粒子出生时间；循环会重置整组粒子。Geometry Nodes 可继续编辑，应用修改器可得到当前帧的普通网格。
+Burst 的所有粒子同时出生，直接根据当前帧计算弹道，因此跳帧不需要缓存。改变运动参数会重新计算当前轨迹，不累积之前的受力；循环重置整组粒子。需要陆续出生的粒子时，使用下面的 Continuous Emitter。两者均不处理碰撞，Geometry Nodes 可继续编辑，应用修改器可得到当前帧的普通网格。
+
+## Continuous Emitter 连续粒子发射
+
+点击 **Create Continuous Emitter**，创建沿局部 +Z 喷出的粒子流。Rate 表示每运动秒出生多少个粒子，Emission Seconds 表示发射多少运动秒，Lifetime 表示每个粒子存活多少运动秒。第一个粒子在 Start 出生，后续粒子间隔为 1 / Rate；Rate 或 Emission Seconds 为 0 时不显示粒子。
+
+**Duration 包含停止发射后的寿命尾段**：整个周期的运动时间为 Emission Seconds + Lifetime。例如 Rate=20、Emission Seconds=2、Lifetime=0.5、Duration=60，前 48 个播放帧陆续发射，后 12 帧等待剩余粒子消失。改变 Duration 或 Speed 只调整播放快慢，不改变弹道；场景帧率不改变这些运动秒参数。
+
+Seed 为每次出生生成可重复的随机方向、速度和尺寸。Velocity / Gravity、Spread、Randomness、Spawn Radius、Size 的含义与 Burst 相同；Fade 按每个粒子自己的年龄缩小尺寸。Loop 重复整个发射及尾段，因此每轮都会重新填充粒子流，不保证无缝衔接。
+
+每个效果只有一个网格对象。为控制开销，同时存活的粒子槽最多 2048 个；实际 Rate 不超过 `2048 / Lifetime`，面板显示 Effective Rate，触及限制时显示提示。默认使用 Low，每粒子 20 个三角面；数量多时先减少 Rate 或 Lifetime。
+
+这是直接计算当前状态的局部空间效果，无需缓存。移动或绑定控制器会连同已经出生的粒子一起移动。修改 Rate、Lifetime、Emission Seconds，或为它们设置关键帧，会使用当前值重新计算出生安排，不累计过去的发射或受力。需要沿角色走过的世界路径留下效果时，使用 Ribbon Trail；本版没有世界空间发射历史、碰撞或外部力场。
+
+支持独立复制、组合时间控制、参数预设及完整效果文件。保存后不安装插件也能播放。`tools/emitter_preview.py` 可重新生成填充、稳定发射和尾段三个阶段的 CPU 预览；用 `-- --engine BLENDER_EEVEE --scale 50` 检查 Eevee。
 
 ## Screen 辉光和闪光
 
@@ -210,7 +224,7 @@ Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使�
 
 库放在 Blender 用户 DATAFILES 目录下的 `blender_vfx_studio/presets/`，不随 `.blend` 保存，卸载插件也不会自动删除。可以把外部参数 JSON 复制到该目录后刷新。最多 256 个 JSON 文件；损坏、超大和符号链接条目会被报告。Flipbook 图片缺失时会报错，不创建残缺实例，也不修改预设文件。
 
-参数文件最大 64 KiB，使用独立格式版本，严格检查字段、数值范围和模块版本。当前格式 2 支持 ring / slash / shield / atlas / sequence / screen / burst 的资产版本 1，也能读取并转换旧格式 1 环形预设。未知版本会明确报错，不修改场景。轨迹路径暂不纳入参数 JSON。
+参数文件最大 64 KiB，使用独立格式版本，严格检查字段、数值范围和模块版本。当前格式 2 支持 ring / slash / shield / atlas / sequence / screen / burst / emitter 的资产版本 1，也能读取并转换旧格式 1 环形预设。未知版本会明确报错，不修改场景。轨迹路径暂不纳入参数 JSON。
 
 ## 删除与兼容性限制
 

@@ -153,6 +153,27 @@ class PresetTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 presets.validate(invalid)
 
+    def test_emitter_parameters_preserve_physical_seconds_and_rate_limits(self):
+        data = dict(
+            sample(),
+            module="particle.emitter",
+            parameters={k: v[0] for k, v in preset_parameters_for("particle.emitter").items()},
+        )
+        self.assertEqual(presets.loads(presets.dumps(data)), data)
+        self.assertNotIn("count", data["parameters"])
+        self.assertNotIn("motion_seconds", data["parameters"])
+        for key, value in (
+            ("rate", -1),
+            ("rate", 10001),
+            ("lifetime", 0),
+            ("emission_seconds", -1),
+            ("seed", 2.5),
+        ):
+            invalid = copy.deepcopy(data)
+            invalid["parameters"][key] = value
+            with self.assertRaises(ValueError):
+                presets.validate(invalid)
+
     def test_reject_versions_fields_and_types(self):
         for key, value in [
             ("format_version", 0),
