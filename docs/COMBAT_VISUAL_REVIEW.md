@@ -72,6 +72,6 @@ combat_frames.py 从实际 MP4 提取隔帧 PNG，video-frames/frames.json 记�
 
 CI 配置生成上述六种条件、三个视频、离线播放页和原生场景，并对三个完整序列的命中帧执行无插件像素对比，附件为 `combat-shot-visual-review`。自动检查结果见关联 PR。视频文件存在和元数据检查通过只证明交付物可供播放，不代表已经观看。
 
-[Issue #69](https://github.com/mumu-lhl/blender-vfx-studio/issues/69) 按用户授权的隔帧替代方案验收，待本轮 PR 的完整检查通过后关闭。实时播放、真实角色、其他帧率及集成显卡性能不在本次已验证范围内。后续可以补充实时播放评审，但不再把缺少这一工具写成抽样验收无法完成。
+[Issue #69](https://github.com/mumu-lhl/blender-vfx-studio/issues/69) 已按用户授权的隔帧替代方案验收并关闭，PR #73 已合并，三平台完整检查通过。实时播放、真实角色、其他帧率及集成显卡性能不在本次已验证范围内。后续可以补充实时播放评审，但不再把缺少这一工具写成抽样验收无法完成。
 
 后续 [#71](https://github.com/mumu-lhl/blender-vfx-studio/issues/71) 增厚主尖片横向轮廓并加入亮暗面。已读取修改后的 Eevee 亮背景近景、远景命中与扩散图，并对比旧图：近景面色更清楚，远景主尖片略易辨认，细余烬仍弱。Cycles 出现、峰值、衰减图已查看。155 项本地回归和两种引擎的无插件命中帧像素对比通过；详细参数、编辑方式和限制见 [Impact 检查记录](IMPACT_VISUAL_REVIEW.md)。#69 的实际 MP4 隔帧验收结果见上文；实时播放仍未检查。
