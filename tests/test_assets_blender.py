@@ -1,7 +1,9 @@
 """Complete native asset reuse, repeated imports and non-destructive failures."""
 
+import struct
 import sys
 import unittest
+import zlib
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -273,8 +275,66 @@ class AssetTests(unittest.TestCase):
         bundle = next(c for c in imported.users_collection if c.get("vfx_bundle_version"))
         self.assertEqual(bundle.preview.image_size[:], (2, 2))
         self.assertTrue(bundle.preview.is_image_custom)
-        for a, b in zip(bundle.preview.image_pixels_float, pixels):
+        expected = pixels[:12] + [0.125, 0.25, 0.375, 0.5]
+        for a, b in zip(bundle.preview.image_pixels_float, expected):
             self.assertAlmostEqual(a, b, delta=1 / 255)
+
+    def test_transparent_png_preview_matches_native_custom_preview(self):
+        rgba = bytes([255, 0, 0, 128, 128, 64, 192, 128, 0, 0, 255, 0, 255, 255, 255, 255])
+
+        def chunk(tag, data):
+            return (
+                struct.pack(">I", len(data))
+                + tag
+                + data
+                + struct.pack(">I", zlib.crc32(tag + data))
+            )
+
+        file = ROOT / "work/native-alpha-preview.png"
+        raw = b"\x00" + rgba[:8] + b"\x00" + rgba[8:]
+        file.write_bytes(
+            b"\x89PNG\r\n\x1a\n"
+            + chunk(b"IHDR", struct.pack(">IIBBBBB", 2, 2, 8, 6, 0, 0, 0))
+            + chunk(b"IDAT", zlib.compress(raw))
+            + chunk(b"IEND", b"")
+        )
+        image = bpy.data.images.load(str(file), check_existing=False)
+        native = bpy.data.collections.new("Native Custom Preview")
+        with bpy.context.temp_override(id=native):
+            self.assertEqual(
+                bpy.ops.ed.lib_id_load_custom_preview(filepath=str(file)), {"FINISHED"}
+            )
+        exported = bpy.data.collections.new("Exported Custom Preview")
+        original = list(image.pixels)
+        asset_preview.apply(exported, asset_preview.prepare(image))
+        self.assertEqual(list(image.pixels), original)
+        for a, b in zip(exported.preview.image_pixels_float, native.preview.image_pixels_float):
+            self.assertAlmostEqual(a, b, delta=2 / 255)
+
+    def test_transparent_edges_are_filtered_after_premultiplication(self):
+        image = bpy.data.images.new("Transparent Edge", 512, 1, alpha=True, float_buffer=True)
+        image.alpha_mode = "STRAIGHT"
+        original = [1, 0, 0, 1, 0, 0, 1, 0] * 256
+        image.pixels = original
+        size, pixels = asset_preview.prepare(image)
+        self.assertEqual(size, (256, 1))
+        for i in range(0, len(pixels), 4):
+            self.assertEqual(list(pixels[i : i + 4]), [0.5, 0, 0, 0.5])
+        self.assertEqual(list(image.pixels), original)
+
+    def test_preview_respects_premultiplied_and_opaque_alpha_modes(self):
+        image = bpy.data.images.new("Alpha Modes", 1, 1, alpha=True, float_buffer=True)
+        for mode, expected in (
+            ("PREMUL", [0.25, 0.125, 0, 0.5]),
+            ("NONE", [0.25, 0.125, 0, 1]),
+            ("CHANNEL_PACKED", [0.25, 0.125, 0, 1]),
+        ):
+            image.alpha_mode = mode
+            image.pixels = [0.25, 0.125, 0, 0.5]
+            original = list(image.pixels)
+            self.assertEqual(list(asset_preview.prepare(image)[1]), expected)
+            self.assertEqual(list(image.pixels), original)
+            self.assertEqual(image.alpha_mode, mode)
 
     def test_preview_resizes_and_preserves_aspect_ratio_without_upscaling(self):
         image = bpy.data.images.new("Wide Preview", 512, 128, float_buffer=True)
@@ -395,8 +455,8 @@ if not result.wasSuccessful():
     raise RuntimeError("Native assets integration failed")
 bpy.ops.wm.read_factory_settings(use_empty=True)
 original, _, _ = group()
-preview = bpy.data.images.new("Fixture Preview", 2, 2)
-preview.pixels = [1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1]
+preview = bpy.data.images.new("Fixture Preview", 2, 2, alpha=True)
+preview.pixels = [1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0.5]
 assets.write(FILE, original, preview_image=preview)
 bpy.data.images.remove(preview)
 loaded = assets.load(bpy.context, FILE)

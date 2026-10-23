@@ -56,3 +56,9 @@ Linux 实际窗口已确认导出图片选择、可读的说明，以及 Asset B
 [#53](https://github.com/mumu-lhl/blender-vfx-studio/issues/53) 增加入门原生资产库：Energy Charge、Impact Burst 和 Arc Slash，可由提交的脚本重新生成并单独打包。
 三张 Cycles CPU 缩略图已查看，实际生成的 ZIP 已在无插件进程中验证。相机、背景、合成节点和预览源图片不进入资产；模板默认 Low，不循环，保留从第 1 帧开始的时间。
 新增生成器保护、重复载入和依赖隔离检查，并增加第 14 个无插件重开进程。本地完整 132 项测试、14 个无插件重开进程、安装/卸载与 Ruff 已通过，实际生成的 ZIP 另有无插件验证。Linux 浏览器已检查三张缩略图、全部模板的载入及蓄力组合的重复载入，不同副本编号独立。三平台 CI 和发布尚待完成。
+
+## 透明预览修复
+
+[#55](https://github.com/mumu-lhl/blender-vfx-studio/issues/55) 修复透明图片预览偏亮和缩小后的边缘串色：先按源 Alpha Mode 转为原生预乘 RGBA，再插值。
+3 项新增回归测试先复现失败，修复后本地 18 项资产测试与无插件重开均通过；包含与 Blender 原生 Load Custom Preview 的像素对照、透明边缘和 Alpha Mode。
+0.19.1 的三平台完整检查尚待完成。入门库的三个预览不透明，不受此问题影响。
