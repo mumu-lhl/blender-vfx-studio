@@ -98,6 +98,36 @@ class ImpactTests(unittest.TestCase):
         self.assertEqual(len(bpy.data.materials), 0)
         self.assertEqual(len(bpy.data.node_groups), 0)
 
+    def test_shard_side_contrast_is_editable_and_survives_complete_assets(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        camera()
+        bpy.context.scene.camera.data.ortho_scale = 5.5
+        bpy.context.scene.render.resolution_x = bpy.context.scene.render.resolution_y = 96
+        for member in composition.members(root):
+            member.children[0].hide_render = not member.name.endswith("Main Shards")
+        shards = next(m for m in composition.members(root) if m.name.endswith("Main Shards"))
+        contrast = shards.children[0].data.materials[0].node_tree.nodes["Side Contrast"].outputs[0]
+        contrast.default_value = 0
+        flat = render_pixels(5)
+        contrast.default_value = 0.63
+        faceted = render_pixels(5)
+        # Actual pixels must change: a saved slider with no shader connection is insufficient.
+        self.assertGreater(sum(flat) - sum(faceted), 0.5)
+        path = ROOT / "work/impact-facets.blend"
+        assets.write(path, root)
+        core.delete(root)
+        loaded = assets.load(bpy.context, path)
+        self.assertEqual(render_pixels(5), faceted)
+        clone = core.duplicate(bpy.context, loaded)
+        core.delete(loaded)
+        self.assertEqual(render_pixels(5), faceted)
+        # Authored shading still follows the ordinary controller's color and emission.
+        shards = next(m for m in composition.members(clone) if "Main Shards" in m.name)
+        update(shards, color_0=0.01, color_1=0.1, color_2=1.0, strength=0.5)
+        blue = render_pixels(5)
+        self.assertGreater(sum(blue[2::4]), sum(blue[0::4]))
+        self.assertNotEqual(blue, faceted)
+
     def test_core_flash_and_sparse_tail_have_distinct_rendered_stages(self):
         root = core.create(bpy.context, "IMPACT_BURST", "LOW")
         camera()
