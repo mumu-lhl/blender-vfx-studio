@@ -35,9 +35,8 @@ def validate(data):
     module = data["module"]
     if not isinstance(module, str) or module not in MODULES:
         raise ValueError("Unknown VFX module")
-    if (
-        type(data["asset_version"]) is not int
-        or data["asset_version"] != MODULES[module].asset_version
+    if type(data["asset_version"]) is not int or not MODULES[module].supports_version(
+        data["asset_version"]
     ):
         raise ValueError("Unsupported module asset version")
     if module in {"trail.ribbon", "core.composition", "simulation.cloth"}:
@@ -66,7 +65,7 @@ def validate(data):
             or any(ord(c) < 32 for c in path)
         ):
             raise ValueError("Atlas image must be a local file path")
-    specs = preset_parameters_for(module)
+    specs = preset_parameters_for(module, data["asset_version"])
     parameters = data["parameters"]
     if not isinstance(parameters, dict) or parameters.keys() != specs.keys():
         raise ValueError("Preset parameters are missing or unknown")

@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT / "tests"))
 from particle_test_support import camera, render_pixels
 
 import blender_vfx_studio as addon
-from blender_vfx_studio import core, presets
+from blender_vfx_studio import assets, core, presets, slash
 
 
 def update(root, **values):
@@ -33,7 +33,7 @@ def points(root, frame):
 
 
 def create():
-    root = core.create(bpy.context, "ARC_SLASH")
+    root = slash.create(bpy.context, asset_version=1)
     update(
         root,
         start=1.0,
@@ -139,7 +139,87 @@ class SlashTests(unittest.TestCase):
                     )
                 )
             core.delete(root)
-        self.assertEqual(counts, [32, 64, 128])
+        self.assertTrue(0 < counts[0] < counts[1] < counts[2] < 5000)
+
+    def test_modern_geometry_parameters_and_stateless_playback(self):
+        root = core.create(bpy.context, "ARC_SLASH", "LOW")
+        self.assertEqual(root["vfx_asset_version"], 2)
+        peak = points(root, 5)
+        update(root, motion_ease=0.0)
+        self.assertNotEqual(points(root, 5), peak)
+        update(root, motion_ease=0.85, head_bias=0.0)
+        self.assertNotEqual(points(root, 5), peak)
+        update(root, head_bias=0.7)
+        self.assertEqual(points(root, 5), peak)
+        self.assertEqual(points(root, 0), [])
+        self.assertEqual(points(root, 17), [])
+        self.assertEqual(points(root, 5), peak)
+        update(root, speed=2.0)
+        self.assertEqual(points(root, 3), peak)
+        update(root, speed=1.0, loop=True)
+        self.assertEqual(points(root, 21), peak)
+        self.assertLess(len(mesh(root, 5).vertices), 1000)
+
+    def test_modern_render_has_attack_peak_release_and_editable_detail(self):
+        root = core.create(bpy.context, "ARC_SLASH")
+        camera()
+        bpy.context.scene.camera.data.ortho_scale = 5.5
+        frames = [render_pixels(frame) for frame in (2, 5, 13)]
+
+        def energy(pixels):
+            return sum(sum(pixels[i : i + 3]) for i in range(0, len(pixels), 4))
+
+        self.assertGreater(energy(frames[1]), energy(frames[0]) * 1.5)
+        self.assertLess(energy(frames[2]), energy(frames[1]) * 0.4)
+        self.assertTrue(any(min(frames[1][i : i + 3]) > 0.3 for i in range(0, len(frames[1]), 4)))
+        self.assertTrue(
+            any(
+                frames[1][i + 2] > 0.15 and frames[1][i + 1] < 0.12
+                for i in range(0, len(frames[1]), 4)
+            )
+        )
+        update(root, afterimage=0.0, streaks=0.0)
+        plain = render_pixels(5)
+        self.assertGreater(sum(abs(a - b) for a, b in zip(plain, frames[1])), 1)
+        update(root, breakup=0.0)
+        intact = render_pixels(13)
+        update(root, breakup=1.0)
+        eroded = render_pixels(13)
+        self.assertLess(energy(eroded), energy(intact) * 0.8)
+        update(root, dissolve=1.0)
+        dissolved = render_pixels(5)
+        self.assertLess(max(dissolved[i] for i in range(len(dissolved)) if i % 4 != 3), 0.01)
+
+    def test_modern_asset_and_legacy_preset_roundtrip_preserve_versions(self):
+        legacy = create()
+        legacy_data = presets.loads(presets.dumps(core.preset_snapshot(legacy)))
+        self.assertEqual(legacy_data["asset_version"], 1)
+        old_copy = core.create_from_preset(bpy.context, legacy_data)
+        self.assertEqual(old_copy["vfx_asset_version"], 1)
+        self.assertNotIn("afterimage", old_copy)
+        self.assertEqual(points(legacy, 7), points(old_copy, 7))
+        bpy.context.scene.frame_set(1)
+        modern = core.create(bpy.context, "ARC_SLASH")
+        update(modern, attack=0.12, core_width=0.08, afterimage=0.4, breakup=0.6)
+        modern.children[0].data.materials[0].node_tree.nodes.new(
+            "ShaderNodeValue"
+        ).name = "User Filament Edit"
+        data = presets.loads(presets.dumps(core.preset_snapshot(modern)))
+        restored = core.create_from_preset(bpy.context, data)
+        self.assertEqual(restored["attack"], 0.12)
+        self.assertEqual(restored["afterimage"], 0.4)
+        file = ROOT / "work/modern-slash.blend"
+        assets.write(file, modern)
+        loaded = assets.load(bpy.context, file)
+        self.assertEqual(points(modern, 5), points(loaded, 5))
+        self.assertIn("User Filament Edit", loaded.children[0].data.materials[0].node_tree.nodes)
+        self.assertNotEqual(loaded["vfx_id"], modern["vfx_id"])
+        core.delete(modern)
+        self.assertTrue(mesh(loaded, 5).vertices)
+        for obj in (loaded, restored, legacy, old_copy):
+            core.delete(obj)
+        self.assertEqual(len(bpy.data.meshes), 0)
+        self.assertEqual(len(bpy.data.materials), 0)
 
 
 addon.register()
@@ -151,6 +231,11 @@ if not result.wasSuccessful():
 bpy.ops.wm.read_factory_settings(use_empty=True)
 root = create()
 root.name = "Persisted Slash"
+modern = core.create(bpy.context, "ARC_SLASH", "LOW")
+modern.name = "Persisted Layered Slash"
+for frame in (2, 5, 13):
+    result = mesh(modern, frame)
+    modern[f"expected_shape_{frame}"] = [c for vertex in result.vertices for c in vertex.co]
 addon.unregister()
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "work/slash.blend"))
 print("SLASH_INTEGRATION_OK")

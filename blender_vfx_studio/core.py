@@ -30,7 +30,7 @@ def resolve(obj):
             if (
                 not isinstance(module, str)
                 or module not in MODULES
-                or obj.get("vfx_asset_version") != MODULES[module].asset_version
+                or not MODULES[module].supports_version(obj.get("vfx_asset_version"))
             ):
                 raise ValueError(
                     "Unsupported VFX module or asset version; update the extension before editing"
@@ -360,7 +360,10 @@ def preset_snapshot(root):
             "asset_version": root["vfx_asset_version"],
             "name": root.name[:80],
             "quality": root["vfx_quality"],
-            "parameters": {key: root[key] for key in preset_parameters_for(root["vfx_module"])},
+            "parameters": {
+                key: root[key]
+                for key in preset_parameters_for(root["vfx_module"], root["vfx_asset_version"])
+            },
         }
     )
 
@@ -385,7 +388,9 @@ def create_from_preset(context, data):
     elif data["module"] == "shader.shield":
         root = create_shield(context, data["quality"])
     elif data["module"] == "mesh.slash":
-        root = create(context, "ARC_SLASH", data["quality"])
+        from . import slash
+
+        root = slash.create(context, data["quality"], asset_version=data["asset_version"])
     elif data["module"] == "mesh.ring":
         root = create(context, quality=data["quality"])
     else:

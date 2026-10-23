@@ -131,7 +131,7 @@ TRAIL_PARAMETERS = {
 }
 
 
-SLASH_PARAMETERS = {
+SLASH_PARAMETERS_V1 = {
     **PARAMETERS,
     "radius": (1.8, 0.001, 10000.0, "Outer radius at birth"),
     "width": (0.45, 0.001, 10000.0, "Maximum radial width"),
@@ -141,6 +141,24 @@ SLASH_PARAMETERS = {
     "arc": (150.0, 1.0, 359.0, "Arc angle in degrees, centered on local +X"),
     "spin": (120.0, -1440.0, 1440.0, "Rotation in degrees over lifetime"),
     "taper": (0.5, 0.01, 4.0, "Tip narrowing; larger values make a thinner crescent"),
+}
+
+SLASH_PARAMETERS = {
+    **SLASH_PARAMETERS_V1,
+    "width": (0.62, 0.001, 10000.0, "Maximum body width"),
+    "arc": (185.0, 1.0, 359.0, "Sweep angle centered on local +X"),
+    "spin": (105.0, -1440.0, 1440.0, "Total sweep rotation"),
+    "strength": (2.2, 0.0, 1000.0, "Blade emission; body and wake stay dimmer"),
+    "color_0": (0.32, 0.0, 1.0, "Linear body red"),
+    "color_1": (0.035, 0.0, 1.0, "Linear body green"),
+    "color_2": (0.8, 0.0, 1.0, "Linear body blue"),
+    "attack": (0.18, 0.02, 0.5, "Fraction of lifetime used to reveal the blade"),
+    "motion_ease": (0.85, 0.0, 1.0, "Sweep deceleration; zero gives linear motion"),
+    "head_bias": (0.7, 0.0, 1.0, "Move body weight toward the leading tip"),
+    "core_width": (0.12, 0.02, 0.4, "Bright blade width relative to body"),
+    "afterimage": (0.28, 0.0, 1.0, "Opacity of two subordinate native wake ribbons"),
+    "streaks": (0.65, 0.0, 1.0, "Anisotropic filament contrast in the body"),
+    "breakup": (0.75, 0.0, 1.0, "Directional noise erosion after the strike"),
 }
 
 SHIELD_PARAMETERS = {
@@ -168,7 +186,7 @@ SIMULATION_PARAMETERS = {key: spec for key, spec in COMMON_PARAMETERS.items() if
 GROUP_PARAMETERS = {key: PARAMETERS[key] for key in ("start", "duration", "speed", "loop")}
 
 
-def parameters_for(module):
+def parameters_for(module, asset_version=None):
     if module == "particle.emitter":
         return EMITTER_PARAMETERS
     if module == "flipbook.sequence":
@@ -176,7 +194,7 @@ def parameters_for(module):
     if module == "shader.shield":
         return SHIELD_PARAMETERS
     if module == "mesh.slash":
-        return SLASH_PARAMETERS
+        return SLASH_PARAMETERS_V1 if asset_version == 1 else SLASH_PARAMETERS
     if module == "simulation.cloth":
         return SIMULATION_PARAMETERS
     if module == "core.composition":
@@ -194,5 +212,7 @@ def parameters_for(module):
     raise ValueError("Unknown VFX module")
 
 
-def preset_parameters_for(module):
-    return {key: spec for key, spec in parameters_for(module).items() if key != "start"}
+def preset_parameters_for(module, asset_version=None):
+    return {
+        key: spec for key, spec in parameters_for(module, asset_version).items() if key != "start"
+    }

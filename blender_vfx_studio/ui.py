@@ -664,7 +664,11 @@ class VFX_PT_main(bpy.types.Panel):
                 "fade",
             )
         elif root["vfx_module"] == "mesh.slash":
-            layout.label(text="Procedural crescent slash")
+            layout.label(
+                text="Layered crescent slash"
+                if root["vfx_asset_version"] == 2
+                else "Legacy crescent slash"
+            )
             keys = (
                 "radius",
                 "width",
@@ -677,6 +681,16 @@ class VFX_PT_main(bpy.types.Panel):
                 "noise_scale",
                 "fade",
             )
+            if root["vfx_asset_version"] == 2:
+                keys += (
+                    "attack",
+                    "motion_ease",
+                    "head_bias",
+                    "core_width",
+                    "afterimage",
+                    "streaks",
+                    "breakup",
+                )
         elif root["vfx_module"] == "simulation.cloth":
             from . import simulation
 
