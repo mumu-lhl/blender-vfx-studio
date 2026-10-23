@@ -9,7 +9,7 @@
 从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 下载最新版本的 `blender-vfx-studio-版本号.zip`。在 Blender 5.2 打开 **Edit → Preferences → Get Extensions → 右上角菜单 → Install from Disk**，选择 ZIP 并启用。不要安装 GitHub 的源码 ZIP。
 
 1. 在 3D 视图按 **N**，打开 **VFX** 标签页，点击 **Create Mesh VFX**。
-2. 选择 Shockwave（冲击波）、Energy Ring（能量环）或 Arc Slash（弧形刀光），以及质量。效果会出现在 3D Cursor 处，以当前帧开始播放。
+2. 选择 Shockwave（冲击波）、Energy Ring（能量环）、Arc Slash（弧形刀光）或 Impact Burst（打击爆发），以及质量。效果会出现在 3D Cursor 处，以当前帧开始播放。
 3. 切换到 **Material Preview** 或 **Rendered** 查看材质，播放时间轴。
 4. 调整面板中的时间、宽度、颜色等参数。右键参数选择 **Insert Keyframe**，即可制作参数动画。
 5. 移动、旋转或缩放 Controller（Empty 控制器），控制整个空间效果。选中效果网格也能显示同一组参数。
@@ -46,6 +46,16 @@ Strength 控制整体发光，颜色控制主体；锋刃使用较浅的冷白�
 
 新建刀光使用资产版本 2。已有版本 1 文件、材质、节点和参数预设继续按旧结构读取或重建，不自动升级，不覆盖手动编辑。
 高清三阶段渲染、复现命令和实际检查范围见 [刀光视觉验收](docs/VISUAL_REVIEW.md)。
+
+## Impact Burst 打击爆发
+
+在 **Create Mesh VFX** 中选择 **Impact Burst**，会在 3D Cursor 处创建一个 24 帧的四层组合：中心白色短闪、橙色定向尖片、较暗的冲击波和稍晚出现的细小余烬。冲击波先扩张再被噪声侵蚀；尖片快速飞出后减速并缩短。默认只播放一次，不添加辉光合成。
+
+选中组合调整整体 Start / Duration / Speed；选中成员可以分别调整颜色、强度和时间。需要独立编辑时点击 **Ungroup All**，保留拆分时各层状态。完整效果导出保留这四层及手动节点；单层参数 JSON 只保存该层参数，不保存手动节点。
+
+新版 **Particle Burst** 增加 Shape（0 圆粒、1 尖片）、Stretch（尖片半长相对 Size 的倍数）、Planar（1 将随机散射压到局部 XY 平面）和 Motion Ease（0 匀速运动时钟、1 快出慢停）。例如 Shape=1、Stretch=6 可生成细长尖片。尖片沿轨迹方向转动，前端偏白、尾部较暗；Fade 仍控制尺寸缩减。Motion Ease 改变直接计算的位置与重力时钟，不是物理模拟；修改它会重新计算当前帧。
+
+Burst 新建资产为版本 2；旧版本 1 资产和参数预设继续按原结构读取，不会被自动重建。Continuous Emitter 保持原有圆粒与时间模型。高清实图、复现方法和限制见 [打击爆发视觉检查](docs/IMPACT_VISUAL_REVIEW.md)。
 
 ## Fresnel 能量护盾
 

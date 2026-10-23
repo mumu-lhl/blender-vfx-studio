@@ -76,6 +76,10 @@ def _controller(context, label, module, quality, parameters, settings):
 
 
 def create(context, preset="SHOCKWAVE", quality="MEDIUM"):
+    if preset == "IMPACT_BURST":
+        from . import impact
+
+        return impact.create(context, quality)
     if preset == "ARC_SLASH":
         from . import slash
 
@@ -377,7 +381,7 @@ def create_from_preset(context, data):
     elif data["module"] == "particle.emitter":
         root = create_emitter(context, data["quality"])
     elif data["module"] == "particle.burst":
-        root = create_particle(context, data["quality"])
+        root = create_particle(context, data["quality"], asset_version=data["asset_version"])
     elif data["module"] == "flipbook.sequence":
         root = create_sequence(context, data["assets"]["image"], data["assets"]["frame_count"])
     elif data["module"] == "flipbook.atlas":
@@ -493,15 +497,24 @@ def create_screen(context):
     return screen.create(context)
 
 
-def create_particle(context, quality="LOW"):
+def create_particle(context, quality="LOW", *, asset_version=2):
     from . import particle
-    from .parameters import PARTICLE_PARAMETERS
+    from .parameters import PARTICLE_PARAMETERS, PARTICLE_PARAMETERS_V1
+
+    if not MODULES["particle.burst"].supports_version(asset_version):
+        raise ValueError("Unsupported particle asset version")
 
     if quality not in {"LOW", "MEDIUM", "HIGH"}:
         raise ValueError("Unknown particle quality")
     root, collection = _controller(
-        context, "Particle Burst", "particle.burst", quality, PARTICLE_PARAMETERS, {}
+        context,
+        "Particle Burst",
+        "particle.burst",
+        quality,
+        PARTICLE_PARAMETERS_V1 if asset_version == 1 else PARTICLE_PARAMETERS,
+        {},
     )
+    root["vfx_asset_version"] = asset_version
     mesh = bpy.data.meshes.new("VFX • Particle Source")
     _tag(mesh, root["vfx_id"])
     layer = bpy.data.objects.new("VFX • Particle Layer", mesh)

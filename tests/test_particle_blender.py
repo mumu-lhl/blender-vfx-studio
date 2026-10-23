@@ -159,6 +159,66 @@ class ParticleTests(unittest.TestCase):
         self.assertIn(external.name, bpy.data.meshes)
         self.assertEqual(len(bpy.data.materials), 0)
 
+    def test_shard_shape_stretch_plane_and_motion_controls_change_native_geometry(self):
+        root = core.create_particle(bpy.context)
+        update(
+            root,
+            count=1,
+            shape=1,
+            stretch=6.0,
+            spread=0.0,
+            randomness=0.0,
+            velocity=0.0,
+            gravity=0.0,
+            size=0.1,
+        )
+        result = mesh(root, 1)
+
+        def extent(axis):
+            return max(v.co[axis] for v in result.vertices) - min(
+                v.co[axis] for v in result.vertices
+            )
+
+        self.assertGreater(extent(2), extent(0) * 20)
+        self.assertLess(len(result.vertices), 20)
+        update(root, count=12, spread=1.0, velocity=3.0, planar=1.0)
+        flat = points(root, 7)
+        update(root, planar=0.0)
+        self.assertNotEqual(points(root, 7), flat)
+        update(root, motion_ease=0.9)
+        eased = points(root, 7)
+        points(root, 19)
+        self.assertEqual(points(root, 7), eased)
+        update(root, speed=2.0)
+        self.assertEqual(points(root, 4), eased)
+        update(root, count=3000)
+        self.assertLessEqual(len(mesh(root, 4).vertices), 2048 * 20)
+
+    def test_legacy_and_shard_presets_keep_their_versions_and_private_data(self):
+        legacy = core.create_particle(bpy.context, asset_version=1)
+        snapshot = core.preset_snapshot(legacy)
+        self.assertEqual(snapshot["asset_version"], 1)
+        restored = core.create_from_preset(bpy.context, snapshot)
+        self.assertNotIn("shape", restored)
+        self.assertEqual(points(legacy, 7), points(restored, 7))
+        bpy.context.scene.frame_set(1)
+        root = core.create_particle(bpy.context)
+        update(root, shape=1, stretch=8.0, planar=0.8, motion_ease=0.7)
+        snapshot = presets.loads(presets.dumps(core.preset_snapshot(root)))
+        restored = core.create_from_preset(bpy.context, snapshot)
+        self.assertEqual(restored["shape"], 1)
+        self.assertEqual(restored["stretch"], 8.0)
+        clone = core.duplicate(bpy.context, root)
+        self.assertEqual(points(root, 5), points(clone, 5))
+        update(clone, stretch=2.0)
+        self.assertNotEqual(points(root, 5), points(clone, 5))
+        core.delete(root)
+        self.assertTrue(mesh(clone, 5).vertices)
+        counts = len(bpy.data.objects)
+        with self.assertRaises(ValueError):
+            core.create_particle(bpy.context, asset_version=99)
+        self.assertEqual(len(bpy.data.objects), counts)
+
 
 addon.register()
 result = unittest.TextTestRunner(verbosity=2).run(

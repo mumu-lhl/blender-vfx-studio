@@ -31,7 +31,7 @@ class StarterTests(unittest.TestCase):
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
     def test_builders_are_low_quality_bounded_and_have_native_timing(self):
-        for key, layers, duration in zip(EXAMPLES, (4, 2, 1), (48, 24, 18)):
+        for key, layers, duration in zip(EXAMPLES, (4, 4, 1), (48, 24, 18)):
             bpy.ops.wm.read_factory_settings(use_empty=True)
             root = create_effect(key)
             self.assertEqual(root["start"], 1)

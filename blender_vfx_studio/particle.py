@@ -16,6 +16,10 @@ def material(root):
     for i in range(3):
         drive(emission.inputs["Color"], "default_value", root, "p", {"p": f"color_{i}"}, i)
     drive(emission.inputs["Strength"], "default_value", root, "p", {"p": "strength"})
+    if root["vfx_module"] == "particle.burst" and root["vfx_asset_version"] == 2:
+        from .particle_shape import shade
+
+        shade(tree, root, emission)
     tree.links.new(emission.outputs[0], out.inputs["Surface"])
     return mat
 
@@ -23,6 +27,7 @@ def material(root):
 def geometry(obj, root, mat, quality, *, emitter=False):
     import bpy
 
+    modern = not emitter and root["vfx_asset_version"] == 2
     name = "Continuous Emitter" if emitter else "Deterministic Burst"
     tree = bpy.data.node_groups.new("VFX • " + name, "GeometryNodeTree")
     tree["vfx_id"] = root["vfx_id"]
@@ -89,11 +94,27 @@ def geometry(obj, root, mat, quality, *, emitter=False):
             f"min(max(floor(p),0),1000000)+{offset}",
             {"p": "seed"},
         )
+    random_direction = next(s for s in random.outputs if s.type == "VECTOR")
+    if modern:
+        flatten = node(tree, "ShaderNodeCombineXYZ", "Local Distribution Plane", -1650, 200)
+        flatten.inputs["X"].default_value = flatten.inputs["Y"].default_value = 1
+        link(
+            math("Out Of Plane", "SUBTRACT", 1, value("Planar", "planar", -2000, 0), -1850, 100),
+            flatten.inputs["Z"],
+        )
+        random_direction = vector(
+            "Flatten Random Directions",
+            "MULTIPLY",
+            random_direction,
+            flatten.outputs[0],
+            -1450,
+            200,
+        )
     spread = value("Spread", "spread", -1400, -200)
     radial = vector(
         "Spread Direction",
         "SCALE",
-        next(s for s in random.outputs if s.type == "VECTOR"),
+        random_direction,
         spread,
         -900,
         400,
@@ -128,7 +149,22 @@ def geometry(obj, root, mat, quality, *, emitter=False):
     if not emitter:
         progress = value("Progress", None, -1200, -700, PROGRESS, TIME_PROPS)
         seconds = value("Motion Seconds", "motion_seconds", -1200, -900)
-        time = math("Motion Time", "MULTIPLY", progress, seconds, -900, -700)
+        clock = progress
+        if modern:
+            left = math("Time Remaining", "SUBTRACT", 1, progress, -1900, -800)
+            cube = math("Ease Cube", "POWER", left, 3, -1700, -800)
+            eased = math("Fast Travel", "SUBTRACT", 1, cube, -1500, -800)
+            delta = math("Ease Difference", "SUBTRACT", eased, progress, -1900, -1000)
+            delta = math(
+                "Ease Amount",
+                "MULTIPLY",
+                delta,
+                value("Motion Ease", "motion_ease", -2100, -1000),
+                -1700,
+                -1000,
+            )
+            clock = math("Travel Clock", "ADD", progress, delta, -1500, -1000)
+        time = math("Motion Time", "MULTIPLY", clock, seconds, -900, -700)
     velocity = value("Velocity", "velocity", -700, -900)
     speed = math("Varied Velocity", "MULTIPLY", velocity, variation, -300, -450)
     distance = math("Travel", "MULTIPLY", speed, time, -100, -450)
@@ -192,6 +228,34 @@ def geometry(obj, root, mat, quality, *, emitter=False):
         link(selection, instance.inputs["Selection"])
     link(material_node.outputs["Geometry"], instance.inputs["Instance"])
     link(scale, instance.inputs["Scale"])
+    if modern:
+        from .particle_shape import geometry as shape_geometry
+
+        velocity_vector = vector("Radial Velocity", "SCALE", direction, speed, 1800, 500)
+        gravity_velocity = node(tree, "ShaderNodeCombineXYZ", "Gravity Velocity", 1800, 200)
+        down_speed = math("Gravity Speed", "MULTIPLY", gravity, time, 1500, 0)
+        down_speed = math("Downward Speed", "MULTIPLY", down_speed, -1, 1700, 0)
+        link(down_speed, gravity_velocity.inputs["Z"])
+        tangent = vector(
+            "Trajectory Tangent", "ADD", velocity_vector, gravity_velocity.outputs[0], 2000, 500
+        )
+        magnitude = node(
+            tree, "ShaderNodeVectorMath", "Tangent Length", 2000, 200, operation="LENGTH"
+        )
+        link(tangent, magnitude.inputs[0])
+        moving = math("Is Moving", "GREATER_THAN", magnitude.outputs["Value"], 0.000001, 2200, 200)
+        orientation = node(
+            tree,
+            "GeometryNodeSwitch",
+            "Stationary Direction Fallback",
+            2400,
+            500,
+            input_type="VECTOR",
+        )
+        link(moving, orientation.inputs["Switch"])
+        link(direction, orientation.inputs["False"])
+        link(tangent, orientation.inputs["True"])
+        shape_geometry(tree, root, ico, material_node, instance, scale, orientation.outputs[0])
     realize = node(tree, "GeometryNodeRealizeInstances", "Editable Mesh Output", 1450, 800)
     out = node(tree, "NodeGroupOutput", "Output", 1700, 800)
     link(instance.outputs["Instances"], realize.inputs["Geometry"])

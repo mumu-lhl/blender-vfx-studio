@@ -24,3 +24,5 @@ select = ["E4", "E7", "E9", "F", "I"]
 "tests/test_sequence_blender.py" = ["E402"]
 "tests/test_emitter_blender.py" = ["E402"]
 "tests/test_examples_blender.py" = ["E402"]
+
+"tests/test_impact_blender.py" = ["E402"]
