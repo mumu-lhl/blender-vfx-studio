@@ -7,7 +7,7 @@ from pathlib import Path
 
 import bpy
 
-from . import core
+from . import asset_preview, core
 from .registry import MODULES
 
 PREFIX = "__VFX_STUDIO_ASSET__"
@@ -99,7 +99,7 @@ def _validate(root, objects, dependencies):
     return roots
 
 
-def write(filepath, root):
+def write(filepath, root, *, preview_image=None):
     root = core.resolve(root)
     if root is None:
         raise ValueError("Select a spatial VFX controller or layer")
@@ -108,6 +108,7 @@ def write(filepath, root):
         raise ValueError("Native effect files must end in .blend")
     if bpy.data.filepath and destination == Path(bpy.data.filepath).resolve():
         raise ValueError("Choose an asset file different from the current project")
+    prepared_preview = asset_preview.prepare(preview_image)
     roots = _roots(root)
     objects = set(roots)
     for controller in roots:
@@ -132,6 +133,7 @@ def write(filepath, root):
         bundle.asset_data.description = "Complete native VFX: " + root.name
         for obj in objects:
             bundle.objects.link(obj)
+        asset_preview.apply(bundle, prepared_preview)
         with tempfile.NamedTemporaryFile(
             suffix=".blend", dir=destination.parent, delete=False
         ) as stream:
