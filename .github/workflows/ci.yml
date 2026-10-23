@@ -147,6 +147,9 @@ jobs:
           python tools/combat_video.py work/visual-combat/dark
           python tools/combat_video.py work/visual-combat/blender_eevee-near-dark
           python tools/combat_video.py work/visual-combat/blender_eevee-wide-light
+          python tools/combat_frames.py work/visual-combat/dark
+          python tools/combat_frames.py work/visual-combat/blender_eevee-near-dark
+          python tools/combat_frames.py work/visual-combat/blender_eevee-wide-light
           python tools/combat_review.py work/visual-combat
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-combat/dark/combat.blend --python tests/combat_reopen.py
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-combat/blender_eevee-near-dark/combat.blend --python tests/combat_reopen.py
@@ -162,6 +165,8 @@ jobs:
             work/visual-combat/*/render-settings.json
             work/visual-combat/*/video-info.json
             work/visual-combat/index.html
+            work/visual-combat/*/video-frames/*.png
+            work/visual-combat/*/video-frames/frames.json
       - name: Build and validate starter assets (CPU only)
         if: github.ref_type == 'tag' && runner.os == 'Linux'
         run: |

@@ -39,7 +39,7 @@ class VideoPreflightTests(unittest.TestCase):
             )
             page = build(base)
             self.assertIn("<video controls", page.read_text(encoding="utf-8"))
-            self.assertIn("连续播放尚未验收", page.read_text(encoding="utf-8"))
+            self.assertIn("本页面不自动批准视觉质量", page.read_text(encoding="utf-8"))
             (folder / "combat-0007.png").write_bytes(b"newly rendered frame")
             self.assertNotIn("<video ", build(base).read_text(encoding="utf-8"))
             settings["rendered_frames"] = [4, 8, 12, 23]
