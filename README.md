@@ -57,11 +57,11 @@ Strength 控制整体发光，颜色控制主体；锋刃使用较浅的冷白�
 
 新版 **Particle Burst** 增加 Shape（0 圆粒、1 尖片）、Stretch（尖片半长相对 Size 的倍数）、Planar（1 将随机散射压到局部 XY 平面）和 Motion Ease（0 匀速运动时钟、1 快出慢停）。例如 Shape=1、Stretch=6 可生成细长尖片。尖片沿轨迹方向转动，前端偏白、尾部较暗；Fade 仍控制尺寸缩减。Motion Ease 改变直接计算的位置与重力时钟，不是物理模拟；修改它会重新计算当前帧。
 
-候选版的 Impact 主尖片额外区分亮面和暗面，轮廓略宽，白色尖端保留。选择 `Impact • Main Shards` 下的网格，在 Shader Editor 中调整 **Side Contrast**（建议 0–1；0 关闭面色差异）。**Illustrated Light** 的向量设置固定的世界空间明暗方向，不依赖灯光。颜色和 Emission 仍在控制器上调整。这是该组合的材质编辑；使用 **Save Complete Effect** 保存它，单层参数 JSON 不保存手动节点编辑，普通 Particle Burst 不附带这套面色。
+0.22.1 的 Impact 主尖片额外区分亮面和暗面，轮廓略宽，白色尖端保留。选择 `Impact • Main Shards` 下的网格，在 Shader Editor 中调整 **Side Contrast**（建议 0–1；0 关闭面色差异）。**Illustrated Light** 的向量设置固定的世界空间明暗方向，不依赖灯光。颜色和 Emission 仍在控制器上调整。这是该组合的材质编辑；使用 **Save Complete Effect** 保存它，单层参数 JSON 不保存手动节点编辑，普通 Particle Burst 不附带这套面色。
 
 Actions 的 `combat-shot-visual-review` 附件解压后，可直接打开 `index.html` 播放完整视频，并下载原生预览场景；页面明确区分视频与静态关键帧。验收条件和本地生成方法见 [镜头记录](docs/COMBAT_VISUAL_REVIEW.md)。视频生成不代表已经观看；#69 已按用户允许的实际 MP4 隔帧抽样方案检查，实时播放仍未验证。
 
-Burst 新建资产为版本 2；旧版本 1 资产和参数预设继续按原结构读取，不会被自动重建。Continuous Emitter 保持原有圆粒与时间模型。0.22.1 候选进一步增厚中心短闪和主尖片，并缩短短闪、提前侵蚀冲击波；已有完整效果保留原参数和节点。实际 MP4 已按用户允许的隔帧抽样方案检查，实时播放仍未验证，Eevee 远景亮背景的帧序列与检查范围见 [镜头记录](docs/COMBAT_VISUAL_REVIEW.md)。高清实图、复现方法和限制见 [打击爆发视觉检查](docs/IMPACT_VISUAL_REVIEW.md)。
+Burst 新建资产为版本 2；旧版本 1 资产和参数预设继续按原结构读取，不会被自动重建。Continuous Emitter 保持原有圆粒与时间模型。0.22.1 进一步增厚中心短闪和主尖片，并缩短短闪、提前侵蚀冲击波；已有完整效果保留原参数和节点。实际 MP4 已按用户允许的隔帧抽样方案检查，实时播放仍未验证，Eevee 远景亮背景的帧序列与检查范围见 [镜头记录](docs/COMBAT_VISUAL_REVIEW.md)。高清实图、复现方法和限制见 [打击爆发视觉检查](docs/IMPACT_VISUAL_REVIEW.md)。
 
 ## Fresnel 能量护盾
 
