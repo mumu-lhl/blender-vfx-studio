@@ -1,7 +1,43 @@
 """Editable four-layer hit: short flash, directional shards, wave and embers."""
 
 from . import composition, core
-from .nodes import PROGRESS, TIME_PROPS, drive
+from .nodes import PROGRESS, TIME_PROPS, drive, node
+
+
+def _shade_shards(root):
+    """Author dark side facets in this Impact member's private material."""
+    tree = root.children[0].data.materials[0].node_tree
+    link = tree.links.new
+    normal = node(tree, "ShaderNodeNewGeometry", "Shard Face Normal", -1000, -400)
+    facing = node(
+        tree, "ShaderNodeVectorMath", "Illustrated Light", -750, -400, operation="DOT_PRODUCT"
+    )
+    link(normal.outputs["Normal"], facing.inputs[0])
+    facing.inputs[1].default_value = (-0.36, -0.48, 0.8)
+    sides = node(tree, "ShaderNodeMapRange", "Side Facets", -500, -400)
+    sides.interpolation_type = "SMOOTHSTEP"
+    link(facing.outputs["Value"], sides.inputs["Value"])
+    sides.inputs["From Min"].default_value = -0.4
+    sides.inputs["From Max"].default_value = 0.4
+    sides.inputs["To Min"].default_value = 1
+    sides.inputs["To Max"].default_value = 0
+    contrast = node(tree, "ShaderNodeValue", "Side Contrast", -500, -700)
+    contrast.outputs[0].default_value = 0.85
+    amount = node(tree, "ShaderNodeMath", "Side Shade Amount", -250, -400, operation="MULTIPLY")
+    link(sides.outputs[0], amount.inputs[0])
+    link(contrast.outputs[0], amount.inputs[1])
+    dark = node(tree, "ShaderNodeVectorMath", "Dark Side Color", -250, -700, operation="SCALE")
+    link(tree.nodes["Editable Particle Color"].outputs[0], dark.inputs[0])
+    dark.inputs["Scale"].default_value = 0.025
+    body = node(tree, "ShaderNodeMixRGB", "Faceted Shard Body", 0, -400)
+    link(amount.outputs[0], body.inputs[0])
+    link(tree.nodes["Tail Color"].outputs[0], body.inputs[1])
+    link(dark.outputs[0], body.inputs[2])
+    # Keep the existing white leading tip independent of the dark side facets.
+    link(body.outputs[0], tree.nodes["White Hot Tip"].inputs[1])
+    tree.nodes["White Hot Tip"].location = (250, 0)
+    tree.nodes["Particle Emission"].location = (500, 0)
+    tree.nodes["Surface"].location = (750, 0)
 
 
 def create(context, quality="LOW"):
@@ -46,10 +82,10 @@ def create(context, quality="LOW"):
         duration=18.0,
         count=12,
         shape=1,
-        stretch=5.0,
+        stretch=4.0,
         planar=0.9,
         motion_ease=0.75,
-        size=0.085,
+        size=0.11,
         spawn_radius=0.05,
         velocity=3.0,
         motion_seconds=0.55,
@@ -60,6 +96,7 @@ def create(context, quality="LOW"):
         strength=2.0,
         seed=17,
     )
+    _shade_shards(shards)
     wave = configure(
         core.create(context, "SHOCKWAVE", quality),
         "Impact • Shockwave",

@@ -49,3 +49,5 @@ python tools/combat_video.py work/visual-combat/blender_eevee-wide-light
 CI 配置生成上述六种条件、两个视频和原生场景，并执行无插件像素对比，附件为 `combat-shot-visual-review`。自动检查结果见关联 PR。视频文件存在和元数据检查通过只证明交付物可供播放，不代表已经观看。
 
 [Issue #69](https://github.com/mumu-lhl/blender-vfx-studio/issues/69) 保持打开：尚需按 24 fps 真正观看两段视频，判断挥砍速度感、命中力度、粒子/冲击波层次和衔接；真实角色、其他帧率及集成显卡性能也未验收。该项完成前不宣布连续战斗动画视觉通过。
+
+后续 [#71](https://github.com/mumu-lhl/blender-vfx-studio/issues/71) 增厚主尖片横向轮廓并加入亮暗面。已读取修改后的 Eevee 亮背景近景、远景命中与扩散图，并对比旧图：近景面色更清楚，远景主尖片略易辨认，细余烬仍弱。Cycles 出现、峰值、衰减图已查看。155 项本地回归和两种引擎的无插件命中帧像素对比通过；详细参数、编辑方式和限制见 [Impact 检查记录](IMPACT_VISUAL_REVIEW.md)。#69 的连续播放部分仍未验收。
