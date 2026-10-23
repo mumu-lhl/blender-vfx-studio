@@ -10,7 +10,9 @@ from .nodes import ACTIVE, PROGRESS, TIME_PROPS, drive, node
 from .parameters import TRAIL_PARAMETERS
 
 
-def sample(context, source, bone, first, last, step):
+def sample(context, source, bone, first, last, step, *, bone_tail=False):
+    if type(bone_tail) is not bool:
+        raise ValueError("Bone Tail must be enabled or disabled")
     if context.scene.render.frame_map_old != context.scene.render.frame_map_new:
         raise ValueError(
             "Sample trails with 1:1 scene Time Remapping; retime the stored path afterwards"
@@ -37,7 +39,11 @@ def sample(context, source, bone, first, last, step):
             scene.frame_set(current)
             evaluated = source.evaluated_get(context.evaluated_depsgraph_get())
             matrix = evaluated.matrix_world
-            position = matrix @ evaluated.pose.bones[bone].head if bone else matrix.translation
+            if bone:
+                pose = evaluated.pose.bones[bone]
+                position = matrix @ (pose.tail if bone_tail else pose.head)
+            else:
+                position = matrix.translation
             if not all(math.isfinite(v) and abs(v) <= 1e8 for v in position):
                 raise ValueError(
                     "Source animation contains an invalid or excessively large position"
@@ -73,9 +79,9 @@ def mesh_data(points, uid):
     return mesh
 
 
-def create(context, source, bone="", first=1, last=25, step=1):
+def create(context, source, bone="", first=1, last=25, step=1, *, bone_tail=False):
     points = sample(
-        context, source, bone, first, last, step
+        context, source, bone, first, last, step, bone_tail=bone_tail
     )  # No mutation until sampling succeeds.
     root, collection = core._controller(
         context, "Ribbon Trail", "trail.ribbon", "LOW", TRAIL_PARAMETERS, {}
@@ -84,6 +90,10 @@ def create(context, source, bone="", first=1, last=25, step=1):
     root["start"], root["duration"] = float(first), float(last - first)
     root["vfx_source"] = source
     root["vfx_bone"] = bone
+    root["vfx_bone_tail"] = bone_tail
+    root.id_properties_ui("vfx_bone_tail").update(
+        description="Sample the bone tail instead of its head on the next Rebake; ignored for objects"
+    )
     root["vfx_bake_first"], root["vfx_bake_last"], root["vfx_bake_step"] = first, last, step
     root["vfx_samples"] = len(points)
     mesh = mesh_data(points, root["vfx_id"])
@@ -124,6 +134,7 @@ def rebake(context, root):
         root["vfx_bake_first"],
         root["vfx_bake_last"],
         root["vfx_bake_step"],
+        bone_tail=root.get("vfx_bone_tail", False),
     )
     # Convert world samples to the layer's current local space, retaining controller transforms.
     if abs(layer.matrix_world.determinant()) < 1e-10:

@@ -5,11 +5,15 @@ import unittest
 from pathlib import Path
 
 import bpy
+from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tests"))
+from rig_test_support import animated_rig
+
 import blender_vfx_studio as addon
-from blender_vfx_studio import core, trail
+from blender_vfx_studio import assets, core, trail
 
 WORK = ROOT / "work"
 WORK.mkdir(exist_ok=True)
@@ -88,6 +92,73 @@ class TrailTests(unittest.TestCase):
         self.assertEqual(tuple(round(v, 5) for v in points[0]), (3, 4, 5))
         self.assertEqual(tuple(round(v, 5) for v in points[-1]), (5, 4, 5))
         self.assertEqual(bone.rotation_mode, "QUATERNION")
+
+    def test_constrained_bone_tail_and_head_restore_source_state(self):
+        rig, parent, control = animated_rig()
+        actions = [o.animation_data.action for o in (rig, parent, control)]
+        bpy.context.scene.frame_set(7, subframe=0.25)
+        original = rig.matrix_world.copy()
+        tail = trail.sample(bpy.context, rig, "Blade", 1, 21, 5, bone_tail=True)
+        head = trail.sample(bpy.context, rig, "Blade", 1, 21, 5)
+        self.assertEqual(bpy.context.scene.frame_current_final, 7.25)
+        self.assertEqual(rig.matrix_world, original)
+        self.assertEqual([o.animation_data.action for o in (rig, parent, control)], actions)
+        self.assertEqual(rig.pose.bones["Blade"].constraints[0].target, control)
+        self.assertGreater((Vector(tail[0]) - Vector(tail[-1])).length, 1)
+        for i, frame in enumerate(range(1, 22, 5)):
+            bpy.context.scene.frame_set(frame)
+            evaluated = rig.evaluated_get(bpy.context.evaluated_depsgraph_get())
+            bone = evaluated.pose.bones["Blade"]
+            # The pose matrix maps bone-local Y to its tip; sample() uses head/tail.
+            tip = evaluated.matrix_world @ bone.matrix @ Vector((0, bone.length, 0))
+            origin = evaluated.matrix_world @ bone.matrix.translation
+            self.assertLess((Vector(tail[i]) - tip).length, 1e-5)
+            self.assertLess((Vector(head[i]) - origin).length, 1e-5)
+
+    def test_bone_tail_rebake_clone_asset_and_legacy_head(self):
+        rig, _, _ = animated_rig()
+        root = trail.create(bpy.context, rig, "Blade", 1, 21, 5, bone_tail=True)
+        self.assertTrue(root["vfx_bone_tail"])
+        clone = core.duplicate(bpy.context, root)
+        self.assertTrue(clone["vfx_bone_tail"])
+        self.assertEqual(clone["vfx_source"], rig)
+        file = WORK / "bone-tail-asset.blend"
+        assets.write(file, clone)
+        imported = assets.load(bpy.context, file)
+        self.assertTrue(imported["vfx_bone_tail"])
+        self.assertIsNone(imported.get("vfx_source"))
+        original = [tuple(v.co) for v in trail.layer_for(root).data.vertices]
+        del root["vfx_bone_tail"]  # Pre-feature assets have no authoring switch.
+        trail.rebake(bpy.context, root)
+        self.assertNotEqual([tuple(v.co) for v in trail.layer_for(root).data.vertices], original)
+        head = trail.sample(bpy.context, rig, "Blade", 1, 21, 5)
+        for i, point in enumerate(head):
+            self.assertLess(
+                (trail.layer_for(root).data.vertices[i * 2].co - Vector(point)).length, 1e-5
+            )
+        root["vfx_bone_tail"] = True
+        trail.rebake(bpy.context, root)
+        self.assertEqual([tuple(v.co) for v in trail.layer_for(root).data.vertices], original)
+        count = len(bpy.data.objects)
+        with self.assertRaisesRegex(ValueError, "enabled or disabled"):
+            trail.create(bpy.context, rig, "Blade", 1, 21, 5, bone_tail="TAIL")
+        self.assertEqual(len(bpy.data.objects), count)
+
+    def test_pose_mode_operator_uses_requested_bone_endpoint(self):
+        rig, _, _ = animated_rig()
+        bpy.context.view_layer.objects.active = rig
+        rig.select_set(True)
+        rig.data.bones.active = rig.data.bones["Blade"]
+        bpy.ops.object.mode_set(mode="POSE")
+        self.assertEqual(
+            bpy.ops.vfx_studio.create_trail(first=1, last=21, step=5, bone_tail=True),
+            {"FINISHED"},
+        )
+        root = bpy.context.object
+        self.assertEqual(root["vfx_bone"], "Blade")
+        self.assertTrue(root["vfx_bone_tail"])
+        self.assertEqual(bpy.context.mode, "OBJECT")
+        self.assertGreater(len(evaluated(root, 11).vertices), 0)
 
     def test_validation_happens_before_data_creation(self):
         obj = source()
@@ -186,6 +257,16 @@ root = trail.create(bpy.context, source(), first=1, last=21, step=5)
 root.name = "Persisted Ribbon"
 update(root, length=0.5, width=0.4)
 bpy.data.objects.remove(root["vfx_source"], do_unlink=True)
+rig, _, _ = animated_rig()
+tail_root = trail.create(bpy.context, rig, "Blade", 1, 21, 5, bone_tail=True)
+tail_root.name = "Persisted Bone Tail"
+# Store independently evaluated native tip positions to verify a fresh, addon-free process.
+for frame in (1, 6, 11, 16):
+    bpy.context.scene.frame_set(frame)
+    evaluated_rig = rig.evaluated_get(bpy.context.evaluated_depsgraph_get())
+    bone = evaluated_rig.pose.bones["Blade"]
+    tip = evaluated_rig.matrix_world @ bone.matrix @ Vector((0, bone.length, 0))
+    tail_root[f"expected_tip_{frame}"] = tuple(tip)
 addon.unregister()
 bpy.ops.wm.save_as_mainfile(filepath=str(WORK / "trail.blend"))
 print("TRAIL_INTEGRATION_OK")
