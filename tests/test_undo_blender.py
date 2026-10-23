@@ -84,6 +84,32 @@ class UndoTests(unittest.TestCase):
         bpy.ops.ed.undo()
         self.assertEqual(len(composition.members(roots("core.composition")[0])), 2)
 
+    def test_ungroup_all_undo_redo_restores_group_and_member_references(self):
+        a, b = core.create(bpy.context), core.create_particle(bpy.context)
+        group = composition.create(bpy.context, [a, b])
+        member_ids = {a["vfx_id"], b["vfx_id"]}
+        group_id = group["vfx_id"]
+        push("Before Ungroup")
+        self.assertEqual(bpy.ops.vfx_studio.ungroup_all(), {"FINISHED"})
+        push("Ungrouped All")
+        self.assertEqual({r["vfx_id"] for r in roots()}, member_ids)
+        self.assertTrue(all(r.parent is None for r in roots()))
+        bpy.ops.ed.undo()
+        restored = roots("core.composition")[0]
+        self.assertEqual(restored["vfx_id"], group_id)
+        self.assertEqual({r["vfx_id"] for r in composition.members(restored)}, member_ids)
+        bpy.context.scene.frame_set(7)
+        self.assertTrue(
+            all(
+                c.driver.is_valid
+                for r in composition.members(restored)
+                for c in r.animation_data.drivers
+            )
+        )
+        bpy.ops.ed.redo()
+        self.assertEqual({r["vfx_id"] for r in roots()}, member_ids)
+        self.assertTrue(all(r.parent is None and r.get("vfx_composition") is None for r in roots()))
+
     def test_baked_shape_keys_and_clear_restore_with_undo(self):
         bpy.ops.vfx_studio.create_simulation()
         push("Unbaked Cloth")

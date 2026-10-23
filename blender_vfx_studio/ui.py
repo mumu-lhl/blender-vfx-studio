@@ -386,6 +386,38 @@ class VFX_OT_detach_member(bpy.types.Operator):
         return {"FINISHED"}
 
 
+class VFX_OT_ungroup_all(bpy.types.Operator):
+    bl_idname = "vfx_studio.ungroup_all"
+    bl_label = "Ungroup All"
+    bl_description = (
+        "Detach every layer, preserving current world poses and timing; "
+        "keep the former controller if user data still references it"
+    )
+    bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        return (
+            context.mode == "OBJECT"
+            and context.object is not None
+            and context.object.get("vfx_module") == "core.composition"
+        )
+
+    def execute(self, context):
+        from . import composition
+
+        try:
+            children, retained = composition.ungroup_all(context, context.object)
+        except ValueError as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        message = f"Ungrouped {len(children)} layers"
+        if retained:
+            message += "; kept controller because user data still references it"
+        self.report({"INFO"}, message)
+        return {"FINISHED"}
+
+
 class VFX_OT_select_member(bpy.types.Operator):
     bl_idname = "vfx_studio.select_member"
     bl_description = "Select a composition controller or member to edit its own controls"
@@ -612,6 +644,7 @@ class VFX_PT_main(bpy.types.Panel):
                 layout.label(text=str(error), icon="ERROR")
                 return
             layout.label(text=f"{len(children)} spatial layers")
+            layout.operator("vfx_studio.ungroup_all", icon="UNLINKED")
             for child in children:
                 layout.operator("vfx_studio.select_member", text=child.name).uid = child["vfx_id"]
             layout.label(text="Loop restarts all layers each group cycle")
@@ -771,6 +804,7 @@ CLASSES = (
     VFX_OT_edit_simulation_source,
     VFX_OT_compose,
     VFX_OT_detach_member,
+    VFX_OT_ungroup_all,
     VFX_OT_select_member,
     VFX_OT_duplicate,
     VFX_OT_delete,
