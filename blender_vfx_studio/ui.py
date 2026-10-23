@@ -106,6 +106,25 @@ class VFX_OT_create_particle(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self)
 
 
+class VFX_OT_create_emitter(bpy.types.Operator):
+    bl_idname = "vfx_studio.create_emitter"
+    bl_description = "Create a continuous local-space stream with individual particle lifetimes"
+    bl_label = "Create Continuous Emitter"
+    bl_options = {"REGISTER", "UNDO"}
+    quality: EnumProperty(
+        name="Quality",
+        items=[("LOW", "Low", ""), ("MEDIUM", "Medium", ""), ("HIGH", "High", "")],
+        default="LOW",
+    )
+
+    def execute(self, context):
+        core.create_emitter(context, self.quality)
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+
+
 class VFX_OT_create_shield(bpy.types.Operator):
     bl_idname = "vfx_studio.create_shield"
     bl_description = "Create an editable sphere with a bright Fresnel rim and noise dissolve"
@@ -497,6 +516,9 @@ class VFX_PT_main(bpy.types.Panel):
         layout.operator(
             "vfx_studio.create_particle", text="Create Particle Burst", icon="PARTICLES"
         )
+        layout.operator(
+            "vfx_studio.create_emitter", text="Create Continuous Emitter", icon="PARTICLES"
+        )
         layout.operator("vfx_studio.create_screen", text="Add Screen VFX", icon="RENDERLAYERS")
         layout.operator(
             "vfx_studio.create_shield", text="Create Energy Shield", icon="SHADING_RENDERED"
@@ -623,6 +645,28 @@ class VFX_PT_main(bpy.types.Panel):
             layout.label(text=f"{root['vfx_samples']} baked samples; source edits need Rebake")
             layout.operator("vfx_studio.rebake_trail", icon="FILE_REFRESH")
             keys = ("width", "length", "fade", "strength")
+        elif root["vfx_module"] == "particle.emitter":
+            from .emitter import limits
+
+            effective, _ = limits(root["rate"], root["lifetime"])
+            layout.label(text=f"Effective rate: {effective:.4g} particles/s")
+            if root["rate"] > effective:
+                layout.label(text="Rate limited by 2048-particle budget", icon="INFO")
+            layout.label(text="Local space · includes lifetime tail")
+            keys = (
+                "rate",
+                "emission_seconds",
+                "lifetime",
+                "seed",
+                "velocity",
+                "gravity",
+                "spread",
+                "randomness",
+                "spawn_radius",
+                "size",
+                "fade",
+                "strength",
+            )
         elif root["vfx_module"] == "particle.burst":
             layout.label(text="Particle Burst · stateless")
             keys = (
@@ -680,6 +724,7 @@ CLASSES = (
     VFX_OT_create_sequence,
     VFX_OT_create_screen,
     VFX_OT_create_particle,
+    VFX_OT_create_emitter,
     VFX_OT_create_shield,
     VFX_OT_create_trail,
     VFX_OT_rebake_trail,

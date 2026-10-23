@@ -51,6 +51,7 @@ jobs:
         run: |
           blender -b --factory-startup --python-exit-code 1 --python tools/preview.py
           blender -b --factory-startup --python-exit-code 1 --python tools/shield_preview.py
+          blender -b --factory-startup --python-exit-code 1 --python tools/emitter_preview.py
       - uses: actions/upload-artifact@v4
         if: runner.os == 'Linux'
         with:
@@ -63,6 +64,7 @@ jobs:
           path: |
             work/preview.png
             work/shield-preview.png
+            work/emitter-preview.png
 
   release:
     if: github.event_name == 'push' && github.ref_type == 'tag'

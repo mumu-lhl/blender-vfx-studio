@@ -368,6 +368,8 @@ def create_from_preset(context, data):
     data = presets.validate(data)  # Validate completely before mutating Blender data.
     if data["module"] == "screen.glare":
         root = create_screen(context)
+    elif data["module"] == "particle.emitter":
+        root = create_emitter(context, data["quality"])
     elif data["module"] == "particle.burst":
         root = create_particle(context, data["quality"])
     elif data["module"] == "flipbook.sequence":
@@ -515,3 +517,25 @@ def create_sequence(context, filepath, frame_count=16):
     from . import sequence
 
     return sequence.create(context, filepath, frame_count)
+
+
+def create_emitter(context, quality="LOW"):
+    from . import particle
+    from .parameters import EMITTER_PARAMETERS
+
+    if quality not in {"LOW", "MEDIUM", "HIGH"}:
+        raise ValueError("Unknown particle quality")
+    root, collection = _controller(
+        context, "Continuous Emitter", "particle.emitter", quality, EMITTER_PARAMETERS, {}
+    )
+    mesh = bpy.data.meshes.new("VFX • Emitter Source")
+    _tag(mesh, root["vfx_id"])
+    layer = bpy.data.objects.new("VFX • Emitter Layer", mesh)
+    _tag(layer, root["vfx_id"], "layer")
+    collection.objects.link(layer)
+    layer.parent = root
+    material = particle.material(root)
+    mesh.materials.append(material)
+    particle.geometry(layer, root, material, quality, emitter=True)
+    select(context, root)
+    return root
