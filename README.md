@@ -123,7 +123,7 @@ Ribbon 暂不支持 JSON 参数预设。使用 Duplicate 复制，或用下文�
 
 ## Particle Burst 粒子爆发
 
-点击 **Create Particle Burst**，默认生成 64 个低面数球形粒子。每个效果只有控制器和一个网格对象，不会为每个粒子创建独立对象。Count 最多 2048；Low / Medium / High 在创建时决定单粒子的细分级别。
+点击 **Create Particle Burst**，默认生成 64 个低面数球形粒子。每个效果只有控制器和一个网格对象，不会为每个粒子创建独立对象。Count 最多 2048；Low / Medium / High 在创建时决定球形粒子的细分级别；版本 2 也可切换为固定低面数尖片，参数见上文 Impact Burst。
 
 Seed 决定可重复的随机方向、速度和尺寸变化。Spread=0 沿控制器局部 +Z 发射，Spread=1 向各方向散射；Randomness 控制变化幅度，Spawn Radius 控制初始径向距离，Size 是出生半径，Fade 控制逐渐缩小。
 
