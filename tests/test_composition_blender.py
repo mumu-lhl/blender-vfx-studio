@@ -165,6 +165,207 @@ class CompositionTests(unittest.TestCase):
         self.assertIsNone(a.parent)
         self.assertEqual(composition.members(group), [b])
 
+    def test_ungroup_sixteen_layers_preserves_current_state_and_resources(self):
+        roots = [core.create(bpy.context, quality="LOW") for _ in range(16)]
+        for index, root in enumerate(roots):
+            root.location = (index * 0.2, 1, 2)
+            root.rotation_euler.z = index * 0.1
+        group = composition.create(bpy.context, roots)
+        bpy.context.scene.collection.objects.link(group)
+        bpy.context.scene.view_layers.new("Other View Layer")
+        group.location = (3, 4, 5)
+        group.rotation_euler.z = 0.4
+        group.scale = (1.5,) * 3
+        update(group, duration=48.0, speed=2.0, loop=True)
+        roots[-1].keyframe_insert(data_path='["radius"]', frame=1)
+        action = roots[-1].animation_data.action
+        material = roots[0].children[0].data.materials[0]
+        user_node = material.node_tree.nodes.new("ShaderNodeValue")
+        user_node.name = "User Edit"
+        user_node.outputs[0].default_value = 0.75
+        bpy.context.scene.frame_set(31, subframe=0.25)
+        depsgraph = bpy.context.evaluated_depsgraph_get()
+        before = []
+        for root in roots:
+            layer = root.children[0]
+            before.append(
+                (
+                    root.matrix_world.copy(),
+                    tuple(root[key] for key in composition.TIME_KEYS),
+                    [v.co.copy() for v in layer.evaluated_get(depsgraph).data.vertices],
+                    layer.data,
+                )
+            )
+        group_id = group["vfx_id"]
+        detached, retained = composition.ungroup_all(bpy.context, group)
+        self.assertFalse(retained)
+        self.assertEqual(set(detached), set(roots))
+        self.assertFalse(any(o.get("vfx_id") == group_id for o in bpy.data.objects))
+        self.assertEqual(set(bpy.context.selected_objects), set(roots))
+        self.assertEqual(bpy.context.scene.frame_current_final, 31.25)
+        depsgraph = bpy.context.evaluated_depsgraph_get()
+        for root, (world, timing, vertices, mesh) in zip(roots, before):
+            self.assertIsNone(root.parent)
+            self.assertIsNone(root.get("vfx_composition"))
+            self.assertEqual(tuple(root[key] for key in composition.TIME_KEYS), timing)
+            self.assertLess(
+                max(abs(x - y) for a, b in zip(world, root.matrix_world) for x, y in zip(a, b)),
+                1e-5,
+            )
+            self.assertEqual(root.children[0].data, mesh)
+            actual = root.children[0].evaluated_get(depsgraph).data.vertices
+            self.assertEqual(len(actual), len(vertices))
+            self.assertTrue(all((a.co - b).length < 1e-5 for a, b in zip(actual, vertices)))
+        self.assertEqual(roots[-1].animation_data.action, action)
+        self.assertEqual(material.node_tree.nodes["User Edit"].outputs[0].default_value, 0.75)
+        self.assertTrue(visible(roots[0], 31))
+        self.assertFalse(visible(roots[0], 61))
+
+    def test_ungroup_preflight_does_not_detach_any_member_on_failure(self):
+        for failure in (
+            "driver",
+            "muted",
+            "timing",
+            "animation",
+            "constraint",
+            "shear",
+            "reparent",
+        ):
+            with self.subTest(failure=failure):
+                bpy.ops.wm.read_factory_settings(use_empty=True)
+                group, a, b = create()
+                # The invalid member sorts last, exposing partial-mutation errors.
+                a.name, b.name = "First", "Last"
+                if failure == "driver":
+                    b.animation_data.drivers[-1].driver.expression = "7"
+                elif failure == "muted":
+                    b.animation_data.drivers[-1].mute = True
+                elif failure == "timing":
+                    b.keyframe_insert(data_path='["start"]', frame=1)
+                elif failure == "animation":
+                    b.keyframe_insert(data_path="location", frame=1)
+                elif failure == "constraint":
+                    b.constraints.new("LIMIT_LOCATION")
+                elif failure == "shear":
+                    group.scale = (2, 1, 1)
+                    b.rotation_euler.z = 0.7
+                else:
+                    b.parent = None
+                bpy.context.view_layer.update()
+                before = {o.as_pointer() for o in bpy.data.objects}
+                with self.assertRaises(ValueError):
+                    composition.ungroup_all(bpy.context, group)
+                self.assertEqual({o.as_pointer() for o in bpy.data.objects}, before)
+                self.assertEqual(a.parent, group)
+                self.assertEqual(a.get("vfx_composition"), group)
+                self.assertEqual(len(a.animation_data.drivers), 4)
+                self.assertEqual(b.get("vfx_composition"), group)
+
+    def test_ungroup_keeps_controller_referenced_by_user_data(self):
+        group, a, b = create()
+        user = bpy.data.objects.new("User Child", None)
+        bpy.context.scene.collection.objects.link(user)
+        user.parent = group
+        user.location = (2, 3, 4)
+        user.keyframe_insert(data_path="location", frame=1)
+        action = user.animation_data.action
+        material = a.children[0].data.materials[0]
+        node = material.node_tree.nodes.new("ShaderNodeValue")
+        nodes.drive(node.outputs[0], "default_value", group, "p", {"p": "duration"})
+        detached, retained = composition.ungroup_all(bpy.context, group)
+        self.assertTrue(retained)
+        self.assertEqual(set(detached), {a, b})
+        self.assertEqual(user.parent, group)
+        self.assertEqual(user.animation_data.action, action)
+        self.assertEqual(composition.members(group), [])
+        update(group, duration=60.0, speed=3.0)
+        self.assertEqual(node.outputs[0].default_value, 60)
+        self.assertEqual(a["duration"], 24)
+        self.assertEqual(a["speed"], 1)
+        bpy.data.objects.remove(user, do_unlink=True)
+        material.node_tree.nodes.remove(node)
+        detached, retained = composition.ungroup_all(bpy.context, group)
+        self.assertFalse(retained)
+        self.assertEqual(detached, [])
+
+    def test_single_detach_also_refuses_shear_without_changing_parent(self):
+        group, a, b = create()
+        group.scale = (2, 1, 1)
+        a.rotation_euler.z = 0.7
+        with self.assertRaisesRegex(ValueError, "sheared"):
+            composition.detach(bpy.context, a)
+        self.assertEqual(a.parent, group)
+        self.assertEqual(len(a.animation_data.drivers), 4)
+        count = len(bpy.data.objects)
+        with self.assertRaisesRegex(ValueError, "sheared"):
+            core.duplicate(bpy.context, a)
+        self.assertEqual(len(bpy.data.objects), count)
+
+    def test_ungroup_keeps_explicit_scene_and_collection_references(self):
+        for owner_kind in ("scene", "collection"):
+            with self.subTest(owner=owner_kind):
+                bpy.ops.wm.read_factory_settings(use_empty=True)
+                group, a, b = create()
+                owner = bpy.context.scene if owner_kind == "scene" else group.users_collection[0]
+                owner["User Controller"] = group
+                bpy.context.scene.view_layers.new("Other View Layer")
+                children, retained = composition.ungroup_all(bpy.context, group)
+                self.assertTrue(retained)
+                self.assertEqual(owner["User Controller"], group)
+                self.assertTrue(all(r.parent is None for r in children))
+                del owner["User Controller"]
+                self.assertFalse(composition.ungroup_all(bpy.context, group)[1])
+
+    def test_ungroup_bound_animated_group_preserves_evaluated_pose(self):
+        from blender_vfx_studio import binding
+
+        group, a, b = create()
+        target = bpy.data.objects.new("Animated Target", None)
+        bpy.context.scene.collection.objects.link(target)
+        target.keyframe_insert(data_path="location", frame=1)
+        target.location = (4, 5, 6)
+        target.keyframe_insert(data_path="location", frame=13)
+        action = target.animation_data.action
+        bpy.context.scene.frame_set(1)
+        binding.bind(bpy.context, group, target)
+        group.rotation_euler.z = 0.2
+        group.keyframe_insert(data_path="rotation_euler", frame=1)
+        group.rotation_euler.z = 0.8
+        group.keyframe_insert(data_path="rotation_euler", frame=13)
+        bpy.context.scene.frame_set(7, subframe=0.5)
+        world = a.evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world.copy()
+        children, retained = composition.ungroup_all(bpy.context, group)
+        self.assertFalse(retained)
+        self.assertEqual(set(children), {a, b})
+        self.assertLess(
+            max(abs(x - y) for ra, rb in zip(world, a.matrix_world) for x, y in zip(ra, rb)), 1e-5
+        )
+        bpy.context.scene.frame_set(13)
+        self.assertLess(
+            max(abs(x - y) for ra, rb in zip(world, a.matrix_world) for x, y in zip(ra, rb)), 1e-5
+        )
+        self.assertEqual(target.animation_data.action, action)
+
+    def test_ungroup_imported_composition_can_export_independent_layers(self):
+        from blender_vfx_studio import assets
+
+        group, a, b = create()
+        path = ROOT / "work/ungroup-complete.blend"
+        assets.write(path, group)
+        loaded = assets.load(bpy.context, path)
+        children, retained = composition.ungroup_all(bpy.context, loaded)
+        self.assertFalse(retained)
+        self.assertEqual(len(children), 2)
+        self.assertEqual(set(composition.members(group)), {a, b})
+        for child in children:
+            self.assertIsNone(child.parent)
+            assets.write(ROOT / "work/ungroup-independent.blend", child)
+            copy = assets.load(bpy.context, ROOT / "work/ungroup-independent.blend")
+            self.assertNotEqual(copy["vfx_id"], child["vfx_id"])
+            core.delete(copy)
+            core.delete(child)
+        self.assertEqual(set(composition.members(group)), {a, b})
+
     def test_edited_timing_and_transform_animation_are_not_erased(self):
         group, a, b = create()
         curve = a.animation_data.drivers[0]
@@ -199,6 +400,12 @@ bpy.ops.wm.read_factory_settings(use_empty=True)
 group, a, b = create()
 group.name, a.name, b.name = "Persisted Composition", "Composition Ring", "Composition Burst"
 update(group, duration=48.0, loop=True)
+ungrouped, ring, burst = create()
+ring.name, burst.name = "Ungrouped Ring", "Ungrouped Burst"
+update(ungrouped, duration=48.0, loop=True)
+ungrouped.location = (2, 3, 4)
+bpy.context.scene.frame_set(61, subframe=0.25)
+composition.ungroup_all(bpy.context, ungrouped)
 addon.unregister()
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "work/composition.blend"))
 print("COMPOSITION_INTEGRATION_OK")

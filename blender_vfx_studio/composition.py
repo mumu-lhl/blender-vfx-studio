@@ -4,6 +4,7 @@ import math
 import uuid
 
 import bpy
+from mathutils import Matrix
 
 from . import core
 from .animation import curves
@@ -127,12 +128,18 @@ def check_detach(root):
 
     if _has_transform_animation(root):
         raise ValueError("Bake member transform animation before detaching or copying it alone")
+    timing_paths = {f'["{key}"]' for key in TIME_KEYS}
+    if sum(curve.data_path in timing_paths for curve in curves(root)) != len(TIME_KEYS):
+        raise ValueError("Bake member timing animation before detaching")
     # Only remove the four drivers we installed. User replacements must be preserved.
     drivers = root.animation_data.drivers if root.animation_data else ()
     for key, (expression, properties) in TIMING.items():
         curve = next((c for c in drivers if c.data_path == f'["{key}"]'), None)
         if (
             curve is None
+            or curve.driver.type != "SCRIPTED"
+            or curve.mute
+            or curve.modifiers
             or curve.driver.expression != expression
             or len(curve.driver.variables) != len(properties)
         ):
@@ -151,19 +158,85 @@ def check_detach(root):
     return root
 
 
-def detach(context, root):
-    root = check_detach(root)
-    context.view_layer.update()
-    world = root.evaluated_get(context.evaluated_depsgraph_get()).matrix_world.copy()
-    values = {key: root[key] for key in TIME_KEYS}
+def _detach_state(root, depsgraph):
+    check_detach(root)
+    evaluated = root.evaluated_get(depsgraph)
+    world = evaluated.matrix_world.copy()
+    rebuilt = Matrix.LocRotScale(*world.decompose())
+    magnitude = max(1.0, *(abs(world[i][j]) for i in range(3) for j in range(3)))
+    if any(not math.isfinite(value) for row in world for value in row) or any(
+        abs(world[i][j] - rebuilt[i][j]) > 1e-5 * magnitude for i in range(3) for j in range(3)
+    ):
+        raise ValueError("Bake the member's sheared world pose before detaching")
+    values = {key: evaluated[key] for key in TIME_KEYS}
+    if any(not math.isfinite(values[key]) for key in TIME_KEYS):
+        raise ValueError("Repair invalid member timing before detaching")
+    return world, values
+
+
+def _apply_detach(root, state):
+    world, values = state
     for key in TIME_KEYS:
         root.driver_remove(f'["{key}"]')
         root[key] = values[key]
     root.parent = None
     root.matrix_world = world
     del root["vfx_composition"]
+
+
+def detach(context, root):
+    root = check_detach(root)
+    context.view_layer.update()
+    state = _detach_state(root, context.evaluated_depsgraph_get())
+    _apply_detach(root, state)
     core.select(context, root)
     return root
+
+
+def ungroup_all(context, group):
+    """Detach every member, taking all snapshots before changing the hierarchy."""
+    group = core.resolve(group)
+    if group is None or group["vfx_module"] != "core.composition":
+        raise ValueError("Select a VFX composition")
+    children = members(group)
+    for root in [group, *children]:
+        if root.library or root.override_library or root.name not in context.view_layer.objects:
+            raise ValueError("Ungroup requires local controllers in the current view layer")
+    core._delete_spatial(group, validate_only=True)
+    context.view_layer.update()
+    depsgraph = context.evaluated_depsgraph_get()
+    states = []
+    for root in children:
+        try:
+            states.append(_detach_state(root, depsgraph))
+        except ValueError as error:
+            raise ValueError(f"{root.name}: {error}") from error
+    for root, state in zip(children, states):
+        _apply_detach(root, state)
+    # Keep user parenting and custom drivers that still refer to the controller.
+    users = bpy.data.user_map(subset={group}).get(group, set())
+    retained = group.use_fake_user or group.use_extra_user
+    for user in users:
+        # Native collection membership and per-view-layer object bases are
+        # ordinary scene ownership, not custom dependencies on the controller.
+        ordinary = 0
+        if isinstance(user, bpy.types.Collection):
+            ordinary = int(user.objects.get(group.name) == group)
+        elif isinstance(user, bpy.types.Scene):
+            ordinary = sum(group.name in layer.objects for layer in user.view_layers)
+            ordinary += int(user.collection.objects.get(group.name) == group)
+            # Undo snapshots cache the active object here, even for an Empty
+            # with no particle system. This read-only pointer is not user data.
+            ordinary += int(user.tool_settings.particle_edit.object == group)
+        if user.user_of_id(group) > ordinary:
+            retained = True
+    if not retained:
+        core._delete_spatial(group)
+    if children:
+        core.select(context, children[0])
+        for root in children[1:]:
+            root.select_set(True)
+    return children, bool(retained)
 
 
 def duplicate(context, group):

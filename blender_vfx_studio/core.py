@@ -163,7 +163,8 @@ def duplicate(context, root, *, _standalone=True, _references=None):
     if _standalone and root.get("vfx_composition"):
         from . import composition
 
-        composition.check_detach(root)
+        context.view_layer.update()
+        composition._detach_state(root, context.evaluated_depsgraph_get())
     if root["vfx_module"] == "simulation.cloth":
         from . import simulation
 
