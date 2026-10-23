@@ -22,8 +22,8 @@ jobs:
     env:
       BLENDER_VERSION: 5.2.2
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
         with:
           python-version: '3.12'
       - name: Install lint tools
@@ -53,12 +53,12 @@ jobs:
           blender -b --factory-startup --python-exit-code 1 --python tools/shield_preview.py
           blender -b --factory-startup --python-exit-code 1 --python tools/emitter_preview.py
           blender -b --factory-startup --python-exit-code 1 --python tools/bone_trail_preview.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.2
         if: runner.os == 'Linux'
         with:
           name: blender-vfx-studio-extension
           path: dist/*.zip
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.2
         if: github.ref_type == 'tag' && runner.os == 'Linux'
         with:
           name: blender-vfx-studio-preview
@@ -75,11 +75,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8.0.2
         with:
           name: blender-vfx-studio-extension
           path: dist
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8.0.2
         with:
           name: blender-vfx-studio-preview
           path: preview
