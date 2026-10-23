@@ -22,7 +22,7 @@
 | --- | --- | --- |
 | Cycles 近景暗背景 | `dark` | 36 帧、视频、原生场景 |
 | Cycles 近景亮背景 | `light` | 四个关键帧、原生场景 |
-| Eevee 近景暗背景 | `blender_eevee-near-dark` | 四个关键帧、原生场景 |
+| Eevee 近景暗背景 | `blender_eevee-near-dark` | 36 帧、视频、原生场景 |
 | Eevee 近景亮背景 | `blender_eevee-near-light` | 四个关键帧、原生场景 |
 | Eevee 远景暗背景 | `blender_eevee-wide-dark` | 四个关键帧、原生场景 |
 | Eevee 远景亮背景 | `blender_eevee-wide-light` | 36 帧、视频、原生场景 |
@@ -31,23 +31,32 @@
 
 ```sh
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --sequence
+blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --sequence
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --wide --light --sequence
 python tools/combat_video.py work/visual-combat/dark
+python tools/combat_video.py work/visual-combat/blender_eevee-near-dark
 python tools/combat_video.py work/visual-combat/blender_eevee-wide-light
+python tools/combat_review.py work/visual-combat
 ```
 
-安装 FFmpeg（含 ffprobe）后，后两条编码 MP4，检查完整 36 帧、24 fps 和 1.5 秒时长。缺少完成记录、只渲染了关键帧、缺帧或尺寸不符时拒绝编码，保留之前的视频。重新渲染开始时会清除旧的完成记录，避免中断后把新旧 PNG 混成“完整序列”。
+安装 FFmpeg（含 ffprobe）后，combat_video.py 编码 MP4，检查完整 36 帧、24 fps 和 1.5 秒时长。缺少完成记录、只渲染了关键帧、缺帧或尺寸不符时拒绝编码，保留之前的视频。重新渲染开始时会清除旧的完成记录和播放页，避免中断后把新旧 PNG 混成“完整序列”。
+
+最后一条命令生成离线播放页 `work/visual-combat/index.html`，直接用浏览器打开即可，无需服务器或联网。Actions 附件解压后也可打开同名文件；请保留旁边的条件目录。先按 1× 正常速度播放 Cycles 与 Eevee 的近景暗背景，两者相机与背景相同；再播放 Eevee 远景亮背景。其他三种条件仍只有关键帧，页面会明确标记，不能据此判断连续播放。
+
+编码记录包含当前渲染设置和全部源 PNG 的 SHA256，即用于识别文件内容的摘要。播放页只嵌入与当前序列匹配的视频；重渲染后需重新编码并生成页面，旧的编码记录也需重新生成。这只能防止误看过期视频，不代表视觉通过。页面没有自动批准按钮，也不能证明浏览器的实际播放速度或掉帧情况。
+
+观看后在 #69 记录播放工具、实际速度，以及挥砍速度感、命中力度、尖片/冲击波层次和衔接的观察。指出问题所在的条件与帧区间，再优先改真实生成器或普通参数并重渲染。慢放和暂停可辅助定位，但不能替代正常速度观看。
 
 去掉 `--sequence` 只生成第 4、8、12、23 帧；去掉 `--wide` 使用近景，去掉 `--light` 使用暗背景。Linux 无 GPU 时可在 Blender 命令前加 `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless`。结果位于 `work/visual-combat/`，`render-settings.json` 记录实际渲染条件；不要同时向同一目录运行两个渲染进程。
 
-各目录的 `combat.blend` 可直接用 Blender 打开并播放，无需插件；时间轴包含出现、命中和恢复标记。它含相机、灯光与参照物，是完整预览场景，不供 Load Complete Effect 载入。
+新生成的 `combat.blend` 打开时停在第 8 帧命中画面，可直接播放，无需插件；时间轴包含出现、命中和恢复标记。它含相机、灯光与参照物，是完整预览场景，不供 Load Complete Effect 载入。原生播放仍需检查能否达到 24 fps，后台软件渲染耗时不能当作视口帧率。
 
 ## 验证范围与待验收项
 
 已有 152 项测试、15 个无插件重开进程、安装/卸载和 Ruff 通过，另增加两项编码预检。Eevee 远景亮背景与 Cycles 近景场景均在无插件新进程跳帧、重渲染第 8 帧，PNG 所有像素通道与原图一致。实际 v0.22.0 示例资产载入、复制及各粒子层参数 JSON 重建后仍保留旧参数；新版默认值只影响重新创建的 Impact。新版入门库也已重建并通过无插件验证。
 
-CI 配置生成上述六种条件、两个视频和原生场景，并执行无插件像素对比，附件为 `combat-shot-visual-review`。自动检查结果见关联 PR。视频文件存在和元数据检查通过只证明交付物可供播放，不代表已经观看。
+CI 配置生成上述六种条件、三个视频、离线播放页和原生场景，并对三个完整序列的命中帧执行无插件像素对比，附件为 `combat-shot-visual-review`。自动检查结果见关联 PR。视频文件存在和元数据检查通过只证明交付物可供播放，不代表已经观看。
 
-[Issue #69](https://github.com/mumu-lhl/blender-vfx-studio/issues/69) 保持打开：尚需按 24 fps 真正观看两段视频，判断挥砍速度感、命中力度、粒子/冲击波层次和衔接；真实角色、其他帧率及集成显卡性能也未验收。该项完成前不宣布连续战斗动画视觉通过。
+[Issue #69](https://github.com/mumu-lhl/blender-vfx-studio/issues/69) 保持打开：尚需按 24 fps 真正观看三段视频，判断挥砍速度感、命中力度、粒子/冲击波层次和衔接；真实角色、其他帧率及集成显卡性能也未验收。该项完成前不宣布连续战斗动画视觉通过。
 
 后续 [#71](https://github.com/mumu-lhl/blender-vfx-studio/issues/71) 增厚主尖片横向轮廓并加入亮暗面。已读取修改后的 Eevee 亮背景近景、远景命中与扩散图，并对比旧图：近景面色更清楚，远景主尖片略易辨认，细余烬仍弱。Cycles 出现、峰值、衰减图已查看。155 项本地回归和两种引擎的无插件命中帧像素对比通过；详细参数、编辑方式和限制见 [Impact 检查记录](IMPACT_VISUAL_REVIEW.md)。#69 的连续播放部分仍未验收。

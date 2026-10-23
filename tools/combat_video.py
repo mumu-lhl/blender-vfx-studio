@@ -1,12 +1,22 @@
 """Encode a complete native review sequence; this does not approve its motion."""
 
 import argparse
+import hashlib
 import json
 import shutil
 import struct
 import subprocess
 import tempfile
 from pathlib import Path
+
+
+def sequence_digest(folder):
+    """Bind a movie's encoding record to the exact settings and source PNGs."""
+    folder = Path(folder)
+    digest = hashlib.sha256((folder / "render-settings.json").read_bytes())
+    for frame in range(1, 37):
+        digest.update((folder / f"combat-{frame:04d}.png").read_bytes())
+    return digest.hexdigest()
 
 
 def encode(folder):
@@ -31,6 +41,7 @@ def encode(folder):
     ffmpeg, ffprobe = shutil.which("ffmpeg"), shutil.which("ffprobe")
     if not ffmpeg or not ffprobe:
         raise RuntimeError("Install FFmpeg (including ffprobe) before encoding review videos")
+    source_digest = sequence_digest(folder)
     destination = folder / "combat.mp4"
     with tempfile.TemporaryDirectory(dir=folder) as temporary:
         movie = Path(temporary) / "combat.mp4"
@@ -86,6 +97,7 @@ def encode(folder):
         ):
             raise ValueError(f"Unexpected video stream: {info}")
         movie.replace(destination)
+    info["source_sha256"] = source_digest
     (folder / "video-info.json").write_text(json.dumps(info, indent=2) + "\n", encoding="utf-8")
     print(f"ENCODED_REVIEW_VIDEO {destination} (36 frames, 24 fps; playback not reviewed)")
     return destination

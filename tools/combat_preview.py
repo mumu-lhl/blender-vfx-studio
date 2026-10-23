@@ -113,11 +113,15 @@ def main():
     # An interrupted or keyframe-only render must not certify an older sequence.
     settings_path = folder / "render-settings.json"
     settings_path.unlink(missing_ok=True)
+    (folder.parent / "index.html").unlink(missing_ok=True)
     frames = list(range(1, 37)) if args.sequence else [4, 8, 12, 23]
     for frame in frames:
         bpy.context.scene.frame_set(frame)
         bpy.context.scene.render.filepath = str(folder / f"combat-{frame:04d}.png")
         bpy.ops.render.render(write_still=True)
+    # Open the review scene on the hit, rather than an empty final frame.
+    bpy.context.scene.frame_set(8)
+    bpy.context.scene.render.filepath = str(folder / "combat-0008.png")
     bpy.ops.wm.save_as_mainfile(filepath=str(folder / "combat.blend"))
     settings = {
         "engine": args.engine,

@@ -140,13 +140,16 @@ jobs:
         run: |
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --sequence
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --light
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --engine BLENDER_EEVEE
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --sequence
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --wide
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --light
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --wide --light --sequence
           python tools/combat_video.py work/visual-combat/dark
+          python tools/combat_video.py work/visual-combat/blender_eevee-near-dark
           python tools/combat_video.py work/visual-combat/blender_eevee-wide-light
+          python tools/combat_review.py work/visual-combat
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-combat/dark/combat.blend --python tests/combat_reopen.py
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-combat/blender_eevee-near-dark/combat.blend --python tests/combat_reopen.py
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-combat/blender_eevee-wide-light/combat.blend --python tests/combat_reopen.py
       - uses: actions/upload-artifact@v7.0.2
         if: runner.os == 'Linux'
@@ -158,6 +161,7 @@ jobs:
             work/visual-combat/*/combat.mp4
             work/visual-combat/*/render-settings.json
             work/visual-combat/*/video-info.json
+            work/visual-combat/index.html
       - name: Build and validate starter assets (CPU only)
         if: github.ref_type == 'tag' && runner.os == 'Linux'
         run: |
