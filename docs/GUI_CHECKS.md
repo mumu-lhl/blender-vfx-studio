@@ -33,6 +33,10 @@
 同日还用带父级动画和骨骼 Copy Rotation 约束的两骨骼场景，检查了骨骼末端入口：在 Pose Mode 激活 Blade，创建对话框勾选 Use Bone Tail，确认后返回 Object Mode，侧栏保留 Source、Bone=Blade 和已勾选状态。
 取消侧栏勾选，再点击 Rebake 并确认，操作完成且参数仍可编辑，没有 Python 异常。路径位置和不改动骨架动画的检查由后台测试完成；Cycles CPU 与 Eevee 对比预览均已查看：固定起点没有扫过弧线，旋转末端会留下刀尖轨迹。
 
+Asset Browser 安全载入也已在同一 Linux 窗口检查。测试库包含 Blue Shockwave、Orange Stream 和一个普通集合资产；库通过 Blender 原生设置添加，新导出名称及 VFX Studio 标签正常显示。
+选中 Blue Shockwave 并连续点击 Load VFX with New ID 两次，得到两个不同实例编号；顶栏 Edit → Undo 移除最近一个，Redo 恢复同一编号。选择普通集合时，按钮报告不支持的完整效果，原有两个实例和 Cube 保留。
+切到 Current File 选中已载入的集合时，载入按钮禁用，并提示使用场景中的 VFX Duplicate。这里验证了原生库选择和操作入口，没有验证自动缩略图生成；当前导出文件没有自动生成的预览图。
+
 需要继续检查的范围包括复杂动画骨架、长名称和不同 UI 缩放，以及 Windows/macOS 的实际窗口交互。当前结果不代表完整交互测试或正式版验收。
 
 若要在自己的桌面上复查，运行：

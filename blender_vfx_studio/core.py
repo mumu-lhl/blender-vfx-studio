@@ -120,8 +120,10 @@ def create(context, preset="SHOCKWAVE", quality="MEDIUM"):
 
 
 def select(context, root):
-    for obj in context.selected_objects:
-        obj.select_set(False)
+    # File Browser context exposes asset selection rather than selected scene objects.
+    for obj in context.view_layer.objects:
+        if obj is not None and obj.select_get():
+            obj.select_set(False)
     root.select_set(True)
     context.view_layer.objects.active = root
     root.update_tag()

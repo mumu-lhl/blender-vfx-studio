@@ -445,7 +445,7 @@ class VFX_OT_delete(bpy.types.Operator):
 class VFX_OT_export_preset(bpy.types.Operator, ExportHelper):
     bl_idname = "vfx_studio.export_preset"
     bl_description = (
-        "Save current parameter values to JSON; use .blend Append for edited nodes or paths"
+        "Save current parameter values to JSON; use Save Complete Effect for edited nodes or paths"
     )
     bl_label = "Save VFX Preset"
     filename_ext = ".json"
