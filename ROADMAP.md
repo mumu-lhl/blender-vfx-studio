@@ -1,97 +1,40 @@
 # 开发进度与后续计划
 
-更新：2026-10-23（Asia/Shanghai）。以下区分已实现代码、已验证范围和尚未完成的工作；早期预览版不等同于正式稳定版。
+更新：2026-10-23（Asia/Shanghai）。目标是 Blender 5.2 LTS；当前仍是预览版，七类效果都有可用入口，但不代表各类功能已经完整。
 
-## M0：插件与开发基础——已实现
+最近完成连续粒子发射、骨骼末端拖尾和剪切姿态的安全解绑。v0.15.0 已发布，ZIP 校验通过且与全新克隆构建一致。v0.16.0 也已通过三平台发布检查并发布，下载 ZIP 校验通过，且与全新克隆构建逐字节一致。
 
-插件可以按 Blender 5.2 Extension 格式构建、安装、启用和卸载，提供原生 VFX 侧栏。安装 ZIP 可以从源码重复构建。CI 使用官方 Blender 5.2.2，并校验下载文件的 SHA256。
+## 已可使用的功能
 
-测试包括普通 Python 测试、真实 Blender CPU 后台测试、无插件保存重开和隔离用户配置的安装测试。架构说明、领域约定、开发规则和首项架构决策记录均已建立。
+**M0：插件与开发基础。** 原生 VFX 侧栏、Extension 安装包、可重复构建、普通 Python 测试、真实 Blender 后台测试，以及隔离配置的安装/卸载检查。CI 校验官方 Blender 5.2.2 下载包，覆盖 Linux x64、Windows x64 和 macOS ARM（[#24](https://github.com/mumu-lhl/blender-vfx-studio/issues/24)）。
 
-## M1：共享控制与首个效果——已可使用
+**M1：共享控制和 Mesh / Shader。** 每个效果拥有独立编号、控制器、网格、材质和节点。Start / Duration / Speed / Loop 使用原生驱动；支持跳帧、复制、安全删除和无插件播放。冲击波、能量环、弧形刀光及 Fresnel 护盾可调整形状、发光、流动和溶解（[#26](https://github.com/mumu-lhl/blender-vfx-studio/issues/26)、[#34](https://github.com/mumu-lhl/blender-vfx-studio/issues/34)）。
 
-已有统一控制器、实例 UUID、参数范围、版本检查、开始帧/时长/速度/循环，以及 Mesh + Shader 环形效果。冲击波和能量环支持参数关键帧、独立复制、安全删除和创建时质量选择。参数 JSON 可以保存、读取并创建新实例。
+**M2：基础效果库。** Flipbook 支持静态图集和外部编号图片序列；Particle 支持同时出生的 Burst，以及独立出生时间和寿命的 Continuous Emitter；Screen 可主动添加辉光和闪光，并保留现有合成链（[#8](https://github.com/mumu-lhl/blender-vfx-studio/issues/8)、[#38](https://github.com/mumu-lhl/blender-vfx-studio/issues/38)、[#11](https://github.com/mumu-lhl/blender-vfx-studio/issues/11)、[#40](https://github.com/mumu-lhl/blender-vfx-studio/issues/40)、[#9](https://github.com/mumu-lhl/blender-vfx-studio/issues/9)）。
 
-已有空间效果多层组合和独立 `.blend` 效果文件的保存与载入。将来修改实例保存结构前，要先补充明确的逐版本迁移和旧数据测试，不能只改变版本号。首次开发及参数预设分别见 [#1](https://github.com/mumu-lhl/blender-vfx-studio/issues/1)、[#3](https://github.com/mumu-lhl/blender-vfx-studio/issues/3)。
+粒子最多使用 2048 个存活槽；连续发射面板会显示受限制后的实际发射率。两种粒子都在局部空间直接计算，不处理碰撞或历史受力；改变发射参数会重算当前状态。序列图片仍为外部文件，完整效果导出不负责序列打包。
 
-## M2：基础效果库——已覆盖主要类型，继续扩展
+**M3：轨迹、绑定、组合与复用。** Ribbon 采样对象原点或骨骼起点/末端，按原采样时间播放；修改源动画后需明确 Rebake（[#13](https://github.com/mumu-lhl/blender-vfx-studio/issues/13)、[#44](https://github.com/mumu-lhl/blender-vfx-studio/issues/44)）。对象/骨骼绑定用 Child Of 保持挂接瞬间姿态；不能安全保留动画或剪切姿态时拒绝解绑（[#15](https://github.com/mumu-lhl/blender-vfx-studio/issues/15)、[#45](https://github.com/mumu-lhl/blender-vfx-studio/issues/45)）。
 
-- Flipbook：静态图集选帧、尺寸、透明度、独立复制和图片保留；新增编号图片序列模块，支持统一时间、相对图片范围和外部文件 JSON 预设（[#38](https://github.com/mumu-lhl/blender-vfx-studio/issues/38)）；JSON 支持图片相对路径及旧格式转换（[#2](https://github.com/mumu-lhl/blender-vfx-studio/issues/2)）。
-- Particle：最多 2048 个粒子的可重复随机爆发、重力弹道和实例化；增加了连续发射、逐粒子寿命和有界数量控制，尚无碰撞（[#11](https://github.com/mumu-lhl/blender-vfx-studio/issues/11)）。
-- Screen：主动添加辉光和时间闪光，保留现有合成链，支持叠加、复制和安全移除（[#9](https://github.com/mumu-lhl/blender-vfx-studio/issues/9)）。
+2–32 个空间效果可以组合、分层调整时间并整体复制/删除，暂不支持 Screen 或嵌套组合（[#19](https://github.com/mumu-lhl/blender-vfx-studio/issues/19)）。用户参数库提供命名、列表创建、重命名和文件删除；完整效果文件另存节点、动画、已采样路径和 Cloth 姿态，载入时分配新编号（[#17](https://github.com/mumu-lhl/blender-vfx-studio/issues/17)、[#36](https://github.com/mumu-lhl/blender-vfx-studio/issues/36)）。完整效果缩略图库尚未实现。
 
-继续扩展 Mesh / Shader 预设，改善常用效果的外观。已实现独立的 Arc Slash 程序化弧形刀光：弧度、生命周期旋转、收尖、溶解和预设复用（[#26](https://github.com/mumu-lhl/blender-vfx-studio/issues/26)）；Trail 继续用于动画采样路径。
+**M4：首个模拟效果。** Cloth Energy Sheet 使用原生布面求解，明确烘焙成保存在 .blend 中的形态键姿态。面板区分未烘焙、已烘焙和过期；改变物理输入不会自动覆盖旧结果（[#22](https://github.com/mumu-lhl/blender-vfx-studio/issues/22)）。仅已存姿态支持任意帧回放。当前源必须静态、有界，没有碰撞、外部力场、流体或烟雾；损坏源的复制会提前拒绝，不留下残缺实例（[#41](https://github.com/mumu-lhl/blender-vfx-studio/issues/41)）。
 
-新增 Fresnel 能量护盾，支持球面半径、增长、透明度、亮边、流动噪声溶解和参数预设（[#34](https://github.com/mumu-lhl/blender-vfx-studio/issues/34)）。
-第一版显示外表面，摄像机进入球内不可见；Cycles CPU 与 Eevee 预览分别检查。
+**M5：兼容性与稳定性仍在推进。** 后台功能已覆盖三个平台；Linux 已实际检查侧栏、文件选择器、Pose Mode 入口、用户库、Cloth 状态和撤销/重做。Windows/macOS 的真实窗口交互、更多骨架形式及不同 UI 缩放仍待检查，不能据此承诺正式版稳定性。具体范围见 [GUI 记录](docs/GUI_CHECKS.md)。
 
-## M3：轨迹、绑定、组合与复用——进行中
+## 当前验证基线
 
-已完成对象原点/骨骼起点或末端采样的 Ribbon Trail，按采样时间插值播放，提供宽度、尾长和明确的重新采样操作（[#13](https://github.com/mumu-lhl/blender-vfx-studio/issues/13)）。轨迹最多 2048 点，暂用 `.blend` 复用，不支持 JSON 路径资产、自动朝向相机或扭转模拟。
+v0.16.0 在三个平台通过 119 项测试、13 个无插件重开进程、安装/卸载和 Ruff。重开进程不加载插件，并关闭脚本自动执行；检查原生驱动、节点和已存路径/姿态能独立工作。Cloth 和骨骼末端路径还会删除源后再验证回放。
 
-已完成对象/骨骼绑定界面，使用 Child Of 约束保持挂接瞬间的世界姿态，并在无法安全保留动画时拒绝解绑（[#15](https://github.com/mumu-lhl/blender-vfx-studio/issues/15)）。
+新增的 5 项测试覆盖受约束、带父级动画和非均匀缩放的骨架、子帧采样、端点切换、旧文件重新采样、复制、完整资产，以及剪切姿态解绑时保留原约束。未改动骨架的 Action 或约束。Linux 窗口检查了端点复选框及 Rebake 确认。
 
-用户参数预设库已实现命名保存、列表创建、重命名、文件删除和损坏文件报告，并完成本地及 CI 验证（[#17](https://github.com/mumu-lhl/blender-vfx-studio/issues/17)、[PR #18](https://github.com/mumu-lhl/blender-vfx-studio/pull/18)）。它保存参数，不代替完整 Blender 资产库。
+图集、图片序列、合成、Burst、Emitter 和护盾有 CPU 像素检查。Continuous Emitter 的 Eevee 无插件像素检查也通过；组合场景、护盾、连续发射和骨骼端点对比预览可用 tools/ 下的脚本重建。刀尖对比的 Cycles CPU 与 Eevee 图像均已查看。CPU 求值开销和测量限制见 [性能记录](docs/PERFORMANCE.md)，尚无集成显卡上的视口帧率保证。
 
-已实现多个空间效果的统一控制、分层时间设置和整体复制/删除（[#19](https://github.com/mumu-lhl/blender-vfx-studio/issues/19)）。已增加完整原生效果的保存/载入，保留节点、动画、轨迹和 Cloth 姿态，每次载入分配新编号（[#36](https://github.com/mumu-lhl/blender-vfx-studio/issues/36)）。
-导出要求没有外部场景依赖，图片先打包；集合支持原生资产标记，完整效果的缩略图库尚未实现。
+## 接下来的优先级
 
-## M4：模拟和缓存——首个布面效果已实现
+1. 完善完整效果的浏览与复用。优先利用 Blender 原生 Asset Browser，避免直接拖入资产时重复 UUID；继续使用经过校验、分配新编号的载入流程。
+2. 明确旧资产的升级范围与失败处理。当前只迁移格式 1 的环形参数 JSON 到格式 2；未知实例或模块资产版本仍拒绝编辑，不能假装已支持通用迁移。
+3. 补充更复杂骨架、不同 UI 缩放、Windows/macOS 窗口和 Eevee/Cycles 的视觉验证；修复能复现的问题，再扩展功能。
+4. 按实际需求增加世界空间粒子历史、碰撞或其他模拟。此类效果需先明确缓存和烘焙规则，不把依赖上一帧的模拟伪装成可直接跳帧的公式效果。
 
-Cloth Energy Sheet 使用原生布面求解，显式烘焙为保存在 `.blend` 的形态键动画，并显示未烘焙、已烘焙和过期状态。
-播放参数与物理输入分开，支持独立复制、安全删除和组合；模拟输入改变后需要明确重烘焙（[#22](https://github.com/mumu-lhl/blender-vfx-studio/issues/22)）。
-
-当前只支持有界的静态源 Cloth，暂无碰撞、外部力场、流体或烟雾。已测默认 Low 的 CPU 求值和 Cloth 烘焙，见 [性能测量](docs/PERFORMANCE.md)。后续完善更多模拟类型、缓存版本迁移，以及包含实际渲染的性能预算。
-未烘焙的模拟不能承诺任意帧都正确，已存姿态才能直接跳帧播放。
-
-## M5：交互、兼容性和正式发布——尚未完成
-
-Windows x64、Apple Silicon macOS 和 Linux x64 的后台套件、无插件重开和安装/卸载均已通过（[#24](https://github.com/mumu-lhl/blender-vfx-studio/issues/24)）。
-Arc Slash、后台 Undo/Redo 和子帧时间修复已通过三平台 CI；护盾继续由相同工作流检查。
-已增加复制/删除、组合、Cloth 烘焙/清除和合成树的后台 Undo/Redo 检查。Linux 的基本侧栏、创建、撤销/重做、用户库和 Cloth 状态已做实际鼠标/键盘检查，见 [GUI 记录](docs/GUI_CHECKS.md)。
-仍需文件选择器、骨骼及其他平台窗口交互、更系统的 Eevee/Cycles 视觉比较和稳定性修复。完成这些验证前，不将预览版标为正式稳定版。
-
-## 已验证的范围与发布状态
-
-时间修复版本的三平台基线为 85 项测试，包括时间公式的 60 组输入对照、参数文件和用户库检查，以及真实 Blender 中的各模块行为。
-用户库另有隔离目录中的界面操作验证，包含图片缺失时不创建残缺实例。
-
-环形、图集、合成、粒子、轨迹、绑定、组合、Cloth 和 Arc Slash 分别在新进程中重开 `.blend`，不加载插件且关闭脚本自动执行。
-图集、合成和粒子还有 CPU 渲染像素检查；Cloth 重开时会删除模拟源，验证已存姿态独立可用。
-安装包已验证安装、启用、创建和卸载，Ruff 检查与格式校验通过。
-
-`tools/preview.py` 可重新生成组合场景。Cycles CPU 800×500 和 Eevee 预览已查看；最新 Trail 构图另检查了 Eevee 400×250 图像。Linux 基本界面操作和后台 Undo/Redo 已检查；Windows/macOS 的后台套件已通过，实际窗口交互仍待检查。
-
-v0.2–v0.5 已发布，分别覆盖环形与参数预设、图集、合成、粒子。v0.6 增加轨迹，v0.7 增加绑定；两版均已发布并下载校验，v0.6 的 ZIP 也与干净源码构建一致。用户库版本 0.8.0 和组合版本 0.9.0 已发布并下载校验，Cloth 版本 0.10.0、Arc Slash 与界面修复版本 0.11.0，以及时间修复版本 0.11.1 已发布并下载校验；0.11.1 安装包与全新克隆构建逐字节一致。最新发布情况见 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases)。
-
-版本标签会触发测试和 CPU 预览，再上传 ZIP、SHA256SUMS 和 PNG。云端直接上传附件曾返回 401，现由 GitHub Actions 的独立发布任务完成（[#5](https://github.com/mumu-lhl/blender-vfx-studio/issues/5)）。v0.6 首次标签误指旧提交，被版本校验拦截；未发布的标签修正后已通过完整发布流程，没有发布错误安装包。
-
-0.11.1 修复子帧或场景时间重映射下创建效果会提前播放的问题；新实例对齐原生驱动时间，旧实例和显式轨迹采样区间不变。
-
-护盾版本 0.12.0 已通过三平台 89 项测试、安装/卸载与 Ruff，并已发布；下载 ZIP 与全新克隆构建逐字节一致。该版增加 4 项 Blender 行为检查和第 10 个无插件重开进程，覆盖 CPU 像素透明度、球内视角和完全溶解。
-新增外观预览生成脚本，不把临时渲染或测试 `.blend` 提交到源码。后续继续完善完整效果库和复杂动画骨架的交互验证。
-
-0.13.0 增加完整效果文件的保存/载入、失败回滚和图片打包检查，新增 6 项资产测试、1 项原生导入 Undo/Redo 检查和第 11 个无插件重开检查。
-三平台 96 项测试、11 个无插件重开进程、安装/卸载与 Ruff 已通过。Linux 实际窗口中已验证护盾创建、完整效果导出/重复载入、取消、覆盖文件、JSON/图集文件选择器、静止骨骼的采样/绑定入口和快捷键 Undo/Redo，见 GUI 记录。版本迁移和跨平台视觉一致性仍未完成，不标为稳定版。
-
-0.13.0 已发布，下载 ZIP 校验通过，且与全新克隆构建逐字节一致。
-0.14.0 的 103 项测试、12 个无插件重开检查、安装/卸载与 Ruff 已通过 Linux、Windows、macOS CI。图片序列 Sprite 已实现：原生选帧、连续文件检查、文件相对路径和跨场景时钟。新增 6 项 Blender 测试、1 项参数格式测试和第 12 个无插件重开检查。
-完整资产导出仍拒绝外部序列，暂无序列打包；新文件选择器已在 Linux 窗口中点击验证，并确认未选图像时不会创建残缺实例。
-
-图片序列在 Cycles CPU 和 Eevee 中分别通过五帧像素检查，未加载插件并关闭自动执行；组合预览增加可由脚本重建的 16 帧序列。图形界面范围见 GUI 记录，其他平台窗口交互仍待检查。
-
-0.14.1 修复损坏的 Cloth 复制会留下半份实例的问题（[#41](https://github.com/mumu-lhl/blender-vfx-studio/issues/41)）。
-单个及组合复制在创建数据前检查源/输出结构，拒绝操作时保留已有数据和烘焙播放；新增 2 项行为测试。
-连续粒子发射与逐粒子寿命已实现，见 [#40](https://github.com/mumu-lhl/blender-vfx-studio/issues/40)。
-
-v0.14.0 已发布并下载校验，与全新克隆构建逐字节一致。0.14.1 已通过三平台 105 项测试、12 个无插件重开检查及安装/卸载，并已发布；下载 ZIP 与全新克隆构建逐字节一致。
-
-0.15.0 增加 Continuous Emitter：独立出生时间、寿命、年龄缩小、确定性随机弹道、停止发射后的尾段，以及最多 2048 个存活槽的发射率限制。
-支持参数预设、完整资产、组合及独立复制。局部空间运动，不保留参数或控制器运动的历史；修改 Rate / Lifetime 会重新安排当前粒子，Loop 重播整个发射及尾段。
-本地已通过 114 项测试、13 个无插件重开检查、安装/卸载与 Ruff；新增 8 项 Blender 行为测试和 1 项参数格式测试。Cycles CPU 三阶段预览已查看，Eevee 无插件重开像素检查通过；Linux 窗口中的创建对话框、数值输入和发射率限制提示已实际检查。三平台 114 项测试和 13 个无插件重开检查均已通过，v0.15.0 已发布；下载 ZIP 的 SHA256 校验通过，且与全新克隆构建逐字节一致。
-
-接下来优先完善复杂动画骨架的采样与绑定验证，以及旧资产升级的明确规则。完整效果缩略图库、世界空间粒子历史和碰撞仍未实现。
-
-0.16.0 开发中：Ribbon 可选择骨骼起点或末端，侧栏记录下次重新采样的选择，兼容旧文件的起点行为（[#44](https://github.com/mumu-lhl/blender-vfx-studio/issues/44)）。
-增加父级动画、骨骼约束和非均匀缩放下的路径与绑定验证，发现并修复剪切姿态解绑后变形的问题：不能保留姿态时提前拒绝，不移除原约束（[#45](https://github.com/mumu-lhl/blender-vfx-studio/issues/45)）。
-本地完整 119 项测试、13 个无插件重开进程、安装/卸载及 Ruff 已通过；新增 3 项 Trail 和 2 项绑定测试，复用 Trail 重开进程验证删除骨架后的路径。刀尖/起点 CPU 对比预览及 Linux 创建、端点切换、Rebake 确认窗口已实际检查。三平台 CI 和发布尚待完成。
+完整历史及安装包见 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases)；具体实现与限制见 [README](README.md)、[DESIGN](DESIGN.md) 和 [CONTEXT](CONTEXT.md)。发布标签会重新执行三平台检查、生成 CPU 预览，再上传 ZIP、SHA256SUMS 和图片。标签版本必须与 manifest 一致；直接上传曾遇到凭据权限问题，现由独立 GitHub Actions 发布任务完成（[#5](https://github.com/mumu-lhl/blender-vfx-studio/issues/5)）。
