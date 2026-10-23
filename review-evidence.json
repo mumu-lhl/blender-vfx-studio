@@ -1,0 +1,28 @@
+{
+  "tag": "v0.22.1",
+  "filename": "blender-vfx-studio-combat-review-0.22.1.zip",
+  "sha256": "5e90add830d969836a9801e49a7101eb5aa2f932de4df5751f50fa62ba1b69b7",
+  "size": 66322905,
+  "parts": [
+    {
+      "sha": "75f8fdab2e957826a65192151319aab7f419ef45",
+      "sha256": "420da6c0648d1e12d1eb5d3a7780a5f9639aece4de0a6bc8ad1ef87ec30cc4a4",
+      "size": 16777216
+    },
+    {
+      "sha": "3f1e25e5d558cf6b26151fdffd32ebd841200ed3",
+      "sha256": "45a6c264ea019555666a15234396772b739c13704546302fbdb0bf5eda50b237",
+      "size": 16777216
+    },
+    {
+      "sha": "1217b27716c913c881380ee59ca3a9de3c4236ba",
+      "sha256": "cd384c1d42b3362c0fe56e7d08b44a0022adeb954e10703512e94ce092139a07",
+      "size": 16777216
+    },
+    {
+      "sha": "60c9d7cd2594a2610544861314a6d7c577d050a3",
+      "sha256": "ab3adca9f4510549982d7d3d548936d42304feeb9a41a50195204427d4518108",
+      "size": 15991257
+    }
+  ]
+}

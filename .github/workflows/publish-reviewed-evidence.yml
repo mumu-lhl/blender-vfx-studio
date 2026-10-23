@@ -1,0 +1,17 @@
+name: Publish exact reviewed combat evidence
+on:
+  push:
+    branches: [ops/publish-review-0221]
+permissions:
+  contents: write
+jobs:
+  upload:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Verify public data chunks and upload exact reviewed archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: python tools/publish_reviewed_evidence.py
