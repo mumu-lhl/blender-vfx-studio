@@ -8,6 +8,7 @@ import bpy
 
 assert not any("blender_vfx_studio" in name for name in sys.modules)
 scene = bpy.context.scene
+assert scene.frame_current == 8, "Review scenes should open on the visible hit"
 folder = Path(bpy.data.filepath).parent
 assert scene.render.resolution_x == 960 and scene.render.resolution_y == 540
 for frame in (36, 0, 8):

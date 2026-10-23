@@ -1,0 +1,91 @@
+{
+  "review_date": "2026-10-23",
+  "effect_source_commit": "e1f2a2d7043ab379cdbc7e3babfdeade8ecb6ea9",
+  "authorization": "用户允许“隔一帧看一帧，来代替实际观看视频的能力”。",
+  "method": "decoded_mp4_every_other_frame",
+  "live_playback_reviewed": false,
+  "result": "accepted_for_issue_69_proxy_shot",
+  "sample_count": 54,
+  "limits": [
+    "未检查实时播放掉帧、单帧级闪烁或完整主观速度感。",
+    "远景亮背景的细残影和微余烬较弱，不承担命中信息。",
+    "只有武器和靶体参照物，未验收真实角色或集成显卡性能。"
+  ],
+  "cases": [
+    {
+      "folder": "dark",
+      "movie_sha256": "8cf66f768cd52a4483f472d714a7b423ff1c695bc9b8abdc7317660a09fef6fa",
+      "source_sequence_sha256": "daf3dd3da632a839f8c5f1b6b251a0a74c489a4e46b522ae9203e805957c300e",
+      "inspected_source_frames": [
+        1,
+        3,
+        5,
+        7,
+        9,
+        11,
+        13,
+        15,
+        17,
+        19,
+        21,
+        23,
+        25,
+        27,
+        29,
+        31,
+        33,
+        35
+      ]
+    },
+    {
+      "folder": "blender_eevee-near-dark",
+      "movie_sha256": "b668b7bf5919980faa48e3e4466426c0bc910776c702bfa3d2786507d7433193",
+      "source_sequence_sha256": "028819475b8907f0a32cef92512be8c0987ba4914923df1cfef2a08dfb147bee",
+      "inspected_source_frames": [
+        1,
+        3,
+        5,
+        7,
+        9,
+        11,
+        13,
+        15,
+        17,
+        19,
+        21,
+        23,
+        25,
+        27,
+        29,
+        31,
+        33,
+        35
+      ]
+    },
+    {
+      "folder": "blender_eevee-wide-light",
+      "movie_sha256": "5f3f318c370cf5730f0a80103005399d05165b4ffec36b93e47dba306a5017c5",
+      "source_sequence_sha256": "6f4205cad2541625e0afd350fe4a14568e0ced0c14bdac7e1ed43ae6e25c8662",
+      "inspected_source_frames": [
+        1,
+        3,
+        5,
+        7,
+        9,
+        11,
+        13,
+        15,
+        17,
+        19,
+        21,
+        23,
+        25,
+        27,
+        29,
+        31,
+        33,
+        35
+      ]
+    }
+  ]
+}
