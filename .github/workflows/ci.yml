@@ -53,11 +53,19 @@ jobs:
           blender -b --factory-startup --python-exit-code 1 --python tools/shield_preview.py
           blender -b --factory-startup --python-exit-code 1 --python tools/emitter_preview.py
           blender -b --factory-startup --python-exit-code 1 --python tools/bone_trail_preview.py
-      - name: Install Linux software rendering libraries
+      - name: Ensure Linux software rendering and video tools
         if: runner.os == 'Linux'
+        timeout-minutes: 7
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends libegl1 libegl-mesa0 libgl1-mesa-dri ffmpeg
+          render_packages=(libegl1 libegl-mesa0 libgl1-mesa-dri)
+          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+            render_packages+=(ffmpeg)
+          fi
+          apt_options=(-o Acquire::Retries=1 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o DPkg::Lock::Timeout=30)
+          if ! sudo env DEBIAN_FRONTEND=noninteractive apt-get "${apt_options[@]}" install -y --no-install-recommends "${render_packages[@]}"; then
+            sudo apt-get "${apt_options[@]}" update -qq
+            sudo env DEBIAN_FRONTEND=noninteractive apt-get "${apt_options[@]}" install -y --no-install-recommends "${render_packages[@]}"
+          fi
       - name: Render Arc Slash visual review (960x540, CPU, no bloom)
         if: runner.os == 'Linux'
         env:
