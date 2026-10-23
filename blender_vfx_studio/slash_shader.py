@@ -1,0 +1,169 @@
+"""Blade highlight, colored filaments and dimmer wakes for slash asset version 2."""
+
+import bpy
+
+from .nodes import PROGRESS, TIME_PROPS, drive, node
+
+
+def shader(root, uid):
+    material = bpy.data.materials.new("VFX • Layered Slash")
+    material["vfx_id"] = uid
+    material.use_nodes = True
+    material.surface_render_method = "BLENDED"
+    tree = material.node_tree
+    tree.nodes.clear()
+    link = tree.links.new
+    count = 0
+
+    def make(kind, name, **attrs):
+        nonlocal count
+        result = node(tree, kind, name, (count % 7) * 220, -(count // 7) * 230, **attrs)
+        count += 1
+        return result
+
+    def connect(socket, source):
+        if isinstance(source, (int, float)):
+            socket.default_value = source
+        else:
+            link(source, socket)
+
+    def mathn(name, operation, a, b=0, clamp=False):
+        n = make("ShaderNodeMath", name, operation=operation)
+        connect(n.inputs[0], a)
+        connect(n.inputs[1], b)
+        n.use_clamp = clamp
+        return n.outputs[0]
+
+    def value(name, prop=None):
+        n = make("ShaderNodeValue", name)
+        drive(
+            n.outputs[0],
+            "default_value",
+            root,
+            "p" if prop else PROGRESS,
+            {"p": prop} if prop else TIME_PROPS,
+        )
+        return n.outputs[0]
+
+    def scale(name, vector, amount):
+        n = make("ShaderNodeVectorMath", name, operation="SCALE")
+        link(vector, n.inputs[0])
+        connect(n.inputs["Scale"], amount)
+        return n.outputs[0]
+
+    uv = make("ShaderNodeTexCoord", "Slash UV")
+    separate = make("ShaderNodeSeparateXYZ", "Along Arc / Across Body")
+    link(uv.outputs["UV"], separate.inputs[0])
+    u, v = separate.outputs["X"], separate.outputs["Y"]
+    progress = value("Progress")
+    attr = make("ShaderNodeAttribute", "Wake Index", attribute_name="vfx_wake")
+    band = attr.outputs["Fac"]
+    primary = mathn("Primary Ribbon", "LESS_THAN", band, 0.5)
+    wake = mathn("Auxiliary Ribbons", "SUBTRACT", 1, primary)
+
+    attack = value("Attack", "attack")
+    front = mathn("Reveal Front", "DIVIDE", progress, attack, clamp=True)
+    distance = mathn("Distance Behind Tip", "SUBTRACT", front, u)
+    reveal = mathn("Soft Moving Tip", "MULTIPLY", distance, 35, clamp=True)
+    remaining = mathn("Remaining Life", "SUBTRACT", 1, progress)
+    release = mathn("Release Curve", "POWER", remaining, 1.6)
+    fade = value("Fade", "fade")
+    loss = mathn("Release Loss", "SUBTRACT", 1, release)
+    loss = mathn("Fade Amount", "MULTIPLY", loss, fade)
+    envelope = mathn("Attack / Release", "SUBTRACT", 1, loss)
+    envelope = mathn("Revealed Envelope", "MULTIPLY", envelope, reveal)
+
+    core_width = value("Core Width", "core_width")
+    center = mathn("Blade Center", "MULTIPLY", core_width, 0.5)
+    blade = mathn("Blade Distance", "SUBTRACT", v, center)
+    blade = mathn("Absolute Blade Distance", "ABSOLUTE", blade)
+    blade = mathn("Normalized Blade Distance", "DIVIDE", blade, center)
+    blade = mathn("Blade Profile", "SUBTRACT", 1, blade, clamp=True)
+    blade = mathn("Sharp Blade", "POWER", blade, 0.65)
+    white = mathn("Primary Highlight Only", "MULTIPLY", blade, primary)
+    focus = mathn("Leading Highlight", "POWER", u, 2)
+    focus = mathn("Highlight Range", "MULTIPLY", focus, 0.65)
+    focus = mathn("Tail Highlight", "ADD", focus, 0.35)
+    white = mathn("Highlight Focus", "MULTIPLY", white, focus)
+
+    # Stretch noise along the arc: long filaments, narrow variation across width.
+    coordinates = make("ShaderNodeCombineXYZ", "Stretched Flow Coordinates")
+    link(mathn("Along Flow", "MULTIPLY", u, 1.8), coordinates.inputs["X"])
+    link(mathn("Across Filaments", "MULTIPLY", v, 5.5), coordinates.inputs["Y"])
+    link(mathn("Flow Over Life", "MULTIPLY", progress, 0.8), coordinates.inputs["Z"])
+    noise = make("ShaderNodeTexNoise", "Directional Filament Noise")
+    noise.inputs["Detail"].default_value = 2
+    link(coordinates.outputs[0], noise.inputs["Vector"])
+    link(value("Noise Scale", "noise_scale"), noise.inputs["Scale"])
+    late = mathn("After Strike", "SUBTRACT", progress, 0.28, clamp=True)
+    late = mathn("Release Erosion", "MULTIPLY", late, 1.35)
+    late = mathn("Breakup Amount", "MULTIPLY", late, value("Breakup", "breakup"))
+    tail = mathn("Trailing Coordinates", "SUBTRACT", 1, u)
+    tail = mathn("Trailing Erosion", "MULTIPLY", tail, late)
+    tail = mathn("Tail Breakup Weight", "MULTIPLY", tail, 0.35)
+    late = mathn("Tail First Release", "ADD", late, tail)
+    cutoff = mathn("Dissolve Over Life", "ADD", value("Dissolve", "dissolve"), late)
+    inward = mathn("Inner Edge Erosion", "MULTIPLY", v, 0.22)
+    cutoff = mathn("Directional Cutoff", "ADD", cutoff, inward)
+    protection = mathn("Blade Erodes Last", "MULTIPLY", blade, 0.3)
+    protection = mathn("Blade Protection Fades", "MULTIPLY", protection, remaining)
+    cutoff = mathn("Protected Blade Cutoff", "SUBTRACT", cutoff, protection)
+    erode = mathn("Noise Minus Cutoff", "SUBTRACT", noise.outputs["Fac"], cutoff)
+    erode = mathn("Soft Erosion", "MULTIPLY", erode, 16, clamp=True)
+    # A cutoff of one must always remove the entire material, including the blade.
+    visible = mathn("Not Fully Dissolved", "LESS_THAN", value("Dissolve Limit", "dissolve"), 1)
+    erode = mathn("Dissolve Mask", "MULTIPLY", erode, visible)
+
+    filament = mathn("Filament Phase", "MULTIPLY", v, 80)
+    distortion = mathn("Noise Distortion", "MULTIPLY", noise.outputs["Fac"], 14)
+    filament = mathn("Distorted Filaments", "ADD", filament, distortion)
+    filament = mathn("Filament Bands", "SINE", filament)
+    filament = mathn("Filament Contrast", "MULTIPLY", filament, 0.35)
+    filament = mathn("Filament Brightness", "ADD", filament, 0.65)
+    contrast = mathn("Streak Contrast", "MULTIPLY", value("Streaks", "streaks"), 0.75)
+    lost = mathn("Filament Gaps", "SUBTRACT", 1, filament)
+    lost = mathn("Streak Modulation", "MULTIPLY", lost, contrast)
+    detail = mathn("Body Detail", "SUBTRACT", 1, lost)
+    # Preserve a continuous blade while allowing the body to split into strands.
+    detail = mathn("Continuous Blade", "MAXIMUM", detail, blade)
+    edge = mathn("Outer Soft Edge", "MULTIPLY", v, 90, clamp=True)
+    inner = mathn("Inner Soft Edge", "SUBTRACT", 1, v)
+    inner = mathn("Body Softness", "POWER", inner, 0.65)
+    alpha = mathn("Body Edges", "MULTIPLY", edge, inner)
+    for name, factor in (("Filaments", detail), ("Erosion", erode), ("Envelope", envelope)):
+        alpha = mathn(name + " Opacity", "MULTIPLY", alpha, factor)
+    wake_weight = mathn("Wake Distance", "ADD", band, 1)
+    wake_weight = mathn("Wake Opacity", "DIVIDE", value("Afterimage", "afterimage"), wake_weight)
+    delay = mathn("Wake Delay", "MULTIPLY", band, 0.06)
+    arrived = mathn("Wake Has Arrived", "GREATER_THAN", progress, delay)
+    wake_weight = mathn("Delayed Wake", "MULTIPLY", wake_weight, arrived)
+    wake_weight = mathn("Subordinate Wake", "MULTIPLY", wake_weight, wake)
+    layer_weight = mathn("Layer Hierarchy", "ADD", primary, wake_weight)
+    alpha = mathn("Final Opacity", "MULTIPLY", alpha, layer_weight)
+
+    tint = make("ShaderNodeCombineXYZ", "Editable Body Color")
+    for index in range(3):
+        drive(tint.inputs[index], "default_value", root, "c", {"c": f"color_{index}"})
+    body = mathn("Body Gradient", "POWER", inner, 1.4)
+    body = mathn("Body Weight", "MULTIPLY", body, 0.65)
+    body = mathn("Dark Inner Color", "ADD", body, 0.08)
+    body = mathn("Gradient Filaments", "MULTIPLY", body, detail)
+    body_color = scale("Tinted Body", tint.outputs[0], body)
+    highlight = make("ShaderNodeCombineXYZ", "Cool Blade White")
+    for socket, component in zip(highlight.inputs, (0.8, 0.9, 1.0)):
+        socket.default_value = component
+    highlight_color = scale("Blade Highlight", highlight.outputs[0], white)
+    color = make("ShaderNodeVectorMath", "Blade Plus Body", operation="ADD")
+    link(body_color, color.inputs[0])
+    link(highlight_color, color.inputs[1])
+    emission = make("ShaderNodeEmission", "Layered Emission")
+    link(color.outputs[0], emission.inputs["Color"])
+    link(value("Emission", "strength"), emission.inputs["Strength"])
+    transparent = make("ShaderNodeBsdfTransparent", "Transparent")
+    mix = make("ShaderNodeMixShader", "Blade Surface")
+    link(alpha, mix.inputs[0])
+    link(transparent.outputs[0], mix.inputs[1])
+    link(emission.outputs[0], mix.inputs[2])
+    output = make("ShaderNodeOutputMaterial", "Surface")
+    link(mix.outputs[0], output.inputs["Surface"])
+    return material

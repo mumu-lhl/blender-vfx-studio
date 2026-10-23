@@ -1,6 +1,5 @@
 """Build three native starter assets and embedded CPU previews in a fresh process."""
 
-import math
 import os
 import sys
 import tempfile
@@ -19,7 +18,7 @@ EXAMPLES = ("energy-charge", "impact-burst", "arc-slash")
 PREVIEWS = {
     "energy-charge": (22, (4, -6, 3.5), (0, 0, 0.1), 4.8),
     "impact-burst": (10, (5, -7, 4), (0, 0, 0.2), 4.8),
-    "arc-slash": (7, (0, 0, 8), (0, 0, 0), 5.0),
+    "arc-slash": (5, (0, 0, 8), (0, 0, 0), 5.4),
 }
 
 
@@ -123,22 +122,8 @@ def create_effect(key):
         root = composition.create(context, [ring, particles])
         root.name = "Impact Burst"
     else:
-        root = configure(
-            core.create(context, "ARC_SLASH", "LOW"),
-            (0.6, 0.06, 1.0),
-            radius=1.8,
-            width=0.5,
-            arc=200.0,
-            spin=165.0,
-            taper=0.65,
-            expansion=0.3,
-            duration=18.0,
-            strength=4.0,
-            dissolve=0.12,
-            noise_scale=7.0,
-            fade=0.8,
-        )
-        root.rotation_euler.z = math.radians(-30)
+        root = core.create(context, "ARC_SLASH", "LOW")
+        root["duration"] = 18.0
         root.name = "Arc Slash"
     root["loop"] = False
     root.update_tag()
@@ -169,9 +154,10 @@ def preview_scene(key):
     scene.view_settings.view_transform = "Standard"
     scene.render.resolution_x = scene.render.resolution_y = 256
     scene.render.resolution_percentage = 100
-    glow = core.create_screen(bpy.context)
-    glow["strength"], glow["fade"] = 0.25, 0.0
-    glow.update_tag()
+    if key != "arc-slash":
+        glow = core.create_screen(bpy.context)
+        glow["strength"], glow["fade"] = 0.25, 0.0
+        glow.update_tag()
     scene.frame_set(frame)
 
 

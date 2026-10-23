@@ -6,52 +6,74 @@ import bpy
 
 from . import core, nodes
 from .nodes import ACTIVE, PROGRESS, TIME_PROPS, drive, node
-from .parameters import SLASH_PARAMETERS
+from .parameters import SLASH_PARAMETERS, SLASH_PARAMETERS_V1
 
 
-def create(context, quality="MEDIUM"):
+def create(context, quality="MEDIUM", *, asset_version=2):
+    if asset_version not in (1, 2):
+        raise ValueError("Unsupported slash asset version")
+    modern = asset_version == 2
     segments = {"LOW": 32, "MEDIUM": 64, "HIGH": 128}.get(quality)
     if segments is None:
         raise ValueError("Unknown slash quality")
     root, collection = core._controller(
-        context, "Arc Slash", "mesh.slash", quality, SLASH_PARAMETERS, {}
+        context,
+        "Arc Slash",
+        "mesh.slash",
+        quality,
+        SLASH_PARAMETERS if modern else SLASH_PARAMETERS_V1,
+        {},
     )
+    root["vfx_asset_version"] = asset_version
     uid = root["vfx_id"]
-    vertices, faces = [], []
-    for i in range(segments + 1):
-        u = i / segments
-        angle = (u - 0.5) * math.radians(root["arc"])
-        taper = max(math.sin(math.pi * u), 0) ** root["taper"]
-        for radius in (root["radius"], max(root["radius"] - root["width"] * taper, 0.001)):
-            vertices.append((radius * math.cos(angle), radius * math.sin(angle), 0))
-        if i < segments:
-            a = 2 * i
-            faces.append((a, a + 2, a + 3, a + 1))
+    vertices, faces, coordinates, bands = [], [], [], []
+    across = (0, 0.06, 0.16, 0.35, 0.65, 1) if modern else (0, 1)
+    for band in range(3 if modern else 1):
+        base = len(vertices)
+        for i in range(segments + 1):
+            u = i / segments
+            for v in across:
+                angle = (u - 0.5) * math.radians(root["arc"]) * (1 - band * 0.16) - band * 0.14
+                taper = max(math.sin(math.pi * u), 0) ** root["taper"]
+                if modern:
+                    taper *= (1 - root["head_bias"] * (1 - u)) * (0.12 if band else 1)
+                radius = max(root["radius"] * (1 + band * 0.075) - root["width"] * taper * v, 0.001)
+                vertices.append((radius * math.cos(angle), radius * math.sin(angle), 0))
+                coordinates.append((u, v))
+                bands.append(float(band))
+        for i in range(segments):
+            for j in range(len(across) - 1):
+                a = base + i * len(across) + j
+                faces.append((a, a + len(across), a + len(across) + 1, a + 1))
     mesh = bpy.data.meshes.new("VFX • Slash Base")
     core._tag(mesh, uid)
     mesh.from_pydata(vertices, [], faces)
     for name, values in (
-        ("vfx_arc", [i / segments for i in range(segments + 1) for _ in range(2)]),
-        ("vfx_inner", [i % 2 for i in range(2 * (segments + 1))]),
+        ("vfx_arc", [u for u, v in coordinates]),
+        ("vfx_inner", [v for u, v in coordinates]),
+        ("vfx_wake", bands),
     ):
+        if name == "vfx_wake" and not modern:
+            continue
         attribute = mesh.attributes.new(name, "FLOAT", "POINT")
         for item, value in zip(attribute.data, values):
             item.value = value
     uv = mesh.uv_layers.new(name="VFX UV")
-    for polygon in mesh.polygons:
-        u = polygon.index / segments
-        for index, coord in zip(
-            polygon.loop_indices, [(u, 0), (u + 1 / segments, 0), (u + 1 / segments, 1), (u, 1)]
-        ):
-            uv.data[index].uv = coord
+    for loop in mesh.loops:
+        uv.data[loop.index].uv = coordinates[loop.vertex_index]
     mesh.update()
     layer = bpy.data.objects.new("VFX • Slash Layer", mesh)
     core._tag(layer, uid, "layer")
     collection.objects.link(layer)
     layer.parent = root
-    material = nodes.shader(root, uid)
+    if modern:
+        from .slash_shader import shader
+
+        material = shader(root, uid)
+    else:
+        material = nodes.shader(root, uid)
     material.name = "VFX • Slash Dissolve"
-    uv_node = material.node_tree.nodes["Ring UV"]
+    uv_node = material.node_tree.nodes["Slash UV" if modern else "Ring UV"]
     uv_node.name = uv_node.label = "Slash UV"
     mesh.materials.append(material)
     geometry(layer, root)
@@ -91,27 +113,77 @@ def geometry(obj, root):
     )
     inner.inputs["Name"].default_value = "vfx_inner"
     progress = value("Progress", None, -1200, -600, PROGRESS, TIME_PROPS)
+    motion = progress
+    modern = root["vfx_asset_version"] == 2
+    band = None
+    if modern:
+        attr = node(
+            tree, "GeometryNodeInputNamedAttribute", "Wake Index", -1500, -1000, data_type="FLOAT"
+        )
+        attr.inputs["Name"].default_value = "vfx_wake"
+        band = attr.outputs["Attribute"]
+        one_minus = math_node("Remaining Life", "SUBTRACT", 1, progress, -1200, -1000)
+        cubic = math_node("Ease Out Cube", "POWER", one_minus, 3, -1000, -1000)
+        eased = math_node("Fast Sweep", "SUBTRACT", 1, cubic, -800, -1000)
+        difference = math_node("Sweep Difference", "SUBTRACT", eased, progress, -600, -1000)
+        ease = value("Motion Ease", "motion_ease", -1200, -1200)
+        weighted = math_node("Ease Amount", "MULTIPLY", difference, ease, -400, -1000)
+        motion = math_node("Sweep Clock", "ADD", progress, weighted, -200, -1000)
     arc = value("Arc Radians", "arc", -1200, 100, "p*0.017453292519943295")
     spin = value("Spin Radians", "spin", -1200, -100, "p*0.017453292519943295")
     centered = math_node("Centered Arc", "SUBTRACT", u.outputs["Attribute"], 0.5, -950, 500)
+    if modern:
+        shorter = math_node("Wake Arc Reduction", "MULTIPLY", band, 0.16, -800, 1800)
+        shorter = math_node("Wake Arc Fraction", "SUBTRACT", 1, shorter, -600, 1800)
+        centered = math_node("Shorter Wakes", "MULTIPLY", centered, shorter, -400, 1800)
     angle = math_node("Arc Angle", "MULTIPLY", centered, arc, -700, 500)
-    rotation = math_node("Spin Over Life", "MULTIPLY", spin, progress, -950, -100)
+    rotation = math_node("Spin Over Life", "MULTIPLY", spin, motion, -950, -100)
     angle = math_node("Animated Angle", "ADD", angle, rotation, -450, 500)
+    if modern:
+        lag = math_node("Wake Lag", "MULTIPLY", band, -0.14, -300, 1200)
+        sign = math_node("Sweep Direction", "SIGN", spin, 0, -500, 1400)
+        lag = math_node("Directional Wake Lag", "MULTIPLY", lag, sign, -300, 1400)
+        angle = math_node("Trailing Angle", "ADD", angle, lag, -100, 1200)
     direction = node(tree, "ShaderNodeCombineXYZ", "Radial Direction", 50, 500)
     link(math_node("Cosine", "COSINE", angle, 0, -200, 500), direction.inputs["X"])
     link(math_node("Sine", "SINE", angle, 0, -200, 300), direction.inputs["Y"])
     width = value("Width", "width", -700, -300)
     taper = value("Taper", "taper", -700, -500)
-    across = math_node("Taper Angle", "MULTIPLY", u.outputs["Attribute"], math.pi, -950, -800)
+    taper_u = u.outputs["Attribute"]
+    if modern:
+        attack = value("Attack", "attack", -1500, -2100)
+        front = math_node("Reveal Progress", "DIVIDE", progress, attack, -1300, -2100)
+        front = math_node("Reveal End", "MINIMUM", front, 1, -1100, -2100)
+        front = math_node("Nonzero Reveal", "MAXIMUM", front, 0.0001, -900, -2100)
+        taper_u = math_node("Moving Tip Coordinates", "DIVIDE", taper_u, front, -700, -2100)
+        taper_u = math_node("Clamped Tip", "MINIMUM", taper_u, 1, -500, -2100)
+    across = math_node("Taper Angle", "MULTIPLY", taper_u, math.pi, -950, -800)
     taper_sine = math_node("Taper Sine", "SINE", across, 0, -700, -800)
     positive = math_node("Nonnegative Taper", "MAXIMUM", taper_sine, 0, -450, -800)
     amount = math_node("Tip Taper", "POWER", positive, taper, -200, -700)
+    if modern:
+        bias = value("Head Bias", "head_bias", -1200, -1400)
+        tail = math_node("Tail Weight", "SUBTRACT", 1, u.outputs["Attribute"], -1000, -1400)
+        bias = math_node("Asymmetric Weight", "MULTIPLY", bias, tail, -800, -1400)
+        bias = math_node("Leading Body", "SUBTRACT", 1, bias, -600, -1400)
+        amount = math_node("Biased Taper", "MULTIPLY", amount, bias, -400, -1400)
+        wake = math_node("Is Wake", "GREATER_THAN", band, 0.5, -1000, -1600)
+        narrow = math_node("Wake Narrowing", "MULTIPLY", wake, 0.88, -800, -1600)
+        narrow = math_node("Ribbon Width Factor", "SUBTRACT", 1, narrow, -600, -1600)
+        amount = math_node("Wake Width", "MULTIPLY", amount, narrow, -200, -1400)
+        shrink = math_node("Release Width", "MULTIPLY", progress, 0.55, -1000, -1800)
+        shrink = math_node("Width Envelope", "SUBTRACT", 1, shrink, -800, -1800)
+        amount = math_node("Width Over Life", "MULTIPLY", amount, shrink, 0, -1400)
     offset = math_node("Tapered Width", "MULTIPLY", width, amount, 50, -500)
     offset = math_node("Inner Offset", "MULTIPLY", offset, inner.outputs["Attribute"], 300, -300)
     radius = value("Radius", "radius", -450, 100)
     expansion = value("Expansion", "expansion", -450, -100)
     growth = math_node("Radius Growth", "MULTIPLY", progress, expansion, -200, 100)
     radius = math_node("Outer Radius", "ADD", radius, growth, 50, 100)
+    if modern:
+        offset_wake = math_node("Wake Spacing", "MULTIPLY", band, 0.075, 0, 1500)
+        offset_wake = math_node("Radius Relative Wake", "MULTIPLY", radius, offset_wake, 200, 1500)
+        radius = math_node("Wake Radius", "ADD", radius, offset_wake, 400, 1500)
     radius = math_node("Inner Radius", "SUBTRACT", radius, offset, 550, 100)
     radius = math_node("Positive Radius", "MAXIMUM", radius, 0.001, 800, 100)
     scale = node(tree, "ShaderNodeVectorMath", "Arc Position", 1050, 500, operation="SCALE")

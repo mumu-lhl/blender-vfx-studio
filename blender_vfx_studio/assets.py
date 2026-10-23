@@ -52,7 +52,7 @@ def _validate(root, objects, dependencies):
         if (
             controller.get("vfx_schema") != core.SCHEMA_VERSION
             or module not in MODULES
-            or controller.get("vfx_asset_version") != MODULES[module].asset_version
+            or not MODULES[module].supports_version(controller.get("vfx_asset_version"))
         ):
             raise ValueError("Unsupported native effect schema or asset version")
         if module == "screen.glare":
