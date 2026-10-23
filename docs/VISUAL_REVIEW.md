@@ -22,7 +22,7 @@ Eevee 的抖动透明在细线中产生颗粒，改为原生 Blended 透明后�
 本轮没有角色实战镜头、Windows/macOS 视口或集成显卡帧率验收；这些不作为本轮视觉交付的前置扩展。
 
 发布页附带 `slash-cycles-appear.png`、`slash-cycles-peak.png`、`slash-cycles-decay.png`，每张均为 960×540。
-标签流程还生成 Eevee 和浅背景三阶段图；PR 的 Linux Actions 提供 `arc-slash-visual-review` 下载包，可在合并前检查实际 PNG。
+Linux PR 与标签流程均生成 Eevee 和浅背景三阶段图，CI 显式安装 EGL/Mesa 并强制软件 OpenGL；Actions 提供 `arc-slash-visual-review` 下载包，可在合并前检查实际 PNG。
 
 ## 复现与数据验证
 
@@ -41,3 +41,5 @@ blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python to
 
 另外把高清预览保存后，关闭自动执行、不加载插件，在新进程渲染同一峰值，确认 PNG 所有像素通道与原结果完全一致。
 实际生成的 examples ZIP 另在无插件进程检查三项资产、时间边界和嵌入预览。自动像素检查只验证外部行为，不替代上面的实际看图。
+
+v0.21.0 的发布流程因 runner 缺少 libEGL.so.1 在 Eevee 启动时退出，未发布安装包。修复为 v0.21.1，保留原失败标签，不跳过 Eevee 验证。

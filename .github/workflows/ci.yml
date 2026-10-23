@@ -53,14 +53,20 @@ jobs:
           blender -b --factory-startup --python-exit-code 1 --python tools/shield_preview.py
           blender -b --factory-startup --python-exit-code 1 --python tools/emitter_preview.py
           blender -b --factory-startup --python-exit-code 1 --python tools/bone_trail_preview.py
-      - name: Render Arc Slash visual review (960x540, CPU, no bloom)
+      - name: Install Linux software rendering libraries
         if: runner.os == 'Linux'
         run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libegl1 libegl-mesa0 libgl1-mesa-dri
+      - name: Render Arc Slash visual review (960x540, CPU, no bloom)
+        if: runner.os == 'Linux'
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: surfaceless
+        run: |
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py
-          if [ "${{ github.ref_type }}" = "tag" ]; then
-            blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE
-            blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --light
-          fi
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --light
       - uses: actions/upload-artifact@v7.0.2
         if: runner.os == 'Linux'
         with:
