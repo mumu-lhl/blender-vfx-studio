@@ -57,14 +57,52 @@ jobs:
         if: runner.os == 'Linux'
         timeout-minutes: 7
         run: |
+          if python - <<'PYTHON'
+          import ctypes, pathlib, shutil
+          missing = []
+          for name in ('libEGL.so.1', 'libEGL_mesa.so.0', 'libGL.so.1'):
+              try:
+                  ctypes.CDLL(name)
+              except OSError:
+                  missing.append(name)
+          if not list(pathlib.Path('/usr/lib').glob('*/dri/swrast_dri.so')):
+              missing.append('Mesa software DRI driver')
+          missing.extend(name for name in ('ffmpeg', 'ffprobe') if not shutil.which(name))
+          print('::notice::Render prerequisites: ' + (', '.join(missing) if missing else 'already available'))
+          raise SystemExit(bool(missing))
+          PYTHON
+          then
+            exit 0
+          fi
+          mkdir -p work
+          # Ubuntu 24.04 is pinned above. Query only its signed official repositories.
+          cat >work/ubuntu-render.sources <<'APT'
+          Types: deb
+          URIs: https://archive.ubuntu.com/ubuntu
+          Suites: noble noble-updates
+          Components: main universe
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+          Types: deb
+          URIs: https://security.ubuntu.com/ubuntu
+          Suites: noble-security
+          Components: main universe
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+          APT
           render_packages=(libegl1 libegl-mesa0 libgl1-mesa-dri)
           if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
             render_packages+=(ffmpeg)
           fi
-          apt_options=(-o Acquire::Retries=1 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o DPkg::Lock::Timeout=30)
-          if ! sudo env DEBIAN_FRONTEND=noninteractive apt-get "${apt_options[@]}" install -y --no-install-recommends "${render_packages[@]}"; then
-            sudo apt-get "${apt_options[@]}" update -qq
-            sudo env DEBIAN_FRONTEND=noninteractive apt-get "${apt_options[@]}" install -y --no-install-recommends "${render_packages[@]}"
+          apt_options=(-o "Dir::Etc::sourcelist=$PWD/work/ubuntu-render.sources" -o Dir::Etc::sourceparts=- -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o DPkg::Lock::Timeout=20)
+          if timeout 90 sudo apt-get "${apt_options[@]}" update -qq >work/render-deps.log 2>&1 && timeout 180 sudo env DEBIAN_FRONTEND=noninteractive apt-get "${apt_options[@]}" install -y --no-install-recommends "${render_packages[@]}" >>work/render-deps.log 2>&1; then
+            cat work/render-deps.log
+          else
+            python - <<'PYTHON'
+          from pathlib import Path
+          message = '\n'.join(Path('work/render-deps.log').read_text(errors='replace').splitlines()[-12:])
+          print('::error::Render dependency preparation failed: ' + message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+          PYTHON
+            exit 1
           fi
       - name: Render Arc Slash visual review (960x540, CPU, no bloom)
         if: runner.os == 'Linux'
