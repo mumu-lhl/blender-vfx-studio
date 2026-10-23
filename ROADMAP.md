@@ -1,6 +1,6 @@
 # 开发进度与后续计划
 
-更新：2026-10-23（Asia/Shanghai）。目标是 Blender 5.2 LTS；当前仍是预览版，七类效果都有可用入口，但不代表各类功能已经完整。
+更新：2026-10-23（UTC）。目标是 Blender 5.2 LTS；当前仍是预览版，七类效果都有可用入口，但不代表各类功能已经完整。
 
 近期重点已调整为视觉品质。v0.21.1 首先升级 Arc Slash 的造型、分层材质、运动节奏和高清预览；本轮继续升级 Impact Burst。非必要的复杂骨架扩展与跨平台 GUI 扩展暂缓。Ungroup All 和原有资产复用功能继续保留。
 
@@ -58,10 +58,16 @@ v0.19.0 和 v0.19.1 下载包的 SHA256 均通过；扩展 ZIP 与对应标签�
 
 v0.21.0 标签的三平台测试通过，但 Linux 缺少 EGL 动态库，Eevee 预览失败，因此没有发布包。[PR #64](https://github.com/mumu-lhl/blender-vfx-studio/pull/64) 已在 v0.21.1 补齐 Mesa 软件渲染依赖，并把 Eevee/浅背景预览加入 Linux PR 检查；修复后的 PR 和标签流程均通过。
 
-## 0.22.0：Impact Burst 视觉改进（待 CI 与发布）
+## 0.22.0：Impact Burst 视觉改进
 
 [#62](https://github.com/mumu-lhl/blender-vfx-studio/issues/62) 把同亮度圆环加圆粒改为白色短闪、渐变尖片、低亮侵蚀冲击波和延迟余烬。Create Mesh VFX 可直接创建完整四层组合；Burst 的 Shape / Stretch / Planar / Motion Ease 可编辑，旧版资产继续按版本 1 读取。
 
-本地 152 项测试、15 个无插件重开进程、安装/卸载及 Ruff 已通过。实际查看 Cycles、软件 Eevee 和浅背景的三阶段 960×540 PNG；中心先爆发、冲击波随后消失、细小余烬最后散去。原生保存后的高清峰值在无插件进程重渲染，所有像素通道一致。实际 v0.21.1 入门库中的旧 Impact 已载入、保存参数和复制验证。新版三项入门资产已构建并通过无插件验证；CI、PR 和发布结果尚待记录。
+本地 152 项测试、15 个无插件重开进程、安装/卸载及 Ruff 已通过。实际查看 Cycles、软件 Eevee 和浅背景的三阶段 960×540 PNG；中心先爆发、冲击波随后消失、细小余烬最后散去。原生保存后的高清峰值在无插件进程重渲染，所有像素通道一致。实际 v0.21.1 入门库中的旧 Impact 已载入、保存参数和复制验证。[PR #66](https://github.com/mumu-lhl/blender-vfx-studio/pull/66) 已合并，三平台 CI 与发布任务通过，[v0.22.0](https://github.com/mumu-lhl/blender-vfx-studio/releases/tag/v0.22.0) 已发布。实际下载的两个 ZIP 均通过 SHA256；扩展 ZIP 与对应标签的全新克隆构建逐字节一致，实际 examples ZIP 通过无插件检查。九张发布高清图尺寸已核对，并直接查看三阶段 Cycles 与 Eevee 峰值。
 
 浅背景上的微小余烬较弱，尚未检查角色实战镜头或集成显卡视口帧率；本轮不把这些写成已通过。检查细节见 [Impact 视觉记录](docs/IMPACT_VISUAL_REVIEW.md)。
+
+## 镜头衔接检查
+
+[#67](https://github.com/mumu-lhl/blender-vfx-studio/issues/67) 增加可重建的 36 帧武器/靶体预览场景，复用实际刀光和打击爆发，不加辉光。已生成完整暗背景序列和 24 fps 视频；实际查看了展开、命中、扩散及恢复阶段，以及浅背景的四个关键帧。初版武器未跟上正在展开的刀尖，已修正预览武器的原生动画。第 8 帧在无插件进程重渲染，所有像素通道一致。CI 将附带暗/浅背景 PNG 和可打开的原生场景，结果待 PR 检查。
+
+这个简易场景检查空间衔接与遮挡；尚未观看连续视频或使用真实角色，不能据此认定完整战斗动作已验收。复现方法和发现见 [镜头记录](docs/COMBAT_VISUAL_REVIEW.md)。

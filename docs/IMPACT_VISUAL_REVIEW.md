@@ -28,4 +28,6 @@ blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python to
 
 本地 152 项测试、15 个无插件重开进程、安装/卸载及 Ruff 已通过。新增检查覆盖尖片参数、旧版 JSON、实例隔离、四层生命周期、低质量顶点预算、整体重定时、完整资产导出与载入、Ungroup All、安全删除及 CPU 像素阶段变化。高清峰值另在关闭自动执行、不加载插件的新进程渲染，PNG 所有像素通道与原图完全一致。
 
-实际从 v0.21.1 发布 examples ZIP 取出的旧 Impact 已载入、保存参数和复制，粒子保持版本 1。新版 examples ZIP 已在无插件进程检查三项资产、时间边界及嵌入预览。三平台 CI 和发布包复核尚待完成；本记录不会以本地检查代替这些结果。
+实际从 v0.21.1 发布 examples ZIP 取出的旧 Impact 已载入、保存参数和复制，粒子保持版本 1。新版 examples ZIP 已在无插件进程检查三项资产、时间边界及嵌入预览。三平台 CI 和发布流程均通过，[v0.22.0 已发布](https://github.com/mumu-lhl/blender-vfx-studio/releases/tag/v0.22.0)。实际下载的两个 ZIP 通过 SHA256；扩展 ZIP 与对应标签全新克隆的构建逐字节一致，实际 examples ZIP 通过无插件检查。九张发布高清图的尺寸已核对，并直接读取发布的 Cycles 三阶段和 Eevee 峰值，层次与本地检查一致。
+
+后续把刀光和爆发放进同一简易镜头的检查，见 [衔接记录](COMBAT_VISUAL_REVIEW.md)。
