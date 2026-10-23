@@ -249,6 +249,13 @@ Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使�
 当前实例保存结构版本为 1。保存的 `.blend` 可在未安装插件、关闭自动执行时播放，使用插件继续创作则需要重新启用。自动验证覆盖 Blender 5.2.2 Linux；Linux x64、Windows x64 和 Apple Silicon macOS 的基础后台套件已通过；新增功能的 CI 状态见路线图。
 后台 Undo/Redo 已覆盖复制删除、组合、Cloth 和合成。Linux 已完成基本侧栏创建、快捷键撤销/重做、用户库保存和 Cloth 状态检查；完整交互检查尚未完成，详见 [GUI 检查记录](docs/GUI_CHECKS.md)。
 
+## 入门资产库
+
+发布附件中的 `blender-vfx-studio-examples-版本.zip` 是独立资产库，不能作为插件安装。解压后，将文件夹添加到 Blender 的 Asset Libraries，再通过 Load VFX with New ID 创建效果。
+目前包含 Energy Charge 蓝色蓄力组合、Impact Burst 橙色冲击爆发、Arc Slash 紫色刀光；全部使用 Low 质量、原生节点和嵌入预览，不需要外部贴图或缓存。
+
+资产保留从第 1 帧开始的播放时间，不自动定位到当前帧；预览中的辉光使用额外的 Screen 效果，载入资产不会改动你的合成链。具体参数、时间和重建方法见 [入门库指南](docs/STARTER_LIBRARY.md)。
+
 ## 从源码构建与验证
 
 需要 Python 3.11+ 和 Blender 5.2.2，没有第三方运行依赖。`BLENDER_BIN` 可指定 Blender 路径。
@@ -257,6 +264,7 @@ Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使�
 python tools/build.py
 python tools/test.py
 python tools/test_install.py
+blender -b --factory-startup --python-exit-code 1 --python tools/build_examples.py
 blender -b --factory-startup --python-exit-code 1 --python tools/preview.py
 blender -b --factory-startup --python-exit-code 1 --python tools/preview.py -- --engine BLENDER_EEVEE --scale 25
 ```

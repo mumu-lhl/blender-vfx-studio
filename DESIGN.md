@@ -156,3 +156,7 @@ Blender 的 [ImagePreview 浮点接口](https://github.com/blender/blender/blob/
 Asset Browser 的面板不读取磁盘或建立自定义索引，只读取当前 AssetRepresentation 的类型、名称、文件路径和来源。
 只支持外部本地集合资产；Current File 和在线条目显示原因并禁用按钮。操作器复用 `assets.load` 的新编号、依赖检查和失败回滚。
 原生文件浏览器暴露的是资产选择，所以 `core.select` 从 view layer 读取场景对象的选中状态，忽略删除后尚未同步的空项；不把资产条目当作场景对象。
+
+入门库由 `tools/build_examples.py` 创建低质量的原生效果与组合，使用独立的相机、背景和 Screen 层渲染缩略图，再调用同一资产导出接口。
+这些辅助数据不在效果层级中，导出依赖检查确保它们不进入资产。生成脚本只接受没有打开文件的新后台进程，不清理输出目录中的其他文件。
+示例 .blend 和渲染不提交源码，标签流程生成独立 examples ZIP，并在新进程关闭自动执行、不加载插件的条件下验证压缩包中的实际文件；扩展安装 ZIP 仍仅含代码。

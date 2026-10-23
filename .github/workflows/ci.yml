@@ -53,6 +53,11 @@ jobs:
           blender -b --factory-startup --python-exit-code 1 --python tools/shield_preview.py
           blender -b --factory-startup --python-exit-code 1 --python tools/emitter_preview.py
           blender -b --factory-startup --python-exit-code 1 --python tools/bone_trail_preview.py
+      - name: Build and validate starter assets (CPU only)
+        if: github.ref_type == 'tag' && runner.os == 'Linux'
+        run: |
+          blender -b --factory-startup --python-exit-code 1 --python tools/build_examples.py
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tests/starter_package_reopen.py
       - uses: actions/upload-artifact@v7.0.2
         if: runner.os == 'Linux'
         with:
@@ -67,6 +72,7 @@ jobs:
             work/shield-preview.png
             work/emitter-preview.png
             work/bone-trail-preview.png
+            work/examples/*.png
 
   release:
     if: github.event_name == 'push' && github.ref_type == 'tag'
@@ -89,4 +95,4 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           (cd dist && sha256sum *.zip > SHA256SUMS)
-          gh release create "$GITHUB_REF_NAME" dist/*.zip dist/SHA256SUMS preview/*.png --verify-tag --prerelease --title "$GITHUB_REF_NAME — Blender VFX Studio Preview" --notes 'Blender 5.2 LTS 预览版。下载下方 ZIP，在 Preferences → Get Extensions → Install from Disk 中安装。附带 CPU 渲染预览和 SHA256 校验值。完整功能与限制请阅读仓库 README。' --generate-notes
+          gh release create "$GITHUB_REF_NAME" dist/*.zip dist/SHA256SUMS preview/*.png preview/examples/*.png --verify-tag --prerelease --title "$GITHUB_REF_NAME — Blender VFX Studio Preview" --notes 'Blender 5.2 LTS 预览版。安装请选择 blender-vfx-studio-版本.zip；examples ZIP 是独立资产库，请解压后添加到 Asset Libraries。插件在 Preferences → Get Extensions → Install from Disk 中安装。附带 CPU 渲染预览和 SHA256 校验值。完整功能与限制请阅读仓库 README。' --generate-notes
