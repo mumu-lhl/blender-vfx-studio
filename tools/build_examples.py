@@ -46,7 +46,7 @@ def create_effect(key):
             duration=48.0,
             strength=3.5,
             dissolve=0.12,
-            fade=0.35,
+            fade=1.0,
         )
         outer.location.z = -0.8
         inner = configure(
@@ -57,7 +57,7 @@ def create_effect(key):
             duration=48.0,
             strength=3.5,
             dissolve=0.08,
-            fade=0.35,
+            fade=1.0,
         )
         inner.location.z = -0.8
         shield = configure(
@@ -71,7 +71,11 @@ def create_effect(key):
             dissolve=0.2,
             flow=1.2,
             duration=48.0,
+            fade=1.0,
         )
+        # Private starter materials: avoid noisy hashed transparency at low Eevee samples.
+        for member in (outer, inner, shield):
+            member.children[0].data.materials[0].surface_render_method = "BLENDED"
         particles = configure(
             core.create_emitter(context),
             color,

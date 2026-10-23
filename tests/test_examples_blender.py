@@ -8,6 +8,9 @@ import bpy
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tests"))
+from particle_test_support import camera, render_pixels
+
 import blender_vfx_studio as addon
 from blender_vfx_studio import assets, composition, core
 from tools.build_examples import EXAMPLES, create_effect, main, preview_scene
@@ -29,6 +32,23 @@ def vertex_count(root, frame):
 class StarterTests(unittest.TestCase):
     def setUp(self):
         bpy.ops.wm.read_factory_settings(use_empty=True)
+
+    def test_charge_fades_before_its_native_lifetime_cutoff(self):
+        root = create_effect("energy-charge")
+        camera()
+        bpy.context.scene.render.dither_intensity = 0
+        bpy.context.scene.camera.data.ortho_scale = 4.8
+
+        def energy(frame):
+            pixels = render_pixels(frame)
+            return sum(sum(pixels[i : i + 3]) for i in range(0, len(pixels), 4))
+
+        middle, tail, ended = (energy(frame) for frame in (22, 48, 49))
+        self.assertGreater(middle, 5)
+        self.assertLess(tail, middle * 0.2)
+        self.assertLess(ended, 1e-5)
+        self.assertGreater(vertex_count(root, 48), 0)
+        self.assertEqual(vertex_count(root, 49), 0)
 
     def test_builders_are_low_quality_bounded_and_have_native_timing(self):
         for key, layers, duration in zip(EXAMPLES, (4, 4, 1), (48, 24, 18)):

@@ -287,6 +287,8 @@ Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使�
 发布附件中的 `blender-vfx-studio-examples-版本.zip` 是独立资产库，不能作为插件安装。解压后，将文件夹添加到 Blender 的 Asset Libraries，再通过 Load VFX with New ID 创建效果。
 目前包含 Energy Charge 蓝色蓄力组合、Impact Burst 橙色冲击爆发、Arc Slash 紫色刀光；全部使用 Low 质量、原生节点和嵌入预览，不需要外部贴图或缓存。
 
+0.22.2 候选为新建 Energy Charge 的双环和球壳补齐生命末段淡出，并改善低采样 Eevee 的透明颗粒；只影响重新构建的入门库，已有资产不重建。尚未发布，范围与实图检查见 [充能记录](docs/CHARGE_VISUAL_REVIEW.md)。
+
 资产保留从第 1 帧开始的播放时间，不自动定位到当前帧；预览中的辉光使用额外的 Screen 效果，载入资产不会改动你的合成链。具体参数、时间和重建方法见 [入门库指南](docs/STARTER_LIBRARY.md)。
 
 ## 从源码构建与验证
