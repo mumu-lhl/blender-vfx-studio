@@ -32,4 +32,4 @@ blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python to
 ffmpeg -framerate 24 -i work/visual-combat/dark/combat-%04d.png -c:v libx264 -pix_fmt yuv420p work/visual-combat/combat.mp4
 ```
 
-本地另用关闭自动执行、不加载插件的新进程跳到第 36、0、8 帧，验证生命周期边界，再重渲染第 8 帧；PNG 所有像素通道与原图一致。Linux CI 重建暗/浅背景关键帧、执行同一无插件渲染检查，并上传 `combat-shot-visual-review`，包含八张 PNG 和两个原生场景。当前 PR 检查尚待完成。
+本地另用关闭自动执行、不加载插件的新进程跳到第 36、0、8 帧，验证生命周期边界，再重渲染第 8 帧；PNG 所有像素通道与原图一致。Linux CI 重建暗/浅背景关键帧、执行同一无插件渲染检查，并上传 `combat-shot-visual-review`，包含八张 PNG 和两个原生场景。自动检查结果以关联 PR 的记录为准。
