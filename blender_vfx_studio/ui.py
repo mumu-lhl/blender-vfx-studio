@@ -491,8 +491,10 @@ class VFX_OT_export_asset(bpy.types.Operator, ExportHelper):
     )
 
     def draw(self, context):
-        self.layout.prop_search(self, "preview_image", bpy.data, "images", text="Preview Image")
-        self.layout.label(text="Optional · uses image pixels, no scene view transform")
+        self.layout.label(text="Preview Image (optional)")
+        self.layout.prop_search(self, "preview_image", bpy.data, "images", text="")
+        self.layout.label(text="Still image · up to 2048 px")
+        self.layout.label(text="No scene view transform")
 
     def execute(self, context):
         from . import assets
