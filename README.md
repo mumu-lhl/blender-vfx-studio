@@ -218,7 +218,7 @@ Duplicate 单层会得到脱离组合的独立效果，Detach Layer 则将原层
 需要重新采样时再指定 Source / Bone。已烘焙的 Cloth 则包含私有模拟源和姿态，仍可检查缓存状态及重新烘焙。
 Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使用参数预设，不保存为完整效果文件。
 
-导出的集合使用效果名称，带有 Blender 原生资产标记和 VFX Studio 标签。旧版使用内部前缀名称的效果文件仍可载入。
+导出的集合使用效果名称，带有 Blender 原生资产标记和 VFX Studio 标签。0.17 及以上版本可读取旧版内部前缀名称的文件；新的可读名称文件需要 0.17 及以上版本载入。
 
 需要在库中浏览时，把这些 `.blend` 放到一个文件夹，在 **Preferences → File Paths → Asset Libraries** 添加该文件夹。打开 **Asset Browser**，选择这个外部库和效果集合，在右侧边栏（N）的 **Blender VFX Studio** 面板点击 **Load VFX with New ID**。按钮会载入选中的集合，每次分配新编号，并保留原来的时间和变换；文件中有多个资产时，也只处理当前选中的集合。
 
