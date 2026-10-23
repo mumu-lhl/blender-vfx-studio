@@ -3,13 +3,14 @@
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import bpy
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 import blender_vfx_studio as addon
-from blender_vfx_studio import assets, composition, core, simulation
+from blender_vfx_studio import asset_browser, assets, composition, core, simulation
 
 
 def roots(module=None):
@@ -127,6 +128,33 @@ class UndoTests(unittest.TestCase):
         mesh = imported.children[0].evaluated_get(bpy.context.evaluated_depsgraph_get()).data
         self.assertAlmostEqual(max(v.co.length for v in mesh.vertices), 3, places=5)
         self.assertTrue(path.is_file())
+
+    def test_asset_browser_import_undo_redo_keeps_independent_ids(self):
+        original = core.create(bpy.context)
+        original_id = original["vfx_id"]
+        path = ROOT / "work/browser-undo-asset.blend"
+        assets.write(path, original)
+        push("Original Browser Effect")
+        area = next(a for a in bpy.context.screen.areas if a.type == "VIEW_3D")
+        area.ui_type = "ASSETS"
+        try:
+            with bpy.context.temp_override(area=area):
+                with patch.object(
+                    asset_browser, "selection", return_value=(str(path), "Shockwave")
+                ):
+                    bpy.ops.vfx_studio.load_browser_asset()
+                push("Browser Imported Effect")
+            imported_id = bpy.context.view_layer.objects.active["vfx_id"]
+            self.assertNotEqual(imported_id, original_id)
+            bpy.ops.ed.undo()
+            self.assertEqual([r["vfx_id"] for r in roots()], [original_id])
+            bpy.ops.ed.redo()
+            self.assertEqual({r["vfx_id"] for r in roots()}, {original_id, imported_id})
+        finally:
+            # Undo can replace the screen and invalidate the old Area reference.
+            for area in bpy.context.screen.areas:
+                if area.type == "FILE_BROWSER":
+                    area.type = "VIEW_3D"
 
     def test_screen_insertion_and_removal_undo_restore_scene_tree(self):
         self.assertIsNone(bpy.context.scene.compositing_node_group)

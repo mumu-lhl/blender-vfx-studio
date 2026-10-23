@@ -123,11 +123,12 @@ def write(filepath, root):
         for controller, _ in sources:
             controller["vfx_source"] = None
         _validate(root, objects, _dependencies(objects))
-        bundle = bpy.data.collections.new(PREFIX)
+        bundle = bpy.data.collections.new(root.name.removesuffix(" • Controller"))
         bundle["vfx_id"] = root["vfx_id"]
         bundle["vfx_bundle_version"] = BUNDLE_VERSION
         bundle["vfx_bundle_root"] = root["vfx_id"]
         bundle.asset_mark()
+        bundle.asset_data.tags.new("VFX Studio")
         bundle.asset_data.description = "Complete native VFX: " + root.name
         for obj in objects:
             bundle.objects.link(obj)
@@ -146,21 +147,37 @@ def write(filepath, root):
             temporary.unlink(missing_ok=True)
 
 
-def load(context, filepath):
+def load(context, filepath, *, collection_name=None):
+    active = context.view_layer.objects.active
+    if active is not None and active.mode != "OBJECT":
+        raise ValueError("Switch to Object Mode before loading a complete effect")
     path = Path(filepath).expanduser().resolve()
     if path.suffix.lower() != ".blend" or not path.is_file():
         raise ValueError("Choose an existing native effect .blend file")
     before = set(bpy.data.all_ids)
     try:
-        with bpy.data.libraries.load(str(path), link=False) as (available, requested):
-            names = [name for name in available.collections if name.startswith(PREFIX)]
-            if len(names) != 1:
-                raise ValueError("This file must contain one exported VFX collection asset")
+        with bpy.data.libraries.load(str(path), link=False, assets_only=True) as (
+            available,
+            requested,
+        ):
+            if collection_name is not None:
+                if (
+                    not isinstance(collection_name, str)
+                    or collection_name not in available.collections
+                ):
+                    raise ValueError("The selected collection asset is not present in this file")
+                names = [collection_name]
+            else:
+                names = list(available.collections)
+                if len(names) != 1:
+                    raise ValueError("This file must contain one exported VFX collection asset")
             requested.collections = names
         imported = set(bpy.data.all_ids) - before
         bundle = requested.collections[0]
-        if bundle is None or bundle.get("vfx_bundle_version") != BUNDLE_VERSION:
-            raise ValueError("Unsupported native effect bundle version")
+        if bundle is None or "vfx_bundle_version" not in bundle:
+            raise ValueError("This collection was not saved with Save Complete Effect")
+        if bundle["vfx_bundle_version"] != BUNDLE_VERSION:
+            raise ValueError("Unsupported native effect bundle version; update the extension")
         objects = set(bundle.all_objects)
         roots = [o for o in objects if o.get("vfx_role") == "controller"]
         candidates = [r for r in roots if r.get("vfx_id") == bundle.get("vfx_bundle_root")]

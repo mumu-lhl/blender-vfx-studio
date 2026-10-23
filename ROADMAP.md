@@ -16,7 +16,7 @@
 
 **M3：轨迹、绑定、组合与复用。** Ribbon 采样对象原点或骨骼起点/末端，按原采样时间播放；修改源动画后需明确 Rebake（[#13](https://github.com/mumu-lhl/blender-vfx-studio/issues/13)、[#44](https://github.com/mumu-lhl/blender-vfx-studio/issues/44)）。对象/骨骼绑定用 Child Of 保持挂接瞬间姿态；不能安全保留动画或剪切姿态时拒绝解绑（[#15](https://github.com/mumu-lhl/blender-vfx-studio/issues/15)、[#45](https://github.com/mumu-lhl/blender-vfx-studio/issues/45)）。
 
-2–32 个空间效果可以组合、分层调整时间并整体复制/删除，暂不支持 Screen 或嵌套组合（[#19](https://github.com/mumu-lhl/blender-vfx-studio/issues/19)）。用户参数库提供命名、列表创建、重命名和文件删除；完整效果文件另存节点、动画、已采样路径和 Cloth 姿态，载入时分配新编号（[#17](https://github.com/mumu-lhl/blender-vfx-studio/issues/17)、[#36](https://github.com/mumu-lhl/blender-vfx-studio/issues/36)）。完整效果缩略图库尚未实现。
+2–32 个空间效果可以组合、分层调整时间并整体复制/删除，暂不支持 Screen 或嵌套组合（[#19](https://github.com/mumu-lhl/blender-vfx-studio/issues/19)）。用户参数库提供命名、列表创建、重命名和文件删除；完整效果文件另存节点、动画、已采样路径和 Cloth 姿态，载入时分配新编号（[#17](https://github.com/mumu-lhl/blender-vfx-studio/issues/17)、[#36](https://github.com/mumu-lhl/blender-vfx-studio/issues/36)）。已接入 Blender 原生 Asset Browser 的安全载入；尚无自动效果缩略图生成。
 
 **M4：首个模拟效果。** Cloth Energy Sheet 使用原生布面求解，明确烘焙成保存在 .blend 中的形态键姿态。面板区分未烘焙、已烘焙和过期；改变物理输入不会自动覆盖旧结果（[#22](https://github.com/mumu-lhl/blender-vfx-studio/issues/22)）。仅已存姿态支持任意帧回放。当前源必须静态、有界，没有碰撞、外部力场、流体或烟雾；损坏源的复制会提前拒绝，不留下残缺实例（[#41](https://github.com/mumu-lhl/blender-vfx-studio/issues/41)）。
 
@@ -32,9 +32,15 @@ v0.16.0 在三个平台通过 119 项测试、13 个无插件重开进程、安�
 
 ## 接下来的优先级
 
-1. 完善完整效果的浏览与复用。优先利用 Blender 原生 Asset Browser，避免直接拖入资产时重复 UUID；继续使用经过校验、分配新编号的载入流程。
+1. 完善原生资产的预览图和常用效果示例，继续使用经过校验、分配新编号的载入流程；不另建文件索引或资产浏览器。
 2. 明确旧资产的升级范围与失败处理。当前只迁移格式 1 的环形参数 JSON 到格式 2；未知实例或模块资产版本仍拒绝编辑，不能假装已支持通用迁移。
 3. 补充更复杂骨架、不同 UI 缩放、Windows/macOS 窗口和 Eevee/Cycles 的视觉验证；修复能复现的问题，再扩展功能。
 4. 按实际需求增加世界空间粒子历史、碰撞或其他模拟。此类效果需先明确缓存和烘焙规则，不把依赖上一帧的模拟伪装成可直接跳帧的公式效果。
 
 完整历史及安装包见 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases)；具体实现与限制见 [README](README.md)、[DESIGN](DESIGN.md) 和 [CONTEXT](CONTEXT.md)。发布标签会重新执行三平台检查、生成 CPU 预览，再上传 ZIP、SHA256SUMS 和图片。标签版本必须与 manifest 一致；直接上传曾遇到凭据权限问题，现由独立 GitHub Actions 发布任务完成（[#5](https://github.com/mumu-lhl/blender-vfx-studio/issues/5)）。
+
+## 正在验证的 0.17.0
+
+[#48](https://github.com/mumu-lhl/blender-vfx-studio/issues/48) 增加 Asset Browser 的 Load VFX with New ID，按选中集合载入并分配新编号；新导出集合使用可读名称和 VFX Studio 标签，旧导出文件仍可读取。
+非视口载入和 Undo/Redo 针对性检查已通过。Linux 窗口已验证重复载入、独立编号、Edit 菜单撤销/重做、普通集合拒绝，以及 Current File 按钮禁用。
+新增编辑模式保护；本地 125 项测试、13 个无插件重开进程、安装/卸载与 Ruff 已通过，新增 5 项资产测试和 1 项 Undo/Redo 测试。三平台检查及发布尚待完成。此项不包含自动预览图生成、在线库或 Current File 资产的直接载入。

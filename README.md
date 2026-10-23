@@ -218,9 +218,13 @@ Duplicate 单层会得到脱离组合的独立效果，Detach Layer 则将原层
 需要重新采样时再指定 Source / Bone。已烘焙的 Cloth 则包含私有模拟源和姿态，仍可检查缓存状态及重新烘焙。
 Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使用参数预设，不保存为完整效果文件。
 
-导出的集合也带有 Blender 原生资产标记。使用插件的 **Load Complete Effect** 可以安全地反复载入并更新编号；
-直接通过 Asset Browser 拖入或手动 Append 同一效果不会自动修复重复编号，可能被插件拒绝管理。
-第一版没有完整效果缩略图库或资产版本迁移；未知结构会报错并移除本次导入的数据，保留已有场景。
+导出的集合使用效果名称，带有 Blender 原生资产标记和 VFX Studio 标签。旧版使用内部前缀名称的效果文件仍可载入。
+
+需要在库中浏览时，把这些 `.blend` 放到一个文件夹，在 **Preferences → File Paths → Asset Libraries** 添加该文件夹。打开 **Asset Browser**，选择这个外部库和效果集合，在右侧边栏（N）的 **Blender VFX Studio** 面板点击 **Load VFX with New ID**。按钮会载入选中的集合，每次分配新编号，并保留原来的时间和变换；文件中有多个资产时，也只处理当前选中的集合。
+
+请通过这个按钮或 **Load Complete Effect** 载入完整效果。普通拖放或 Append 不会更新实例编号，重复插入后可能无法安全管理。需要撤销时可使用顶栏 **Edit → Undo / Redo**；Asset Browser 内的快捷键也可能用于目录编辑。
+
+本版只支持本地外部 `.blend` 库中的完整效果集合，不载入在线资产或 Current File 条目；场景内复制使用 VFX Duplicate。载入前需回到 Object Mode。普通集合、损坏文件或不支持的版本会报错，不留下半份实例。浏览、分类和缩略图显示使用 Blender 原生功能；插件不建立额外索引，也不会自动生成效果预览图。
 
 ## 保存和管理预设
 

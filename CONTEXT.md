@@ -81,3 +81,6 @@ Rate 为 0 时全部隐藏；有效发射率为 `min(Rate, 2048 / Lifetime)`，�
 
 Ribbon 的 `vfx_bone_tail` 只决定下次采样使用骨骼末端还是起点，默认 False。旧文件缺少该属性时仍用起点；对象采样忽略它。
 已存路径不依赖该开关或源骨架，因此修改开关需明确 Rebake，删除骨架仍可播放。参数属于创作设置，不改变存储网格或资产版本。
+
+原生 Asset Browser 中的集合名称只是显示名称。完整效果仍由 `vfx_bundle_version` 和 `vfx_bundle_root` 验证身份；老的内部前缀名称不是新的格式版本。
+Load VFX with New ID 读取当前选中外部资产的文件路径和集合名，复用安全载入流程。普通拖放/Append 不会分配新实例编号，不能代替它。Current File 中的条目使用场景里的 VFX Duplicate 复制。

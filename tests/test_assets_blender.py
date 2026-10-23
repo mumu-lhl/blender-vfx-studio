@@ -3,6 +3,7 @@
 import sys
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import bpy
@@ -10,7 +11,7 @@ import bpy
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 import blender_vfx_studio as addon
-from blender_vfx_studio import assets, binding, composition, core, simulation, trail
+from blender_vfx_studio import asset_browser, assets, binding, composition, core, simulation, trail
 
 FILE = ROOT / "work/effect-asset.blend"
 
@@ -125,6 +126,103 @@ class AssetTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "version"):
             assets.write(FILE, root)
         self.assertEqual(FILE.read_bytes(), previous)
+
+    def test_readable_asset_names_and_legacy_prefix_files(self):
+        root = ring()
+        root.name = "Blue Shockwave"
+        assets.write(FILE, root)
+        with bpy.data.libraries.load(str(FILE), assets_only=True) as (available, _):
+            self.assertEqual(available.collections, ["Blue Shockwave"])
+        imported = assets.load(bpy.context, FILE)
+        bundle = next(c for c in imported.users_collection if c.get("vfx_bundle_version"))
+        self.assertIn("VFX Studio", bundle.asset_data.tags)
+        bundle.name = assets.PREFIX
+        legacy = ROOT / "work/legacy-asset.blend"
+        bpy.data.libraries.write(str(legacy), {bundle})
+        old = assets.load(bpy.context, legacy)
+        self.assertNotEqual(imported["vfx_id"], old["vfx_id"])
+        self.assertEqual(core.resolve(old), old)
+
+    def test_exact_selected_collection_and_foreign_asset_rollback(self):
+        bundles = []
+        for creator in (core.create, core.create_shield):
+            assets.write(FILE, creator(bpy.context))
+            imported = assets.load(bpy.context, FILE)
+            bundles.append(
+                next(c for c in imported.users_collection if c.get("vfx_bundle_version"))
+            )
+        ordinary = bpy.data.collections.new("User Collection Asset")
+        ordinary.asset_mark()
+        multi = ROOT / "work/multiple-assets.blend"
+        bpy.data.libraries.write(str(multi), {*bundles, ordinary})
+        before = set(bpy.data.all_ids)
+        for name in (ordinary.name, "Missing Asset"):
+            with self.assertRaises(ValueError):
+                assets.load(bpy.context, multi, collection_name=name)
+            self.assertEqual(set(bpy.data.all_ids), before)
+        with self.assertRaisesRegex(ValueError, "one exported"):
+            assets.load(bpy.context, multi)
+        self.assertEqual(set(bpy.data.all_ids), before)
+        a = assets.load(bpy.context, multi, collection_name=bundles[0].name)
+        b = assets.load(bpy.context, multi, collection_name=bundles[1].name)
+        self.assertEqual(a["vfx_module"], "mesh.ring")
+        self.assertEqual(b["vfx_module"], "shader.shield")
+        self.assertNotEqual(a["vfx_id"], b["vfx_id"])
+
+    def test_browser_selection_rejects_unsupported_sources_without_file_io(self):
+        values = dict(
+            id_type="COLLECTION",
+            local_id=None,
+            is_online=False,
+            full_library_path=str(FILE),
+            name="Example",
+        )
+        self.assertEqual(asset_browser.selection(SimpleNamespace(**values)), (str(FILE), "Example"))
+        for change in (
+            dict(id_type="MATERIAL"),
+            dict(local_id=object()),
+            dict(is_online=True),
+            dict(full_library_path=""),
+            dict(name=""),
+        ):
+            with self.assertRaises(ValueError):
+                asset_browser.selection(SimpleNamespace(**dict(values, **change)))
+        with self.assertRaises(ValueError):
+            asset_browser.selection(None)
+
+    def test_browser_operator_imports_from_non_viewport_context(self):
+        root = ring()
+        assets.write(FILE, root)
+        area = next(a for a in bpy.context.screen.areas if a.type == "VIEW_3D")
+        area.ui_type = "ASSETS"
+        try:
+            with bpy.context.temp_override(area=area):
+                self.assertFalse(bpy.ops.vfx_studio.load_browser_asset.poll())
+                with patch.object(
+                    asset_browser, "selection", return_value=(str(FILE), "Shockwave")
+                ):
+                    self.assertTrue(bpy.ops.vfx_studio.load_browser_asset.poll())
+                    self.assertEqual(bpy.ops.vfx_studio.load_browser_asset(), {"FINISHED"})
+            imported = bpy.context.view_layer.objects.active
+            self.assertNotEqual(imported["vfx_id"], root["vfx_id"])
+            self.assertEqual(core.resolve(imported), imported)
+        finally:
+            area.type = "VIEW_3D"
+
+    def test_import_refuses_edit_mode_without_changing_existing_data(self):
+        root = ring()
+        assets.write(FILE, root)
+        bpy.ops.mesh.primitive_cube_add()
+        obj = bpy.context.object
+        bpy.ops.object.mode_set(mode="EDIT")
+        before = set(bpy.data.all_ids)
+        try:
+            with self.assertRaisesRegex(ValueError, "Object Mode"):
+                assets.load(bpy.context, FILE)
+            self.assertEqual(set(bpy.data.all_ids), before)
+            self.assertEqual(obj.mode, "EDIT")
+        finally:
+            bpy.ops.object.mode_set(mode="OBJECT")
 
     def test_invalid_bundle_rolls_back_only_new_data(self):
         root = ring()
