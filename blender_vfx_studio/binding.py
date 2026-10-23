@@ -96,6 +96,20 @@ def unbind(context, root):
         )
     context.view_layer.update()
     world = root.evaluated_get(context.evaluated_depsgraph_get()).matrix_world.copy()
+    from mathutils import Matrix
+
+    # Blender assigns matrix_world through location/rotation/scale. Those channels
+    # cannot retain shear introduced by a rotated, nonuniformly scaled target.
+    local = root.convert_space(matrix=world, from_space="WORLD", to_space="LOCAL")
+    reconstructed = Matrix.LocRotScale(*local.decompose())
+    magnitude = max(1.0, *(abs(local[i][j]) for i in range(3) for j in range(3)))
+    if (
+        max(abs(local[i][j] - reconstructed[i][j]) for i in range(3) for j in range(3))
+        > 1e-5 * magnitude
+    ):
+        raise ValueError(
+            "Cannot preserve this sheared pose when unbinding; bake the transform or choose a pose without shear"
+        )
     root.constraints.remove(constraint)
     root.matrix_world = world
     del root["vfx_binding_constraint"]

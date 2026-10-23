@@ -8,6 +8,9 @@ import bpy
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tests"))
+from rig_test_support import animated_rig
+
 import blender_vfx_studio as addon
 from blender_vfx_studio import binding, core
 
@@ -82,6 +85,59 @@ class BindingTests(unittest.TestCase):
         core.delete(root)
         self.assertIn(obj.name, bpy.data.objects)
         self.assertEqual(obj.pose.bones[0].name, bone.name)
+
+    def test_constrained_parented_bone_binding_and_unbind_at_subframe(self):
+        rig, parent, control = animated_rig()
+        actions = [o.animation_data.action for o in (rig, parent, control)]
+        bpy.context.scene.frame_set(7, subframe=0.25)
+        root = core.create(bpy.context)
+        root.location = (1, -2, 0.5)
+        root.rotation_euler = (0.2, -0.1, 0.3)
+        original = world(root)
+        evaluated = rig.evaluated_get(bpy.context.evaluated_depsgraph_get())
+        target_before = evaluated.matrix_world @ evaluated.pose.bones["Blade"].matrix
+        binding.bind(bpy.context, root, rig, "Blade")
+        self.assertMatrix(world(root), original)
+        clone = core.duplicate(bpy.context, root)
+        for frame in (16, 1, 11, 21):
+            bpy.context.scene.frame_set(frame, subframe=0.5)
+            evaluated = rig.evaluated_get(bpy.context.evaluated_depsgraph_get())
+            target_now = evaluated.matrix_world @ evaluated.pose.bones["Blade"].matrix
+            expected = target_now @ target_before.inverted() @ original
+            self.assertMatrix(world(root), expected)
+            self.assertMatrix(world(clone), expected)
+        frozen = world(clone)
+        constraint = binding.managed(clone)
+        with self.assertRaisesRegex(ValueError, "sheared pose"):
+            binding.unbind(bpy.context, clone)
+        self.assertEqual(binding.managed(clone), constraint)
+        self.assertMatrix(world(clone), frozen)
+        bpy.context.scene.frame_set(7, subframe=0.25)
+        self.assertMatrix(world(root), original)
+        binding.unbind(bpy.context, clone)
+        self.assertMatrix(world(clone), original)
+        bpy.context.scene.frame_set(16)
+        self.assertMatrix(world(clone), original)
+        self.assertEqual([o.animation_data.action for o in (rig, parent, control)], actions)
+        self.assertEqual(rig.pose.bones["Blade"].constraints[0].target, control)
+
+    def test_parented_controller_keeps_parent_transform_when_unbinding(self):
+        parent = bpy.data.objects.new("Controller Parent", None)
+        bpy.context.scene.collection.objects.link(parent)
+        parent.scale = (2, 1, 1)
+        parent.rotation_euler.z = 0.4
+        root = core.create(bpy.context)
+        root.parent = parent
+        root.rotation_euler.z = 0.7
+        obj = target()
+        binding.bind(bpy.context, root, obj)
+        bpy.context.scene.frame_set(11)
+        original = world(root)
+        binding.unbind(bpy.context, root)
+        self.assertMatrix(world(root), original)
+        self.assertEqual(root.parent, parent)
+        bpy.context.scene.frame_set(1)
+        self.assertMatrix(world(root), original)
 
     def test_invalid_targets_and_cycles_leave_controller_unchanged(self):
         root = core.create(bpy.context)

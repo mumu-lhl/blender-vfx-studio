@@ -1,7 +1,7 @@
 """Blender UI delegates lifecycle operations to core."""
 
 import bpy
-from bpy.props import EnumProperty, IntProperty, StringProperty
+from bpy.props import BoolProperty, EnumProperty, IntProperty, StringProperty
 from bpy_extras.io_utils import ExportHelper, ImportHelper
 
 from . import core, presets
@@ -157,12 +157,26 @@ class VFX_OT_create_trail(bpy.types.Operator):
     last: IntProperty(name="Last Frame", default=25, min=-100000, max=100000)
     step: IntProperty(name="Sample Step", default=1, min=1, max=100000)
 
+    bone_tail: BoolProperty(
+        name="Use Bone Tail",
+        description="Sample the active pose bone's tip instead of its head; ignored for objects",
+        default=False,
+    )
+
     def execute(self, context):
         from . import trail
 
         bone = context.active_pose_bone.name if context.active_pose_bone else ""
         try:
-            trail.create(context, context.object, bone, self.first, self.last, self.step)
+            trail.create(
+                context,
+                context.object,
+                bone,
+                self.first,
+                self.last,
+                self.step,
+                bone_tail=self.bone_tail,
+            )
         except ValueError as error:
             self.report({"ERROR"}, str(error))
             return {"CANCELLED"}
@@ -639,7 +653,13 @@ class VFX_PT_main(bpy.types.Panel):
         elif root["vfx_module"] == "trail.ribbon":
             layout.label(text="Ribbon · explicit sampled animation")
             layout.prop(root, '["vfx_source"]', text="Source")
-            layout.prop(root, '["vfx_bone"]', text="Bone (head)")
+            layout.prop(root, '["vfx_bone"]', text="Bone")
+            if "vfx_bone_tail" in root:
+                row = layout.row()
+                row.enabled = bool(root.get("vfx_bone"))
+                row.prop(root, '["vfx_bone_tail"]', text="Use Bone Tail")
+            else:
+                layout.label(text="Legacy ribbon · samples bone head")
             for key in ("vfx_bake_first", "vfx_bake_last", "vfx_bake_step"):
                 layout.prop(root, f'["{key}"]', text=key.removeprefix("vfx_bake_").title())
             layout.label(text=f"{root['vfx_samples']} baked samples; source edits need Rebake")
