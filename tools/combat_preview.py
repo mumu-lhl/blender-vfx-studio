@@ -110,6 +110,9 @@ def main():
     )
     folder = ROOT / "work/visual-combat" / variant
     folder.mkdir(parents=True, exist_ok=True)
+    # An interrupted or keyframe-only render must not certify an older sequence.
+    settings_path = folder / "render-settings.json"
+    settings_path.unlink(missing_ok=True)
     frames = list(range(1, 37)) if args.sequence else [4, 8, 12, 23]
     for frame in frames:
         bpy.context.scene.frame_set(frame)
@@ -126,9 +129,7 @@ def main():
         "samples": 16 if args.engine == "BLENDER_EEVEE" else 24,
         "bloom": False,
     }
-    (folder / "render-settings.json").write_text(
-        json.dumps(settings, indent=2) + "\n", encoding="utf-8"
-    )
+    settings_path.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

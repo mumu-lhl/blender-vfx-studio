@@ -8,7 +8,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 os.chdir(ROOT)
 blender = os.environ.get("BLENDER_BIN", "blender")
-for pattern in ("test_timing.py", "test_presets.py", "test_library.py", "test_fetch_blender.py"):
+for pattern in (
+    "test_timing.py",
+    "test_presets.py",
+    "test_library.py",
+    "test_fetch_blender.py",
+    "test_combat_video.py",
+):
     subprocess.run(
         [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", pattern],
         check=True,

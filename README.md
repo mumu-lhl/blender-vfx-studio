@@ -57,7 +57,7 @@ Strength 控制整体发光，颜色控制主体；锋刃使用较浅的冷白�
 
 新版 **Particle Burst** 增加 Shape（0 圆粒、1 尖片）、Stretch（尖片半长相对 Size 的倍数）、Planar（1 将随机散射压到局部 XY 平面）和 Motion Ease（0 匀速运动时钟、1 快出慢停）。例如 Shape=1、Stretch=6 可生成细长尖片。尖片沿轨迹方向转动，前端偏白、尾部较暗；Fade 仍控制尺寸缩减。Motion Ease 改变直接计算的位置与重力时钟，不是物理模拟；修改它会重新计算当前帧。
 
-Burst 新建资产为版本 2；旧版本 1 资产和参数预设继续按原结构读取，不会被自动重建。Continuous Emitter 保持原有圆粒与时间模型。高清实图、复现方法和限制见 [打击爆发视觉检查](docs/IMPACT_VISUAL_REVIEW.md)。
+Burst 新建资产为版本 2；旧版本 1 资产和参数预设继续按原结构读取，不会被自动重建。Continuous Emitter 保持原有圆粒与时间模型。0.22.1 候选进一步增厚中心短闪和主尖片，并缩短短闪、提前侵蚀冲击波；已有完整效果保留原参数和节点。连续播放观感仍未验收，Eevee 远景亮背景的帧序列与检查范围见 [镜头记录](docs/COMBAT_VISUAL_REVIEW.md)。高清实图、复现方法和限制见 [打击爆发视觉检查](docs/IMPACT_VISUAL_REVIEW.md)。
 
 ## Fresnel 能量护盾
 

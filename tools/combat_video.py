@@ -11,9 +11,13 @@ from pathlib import Path
 
 def encode(folder):
     folder = Path(folder)
-    ffmpeg, ffprobe = shutil.which("ffmpeg"), shutil.which("ffprobe")
-    if not ffmpeg or not ffprobe:
-        raise RuntimeError("Install FFmpeg (including ffprobe) before encoding review videos")
+    settings = json.loads((folder / "render-settings.json").read_text(encoding="utf-8"))
+    if (
+        settings.get("rendered_frames") != list(range(1, 37))
+        or settings.get("fps") != 24
+        or settings.get("resolution") != [960, 540]
+    ):
+        raise ValueError("Render a complete 36-frame 960x540 sequence at 24 fps before encoding")
     for frame in range(1, 37):
         path = folder / f"combat-{frame:04d}.png"
         with path.open("rb") as stream:
@@ -24,6 +28,9 @@ def encode(folder):
             or struct.unpack(">II", header[16:24]) != (960, 540)
         ):
             raise ValueError(f"Expected a 960x540 PNG: {path}")
+    ffmpeg, ffprobe = shutil.which("ffmpeg"), shutil.which("ffprobe")
+    if not ffmpeg or not ffprobe:
+        raise RuntimeError("Install FFmpeg (including ffprobe) before encoding review videos")
     destination = folder / "combat.mp4"
     with tempfile.TemporaryDirectory(dir=folder) as temporary:
         movie = Path(temporary) / "combat.mp4"
