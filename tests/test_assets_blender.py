@@ -11,7 +11,16 @@ import bpy
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 import blender_vfx_studio as addon
-from blender_vfx_studio import asset_browser, assets, binding, composition, core, simulation, trail
+from blender_vfx_studio import (
+    asset_browser,
+    asset_preview,
+    assets,
+    binding,
+    composition,
+    core,
+    simulation,
+    trail,
+)
 
 FILE = ROOT / "work/effect-asset.blend"
 
@@ -224,6 +233,105 @@ class AssetTests(unittest.TestCase):
         finally:
             bpy.ops.object.mode_set(mode="OBJECT")
 
+    def test_embedded_preview_preserves_source_and_needs_no_image_dependency(self):
+        ring()
+        image = bpy.data.images.new("User Preview", 2, 2, float_buffer=True)
+        pixels = [1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0.25, 0.5, 0.75, 0.5]
+        image.filepath = "//untouched-preview.png"
+        image.colorspace_settings.name = "Non-Color"
+        image.pixels = pixels
+        before = set(bpy.data.all_ids)
+        state = (
+            image.size[:],
+            list(image.pixels),
+            image.filepath,
+            image.colorspace_settings.name,
+            image.users,
+            image.is_dirty,
+            bpy.context.scene.view_settings.view_transform,
+        )
+        self.assertEqual(
+            bpy.ops.vfx_studio.export_asset(filepath=str(FILE), preview_image=image.name),
+            {"FINISHED"},
+        )
+        self.assertEqual(set(bpy.data.all_ids), before)
+        self.assertEqual(
+            (
+                image.size[:],
+                list(image.pixels),
+                image.filepath,
+                image.colorspace_settings.name,
+                image.users,
+                image.is_dirty,
+                bpy.context.scene.view_settings.view_transform,
+            ),
+            state,
+        )
+        with bpy.data.libraries.load(str(FILE)) as (available, _):
+            self.assertEqual(available.images, [])
+        imported = assets.load(bpy.context, FILE)
+        bundle = next(c for c in imported.users_collection if c.get("vfx_bundle_version"))
+        self.assertEqual(bundle.preview.image_size[:], (2, 2))
+        self.assertTrue(bundle.preview.is_image_custom)
+        for a, b in zip(bundle.preview.image_pixels_float, pixels):
+            self.assertAlmostEqual(a, b, delta=1 / 255)
+
+    def test_preview_resizes_and_preserves_aspect_ratio_without_upscaling(self):
+        image = bpy.data.images.new("Wide Preview", 512, 128, float_buffer=True)
+        image.pixels = [0.25, 0.5, 0.75, 1] * (512 * 128)
+        size, pixels = asset_preview.prepare(image)
+        self.assertEqual(size, (256, 64))
+        self.assertEqual(len(pixels), 256 * 64 * 4)
+        self.assertEqual(list(pixels[:4]), [0.25, 0.5, 0.75, 1])
+        self.assertEqual(image.size[:], (512, 128))
+        self.assertEqual(list(image.pixels[:4]), [0.25, 0.5, 0.75, 1])
+        small = bpy.data.images.new("Small Preview", 3, 1)
+        self.assertEqual(asset_preview.prepare(small)[0], (3, 1))
+
+    def test_preview_errors_preserve_existing_asset_and_data(self):
+        root = ring()
+        assets.write(FILE, root)
+        original = FILE.read_bytes()
+        large = bpy.data.images.new("Oversize Preview", 2049, 1)
+        missing = bpy.data.images.new("Missing Preview", 2, 2)
+        missing.source = "FILE"
+        missing.filepath = str(ROOT / "work/missing-preview-file.png")
+        sequence = bpy.data.images.new("Sequence Preview", 2, 2)
+        sequence.source = "SEQUENCE"
+        invalid = bpy.data.images.new("NaN Preview", 1, 1, float_buffer=True)
+        invalid.pixels = [float("nan"), 0, 0, 1]
+        for image in (large, missing, sequence, invalid, object()):
+            before = set(bpy.data.all_ids)
+            with self.assertRaises(ValueError):
+                assets.write(FILE, root, preview_image=image)
+            self.assertEqual(set(bpy.data.all_ids), before)
+            self.assertEqual(FILE.read_bytes(), original)
+        with self.assertRaisesRegex(RuntimeError, "no longer exists"):
+            bpy.ops.vfx_studio.export_asset(filepath=str(FILE), preview_image="Deleted Image")
+        self.assertEqual(FILE.read_bytes(), original)
+
+    def test_packed_preview_survives_missing_file_and_failed_export_cleans_up(self):
+        root = ring()
+        generated = bpy.data.images.new("Preview PNG Source", 4, 2)
+        generated.generated_color = (0.2, 0.4, 0.8, 1)
+        generated.filepath_raw = str(ROOT / "work/packed-preview.png")
+        generated.file_format = "PNG"
+        generated.save()
+        image = bpy.data.images.load(generated.filepath_raw, check_existing=False)
+        image.pack()
+        Path(image.filepath).unlink()
+        assets.write(FILE, root, preview_image=image)
+        original = FILE.read_bytes()
+        before = set(bpy.data.all_ids)
+        with patch.object(assets.os, "replace", side_effect=OSError("Disk")):
+            with self.assertRaisesRegex(OSError, "Disk"):
+                assets.write(FILE, root, preview_image=image)
+        self.assertEqual(set(bpy.data.all_ids), before)
+        self.assertEqual(FILE.read_bytes(), original)
+        self.assertTrue(image.packed_file)
+        self.assertEqual(image.size[:], (4, 2))
+        self.assertIsNone(asset_preview.prepare(None))
+
     def test_invalid_bundle_rolls_back_only_new_data(self):
         root = ring()
         assets.write(FILE, root)
@@ -287,7 +395,10 @@ if not result.wasSuccessful():
     raise RuntimeError("Native assets integration failed")
 bpy.ops.wm.read_factory_settings(use_empty=True)
 original, _, _ = group()
-assets.write(FILE, original)
+preview = bpy.data.images.new("Fixture Preview", 2, 2)
+preview.pixels = [1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1]
+assets.write(FILE, original, preview_image=preview)
+bpy.data.images.remove(preview)
 loaded = assets.load(bpy.context, FILE)
 loaded.name = "Persisted Native Asset"
 core.delete(original)

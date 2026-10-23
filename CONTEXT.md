@@ -19,6 +19,9 @@ Load Complete Effect 保留原来的时间和变换，并为载入的实例分�
 原生 Asset Browser 中的集合名称只是显示名称。完整效果仍由 `vfx_bundle_version` 和 `vfx_bundle_root` 验证身份；老的内部前缀名称不是新的格式版本。
 Load VFX with New ID 读取当前选中外部资产的文件路径和集合名，复用安全载入流程。普通拖放/Append 不会分配新实例编号，不能代替它。Current File 中的条目使用场景里的 VFX Duplicate 复制。
 
+**资产预览图** 是完整效果集合中的原生 ImagePreview，供 Asset Browser 显示。它与效果材质的 Image 贴图是两回事，不参与效果播放，也不要求载入插件或原图片文件。
+可选预览不改变集合封装版本；没有预览的旧文件继续使用原生默认图标。导出读源图片像素，只保存最多 256 像素长边的副本。
+
 实例结构版本 `vfx_schema` 当前为 1；各模块生成资产的 `vfx_asset_version` 当前均为 1；JSON 参数文件当前为格式 2。格式 1 的旧环形预设可以转换为格式 2，其他未知版本会报错。这三个版本各管一件事，不能互相替代。
 
 ## 统一时间

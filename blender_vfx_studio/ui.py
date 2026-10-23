@@ -484,11 +484,26 @@ class VFX_OT_export_asset(bpy.types.Operator, ExportHelper):
     filename_ext = ".blend"
     filter_glob: StringProperty(default="*.blend", options={"HIDDEN"})
 
+    preview_image: StringProperty(
+        name="Preview Image",
+        description="Optional loaded still image, at most 2048 pixels per side; source stays unchanged",
+        default="",
+    )
+
+    def draw(self, context):
+        self.layout.label(text="Preview Image (optional)")
+        self.layout.prop_search(self, "preview_image", bpy.data, "images", text="")
+        self.layout.label(text="Still image · up to 2048 px")
+        self.layout.label(text="No scene view transform")
+
     def execute(self, context):
         from . import assets
 
         try:
-            assets.write(self.filepath, context.object)
+            image = bpy.data.images.get(self.preview_image) if self.preview_image else None
+            if self.preview_image and image is None:
+                raise ValueError("The selected preview image no longer exists")
+            assets.write(self.filepath, context.object, preview_image=image)
         except (ValueError, OSError, RuntimeError) as error:
             self.report({"ERROR"}, str(error))
             return {"CANCELLED"}
