@@ -16,6 +16,9 @@
 Load Complete Effect 保留原来的时间和变换，并为载入的实例分配新 UUID；它不使用当前帧或 3D Cursor 重新定位。
 集合封装版本 `vfx_bundle_version` 当前为 1，用于识别这类文件，不负责迁移实例。
 
+原生 Asset Browser 中的集合名称只是显示名称。完整效果仍由 `vfx_bundle_version` 和 `vfx_bundle_root` 验证身份；老的内部前缀名称不是新的格式版本。
+Load VFX with New ID 读取当前选中外部资产的文件路径和集合名，复用安全载入流程。普通拖放/Append 不会分配新实例编号，不能代替它。Current File 中的条目使用场景里的 VFX Duplicate 复制。
+
 实例结构版本 `vfx_schema` 当前为 1；各模块生成资产的 `vfx_asset_version` 当前均为 1；JSON 参数文件当前为格式 2。格式 1 的旧环形预设可以转换为格式 2，其他未知版本会报错。这三个版本各管一件事，不能互相替代。
 
 ## 统一时间
@@ -58,11 +61,19 @@ Opacity 和 Fade 控制透明度，Dissolve 为噪声阈值。Flow 是一个周�
 
 Burst 粒子整组在 Start 出生，以原生点 Index 作为编号，Seed 决定可重复的随机变化，Count 不超过 2048。Motion Time = Progress × Motion Seconds；位置由初速度、初始径向距离和重力公式直接计算。Motion Seconds 表示轨迹中的秒数，Duration 表示播放帧数，修改场景帧率不会自动改变二者。Fade 在粒子模块表示尺寸缩减，不是透明度。一个周期结束后全体消失，循环从出生状态重新开始；不处理碰撞或历史受力。
 
-Trail 保存对象原点或骨骼 head 在指定帧区间的世界位置，播放时在采样点间按时间线性插值。Length 是可见尾带占完整采样时间的比例，Width 是全宽，Fade 表示逐渐缩窄。Rebake 是明确重新采样并替换基础网格的操作，会覆盖手动路径编辑，但保留材质和节点。修改源引用或采样区间不会自动更新路径，也不会自动修改回放 Start / Duration。
+连续发射模块 `particle.emitter` 使用每个粒子的独立出生时间和寿命，不使用 Burst 的 Count / Motion Seconds。
+运动时钟为 `Progress × (Emission Seconds + Lifetime)`，出生编号 n 的时间为 `n / Effective Rate`，只接受出生时间小于 Emission Seconds 的粒子；年龄达到 Lifetime 即消失。
+Rate 为 0 时全部隐藏；有效发射率为 `min(Rate, 2048 / Lifetime)`，最多分配 2048 个循环使用的点。Rate 的界面上限为 10000，Lifetime 范围为 0.001–100 运动秒。
+修改或动画化发射参数会按当前值重算整个安排，不积分历史参数。移动控制器会移动已出生粒子；循环重新播放发射及寿命尾段，不能理解成无缝的无限喷射。
+
+Trail 保存对象原点或骨骼起点/末端 在指定帧区间的世界位置，播放时在采样点间按时间线性插值。Length 是可见尾带占完整采样时间的比例，Width 是全宽，Fade 表示逐渐缩窄。Rebake 是明确重新采样并替换基础网格的操作，会覆盖手动路径编辑，但保留材质和节点。修改源引用或采样区间不会自动更新路径，也不会自动修改回放 Start / Duration。
+
+Ribbon 的 `vfx_bone_tail` 只决定下次采样使用骨骼末端还是起点，默认 False。旧文件缺少该属性时仍用起点；对象采样忽略它。
+已存路径不依赖该开关或源骨架，因此修改开关需明确 Rebake，删除骨架仍可播放。参数属于创作设置，不改变存储网格或资产版本。
 
 Screen 的效果层是控制器记录的 Scene 中的合成节点，不是 Mesh 子对象。Strength 控制有效时间内的辉光，Flash 控制开始时的全屏颜色覆盖；实际覆盖系数为 `Flash × Active × (1 − Progress × Fade)`。区间外两者为 0，原图不变。默认 Loop 开启且 Flash=0。多个 Screen 层按合成链顺序叠加；Duplicate 在当前场景创建副本，Delete 处理控制器记录的原场景。
 
-**绑定** 是控制器上的原生 Child Of 约束。目标对象或骨骼仍由用户持有，挂接时保持当前世界变换。解绑只保留当前帧的姿态；若其他约束或变换动画让这一操作不明确，插件会拒绝并要求先烘焙。参数动画不受此限制。
+**绑定** 是控制器上的原生 Child Of 约束。目标对象或骨骼仍由用户持有，挂接时保持当前世界变换。解绑只保留当前帧的姿态；若其他约束、变换动画或无法用变换通道保存的剪切让这一操作不明确，插件会拒绝并要求先烘焙。参数动画不受此限制。
 
 **Composition（组合）** 是统一移动和调整多个空间效果时间的控制器。成员用 `vfx_composition` 保存原生对象引用。
 开始和时长比例都相对组合 Duration，Speed 缩放整体播放时间，Local Speed 再缩放单层速度。
@@ -73,14 +84,3 @@ Screen 的效果层是控制器记录的 Scene 中的合成节点，不是 Mesh 
 播放 Start / Duration / Speed / Loop 决定怎样重放，二者独立。UNBAKED 没有存储动画，BAKED 的输入与上次烘焙一致，
 STALE 表示输入已变化但仍保留旧动画。只有明确重新烘焙才更新结果，不能把过期标记等同于自动重算。
 模拟在控制器局部空间计算；控制器变换和播放动画不使已存结果过期。
-
-连续发射模块 `particle.emitter` 使用每个粒子的独立出生时间和寿命，不使用 Burst 的 Count / Motion Seconds。
-运动时钟为 `Progress × (Emission Seconds + Lifetime)`，出生编号 n 的时间为 `n / Effective Rate`，只接受出生时间小于 Emission Seconds 的粒子；年龄达到 Lifetime 即消失。
-Rate 为 0 时全部隐藏；有效发射率为 `min(Rate, 2048 / Lifetime)`，最多分配 2048 个循环使用的点。Rate 的界面上限为 10000，Lifetime 范围为 0.001–100 运动秒。
-修改或动画化发射参数会按当前值重算整个安排，不积分历史参数。移动控制器会移动已出生粒子；循环重新播放发射及寿命尾段，不能理解成无缝的无限喷射。
-
-Ribbon 的 `vfx_bone_tail` 只决定下次采样使用骨骼末端还是起点，默认 False。旧文件缺少该属性时仍用起点；对象采样忽略它。
-已存路径不依赖该开关或源骨架，因此修改开关需明确 Rebake，删除骨架仍可播放。参数属于创作设置，不改变存储网格或资产版本。
-
-原生 Asset Browser 中的集合名称只是显示名称。完整效果仍由 `vfx_bundle_version` 和 `vfx_bundle_root` 验证身份；老的内部前缀名称不是新的格式版本。
-Load VFX with New ID 读取当前选中外部资产的文件路径和集合名，复用安全载入流程。普通拖放/Append 不会分配新实例编号，不能代替它。Current File 中的条目使用场景里的 VFX Duplicate 复制。
