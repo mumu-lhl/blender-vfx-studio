@@ -72,6 +72,20 @@ jobs:
         with:
           name: arc-slash-visual-review
           path: work/visual-slash/*.png
+      - name: Render Impact Burst visual review (960x540, CPU, no bloom)
+        if: runner.os == 'Linux'
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: surfaceless
+        run: |
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --light
+      - uses: actions/upload-artifact@v7.0.2
+        if: runner.os == 'Linux'
+        with:
+          name: impact-burst-visual-review
+          path: work/visual-impact/*.png
       - name: Build and validate starter assets (CPU only)
         if: github.ref_type == 'tag' && runner.os == 'Linux'
         run: |
@@ -93,6 +107,7 @@ jobs:
             work/bone-trail-preview.png
             work/examples/*.png
             work/visual-slash/*.png
+            work/visual-impact/*.png
 
   release:
     if: github.event_name == 'push' && github.ref_type == 'tag'
@@ -115,4 +130,4 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           (cd dist && sha256sum *.zip > SHA256SUMS)
-          gh release create "$GITHUB_REF_NAME" dist/*.zip dist/SHA256SUMS preview/*.png preview/examples/*.png preview/visual-slash/*.png --verify-tag --prerelease --title "$GITHUB_REF_NAME — Blender VFX Studio Preview" --notes 'Blender 5.2 LTS 预览版。安装请选择 blender-vfx-studio-版本.zip；examples ZIP 是独立资产库，请解压后添加到 Asset Libraries。插件在 Preferences → Get Extensions → Install from Disk 中安装。附带 CPU 渲染预览和 SHA256 校验值。完整功能与限制请阅读仓库 README。' --generate-notes
+          gh release create "$GITHUB_REF_NAME" dist/*.zip dist/SHA256SUMS preview/*.png preview/examples/*.png preview/visual-slash/*.png preview/visual-impact/*.png --verify-tag --prerelease --title "$GITHUB_REF_NAME — Blender VFX Studio Preview" --notes 'Blender 5.2 LTS 预览版。安装请选择 blender-vfx-studio-版本.zip；examples ZIP 是独立资产库，请解压后添加到 Asset Libraries。插件在 Preferences → Get Extensions → Install from Disk 中安装。附带 CPU 渲染预览和 SHA256 校验值。完整功能与限制请阅读仓库 README。' --generate-notes

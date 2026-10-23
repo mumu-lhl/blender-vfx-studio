@@ -17,7 +17,7 @@ from blender_vfx_studio import assets, composition, core  # noqa: E402
 EXAMPLES = ("energy-charge", "impact-burst", "arc-slash")
 PREVIEWS = {
     "energy-charge": (22, (4, -6, 3.5), (0, 0, 0.1), 4.8),
-    "impact-burst": (10, (5, -7, 4), (0, 0, 0.2), 4.8),
+    "impact-burst": (5, (3, -5, 6), (0, 0, 0), 5.0),
     "arc-slash": (5, (0, 0, 8), (0, 0, 0), 5.4),
 }
 
@@ -91,36 +91,7 @@ def create_effect(key):
         root = composition.create(context, [outer, inner, shield, particles])
         root.name = "Energy Charge"
     elif key == "impact-burst":
-        color = (1.0, 0.15, 0.015)
-        ring = configure(
-            core.create(context, "SHOCKWAVE", "LOW"),
-            color,
-            radius=0.15,
-            expansion=3.2,
-            width=0.2,
-            duration=24.0,
-            fade=1.0,
-            dissolve=0.15,
-            strength=4.0,
-        )
-        particles = configure(
-            core.create_particle(context),
-            color,
-            count=40,
-            velocity=3.0,
-            gravity=1.8,
-            motion_seconds=0.75,
-            size=0.07,
-            spawn_radius=0.08,
-            spread=0.85,
-            randomness=0.7,
-            strength=4.0,
-            fade=1.0,
-            duration=24.0,
-            seed=17,
-        )
-        root = composition.create(context, [ring, particles])
-        root.name = "Impact Burst"
+        root = core.create(context, "IMPACT_BURST", "LOW")
     else:
         root = core.create(context, "ARC_SLASH", "LOW")
         root["duration"] = 18.0
@@ -154,7 +125,7 @@ def preview_scene(key):
     scene.view_settings.view_transform = "Standard"
     scene.render.resolution_x = scene.render.resolution_y = 256
     scene.render.resolution_percentage = 100
-    if key != "arc-slash":
+    if key == "energy-charge":
         glow = core.create_screen(bpy.context)
         glow["strength"], glow["fade"] = 0.25, 0.0
         glow.update_tag()

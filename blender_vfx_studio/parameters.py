@@ -81,7 +81,7 @@ SCREEN_PARAMETERS = {
 }
 
 
-PARTICLE_PARAMETERS = {
+PARTICLE_PARAMETERS_V1 = {
     **COMMON_PARAMETERS,
     "strength": (4.0, 0.0, 1000.0, "Particle emission strength"),
     "color_0": (1.0, 0.0, 1.0, "Linear red"),
@@ -105,7 +105,9 @@ PARTICLE_PARAMETERS = {
 
 
 EMITTER_PARAMETERS = {
-    key: spec for key, spec in PARTICLE_PARAMETERS.items() if key not in {"count", "motion_seconds"}
+    key: spec
+    for key, spec in PARTICLE_PARAMETERS_V1.items()
+    if key not in {"count", "motion_seconds"}
 }
 EMITTER_PARAMETERS.update(
     {
@@ -121,6 +123,15 @@ EMITTER_PARAMETERS.update(
         "fade": (1.0, 0.0, 1.0, "Size loss over each particle's own lifetime"),
     }
 )
+
+
+PARTICLE_PARAMETERS = {
+    **PARTICLE_PARAMETERS_V1,
+    "shape": (0, 0, 1, "0: round particle; 1: pointed shard"),
+    "stretch": (1.0, 1.0, 24.0, "Shard half-length as a multiple of Size"),
+    "planar": (0.0, 0.0, 1.0, "Flatten random directions into local XY before applying Spread"),
+    "motion_ease": (0.0, 0.0, 1.0, "Fast initial travel followed by deceleration; zero is linear"),
+}
 
 
 TRAIL_PARAMETERS = {
@@ -208,7 +219,7 @@ def parameters_for(module, asset_version=None):
     if module == "screen.glare":
         return SCREEN_PARAMETERS
     if module == "particle.burst":
-        return PARTICLE_PARAMETERS
+        return PARTICLE_PARAMETERS_V1 if asset_version == 1 else PARTICLE_PARAMETERS
     raise ValueError("Unknown VFX module")
 
 

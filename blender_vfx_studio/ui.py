@@ -10,7 +10,7 @@ from .registry import PRESETS
 
 class VFX_OT_create(bpy.types.Operator):
     bl_idname = "vfx_studio.create"
-    bl_description = "Create an editable ring or crescent slash at the 3D Cursor"
+    bl_description = "Create an editable ring, slash or impact composition at the 3D Cursor"
     bl_label = "Create Mesh VFX"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -764,6 +764,9 @@ class VFX_PT_main(bpy.types.Panel):
                 "fade",
                 "strength",
             )
+            if root["vfx_asset_version"] == 2:
+                layout.label(text="Shape: 0 Round / 1 Shard")
+                keys += ("shape", "stretch", "planar", "motion_ease")
         elif root["vfx_module"] == "screen.glare":
             layout.label(text="Screen · scene compositor")
             keys = ("strength", "threshold", "glow_size", "flash", "fade")

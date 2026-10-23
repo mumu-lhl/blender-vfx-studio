@@ -138,6 +138,7 @@ class PresetTests(unittest.TestCase):
         data = dict(
             sample(),
             module="particle.burst",
+            asset_version=2,
             parameters={k: spec[0] for k, spec in preset_parameters_for("particle.burst").items()},
         )
         self.assertEqual(presets.loads(presets.dumps(data)), data)
