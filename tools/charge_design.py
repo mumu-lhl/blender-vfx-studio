@@ -261,8 +261,12 @@ def _surface(root, *, core=False):
         )
         packet = hot
         hot = g.m("Packet Follows Core", "MULTIPLY", hot, across)
-        packet_alpha = g.m("Visible Flow Packets", "MULTIPLY_ADD", packet, 0.65)
-        packet_alpha.node.inputs[2].default_value = 0.35
+        packet_alpha = g.m(
+            "Pointed Energy Segments",
+            "GREATER_THAN",
+            g.m("Taper Moving Packet Width", "SUBTRACT", packet, side),
+            0.08,
+        )
         alpha = g.m("Separated Energy Wisps", "MULTIPLY", alpha, packet_alpha)
         hot = g.m("Flow Emphasis", "MULTIPLY", hot, 0.6)
     mix = g.n("ShaderNodeMixRGB", "Dark Body And Flowing Energy")
