@@ -177,6 +177,7 @@ class StarterTests(unittest.TestCase):
             self.assertLess(energy(), 1e-5, key)
             core_member[key] = old
             core_member.update_tag()
+
         def coverage():
             pixels = render_pixels(44)
             return sum(max(pixels[i : i + 3]) > 1e-5 for i in range(0, len(pixels), 4))
