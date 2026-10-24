@@ -175,6 +175,7 @@ SLASH_PARAMETERS_V2 = {
 SLASH_PARAMETERS = {
     **SLASH_PARAMETERS_V2,
     "strength": (1.6, 0.0, 1000.0, "Blade emission; illustrated body stays darker"),
+    "fade": (1.0, 0.0, 1.0, "Release into separate pieces; noise breakup remains independent"),
     "contour": (0.65, 0.0, 1.0, "Uneven leading hook and torn inner silhouette"),
     "bank": (0.22, -1.0, 1.0, "Depth bend relative to radius; zero flattens the blade"),
     "wake_spread": (0.7, 0.0, 1.0, "Wake separation during the sweep and release"),

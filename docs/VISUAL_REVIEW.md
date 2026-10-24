@@ -18,6 +18,8 @@ Contour、Bank、Wake Spread 与原有控制都可关键帧编辑。Low 仍是�
 
 已读取暗/浅灰两个序列的全部 22 帧：第 2–5 帧快速展开，峰值的锋刃和深色内面均能辨认；第 7 帧开始分段，第 9–11 帧只留短笔触，后段退净。暗背景能辨认分离的辅助残影；浅背景上它们仍弱，不能承诺所有背景上的细节都清楚。
 
+另实际读取 Eevee、AgX、近白背景、远景的三阶段图。峰值仍能辨认深紫主体、钩形与浅色锋刃；颜色比 Standard 更柔和，辅助残影很弱，衰减短笔触也接近背景。这个结果支持主体轮廓的可读性，不代表所有细节通过。背景线性 RGB 为 0.72/0.76/0.8，远景相机宽度为 14，常规为 9.2；AgX 会把该背景显示为较柔和的灰白。
+
 版本 2 通过明确的资产版本重新构建，其 Cycles 三阶段与修改前保存的实际 PNG 逐像素一致。这证明保留了旧版生成结果；它不是两版等参数的性能比较。
 
 抽帧只检查这些时刻的形状、位置与层次，没有实时观看视频，不能验证实际播放掉帧或未抽取帧的闪烁。角色实战镜头、集成显卡视口帧率和更多镜头仍未验收。
@@ -31,10 +33,11 @@ blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python to
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE --light --sampled
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --light --angled
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --asset-version 2
+blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE --pale --far --view-transform AgX
 ```
 
 输出在 `work/visual-slash/`，包括 PNG、原生 `.blend` 和 `*-settings.json`。记录包含实际帧列表、图片文件名、源文件哈希、相机与引擎；旧图片可能仍在目录中，应按记录选择本次结果。`--frames 2 5 11` 指定抽查帧，`--far` 拉远相机，`--legacy` 保留版本 1 的对照入口。
 
-11 项 Blender 刀光测试通过，覆盖版本 1/2 保留、新版形状控制与重定时、实例独立、参数及完整资产复用、表面控制和几何预算。保存后在不导入插件、关闭自动执行的新进程跳帧：版本 3 的几何与三个阶段低分辨率像素保持一致。另对 Cycles 三阶段高清 PNG 完成同样的原生重开逐通道对比；Eevee 检查随 PR 记录。测试不代替上面的实际看图。
+11 项 Blender 刀光测试通过，覆盖版本 1/2 保留、新版形状控制与重定时、实例独立、参数及完整资产复用、表面控制和几何预算。保存后在不导入插件、关闭自动执行的新进程跳帧：版本 3 的几何与三个阶段低分辨率像素保持一致。另对 Cycles 暗背景及 Eevee 浅灰背景的三阶段高清 PNG 完成原生重开逐通道对比；19 帧所有效果层不再输出几何。实际 examples ZIP 也通过无插件检查。测试不代替上面的实际看图。
 
 版本 2 首轮改进与 v0.21.1 发布验证属于历史结果，详见 [该版本发布页](https://github.com/mumu-lhl/blender-vfx-studio/releases/tag/v0.21.1)。当前候选的 CI、合并与后续问题由 [#91](https://github.com/mumu-lhl/blender-vfx-studio/issues/91) 跟踪。

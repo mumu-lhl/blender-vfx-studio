@@ -15,7 +15,15 @@ from blender_vfx_studio import core, slash  # noqa: E402
 
 
 def setup(
-    *, legacy=False, engine="CYCLES", light=False, asset_version=None, angled=False, far=False
+    *,
+    legacy=False,
+    engine="CYCLES",
+    light=False,
+    asset_version=None,
+    angled=False,
+    far=False,
+    pale=False,
+    view_transform="Standard",
 ):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
@@ -49,13 +57,21 @@ def setup(
             0.24,
             1,
         )
+    if pale:
+        scene.world.node_tree.nodes["Background"].inputs["Color"].default_value = (
+            0.72,
+            0.76,
+            0.8,
+            1,
+        )
     scene.render.engine = engine
     scene.cycles.device, scene.cycles.samples = "CPU", 24
     scene.cycles.use_denoising = False
     scene.eevee.taa_render_samples = 16
     scene.render.resolution_x, scene.render.resolution_y = 960, 540
     scene.render.resolution_percentage = 100
-    scene.view_settings.view_transform = "Standard"
+    scene.view_settings.view_transform = view_transform
+    scene.view_settings.look = "None"
     scene.render.image_settings.file_format = "PNG"
     return root
 
@@ -64,6 +80,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--legacy", action="store_true")
     parser.add_argument("--light", action="store_true")
+    parser.add_argument("--pale", action="store_true", help="Near-white background instead of gray")
+    parser.add_argument("--view-transform", choices=("Standard", "AgX"), default="Standard")
     parser.add_argument("--engine", choices=("CYCLES", "BLENDER_EEVEE"), default="CYCLES")
     parser.add_argument("--asset-version", type=int, choices=(1, 2, 3))
     parser.add_argument("--sampled", action="store_true", help="Render every other frame plus peak")
@@ -94,6 +112,8 @@ def main():
         asset_version=args.asset_version,
         angled=args.angled,
         far=args.far,
+        pale=args.pale,
+        view_transform=args.view_transform,
     )
     folder = ROOT / "work/visual-slash"
     folder.mkdir(parents=True, exist_ok=True)
@@ -102,6 +122,8 @@ def main():
     prefix += f"-v{args.asset_version}" if args.asset_version else ""
     prefix += "-angled" if args.angled else ""
     prefix += "-far" if args.far else ""
+    prefix += "-pale" if args.pale else ""
+    prefix += "-agx" if args.view_transform == "AgX" else ""
     stages = [("appear", 2), ("peak", 5), ("decay", 11)]
     if args.sampled or args.frames:
         frames = sorted(set(range(1, 20, 2)) | {2, 5}) if args.sampled else sorted(set(args.frames))
@@ -120,7 +142,12 @@ def main():
             {
                 "asset_version": root["vfx_asset_version"],
                 "engine": args.engine,
-                "light_background": args.light,
+                "light_background": args.light or args.pale,
+                "background_color": list(
+                    bpy.context.scene.world.node_tree.nodes["Background"]
+                    .inputs["Color"]
+                    .default_value
+                ),
                 "frames": [frame for stage, frame in stages],
                 "images": {str(frame): f"slash-{prefix}-{stage}.png" for stage, frame in stages},
                 "resolution": [960, 540],
