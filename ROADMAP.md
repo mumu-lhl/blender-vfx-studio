@@ -82,3 +82,9 @@ v0.21.0 标签的三平台测试通过，但 Linux 缺少 EGL 动态库，Eevee 
 0.22.1 通过标签流程发布预览包，实际发布与下载包复核进度见 [#74](https://github.com/mumu-lhl/blender-vfx-studio/issues/74)。检查包括安装包与新克隆构建逐字节比较、实际示例 ZIP 无插件验证，以及实际审阅数据包的哈希核对。发布文件以 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases) 为准。
 
 下一阶段继续提高可复用效果库的视觉品质，优先补强亮背景下的高对比表现与充能效果；复杂骨架和跨平台 GUI 扩展继续暂缓。
+
+## 0.22.2 候选：充能末段淡出
+
+[#76](https://github.com/mumu-lhl/blender-vfx-studio/issues/76) 修复新建入门库中 Energy Charge 的双环、球壳在生命末帧仍很亮的问题，并将其私有透明材质改为 Blended，减少软件 Eevee 低采样下的颗粒。时长、发光强度、层数与粒子预算不变，旧完整资产保持原样。
+
+本地四项入门库测试、保存重开及实际旧资产兼容检查通过；Cycles 与 Eevee 的中段、末帧在无插件进程重渲染后逐像素一致。已读取五阶段高清图并对比旧末帧，CI 增加对应附件。当前候选未发布，完整检查以关联 PR 为准；聚能造型与连续节奏仍需继续改进，见 [充能记录](docs/CHARGE_VISUAL_REVIEW.md)。
