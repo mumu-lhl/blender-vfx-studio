@@ -287,9 +287,7 @@ Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使�
 发布附件中的 `blender-vfx-studio-examples-版本.zip` 是独立资产库，不能作为插件安装。解压后，将文件夹添加到 Blender 的 Asset Libraries，再通过 Load VFX with New ID 创建效果。
 目前包含 Energy Charge 蓝色蓄力组合、Impact Burst 橙色冲击爆发、Arc Slash 紫色刀光；全部使用 Low 质量、原生节点和嵌入预览，不需要外部贴图或缓存。
 
-0.22.2 候选为新建 Energy Charge 的双环和球壳补齐生命末段淡出，并改善低采样 Eevee 的透明颗粒；只影响重新构建的入门库，已有资产不重建。尚未发布，范围与实图检查见 [充能记录](docs/CHARGE_VISUAL_REVIEW.md)。
-
-资产保留从第 1 帧开始的播放时间，不自动定位到当前帧；预览中的辉光使用额外的 Screen 效果，载入资产不会改动你的合成链。具体参数、时间和重建方法见 [入门库指南](docs/STARTER_LIBRARY.md)。
+资产保留从第 1 帧开始的播放时间，不自动定位到当前帧。0.22.2 的充能缩略图使用额外 Screen 辉光，当前艺术重设计取消了它；载入均不会改动你的合成链。具体参数、时间和重建方法见 [入门库指南](docs/STARTER_LIBRARY.md)。
 
 ## 从源码构建与验证
 
@@ -312,4 +310,4 @@ blender -b --factory-startup --python-exit-code 1 --python tools/preview.py -- -
 
 代码分工见 [DESIGN.md](DESIGN.md)，参数和时间约定见 [CONTEXT.md](CONTEXT.md)。许可证：**GPL-3.0-or-later**。
 
-已发布的 [0.22.2](https://github.com/mumu-lhl/blender-vfx-studio/releases/tag/v0.22.2) 改进充能汇聚、视觉主次与末段淡出，并附原生衔接检查包。入门库安装和参数编辑见 [使用指南](docs/STARTER_LIBRARY.md)。main 的 0.22.3 尖形微粒候选已通过三平台 CI，尚未发布；下载 0.22.2 不会包含它。
+当前发布的是 [0.22.2](https://github.com/mumu-lhl/blender-vfx-studio/releases/tag/v0.22.2)，附原生衔接检查包。0.22.3 尚未发布；Energy Charge 整体艺术重设计的进度、实图范围与限制见 [充能记录](docs/CHARGE_VISUAL_REVIEW.md) 和 [PR #90](https://github.com/mumu-lhl/blender-vfx-studio/pull/90)。下载的 0.22.2 保留原造型，不会自动换成新候选；安装和参数编辑见 [使用指南](docs/STARTER_LIBRARY.md)。

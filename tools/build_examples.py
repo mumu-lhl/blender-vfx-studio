@@ -13,11 +13,11 @@ from mathutils import Vector
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from blender_vfx_studio import assets, composition, core  # noqa: E402
-from blender_vfx_studio.nodes import PROGRESS, TIME_PROPS, drive, node  # noqa: E402
+from blender_vfx_studio.nodes import drive, node  # noqa: E402
 
 EXAMPLES = ("energy-charge", "impact-burst", "arc-slash")
 PREVIEWS = {
-    "energy-charge": (22, (4, -6, 3.5), (0, 0, 0.1), 4.8),
+    "energy-charge": (31, (4, -6, 3.5), (0, 0, 0.1), 4.8),
     "impact-burst": (5, (3, -5, 6), (0, 0, 0), 5.0),
     "arc-slash": (5, (0, 0, 8), (0, 0, 0), 5.4),
 }
@@ -99,102 +99,72 @@ def create_effect(key):
     context = bpy.context
     context.scene.frame_set(1)
     if key == "energy-charge":
+        from tools.charge_design import core_shape, ribbons, spiral_motes
+
         color = (0.03, 0.45, 1.0)
         outer = configure(
             core.create(context, "ENERGY_RING", "LOW"),
             color,
-            radius=0.9,
-            width=0.02,
-            duration=48.0,
+            radius=1.65,
+            width=0.15,
             strength=0.9,
-            dissolve=0.12,
+            duration=48.0,
+            dissolve=0.08,
+            noise_scale=7.0,
             fade=1.0,
         )
-        outer.name = "Charge • Orbit"
-        outer.rotation_euler = (1.1, 0.35, 0.25)
-        drive(outer, "rotation_euler", outer, f"0.25+({PROGRESS})*6.283185", TIME_PROPS, 2)
+        outer.name = "Charge • Converging Vortex"
         inner = configure(
             core.create(context, "ENERGY_RING", "LOW"),
             color,
-            radius=1.35,
-            width=0.025,
+            radius=1.55,
+            width=0.14,
+            strength=0.45,
             duration=48.0,
-            strength=0.6,
             dissolve=0.08,
+            noise_scale=7.0,
             fade=1.0,
         )
+        inner.name = "Charge • Ground Intake"
         inner.location.z = -0.8
         shield = configure(
             core.create_shield(context, "LOW"),
             color,
-            radius=0.65,
-            opacity=0.95,
-            strength=1.6,
-            ior=1.3,
-            rim_power=0.05,
-            dissolve=0.1,
-            flow=2.4,
+            radius=0.75,
+            opacity=1.0,
+            strength=1.2,
             duration=48.0,
+            dissolve=0.08,
+            noise_scale=4.5,
             fade=1.0,
         )
-        # A dark center and cyan edge preserve a focal shape on pale backgrounds.
-        tree = shield.children[0].data.materials[0].node_tree
-        tint = node(tree, "ShaderNodeRGB", "Editable Charge Color", -750, -600)
-        for index in range(3):
-            drive(tint.outputs[0], "default_value", shield, "p", {"p": f"color_{index}"}, index)
-        dark = node(tree, "ShaderNodeVectorMath", "Dark Charge Body", -500, -600, operation="SCALE")
-        tree.links.new(tint.outputs[0], dark.inputs[0])
-        dark.inputs["Scale"].default_value = 0.05
-        gradient = node(tree, "ShaderNodeMixRGB", "Body To Cyan Rim", -250, -600)
-        tree.links.new(tree.nodes["Fresnel Edge"].outputs[0], gradient.inputs[0])
-        tree.links.new(dark.outputs[0], gradient.inputs[1])
-        tree.links.new(tint.outputs[0], gradient.inputs[2])
-        tree.links.new(gradient.outputs[0], tree.nodes["Shield Emission"].inputs["Color"])
-        buildup = node(tree, "ShaderNodeValue", "Charge Build Up", -500, -850)
-        drive(
-            buildup.outputs[0],
-            "default_value",
-            shield,
-            f"min(max(({PROGRESS})/0.3,0),1)",
-            TIME_PROPS,
-        )
-        visible = node(tree, "ShaderNodeMath", "Gathering Opacity", 0, -600, operation="MULTIPLY")
-        tree.links.new(tree.nodes["Final Opacity"].outputs[0], visible.inputs[0])
-        tree.links.new(buildup.outputs[0], visible.inputs[1])
-        tree.links.new(visible.outputs[0], tree.nodes["Shield Surface"].inputs[0])
-        # Private starter materials: avoid noisy hashed transparency at low Eevee samples.
-        for member in (outer, inner, shield):
-            member.children[0].data.materials[0].surface_render_method = "BLENDED"
+        shield.name = "Charge • Compressed Core"
         particles = configure(
             core.create_emitter(context),
             color,
-            rate=18.0,
+            rate=14.0,
             lifetime=0.8,
             emission_seconds=1.2,
             duration=48.0,
-            velocity=1.5,
+            velocity=2.6,
             gravity=0.0,
             spread=1.0,
             randomness=0.0,
-            spawn_radius=1.4,
-            size=0.035,
-            strength=3.0,
+            spawn_radius=1.7,
+            size=0.055,
+            strength=2.0,
             seed=9,
         )
-        particles.name = "Charge • Inward Motes"
-        # Edit only this asset's private native graph. Generic emitters still move outward.
-        tree = particles.children[0].modifiers[0].node_group
-        distance = tree.nodes["Radial Distance"]
-        distance.name = distance.label = "Remaining Gathering Radius"
-        distance.operation = "SUBTRACT"
-        tree.links.new(tree.nodes["Spawn Radius"].outputs[0], distance.inputs[0])
-        tree.links.new(tree.nodes["Travel"].outputs[0], distance.inputs[1])
-        stop = node(tree, "ShaderNodeMath", "Stop At Center", 300, -450, operation="MAXIMUM")
-        stop.inputs[1].default_value = 0
-        tree.links.new(distance.outputs[0], stop.inputs[0])
-        tree.links.new(stop.outputs[0], tree.nodes["Radial Motion"].inputs["Scale"])
+        particles.name = "Charge • Spiral Motes"
         _shape_charge_motes(particles)
-        particles.location.z = 0.0
+        core_shape(shield)
+        ribbons(outer)
+        ribbons(inner, ground=True)
+        spiral_motes(particles)
+        for member in (outer, inner, shield):
+            member.children[0].data.materials[0].surface_render_method = "BLENDED"
+        # Depth-correct cutouts keep the inner nucleus behind the outer shell in Eevee.
+        shield.children[0].data.materials[0].surface_render_method = "DITHERED"
         root = composition.create(context, [outer, inner, shield, particles])
         root.name = "Energy Charge"
     elif key == "impact-burst":
@@ -232,10 +202,6 @@ def preview_scene(key):
     scene.view_settings.view_transform = "Standard"
     scene.render.resolution_x = scene.render.resolution_y = 256
     scene.render.resolution_percentage = 100
-    if key == "energy-charge":
-        glow = core.create_screen(bpy.context)
-        glow["strength"], glow["fade"] = 0.25, 0.0
-        glow.update_tag()
     scene.frame_set(frame)
 
 

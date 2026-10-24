@@ -1,4 +1,4 @@
-"""Check the actual saved charge scene's peak and tail without importing the add-on."""
+"""Check the actual saved charge scene's opening, peak and tail without importing the add-on."""
 
 import sys
 from array import array
@@ -16,7 +16,7 @@ assert not any(
     for obj in scene.objects
     if obj.get("vfx_role") == "layer"
 )
-for frame in (22, 48):
+for frame in (4, 7, 22, 37, 42, 48):
     scene.frame_set(frame)
     scene.render.filepath = str(folder / f"native-check-{frame}.png")
     bpy.ops.render.render(write_still=True)
@@ -26,4 +26,4 @@ for frame in (22, 48):
     assert array("f", expected.pixels[:]).tobytes() == array("f", actual.pixels[:]).tobytes()
     bpy.data.images.remove(expected)
     bpy.data.images.remove(actual)
-print("CHARGE_PEAK_AND_TAIL_NATIVE_ALL_CHANNELS_IDENTICAL")
+print("CHARGE_OPENING_PEAK_AND_TAIL_NATIVE_ALL_CHANNELS_IDENTICAL")
