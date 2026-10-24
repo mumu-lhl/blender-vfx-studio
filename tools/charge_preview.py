@@ -32,6 +32,10 @@ def main():
     if not bpy.app.background or "--factory-startup" not in sys.argv or bpy.data.filepath:
         raise RuntimeError("Use a fresh background process with --factory-startup and no project")
     bpy.ops.wm.read_factory_settings(use_empty=True)
+    sources = ("tools/build_examples.py", "tools/charge_design.py", "tools/charge_preview.py")
+    source_hashes = {
+        name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in sources
+    }
     root = (
         assets.load(bpy.context, args.baseline_asset)
         if args.baseline_asset
@@ -89,6 +93,10 @@ def main():
         bpy.ops.render.render(write_still=True)
     scene.frame_set(31)
     bpy.ops.wm.save_as_mainfile(filepath=str(folder / "charge.blend"))
+    if source_hashes != {
+        name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in sources
+    }:
+        raise RuntimeError("Source changed during rendering; rerender a frozen revision")
     record.write_text(
         json.dumps(
             {
@@ -98,10 +106,7 @@ def main():
                 "fps": scene.render.fps,
                 "rendered_frames": sorted(frames),
                 "saved_frame": 31,
-                "builder_sha256": {
-                    name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
-                    for name in ("tools/build_examples.py", "tools/charge_design.py")
-                },
+                "source_sha256": source_hashes,
                 "baseline_sha256": hashlib.sha256(args.baseline_asset.read_bytes()).hexdigest()
                 if args.baseline_asset
                 else None,
