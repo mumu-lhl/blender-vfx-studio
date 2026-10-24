@@ -15,7 +15,7 @@ blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python to
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --light
 ```
 
-Linux 无 GPU 时可加 `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless`。结果在 `work/visual-charge/`，含五帧 PNG 和原生场景；CI 附件名为 `energy-charge-visual-review`。末段淡出修复已在 PR #77 合并并通过三平台 CI；0.22.2 尚未发布。
+Linux 无 GPU 时可加 `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless`。结果在 `work/visual-charge/`，含五帧 PNG 和原生场景；CI 附件名为 `energy-charge-visual-review`。末段淡出修复已在 PR #77 合并并通过三平台 CI；0.22.2 已发布并完成实际下载包复核，见 [发布记录](https://github.com/mumu-lhl/blender-vfx-studio/issues/81)。
 
 随后 #79 改进新建入门资产的视觉主次。旧版外散圆粒改为从半径 1.4 处向中心移动；Spawn Radius 控制起点、Velocity 控制汇聚速度，剩余距离最低为 0，因此调高速度不会穿过中心再向外散出。出生时间、独立寿命、随机种子和槽位复用仍使用原来的原生 Emitter。默认发射率与存活槽数没有增加，重算任意帧不依赖之前的状态。
 
@@ -35,4 +35,4 @@ Linux 无 GPU 时可加 `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless`。结
 
 实际查看了 Cycles 暗背景的第 4、22、42、48 帧，软件 Eevee 暗背景的第 4、22、42、48、49 帧，以及 Eevee 亮背景的第 4、22、42、48 帧，并对比保留的圆粒峰值。尖形轮廓比圆点更能显示指向中心的方向，未盖过球壳焦点；末段缩小，亮背景的细小尾粒仍弱。静帧不证明连续运动或释放衔接已重新验收，后续仍需复用衔接场景检查。
 
-六项入门库测试覆盖单个微粒的径向长宽比、每粒几何少于原 LOW 圆粒、Size 缩放、汇聚停止、跳帧与淡出，完整示例 ZIP 也通过无插件重开。Cycles、Eevee 暗/亮背景的第 22、48 帧已在无插件新进程重渲染，所有像素通道一致。0.22.3 尚未发布，三平台完整结果以关联 PR 为准。
+六项入门库测试覆盖单个微粒的径向长宽比、每粒几何少于原 LOW 圆粒、Size 缩放、汇聚停止、跳帧与淡出，完整示例 ZIP 也通过无插件重开。Cycles、Eevee 暗/亮背景的第 22、48 帧已在无插件新进程重渲染，所有像素通道一致。PR #86 已合并，三平台 CI 全部通过。实际下载的 0.22.2 旧示例载入、复制、保存重开后仍保留圆粒；尖形候选也已复用衔接镜头读取 Cycles 第 13、29、31、33、37、60 帧，31/33 帧无插件像素对比一致。0.22.3 尚未发布，有限静帧检查仍不能代替实时播放。

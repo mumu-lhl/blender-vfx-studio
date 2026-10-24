@@ -24,7 +24,7 @@
 
 ## 当前验证基线
 
-v0.22.1 已通过 Linux、Windows、macOS 的 156 项测试、15 个无插件重开进程、安装/卸载和 Ruff，并已发布。下载 ZIP 的 SHA256 校验通过；扩展 ZIP 与对应标签的全新克隆构建逐字节一致，实际发布的 examples ZIP 也通过无插件进程验证。
+v0.22.2 已通过 Linux、Windows、macOS 的后台测试、无插件重开、安装/卸载和 Ruff，并已发布。实际下载的三个 ZIP 均通过 SHA256；扩展与标签新克隆构建逐字节一致，实际 examples ZIP 通过无插件检查，衔接检查包与实际已读图及记录一致。
 
 重开进程关闭脚本自动执行，检查驱动、节点、路径和烘焙姿态能独立播放。Cloth 和骨骼末端轨迹还会删除源后验证回放。
 窗口检查、后台功能检查和渲染像素检查各有范围，不能互相替代。
@@ -87,20 +87,20 @@ v0.21.0 标签的三平台测试通过，但 Linux 缺少 EGL 动态库，Eevee 
 
 [#76](https://github.com/mumu-lhl/blender-vfx-studio/issues/76) 修复新建入门库中 Energy Charge 的双环、球壳在生命末帧仍很亮的问题，并将其私有透明材质改为 Blended，减少软件 Eevee 低采样下的颗粒。时长、发光强度、层数与粒子预算不变，旧完整资产保持原样。
 
-本地四项入门库测试、保存重开及实际旧资产兼容检查通过；Cycles 与 Eevee 的中段、末帧在无插件进程重渲染后逐像素一致。已读取五阶段高清图并对比旧末帧，CI 增加对应附件。[PR #77](https://github.com/mumu-lhl/blender-vfx-studio/pull/77) 已合并，三平台 CI 全部通过，实际候选示例 ZIP 也通过无插件检查。0.22.2 尚未发布，后续聚能造型改进见 [充能记录](docs/CHARGE_VISUAL_REVIEW.md)。
+本地四项入门库测试、保存重开及实际旧资产兼容检查通过；Cycles 与 Eevee 的中段、末帧在无插件进程重渲染后逐像素一致。已读取五阶段高清图并对比旧末帧，CI 增加对应附件。[PR #77](https://github.com/mumu-lhl/blender-vfx-studio/pull/77) 已合并，三平台 CI 全部通过，实际候选示例 ZIP 也通过无插件检查。0.22.2 已发布并完成下载复核（[#81](https://github.com/mumu-lhl/blender-vfx-studio/issues/81)），后续聚能造型改进见 [充能记录](docs/CHARGE_VISUAL_REVIEW.md)。
 
 ## 充能的汇聚方向与视觉主次
 
 [#79](https://github.com/mumu-lhl/blender-vfx-studio/issues/79) 改进实际入门资产：将外散粒子改为从外围向中心汇聚，并在中心停止；一个地面环改为原生驱动的倾斜轨道，另一个保留为低亮地面辅助层。球壳用深色主体到青色边缘的渐变，在前段逐渐显现，使浅背景也能看清主体。四层结构、LOW 质量、48 帧时长和粒子槽位预算保持不变，普通 Emitter 与旧完整资产不重建。
 
-检查包含九个高清时刻、汇聚距离和任意帧重算；这不是实时播放或角色蓄力动作的完整验收。具体证据与不足见 [充能记录](docs/CHARGE_VISUAL_REVIEW.md)。
+检查包含九个高清时刻、汇聚距离和任意帧重算；这不是实时播放或角色蓄力动作的完整验收。[PR #80](https://github.com/mumu-lhl/blender-vfx-studio/pull/80) 已合并并通过三平台完整 CI，改进已随 0.22.2 发布。具体证据与不足见 [充能记录](docs/CHARGE_VISUAL_REVIEW.md)。
 
 ## 充能到命中的衔接
 
-[#82](https://github.com/mumu-lhl/blender-vfx-studio/issues/82) 复用真实效果与原战斗靶体，先充能，再挥斩和命中。实际读取 Cycles 暗背景 17 帧及 Eevee 亮背景释放阶段 6 帧，未见抽查帧中的焦点冲突或明显空档；两条件保存后的第 31、33 帧无插件重渲染逐像素一致，60 帧无 VFX 网格残留。该工具没有修改真实生成器，也未实时观看完整动画；范围和重建命令见 [衔接记录](docs/CHARGE_HANDOFF_REVIEW.md)。
+[#82](https://github.com/mumu-lhl/blender-vfx-studio/issues/82) 复用真实效果与原战斗靶体，先充能，再挥斩和命中。实际读取 Cycles 暗背景 17 帧及 Eevee 亮背景释放阶段 6 帧，未见抽查帧中的焦点冲突或明显空档；两条件保存后的第 31、33 帧无插件重渲染逐像素一致，60 帧无 VFX 网格残留。[PR #84](https://github.com/mumu-lhl/blender-vfx-studio/pull/84) 已合并，实际检查包随 0.22.2 发布。该工具没有修改真实生成器，也未实时观看完整动画；范围和重建命令见 [衔接记录](docs/CHARGE_HANDOFF_REVIEW.md)。
 
 ## 0.22.3 候选：尖形充能微粒
 
 [#85](https://github.com/mumu-lhl/blender-vfx-studio/issues/85) 改进实际新建充能资产的私有节点：以低面数尖形替代圆点，沿汇聚方向排列，暗尾向青色前端渐变。层数、发射率、生命周期与发光强度不增加，每粒几何减少；旧完整资产和普通 Emitter 保持原样。Size 仍可调整，完整效果保存这些节点，单层参数预设不保存节点编排。
 
-本地六项入门库测试、实际示例 ZIP 无插件重开与三种渲染条件的原生像素对比通过；已读取出现、中段和末段高清图。0.22.3 未发布，完整 CI 与兼容复核仍由关联 PR 跟踪，具体观察和限制见 [充能记录](docs/CHARGE_VISUAL_REVIEW.md)。
+本地六项入门库测试、实际示例 ZIP 无插件重开与三种渲染条件的原生像素对比通过；已读取出现、中段和末段高清图。[PR #86](https://github.com/mumu-lhl/blender-vfx-studio/pull/86) 已合并，三平台 CI 全部通过；实际下载的 0.22.2 旧资产及其副本在无插件重开后仍保留圆粒。0.22.3 尚未发布，具体观察和限制见 [充能记录](docs/CHARGE_VISUAL_REVIEW.md)。
