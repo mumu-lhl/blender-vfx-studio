@@ -7,6 +7,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: blender-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   blender:
     name: Blender · ${{ matrix.os }}
@@ -15,7 +18,8 @@ jobs:
       matrix:
         os: [ubuntu-24.04, windows-2025, macos-15]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    # Software Eevee previews plus native opening-frame checks need render time.
+    timeout-minutes: 40
     defaults:
       run:
         shell: bash
@@ -140,11 +144,10 @@ jobs:
           LIBGL_ALWAYS_SOFTWARE: '1'
           EGL_PLATFORM: surfaceless
         run: |
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --legacy
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --engine BLENDER_EEVEE
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --light
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --engine BLENDER_EEVEE --light
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --engine BLENDER_EEVEE --light --sampled
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-charge/cycles/charge.blend --python tests/charge_reopen.py
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-charge/blender_eevee/charge.blend --python tests/charge_reopen.py
       - uses: actions/upload-artifact@v7.0.2
@@ -154,6 +157,7 @@ jobs:
           path: |
             work/visual-charge/*/charge-*.png
             work/visual-charge/*/charge.blend
+            work/visual-charge/*/render-settings.json
       - name: Build combat playback evidence (960x540, CPU, no bloom)
         if: runner.os == 'Linux'
         env:
@@ -190,7 +194,7 @@ jobs:
             work/visual-combat/*/video-frames/*.png
             work/visual-combat/*/video-frames/frames.json
       - name: Build and validate starter assets (CPU only)
-        if: github.ref_type == 'tag' && runner.os == 'Linux'
+        if: runner.os == 'Linux'
         run: |
           blender -b --factory-startup --python-exit-code 1 --python tools/build_examples.py
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tests/starter_package_reopen.py
