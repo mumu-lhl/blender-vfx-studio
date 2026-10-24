@@ -93,6 +93,35 @@ class StarterTests(unittest.TestCase):
         motes.update_tag()
         self.assertAlmostEqual(particles(motes, 7)[0][1], before * 2, places=5)
 
+    def test_charge_rings_reveal_from_transparency_and_follow_group_speed(self):
+        charge = create_effect("energy-charge")
+        camera()
+        bpy.context.scene.render.dither_intensity = 0
+        for member in composition.members(charge):
+            if member["vfx_module"] != "mesh.ring":
+                member.children[0].hide_render = True
+
+        def energy(pixels):
+            return sum(sum(pixels[i : i + 3]) for i in range(0, len(pixels), 4))
+
+        born = energy(render_pixels(1))
+        early = energy(render_pixels(4))
+        opened = energy(render_pixels(16))
+        self.assertLess(born, 1e-5)
+        self.assertGreater(early, 0.01)
+        self.assertLess(early, opened * 0.6)
+        reference = render_pixels(7)
+        self.assertEqual(render_pixels(7), reference)
+        charge["speed"] = 2.0
+        charge.update_tag()
+        self.assertEqual(render_pixels(4), reference)
+        for obj in list(bpy.context.scene.objects):
+            if obj.get("vfx_role") == "layer":
+                obj.hide_render = True
+        bpy.context.scene.frame_set(1)
+        core.create(bpy.context, "ENERGY_RING", "LOW")
+        self.assertGreater(energy(render_pixels(1)), 1)
+
     def test_charge_fades_before_its_native_lifetime_cutoff(self):
         root = create_effect("energy-charge")
         camera()

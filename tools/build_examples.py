@@ -93,6 +93,45 @@ def _shape_charge_motes(particles):
     material.links.new(gradient.outputs[0], material.nodes["Particle Emission"].inputs["Color"])
 
 
+def _reveal_charge_ring(root, attack):
+    """Draw two opposing arcs in this asset's private material, then close the ring."""
+    tree = root.children[0].data.materials[0].node_tree
+    link = tree.links.new
+    progress = node(tree, "ShaderNodeValue", "Charge Progress", -1400, 1000)
+    drive(progress.outputs[0], "default_value", root, PROGRESS, TIME_PROPS)
+    duration = node(tree, "ShaderNodeValue", "Draw Duration", -1400, 800)
+    duration.outputs[0].default_value = attack
+    coverage = node(tree, "ShaderNodeMapRange", "Smooth Arc Reveal", -1150, 1000)
+    coverage.interpolation_type = "SMOOTHSTEP"
+    coverage.clamp = True
+    link(progress.outputs[0], coverage.inputs["Value"])
+    link(duration.outputs[0], coverage.inputs["From Max"])
+    sectors = node(tree, "ShaderNodeMath", "Opposing Arc Starts", -1150, 650, operation="MULTIPLY")
+    link(tree.nodes["Across Width"].outputs["X"], sectors.inputs[0])
+    sectors.inputs[1].default_value = 2
+    phase = node(tree, "ShaderNodeMath", "Arc Phase", -900, 650, operation="FRACT")
+    link(sectors.outputs[0], phase.inputs[0])
+    phase_range = node(tree, "ShaderNodeMath", "Closing Margin", -700, 650, operation="MULTIPLY")
+    phase_range.inputs[1].default_value = 0.96
+    link(phase.outputs[0], phase_range.inputs[0])
+    distance = node(
+        tree, "ShaderNodeMath", "Distance Behind Leading Edge", -650, 1000, operation="SUBTRACT"
+    )
+    link(coverage.outputs[0], distance.inputs[0])
+    link(phase_range.outputs[0], distance.inputs[1])
+    edge = node(tree, "ShaderNodeMapRange", "Soft Leading Edge", -400, 1000)
+    edge.clamp = True
+    edge.inputs["From Max"].default_value = 0.04
+    link(distance.outputs[0], edge.inputs["Value"])
+    buildup = node(tree, "ShaderNodeMath", "Stroke Build Up", -150, 1000, operation="MULTIPLY")
+    link(edge.outputs[0], buildup.inputs[0])
+    link(coverage.outputs[0], buildup.inputs[1])
+    alpha = node(tree, "ShaderNodeMath", "Revealed Ring Opacity", 150, 1000, operation="MULTIPLY")
+    link(tree.nodes["Opacity"].outputs[0], alpha.inputs[0])
+    link(buildup.outputs[0], alpha.inputs[1])
+    link(alpha.outputs[0], tree.nodes["Soft Dissolve Surface"].inputs[0])
+
+
 def create_effect(key):
     if key not in EXAMPLES:
         raise ValueError("Unknown starter effect")
@@ -162,6 +201,8 @@ def create_effect(key):
         tree.links.new(tree.nodes["Final Opacity"].outputs[0], visible.inputs[0])
         tree.links.new(buildup.outputs[0], visible.inputs[1])
         tree.links.new(visible.outputs[0], tree.nodes["Shield Surface"].inputs[0])
+        _reveal_charge_ring(inner, 0.22)
+        _reveal_charge_ring(outer, 0.30)
         # Private starter materials: avoid noisy hashed transparency at low Eevee samples.
         for member in (outer, inner, shield):
             member.children[0].data.materials[0].surface_render_method = "BLENDED"
