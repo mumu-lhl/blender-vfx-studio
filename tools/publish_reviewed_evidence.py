@@ -87,3 +87,57 @@ subprocess.run(
     ["gh", "release", "upload", manifest["tag"], str(checksums), "--clobber"], check=True
 )
 print("EXACT_REVIEW_ARCHIVE_AND_CHECKSUM_PUBLISHED", manifest["sha256"])
+subprocess.run(
+    ["gh", "release", "edit", manifest["tag"], "--notes-file", "review-release-notes.md"],
+    check=True,
+)
+
+# Clean up only this delivery PR and its redundant product-check runs.
+branch = "ops/publish-review-0221"
+pr = json.loads(subprocess.check_output(["gh", "api", f"repos/{repository}/pulls/78"], text=True))
+assert pr["head"]["ref"] == branch and pr["head"]["sha"] == os.environ["GITHUB_SHA"]
+runs = json.loads(
+    subprocess.check_output(
+        [
+            "gh",
+            "api",
+            f"repos/{repository}/actions/runs?branch=ops%2Fpublish-review-0221&per_page=20",
+        ],
+        text=True,
+    )
+)["workflow_runs"]
+for run in runs:
+    if (
+        run["name"] == "Blender extension"
+        and run["event"] == "pull_request"
+        and run["status"] != "completed"
+    ):
+        subprocess.run(
+            [
+                "gh",
+                "api",
+                "--silent",
+                "--method",
+                "POST",
+                f"repos/{repository}/actions/runs/{run['id']}/cancel",
+            ],
+            check=True,
+        )
+subprocess.run(
+    [
+        "gh",
+        "api",
+        "--silent",
+        "--method",
+        "PATCH",
+        f"repos/{repository}/pulls/78",
+        "-f",
+        "state=closed",
+    ],
+    check=True,
+)
+subprocess.run(
+    ["gh", "api", "--silent", "--method", "DELETE", f"repos/{repository}/git/refs/heads/{branch}"],
+    check=True,
+)
+print("RELEASE_NOTES_AND_DELIVERY_BRANCH_CLEANUP_DONE")

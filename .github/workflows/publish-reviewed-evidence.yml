@@ -4,6 +4,8 @@ on:
     branches: [ops/publish-review-0221]
 permissions:
   contents: write
+  actions: write
+  pull-requests: write
 jobs:
   upload:
     runs-on: ubuntu-24.04
