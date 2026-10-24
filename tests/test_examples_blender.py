@@ -9,7 +9,7 @@ import bpy
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests"))
-from emitter_test_support import particles
+from emitter_test_support import mesh, particles
 from particle_test_support import camera, render_pixels
 
 import blender_vfx_studio as addon
@@ -68,6 +68,30 @@ class StarterTests(unittest.TestCase):
         ordinary.update_tag()
         bpy.context.view_layer.update()
         self.assertGreater(particles(ordinary, 7)[0][0].length, particles(ordinary, 1)[0][0].length)
+
+    def test_charge_motes_are_radially_pointed_with_less_geometry_than_round_motes(self):
+        charge = create_effect("energy-charge")
+        motes = next(
+            r for r in composition.members(charge) if r["vfx_module"] == "particle.emitter"
+        )
+        for key, value in dict(rate=0.1, lifetime=1.0, emission_seconds=3.0).items():
+            motes[key] = value
+        motes.update_tag()
+        for frame in (1, 7, 1):
+            centers = particles(motes, frame)
+            self.assertEqual(len(centers), 1)
+            center = centers[0][0]
+            vertices = mesh(motes, frame).vertices
+            self.assertLess(len(vertices), 12)  # LOW round motes use twelve vertices.
+            radial = center.normalized()
+            offsets = [v.co - center for v in vertices]
+            length = max(abs(v.dot(radial)) for v in offsets)
+            width = max((v - radial * v.dot(radial)).length for v in offsets)
+            self.assertGreater(length, width * 5)
+        before = particles(motes, 7)[0][1]
+        motes["size"] *= 2
+        motes.update_tag()
+        self.assertAlmostEqual(particles(motes, 7)[0][1], before * 2, places=5)
 
     def test_charge_fades_before_its_native_lifetime_cutoff(self):
         root = create_effect("energy-charge")

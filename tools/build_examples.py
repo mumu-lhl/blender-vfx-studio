@@ -32,6 +32,67 @@ def configure(root, color, **values):
     return root
 
 
+def _shape_charge_motes(particles):
+    """Author only this complete asset's private native shape and tip gradient."""
+    tree = particles.children[0].modifiers[0].node_group
+    # Low-poly pointed motes replace the LOW icospheres without adding particles.
+    shard = node(tree, "GeometryNodeMeshUVSphere", "Charge Mote Shape", 500, 1700)
+    shard.inputs["Segments"].default_value = 4
+    shard.inputs["Rings"].default_value = 3
+    shard.inputs["Radius"].default_value = 1
+    position = node(tree, "GeometryNodeInputPosition", "Mote Local Position", 0, 2100)
+    axes = node(tree, "ShaderNodeSeparateXYZ", "Mote Tip Axis", 200, 2100)
+    tree.links.new(position.outputs[0], axes.inputs[0])
+    heat = node(tree, "ShaderNodeMath", "Tail To Leading Tip", 400, 2100, operation="MULTIPLY_ADD")
+    tree.links.new(axes.outputs["Z"], heat.inputs[0])
+    heat.inputs[1].default_value, heat.inputs[2].default_value = 0.5, 0.5
+    store = node(
+        tree,
+        "GeometryNodeStoreNamedAttribute",
+        "Charge Tip Gradient",
+        700,
+        1700,
+        data_type="FLOAT",
+        domain="POINT",
+    )
+    store.inputs["Name"].default_value = "vfx_charge_tip"
+    tree.links.new(shard.outputs["Mesh"], store.inputs["Geometry"])
+    tree.links.new(heat.outputs[0], store.inputs["Value"])
+    tree.links.new(store.outputs["Geometry"], tree.nodes["Particle Material"].inputs["Geometry"])
+    shape = node(tree, "ShaderNodeVectorMath", "Mote Proportions", 700, 1300, operation="SCALE")
+    shape.inputs[0].default_value = (0.4, 0.4, 2.6)
+    tree.links.new(tree.nodes["Particle Scale"].outputs[0], shape.inputs["Scale"])
+    tree.links.new(shape.outputs[0], tree.nodes["Particle Instances"].inputs["Scale"])
+    inward = node(
+        tree, "ShaderNodeVectorMath", "Leading Tip Toward Center", 700, 1000, operation="SCALE"
+    )
+    inward.inputs["Scale"].default_value = -1
+    tree.links.new(tree.nodes["Direction"].outputs[0], inward.inputs[0])
+    align = node(tree, "FunctionNodeAlignEulerToVector", "Aim Mote Inward", 950, 1000, axis="Z")
+    tree.links.new(inward.outputs[0], align.inputs["Vector"])
+    tree.links.new(align.outputs["Rotation"], tree.nodes["Particle Instances"].inputs["Rotation"])
+    material = particles.children[0].data.materials[0].node_tree
+    tip = node(
+        material,
+        "ShaderNodeAttribute",
+        "Charge Leading Tip",
+        -1000,
+        400,
+        attribute_name="vfx_charge_tip",
+    )
+    color = node(material, "ShaderNodeCombineXYZ", "Editable Mote Color", -1000, 0)
+    for index in range(3):
+        drive(color.inputs[index], "default_value", particles, "p", {"p": f"color_{index}"})
+    dark = node(material, "ShaderNodeVectorMath", "Mote Dark Tail", -750, -200, operation="SCALE")
+    dark.inputs["Scale"].default_value = 0.2
+    material.links.new(color.outputs[0], dark.inputs[0])
+    gradient = node(material, "ShaderNodeMixRGB", "Tail To Cyan Tip", -500, 200)
+    material.links.new(tip.outputs["Fac"], gradient.inputs[0])
+    material.links.new(dark.outputs[0], gradient.inputs[1])
+    material.links.new(color.outputs[0], gradient.inputs[2])
+    material.links.new(gradient.outputs[0], material.nodes["Particle Emission"].inputs["Color"])
+
+
 def create_effect(key):
     if key not in EXAMPLES:
         raise ValueError("Unknown starter effect")
@@ -132,6 +193,7 @@ def create_effect(key):
         stop.inputs[1].default_value = 0
         tree.links.new(distance.outputs[0], stop.inputs[0])
         tree.links.new(stop.outputs[0], tree.nodes["Radial Motion"].inputs["Scale"])
+        _shape_charge_motes(particles)
         particles.location.z = 0.0
         root = composition.create(context, [outer, inner, shield, particles])
         root.name = "Energy Charge"

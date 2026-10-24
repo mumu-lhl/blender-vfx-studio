@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "blender_vfx_studio"
-version = "0.22.2"
+version = "0.22.3"
 name = "Blender VFX Studio"
 tagline = "Create editable VFX with native nodes, animation and cloth"
 maintainer = "Blender VFX Studio contributors"
