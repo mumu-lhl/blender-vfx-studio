@@ -499,7 +499,28 @@ def core_shape(root):
     )
     g.link(displacement, deform.inputs["Offset"])
 
-    _finish(g, deform.outputs[0])
+    # Invisible nested shells can exhaust Cycles' default transparent bounce budget.
+    # Remove their evaluated geometry once hidden or collapsed; keep the editable mesh.
+    transparent = g.m(
+        "Core Opacity Off", "LESS_THAN", g.value("Visibility Opacity", prop="opacity"), 1e-6
+    )
+    dissolved = g.m(
+        "Core Fully Dissolved",
+        "GREATER_THAN",
+        g.value("Visibility Dissolve", prop="dissolve"),
+        0.999999,
+    )
+    finished = g.m("Core Collapse Complete", "LESS_THAN", remaining, 0.35)
+    invisible = g.m(
+        "Core Has Finished Or Is Hidden",
+        "MAXIMUM",
+        finished,
+        g.m("Core Hidden By Parameters", "MAXIMUM", transparent, dissolved),
+    )
+    hide = g.n("GeometryNodeDeleteGeometry", "Skip Invisible Core Surfaces", domain="POINT")
+    g.link(deform.outputs[0], hide.inputs["Geometry"])
+    g.link(invisible, hide.inputs["Selection"])
+    _finish(g, hide.outputs[0])
     _surface(root, core=True)
     root["vfx_parameter_keys"] = "radius,expansion,opacity,strength,dissolve,noise_scale,fade"
 

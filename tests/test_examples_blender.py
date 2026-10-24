@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 
 import bpy
+from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -188,6 +189,41 @@ class StarterTests(unittest.TestCase):
         core_member["fade"] = 0
         core_member.update_tag()
         self.assertGreater(coverage(), eroded)
+
+    def test_hidden_charge_core_reveals_a_light_background(self):
+        root = create_effect("energy-charge")
+        camera()
+        scene = bpy.context.scene
+        scene.render.dither_intensity = 0
+        background = scene.world.node_tree.nodes["Background"]
+        background.inputs["Strength"].default_value = 1
+        background.inputs["Color"].default_value = (0.55, 0.60, 0.68, 1)
+        scene.cycles.transparent_max_bounces = 8
+        scene.render.resolution_x = scene.render.resolution_y = 96
+        view = scene.camera
+        view.location = (4, -6, 3.5)
+        view.rotation_euler = (
+            (Vector((0, 0, 0.1)) - view.location).to_track_quat("-Z", "Y").to_euler()
+        )
+        members = composition.members(root)
+        core_member = next(r for r in members if r["vfx_module"] == "shader.shield")
+        core_member.children[0].hide_render = True
+        empty = render_pixels(31)
+        core_member.children[0].hide_render = False
+        for key, value in (("opacity", 0), ("dissolve", 1)):
+            old = core_member[key]
+            core_member[key] = value
+            core_member.update_tag()
+            actual = render_pixels(31)
+            self.assertLess(max(abs(a - b) for a, b in zip(actual, empty)), 1e-6, key)
+            core_member[key] = old
+            core_member.update_tag()
+        view.data.ortho_scale = 1.2
+        core_member.children[0].hide_render = True
+        empty = render_pixels(46)
+        core_member.children[0].hide_render = False
+        tail = render_pixels(46)
+        self.assertLess(max(abs(a - b) for a, b in zip(tail, empty)), 1e-6, "core release complete")
 
     def test_charge_fades_before_its_native_lifetime_cutoff(self):
         root = create_effect("energy-charge")
