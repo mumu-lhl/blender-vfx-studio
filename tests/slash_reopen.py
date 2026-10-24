@@ -1,6 +1,12 @@
 """Saved crescent mesh and shader evaluate with no extension."""
 
+import sys
+from pathlib import Path
+
 import bpy
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from particle_test_support import render_pixels
 
 root = bpy.data.objects["Persisted Slash"]
 layer = root.children[0]
@@ -30,4 +36,18 @@ for frame in (13, 2, 5, 0, 17, 5):
         assert all(
             c.driver.is_valid and c.driver.is_simple_expression for c in data.animation_data.drivers
         )
+root = bpy.data.objects["Persisted Authored Slash"]
+assert root["vfx_asset_version"] == 3
+assert "blender_vfx_studio" not in sys.modules
+for frame in (13, 2, 5, 17, 5):
+    bpy.context.scene.frame_set(frame)
+    mesh = root.children[0].evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+    if frame == 17:
+        assert not mesh.vertices
+        continue
+    expected = root[f"expected_shape_{frame}"]
+    actual = [c for vertex in mesh.vertices for c in vertex.co]
+    assert len(actual) == len(expected)
+    assert max(abs(a - b) for a, b in zip(actual, expected)) < 1e-5
+    assert list(root[f"expected_pixels_{frame}"]) == render_pixels(frame)
 print("SLASH_NATIVE_REOPEN_OK")

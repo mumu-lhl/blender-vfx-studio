@@ -669,8 +669,8 @@ class VFX_PT_main(bpy.types.Panel):
             )
         elif root["vfx_module"] == "mesh.slash":
             layout.label(
-                text="Layered crescent slash"
-                if root["vfx_asset_version"] == 2
+                text="Layered arc slash"
+                if root["vfx_asset_version"] >= 2
                 else "Legacy crescent slash"
             )
             keys = (
@@ -685,7 +685,7 @@ class VFX_PT_main(bpy.types.Panel):
                 "noise_scale",
                 "fade",
             )
-            if root["vfx_asset_version"] == 2:
+            if root["vfx_asset_version"] >= 2:
                 keys += (
                     "attack",
                     "motion_ease",
@@ -695,6 +695,8 @@ class VFX_PT_main(bpy.types.Panel):
                     "streaks",
                     "breakup",
                 )
+            if root["vfx_asset_version"] == 3:
+                keys += ("contour", "bank", "wake_spread")
         elif root["vfx_module"] == "simulation.cloth":
             from . import simulation
 

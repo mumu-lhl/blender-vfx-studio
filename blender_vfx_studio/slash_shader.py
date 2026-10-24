@@ -56,6 +56,7 @@ def shader(root, uid):
     link(uv.outputs["UV"], separate.inputs[0])
     u, v = separate.outputs["X"], separate.outputs["Y"]
     progress = value("Progress")
+    shaped = root["vfx_asset_version"] == 3
     attr = make("ShaderNodeAttribute", "Wake Index", attribute_name="vfx_wake")
     band = attr.outputs["Fac"]
     primary = mathn("Primary Ribbon", "LESS_THAN", band, 0.5)
@@ -85,6 +86,15 @@ def shader(root, uid):
     focus = mathn("Highlight Range", "MULTIPLY", focus, 0.65)
     focus = mathn("Tail Highlight", "ADD", focus, 0.35)
     white = mathn("Highlight Focus", "MULTIPLY", white, focus)
+    if shaped:
+        spent = mathn("Spent Blade Light", "SUBTRACT", progress, 0.32, clamp=True)
+        spent = mathn("Blade Light Release", "MULTIPLY", spent, 2, clamp=True)
+        white = mathn(
+            "Blade Light Remaining",
+            "MULTIPLY",
+            white,
+            mathn("Light Envelope", "SUBTRACT", 1, spent),
+        )
 
     # Stretch noise along the arc: long filaments, narrow variation across width.
     coordinates = make("ShaderNodeCombineXYZ", "Stretched Flow Coordinates")
@@ -113,6 +123,10 @@ def shader(root, uid):
     # A cutoff of one must always remove the entire material, including the blade.
     visible = mathn("Not Fully Dissolved", "LESS_THAN", value("Dissolve Limit", "dissolve"), 1)
     erode = mathn("Dissolve Mask", "MULTIPLY", erode, visible)
+    if shaped:
+        # Hard illustrated cutouts remove spatial pieces instead of leaving a
+        # faint complete crescent. Keep the old shader path unchanged for v2.
+        erode = mathn("Illustrated Cutout", "GREATER_THAN", erode, 0.22)
 
     filament = mathn("Filament Phase", "MULTIPLY", v, 80)
     distortion = mathn("Noise Distortion", "MULTIPLY", noise.outputs["Fac"], 14)
@@ -132,10 +146,57 @@ def shader(root, uid):
     alpha = mathn("Body Edges", "MULTIPLY", edge, inner)
     for name, factor in (("Filaments", detail), ("Erosion", erode), ("Envelope", envelope)):
         alpha = mathn(name + " Opacity", "MULTIPLY", alpha, factor)
+    if shaped:
+        alpha = mathn("Solid Body Edge", "LESS_THAN", v, 0.98)
+        alpha = mathn("Blade Outer Edge", "MULTIPLY", alpha, edge)
+        alpha = mathn("Cutout Body", "MULTIPLY", alpha, erode)
+        alpha = mathn("Revealed Body", "MULTIPLY", alpha, reveal)
+        cut_phase = mathn("Tear Along Arc", "MULTIPLY", u, 26)
+        cut_phase = mathn(
+            "Diagonal Tears", "ADD", cut_phase, mathn("Tear Across", "MULTIPLY", v, 7)
+        )
+        cut_phase = mathn(
+            "Moving Tears", "SUBTRACT", cut_phase, mathn("Tear Clock", "MULTIPLY", progress, 4)
+        )
+        cuts = mathn("Tear Pattern", "SINE", cut_phase)
+        cuts = mathn("Open Tears", "GREATER_THAN", cuts, 0.78)
+        cuts = mathn("Protect Edge", "MULTIPLY", cuts, mathn("Body Only", "GREATER_THAN", v, 0.24))
+        cuts = mathn(
+            "Trailing Tears Only", "MULTIPLY", cuts, mathn("Tail Region", "LESS_THAN", u, 0.7)
+        )
+        alpha = mathn(
+            "Broken Tail", "MULTIPLY", alpha, mathn("Intact Regions", "SUBTRACT", 1, cuts)
+        )
+        release_phase = mathn("Release Fragment Phase", "MULTIPLY", u, 19)
+        release_phase = mathn(
+            "Irregular Fragment Boundaries",
+            "ADD",
+            release_phase,
+            mathn("Fragment Variation", "MULTIPLY", noise.outputs["Fac"], 3),
+        )
+        islands = mathn("Release Islands", "SINE", release_phase)
+        islands = mathn("Island Range", "MULTIPLY", islands, 0.5)
+        islands = mathn("Positive Islands", "ADD", islands, 0.5)
+        threshold = mathn("After Peak", "SUBTRACT", progress, 0.30, clamp=True)
+        threshold = mathn("Fragment Release", "MULTIPLY", threshold, 3, clamp=True)
+        threshold = mathn("Editable Fragment Fade", "MULTIPLY", threshold, fade)
+        islands = mathn("Surviving Pieces", "GREATER_THAN", islands, threshold)
+        alpha = mathn("Separated Release Pieces", "MULTIPLY", alpha, islands)
     wake_weight = mathn("Wake Distance", "ADD", band, 1)
     wake_weight = mathn("Wake Opacity", "DIVIDE", value("Afterimage", "afterimage"), wake_weight)
     delay = mathn("Wake Delay", "MULTIPLY", band, 0.06)
     arrived = mathn("Wake Has Arrived", "GREATER_THAN", progress, delay)
+    if shaped:
+        packet = mathn("Wake Segments", "MULTIPLY", u, 15)
+        packet = mathn(
+            "Wake Phase", "ADD", packet, mathn("Separate Wake Phase", "MULTIPLY", band, 1.7)
+        )
+        packet = mathn(
+            "Wake Segment Motion", "SUBTRACT", packet, mathn("Wake Clock", "MULTIPLY", progress, 6)
+        )
+        packet = mathn("Wake Islands", "SINE", packet)
+        packet = mathn("Separate Wake Islands", "GREATER_THAN", packet, -0.25)
+        arrived = mathn("Broken Wakes", "MULTIPLY", arrived, packet)
     wake_weight = mathn("Delayed Wake", "MULTIPLY", wake_weight, arrived)
     wake_weight = mathn("Subordinate Wake", "MULTIPLY", wake_weight, wake)
     layer_weight = mathn("Layer Hierarchy", "ADD", primary, wake_weight)
@@ -148,6 +209,18 @@ def shader(root, uid):
     body = mathn("Body Weight", "MULTIPLY", body, 0.65)
     body = mathn("Dark Inner Color", "ADD", body, 0.08)
     body = mathn("Gradient Filaments", "MULTIPLY", body, detail)
+    if shaped:
+        mid = mathn("Middle Color Band", "LESS_THAN", v, 0.64)
+        outer = mathn("Outer Color Band", "LESS_THAN", v, 0.22)
+        body = mathn("Middle Violet", "MULTIPLY", mid, 0.3)
+        body = mathn("Outer Violet", "ADD", body, mathn("Bright Violet", "MULTIPLY", outer, 0.4))
+        body = mathn("Ink Inner Body", "ADD", body, 0.045)
+        body = mathn(
+            "Subtle Brush Detail",
+            "MULTIPLY",
+            body,
+            mathn("Brush Floor", "ADD", mathn("Brush Contrast", "MULTIPLY", detail, 0.2), 0.8),
+        )
     body_color = scale("Tinted Body", tint.outputs[0], body)
     highlight = make("ShaderNodeCombineXYZ", "Cool Blade White")
     for socket, component in zip(highlight.inputs, (0.8, 0.9, 1.0)):

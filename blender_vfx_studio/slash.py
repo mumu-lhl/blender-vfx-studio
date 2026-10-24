@@ -6,13 +6,13 @@ import bpy
 
 from . import core, nodes
 from .nodes import ACTIVE, PROGRESS, TIME_PROPS, drive, node
-from .parameters import SLASH_PARAMETERS, SLASH_PARAMETERS_V1
+from .parameters import SLASH_PARAMETERS, SLASH_PARAMETERS_V1, SLASH_PARAMETERS_V2
 
 
-def create(context, quality="MEDIUM", *, asset_version=2):
-    if asset_version not in (1, 2):
+def create(context, quality="MEDIUM", *, asset_version=3):
+    if asset_version not in (1, 2, 3):
         raise ValueError("Unsupported slash asset version")
-    modern = asset_version == 2
+    modern = asset_version >= 2
     segments = {"LOW": 32, "MEDIUM": 64, "HIGH": 128}.get(quality)
     if segments is None:
         raise ValueError("Unknown slash quality")
@@ -21,7 +21,7 @@ def create(context, quality="MEDIUM", *, asset_version=2):
         "Arc Slash",
         "mesh.slash",
         quality,
-        SLASH_PARAMETERS if modern else SLASH_PARAMETERS_V1,
+        {1: SLASH_PARAMETERS_V1, 2: SLASH_PARAMETERS_V2, 3: SLASH_PARAMETERS}[asset_version],
         {},
     )
     root["vfx_asset_version"] = asset_version
@@ -114,7 +114,8 @@ def geometry(obj, root):
     inner.inputs["Name"].default_value = "vfx_inner"
     progress = value("Progress", None, -1200, -600, PROGRESS, TIME_PROPS)
     motion = progress
-    modern = root["vfx_asset_version"] == 2
+    modern = root["vfx_asset_version"] >= 2
+    shaped = root["vfx_asset_version"] == 3
     band = None
     if modern:
         attr = node(
@@ -144,6 +145,13 @@ def geometry(obj, root):
         sign = math_node("Sweep Direction", "SIGN", spin, 0, -500, 1400)
         lag = math_node("Directional Wake Lag", "MULTIPLY", lag, sign, -300, 1400)
         angle = math_node("Trailing Angle", "ADD", angle, lag, -100, 1200)
+    if shaped:
+        spread = value("Wake Spread", "wake_spread", -800, 2200)
+        separation = math_node("Separating Clock", "MULTIPLY", motion, spread, -600, 2200)
+        separation = math_node("Wake Separation", "MULTIPLY", separation, band, -400, 2200)
+        separation = math_node("Trailing Separation", "MULTIPLY", separation, -0.42, -200, 2200)
+        separation = math_node("Signed Separation", "MULTIPLY", separation, sign, 0, 2200)
+        angle = math_node("Separating Wakes", "ADD", angle, separation, 200, 2200)
     direction = node(tree, "ShaderNodeCombineXYZ", "Radial Direction", 50, 500)
     link(math_node("Cosine", "COSINE", angle, 0, -200, 500), direction.inputs["X"])
     link(math_node("Sine", "SINE", angle, 0, -200, 300), direction.inputs["Y"])
@@ -184,6 +192,19 @@ def geometry(obj, root):
         offset_wake = math_node("Wake Spacing", "MULTIPLY", band, 0.075, 0, 1500)
         offset_wake = math_node("Radius Relative Wake", "MULTIPLY", radius, offset_wake, 200, 1500)
         radius = math_node("Wake Radius", "ADD", radius, offset_wake, 400, 1500)
+    if shaped:
+        from .slash_shape import shape
+
+        radius, offset, depth = shape(
+            tree,
+            root,
+            u.outputs["Attribute"],
+            inner.outputs["Attribute"],
+            band,
+            progress,
+            radius,
+            offset,
+        )
     radius = math_node("Inner Radius", "SUBTRACT", radius, offset, 550, 100)
     radius = math_node("Positive Radius", "MAXIMUM", radius, 0.001, 800, 100)
     scale = node(tree, "ShaderNodeVectorMath", "Arc Position", 1050, 500, operation="SCALE")
@@ -191,7 +212,15 @@ def geometry(obj, root):
     link(radius, scale.inputs["Scale"])
     setpos = node(tree, "GeometryNodeSetPosition", "Crescent Shape", 1200, 800)
     link(inp.outputs["Geometry"], setpos.inputs["Geometry"])
-    link(scale.outputs[0], setpos.inputs["Position"])
+    if shaped:
+        z = node(tree, "ShaderNodeCombineXYZ", "Blade Depth", 1050, 100)
+        link(depth, z.inputs["Z"])
+        position = node(tree, "ShaderNodeVectorMath", "Banked Arc", 1100, 300, operation="ADD")
+        link(scale.outputs[0], position.inputs[0])
+        link(z.outputs[0], position.inputs[1])
+        link(position.outputs[0], setpos.inputs["Position"])
+    else:
+        link(scale.outputs[0], setpos.inputs["Position"])
     hide = node(tree, "GeometryNodeDeleteGeometry", "Outside Lifetime", 1450, 800, domain="POINT")
     active = value("Active", None, 800, -500, ACTIVE, TIME_PROPS)
     inactive = math_node("Inactive", "LESS_THAN", active, 0.5, 1050, -300)
