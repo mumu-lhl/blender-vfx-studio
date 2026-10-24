@@ -311,3 +311,5 @@ blender -b --factory-startup --python-exit-code 1 --python tools/preview.py -- -
 默认效果的 CPU 求值测量和限制见 [性能记录](docs/PERFORMANCE.md)。
 
 代码分工见 [DESIGN.md](DESIGN.md)，参数和时间约定见 [CONTEXT.md](CONTEXT.md)。许可证：**GPL-3.0-or-later**。
+
+已发布的 [0.22.2](https://github.com/mumu-lhl/blender-vfx-studio/releases/tag/v0.22.2) 改进充能汇聚、视觉主次与末段淡出，并附原生衔接检查包。入门库安装和参数编辑见 [使用指南](docs/STARTER_LIBRARY.md)。main 的 0.22.3 尖形微粒候选已通过三平台 CI，尚未发布；下载 0.22.2 不会包含它。
