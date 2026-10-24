@@ -149,7 +149,9 @@ class StarterTests(unittest.TestCase):
 
         early, charged = dimensions(13), dimensions(37)
         self.assertLess(charged[0], early[0] * 0.8)
-        self.assertGreater(charged[1], early[1] * 1.4)
+        # Pressure concentrates a volume instead of stretching it into a long leaf.
+        self.assertGreater(charged[1], early[1] * 0.8)
+        self.assertLess(charged[1], early[1] * 1.2)
         for frame in (1, 7, 22, 37, 46, 48):
             self.assertLessEqual(
                 vertex_count(charge, frame), 900

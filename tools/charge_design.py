@@ -191,7 +191,7 @@ def _surface(root, *, core=False):
             g.m("Flow Speed", "MULTIPLY", g.m("Flow Clock", "MULTIPLY", p, p), 9),
         )
         thin = g.m("Thin Curving Channel", "ABSOLUTE", g.m("Channel Wave", "SINE", phase))
-        hot = g.m("Bright Vein", "SUBTRACT", 1, g.stage("Vein Soft Edges", thin, 0.10, 0.32))
+        hot = g.m("Bright Vein", "SUBTRACT", 1, g.stage("Vein Soft Edges", thin, 0.18, 0.45))
         hot = g.m("Concentrated Veins", "MULTIPLY", hot, gather)
         # Three illustrated values describe volume without a glossy gradient or broad random holes.
         mid = g.m("Lit Midtone", "GREATER_THAN", facing.outputs["Value"], 0.05)
@@ -303,6 +303,22 @@ def _surface(root, *, core=False):
             alpha_mix.inputs[2],
         )
         alpha = alpha_mix.outputs[0]
+        facing = g.n("ShaderNodeVectorMath", "Plasma Facing", operation="DOT_PRODUCT")
+        g.link(normal.outputs["Normal"], facing.inputs[0])
+        g.link(normal.outputs["Incoming"], facing.inputs[1])
+        front = g.stage(
+            "Hot Facing With Dark Silhouette",
+            g.m("Two Sided Plasma Facing", "ABSOLUTE", facing.outputs["Value"]),
+            0.72,
+            0.78,
+        )
+        pressure = g.m("Pressure Concentrates Light", "MULTIPLY_ADD", gather, 0.5)
+        pressure.node.inputs[2].default_value = 0.45
+        center_mix = g.n("ShaderNodeMixRGB", "White Heart Cyan Midtone Ink Edge")
+        g.link(g.m("Hot Front Coverage", "MULTIPLY", front, pressure), center_mix.inputs[0])
+        g.link(surface_color, center_mix.inputs[1])
+        g.link(hot_color.outputs[0], center_mix.inputs[2])
+        surface_color = center_mix.outputs[0]
         kernel_color = g.n("ShaderNodeMixRGB", "Concentrated Inner Light")
         brightness = g.m("Inner Compression Brightness", "MULTIPLY_ADD", gather, 0.3)
         brightness.node.inputs[2].default_value = 0.55
@@ -342,10 +358,10 @@ def core_shape(root):
     # Three unequal flame tongues share one native editable mesh.
     for tongue, (steps, sides, height, breadth, offset) in enumerate(
         [
-            (17, 8, 1.0, 0.55, (0.0, 0.0)),
-            (11, 6, 0.67, 0.3, (-0.65, 0.16)),
-            (11, 6, 0.50, 0.24, (0.62, -0.18)),
-            (9, 6, 0.67, 0.24, (0.0, 0.0)),
+            (17, 8, 0.78, 0.68, (0.0, 0.0)),
+            (11, 6, 0.43, 0.24, (-0.45, 0.30)),
+            (11, 6, 0.36, 0.20, (0.40, -0.38)),
+            (9, 6, 0.58, 0.30, (0.0, 0.0)),
         ]
     ):
         base = len(vertices)
@@ -384,7 +400,7 @@ def core_shape(root):
         g.m("Compression Amount", "MULTIPLY", gather, 0.32),
     )
     height = g.m(
-        "Stretch Under Tension", "ADD", 0.6, g.m("Tension Height", "MULTIPLY", gather, 0.6)
+        "Compact Pressure Volume", "ADD", 0.85, g.m("Pressure Height", "MULTIPLY", gather, 0.05)
     )
     radius = g.m(
         "Core Radius",
@@ -426,7 +442,7 @@ def core_shape(root):
     wave = g.m(
         "Energy Rises Along Tongue",
         "SUBTRACT",
-        g.m("Roil Along Height", "ADD", g.m("Roil Wavelength", "MULTIPLY", u, 9), phase),
+        g.m("Roil Along Height", "ADD", g.m("Roil Wavelength", "MULTIPLY", u, 6), phase),
         clock,
     )
     bulge = g.m("Passing Energy Bulge", "MULTIPLY_ADD", g.m("Roil Wave", "SINE", wave), 0.18)
@@ -434,7 +450,7 @@ def core_shape(root):
     curled = g.n("ShaderNodeSeparateXYZ", "Twisted Flame Coordinates")
     g.link(twist.outputs[0], curled.inputs[0])
     tip = g.m("Flexible Tongue Tips", "MULTIPLY", u, u)
-    flex = g.m("Tip Curl Distance", "MULTIPLY", tip, g.m("Curl Scale", "MULTIPLY", radius, 0.32))
+    flex = g.m("Tip Curl Distance", "MULTIPLY", tip, g.m("Curl Scale", "MULTIPLY", radius, 0.18))
     flex = g.m(
         "Restrain Inner Tip Curl",
         "MULTIPLY",
@@ -582,7 +598,7 @@ def ribbons(root, *, ground=False):
     angle = g.m("Ribbon Bank", "ADD", angle, side_offset)
     x = g.m("Spiral X", "MULTIPLY", radius, g.m("Cosine", "COSINE", angle))
     y = g.m("Spiral Y", "MULTIPLY", radius, g.m("Sine", "SINE", angle))
-    z = g.m("Rising Flow", "MULTIPLY", g.m("Path Height", "MULTIPLY", u, u), 0 if ground else 1.55)
+    z = g.m("Rising Flow", "MULTIPLY", g.m("Path Height", "MULTIPLY", u, u), 0 if ground else 1.1)
     z = g.m("Flow Origin", "SUBTRACT", z, 0 if ground else 0.65)
     z = g.m(
         "Bank Height",
