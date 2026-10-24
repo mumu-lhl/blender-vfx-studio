@@ -217,12 +217,23 @@ def _surface(root, *, core=False):
         )
         along.node.inputs[2].default_value = 0.2
         across = g.m(
-            "Dark Ribbon Edge",
+            "Ink Edge And Midtone",
             "MULTIPLY_ADD",
-            g.m("Bright Center Strip", "MULTIPLY", center, center),
-            0.95,
+            g.m("Ribbon Midtone Width", "GREATER_THAN", center, 0.2),
+            0.20,
         )
-        across.node.inputs[2].default_value = 0.035
+        across.node.inputs[2].default_value = 0.055
+        across = g.m(
+            "Illustrated Stream Bands",
+            "ADD",
+            across,
+            g.m(
+                "Narrow Cyan Center",
+                "MULTIPLY",
+                g.m("Center Band Width", "GREATER_THAN", center, 0.65),
+                0.65,
+            ),
+        )
         body = g.v(
             "Ink Edge And Cyan Body",
             "SCALE",
@@ -250,15 +261,15 @@ def _surface(root, *, core=False):
         )
         packet = hot
         hot = g.m("Packet Follows Core", "MULTIPLY", hot, across)
-        packet_alpha = g.m("Visible Flow Packets", "MULTIPLY_ADD", packet, 0.9)
-        packet_alpha.node.inputs[2].default_value = 0.1
+        packet_alpha = g.m("Visible Flow Packets", "MULTIPLY_ADD", packet, 0.65)
+        packet_alpha.node.inputs[2].default_value = 0.35
         alpha = g.m("Separated Energy Wisps", "MULTIPLY", alpha, packet_alpha)
         hot = g.m("Flow Emphasis", "MULTIPLY", hot, 0.6)
     mix = g.n("ShaderNodeMixRGB", "Dark Body And Flowing Energy")
     g.link(hot, mix.inputs[0])
     g.link(body, mix.inputs[1])
     hot_color = g.n("ShaderNodeMixRGB", "Editable Color To Hot Light")
-    hot_color.inputs[0].default_value = 0.85 if core else 0.2
+    hot_color.inputs[0].default_value = 0.85 if core else 0.035
     g.link(color.outputs[0], hot_color.inputs[1])
     hot_color.inputs[2].default_value = (0.9, 0.95, 1.0, 1)
     g.link(hot_color.outputs[0], mix.inputs[2])
@@ -310,7 +321,14 @@ def core_shape(root):
     layer, g, geometry = _geometry(root, "Compressed Flame Core")
     vertices, faces = [], []
     core_attrs = {
-        k: [] for k in ("charge_core_u", "charge_angle_sin", "charge_angle_cos", "charge_inner")
+        k: []
+        for k in (
+            "charge_core_u",
+            "charge_angle_sin",
+            "charge_angle_cos",
+            "charge_inner",
+            "charge_tongue",
+        )
     }
     # Three unequal flame tongues share one native editable mesh.
     for tongue, (steps, sides, height, breadth, offset) in enumerate(
@@ -337,6 +355,7 @@ def core_shape(root):
                 core_attrs["charge_angle_sin"].append(math.sin(a))
                 core_attrs["charge_angle_cos"].append(math.cos(a))
                 core_attrs["charge_inner"].append(1.0 if tongue == 3 else 0.0)
+                core_attrs["charge_tongue"].append(float(tongue))
         for j in range(steps - 1):
             for k in range(sides):
                 a, b = base + j * sides + k, base + j * sides + (k + 1) % sides
@@ -389,9 +408,43 @@ def core_shape(root):
         g.m("Spin Accelerates", "MULTIPLY", g.m("Squared Time", "MULTIPLY", p, p), 3.5),
     )
     g.link(angle, twist.inputs["Angle"])
+    # Travel along each tongue rather than rotating a rigid, leaf-shaped shell.
+    # One coherent bulge and a delayed tip curl keep the low-resolution mesh legible.
+    u = g.attr("charge_core_u")
+    tongue = g.attr("charge_tongue")
+    clock = g.m("Accelerating Roil Clock", "MULTIPLY", g.m("Roil Time", "MULTIPLY", p, p), 18)
+    phase = g.m("Independent Tongue Phase", "MULTIPLY", tongue, 2.1)
+    wave = g.m(
+        "Energy Rises Along Tongue",
+        "SUBTRACT",
+        g.m("Roil Along Height", "ADD", g.m("Roil Wavelength", "MULTIPLY", u, 9), phase),
+        clock,
+    )
+    bulge = g.m("Passing Energy Bulge", "MULTIPLY_ADD", g.m("Roil Wave", "SINE", wave), 0.18)
+    bulge.node.inputs[2].default_value = 1
+    curled = g.n("ShaderNodeSeparateXYZ", "Twisted Flame Coordinates")
+    g.link(twist.outputs[0], curled.inputs[0])
+    tip = g.m("Flexible Tongue Tips", "MULTIPLY", u, u)
+    flex = g.m("Tip Curl Distance", "MULTIPLY", tip, g.m("Curl Scale", "MULTIPLY", radius, 0.32))
+    curl = g.m("Tip Follows Rising Energy", "ADD", wave, 1.2)
+    shaped = []
+    for axis, operation in (("X", "SINE"), ("Y", "COSINE")):
+        shaped.append(
+            g.m(
+                "Curl Tongue " + axis,
+                "ADD",
+                g.m("Roiling Width " + axis, "MULTIPLY", curled.outputs[axis], bulge),
+                g.m(
+                    "Flexible Tip " + axis,
+                    "MULTIPLY",
+                    flex,
+                    g.m("Tip Direction " + axis, operation, curl),
+                ),
+            )
+        )
     deform = g.n("GeometryNodeSetPosition", "Irregular Flame Silhouette")
     g.link(scale.outputs[0], deform.inputs["Geometry"])
-    g.link(twist.outputs[0], deform.inputs["Position"])
+    g.link(g.xyz("Roiling Flame Volume", *shaped, curled.outputs["Z"]), deform.inputs["Position"])
     noise = g.n("ShaderNodeTexNoise", "Roiling Flame Contour", noise_dimensions="4D")
     noise.inputs["Scale"].default_value = 3.5
     noise.inputs["Detail"].default_value = 1.0

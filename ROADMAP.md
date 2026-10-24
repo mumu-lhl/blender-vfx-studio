@@ -112,3 +112,5 @@ v0.21.0 标签的三平台测试通过，但 Linux 缺少 EGL 动态库，Eevee 
 ## 艺术设计重新评估：Energy Charge 优先
 
 用户复核指出原有球壳、细环、月牙与星芒仍过于简单。此前技术检查不等于成熟游戏品质，整体差距见 [艺术评估](docs/ART_DIRECTION_REVIEW.md)。[#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 正在以真实原生资产重设计充能的形体、空间流动、压缩与释放；[#88](https://github.com/mumu-lhl/blender-vfx-studio/issues/88) 的局部环显现不足以解决整体问题，已被此项取代。候选已经过多次实际渲染调整，仍在检查完整动作、兼容和预算，不宣称艺术验收完成；先完成它，再处理 Arc Slash 与 Impact Burst。
+
+[PR #90](https://github.com/mumu-lhl/blender-vfx-studio/pull/90) 保持草稿。隔帧复核发现核心仍有硬质叶片感，随后增加各瓣独立的卷动和局部鼓胀，流带改用明确色阶；这些修改发生在真实原生生成器。旧版完整资产不重建，当前仍为四层、最高约 826 顶点。尚未发布此重设计，剩余问题和实际看图范围见充能记录。

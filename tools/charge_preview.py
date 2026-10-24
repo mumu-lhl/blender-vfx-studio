@@ -25,10 +25,17 @@ def main():
         "--sampled", action="store_true", help="Render every other frame plus key review frames"
     )
     parser.add_argument(
+        "--frames", type=int, nargs="+", help="Render only these frames for a focused comparison"
+    )
+    parser.add_argument(
         "--baseline-asset", type=Path, help="Load a complete old asset instead of rebuilding it"
     )
     parser.add_argument("--engine", choices=("CYCLES", "BLENDER_EEVEE"), default="CYCLES")
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
+    if args.frames and (min(args.frames) < 1 or args.sampled):
+        parser.error(
+            "--frames requires positive frame numbers and cannot be combined with --sampled"
+        )
     if not bpy.app.background or "--factory-startup" not in sys.argv or bpy.data.filepath:
         raise RuntimeError("Use a fresh background process with --factory-startup and no project")
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -87,6 +94,8 @@ def main():
     frames = {1, 4, 7, 13, 22, 31, 37, 42, 46, 48, 49}
     if args.sampled:
         frames.update(range(1, 50, 2))
+    if args.frames:
+        frames = set(args.frames)
     for frame in sorted(frames):
         scene.frame_set(frame)
         scene.render.filepath = str(folder / f"charge-{prefix}-{frame:04d}.png")
