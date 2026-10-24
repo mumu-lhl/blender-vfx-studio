@@ -177,6 +177,14 @@ class StarterTests(unittest.TestCase):
             self.assertLess(energy(), 1e-5, key)
             core_member[key] = old
             core_member.update_tag()
+        def coverage():
+            pixels = render_pixels(44)
+            return sum(max(pixels[i : i + 3]) > 1e-5 for i in range(0, len(pixels), 4))
+
+        eroded = coverage()
+        core_member["fade"] = 0
+        core_member.update_tag()
+        self.assertGreater(coverage(), eroded)
 
     def test_charge_fades_before_its_native_lifetime_cutoff(self):
         root = create_effect("energy-charge")

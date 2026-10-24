@@ -120,7 +120,7 @@ def _surface(root, *, core=False):
         "Charge Envelope",
         "MULTIPLY",
         1 if core else ignite,
-        g.m("Opacity After Release", "SUBTRACT", 1, loss),
+        1 if core else g.m("Opacity After Release", "SUBTRACT", 1, loss),
     )
     if core:
         alpha = g.m("Editable Opacity", "MULTIPLY", alpha, g.value("Opacity", prop="opacity"))
@@ -147,7 +147,7 @@ def _surface(root, *, core=False):
         "Release Erosion",
         "ADD",
         g.value("Dissolve", prop="dissolve"),
-        g.m("Erosion During Release", "MULTIPLY", release, 0.8),
+        g.m("Erosion During Release", "MULTIPLY", loss if core else release, 0.8),
     )
     alpha = g.m(
         "Broken Energy Surface",
@@ -283,11 +283,20 @@ def _surface(root, *, core=False):
         alpha_mix = g.n("ShaderNodeMixRGB", "Shell And Inner Opacity")
         g.link(inner, alpha_mix.inputs[0])
         g.link(shell_alpha, alpha_mix.inputs[1])
+        # Opaque spatial erosion avoids stochastic alpha grain in low-sample Eevee.
+        # User Opacity remains continuous; Fade controls erosion during release.
         inner_survival = g.m(
             "Inner Dissolves Last",
-            "SUBTRACT",
-            1,
-            g.stage("Inner Dissolve Threshold", g.value("Inner Dissolve", prop="dissolve"), 0.7, 1),
+            "GREATER_THAN",
+            noise.outputs["Fac"],
+            g.m(
+                "Inner Erosion Threshold",
+                "ADD",
+                g.stage(
+                    "Inner Dissolve Threshold", g.value("Inner Dissolve", prop="dissolve"), 0.7, 1
+                ),
+                g.m("Kernel Release Erosion", "MULTIPLY", loss, 0.85),
+            ),
         )
         g.link(
             g.m("Internal Energy Envelope", "MULTIPLY", envelope, inner_survival),
