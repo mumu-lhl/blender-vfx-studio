@@ -318,6 +318,9 @@ def _surface(root, *, core=False):
         )
         pressure = g.m("Pressure Concentrates Light", "MULTIPLY_ADD", gather, 0.5)
         pressure.node.inputs[2].default_value = 0.45
+        spent = g.stage("Release Spends Concentrated Light", p, 0.78, 0.92)
+        light_remaining = g.m("Light Left Before Debris", "SUBTRACT", 1, spent)
+        pressure = g.m("Spend White Front During Release", "MULTIPLY", pressure, light_remaining)
         center_mix = g.n("ShaderNodeMixRGB", "White Heart Cyan Midtone Ink Edge")
         g.link(g.m("Hot Front Coverage", "MULTIPLY", front, pressure), center_mix.inputs[0])
         g.link(surface_color, center_mix.inputs[1])
@@ -326,7 +329,10 @@ def _surface(root, *, core=False):
         kernel_color = g.n("ShaderNodeMixRGB", "Concentrated Inner Light")
         brightness = g.m("Inner Compression Brightness", "MULTIPLY_ADD", gather, 0.3)
         brightness.node.inputs[2].default_value = 0.55
-        g.link(brightness, kernel_color.inputs[0])
+        g.link(
+            g.m("Spend Inner White During Release", "MULTIPLY", brightness, light_remaining),
+            kernel_color.inputs[0],
+        )
         g.link(color.outputs[0], kernel_color.inputs[1])
         kernel_color.inputs[2].default_value = (0.9, 0.98, 1, 1)
         core_mix = g.n("ShaderNodeMixRGB", "Light Beneath Broken Shell")
