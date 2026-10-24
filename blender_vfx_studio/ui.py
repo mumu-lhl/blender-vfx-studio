@@ -650,7 +650,11 @@ class VFX_PT_main(bpy.types.Panel):
             layout.label(text="Loop restarts all layers each group cycle")
             return
         if root["vfx_module"] == "shader.shield":
-            layout.label(text="Fresnel shield · exterior surface")
+            layout.label(
+                text="Authored shader layer"
+                if root.get("vfx_parameter_keys")
+                else "Fresnel shield · exterior surface"
+            )
             keys = (
                 "radius",
                 "expansion",
@@ -795,6 +799,9 @@ class VFX_PT_main(bpy.types.Panel):
         else:
             layout.label(text="Mesh + Shader")
             keys = ("radius", "width", "expansion", "strength", "dissolve", "noise_scale", "fade")
+        profile = root.get("vfx_parameter_keys")
+        if isinstance(profile, str):
+            keys = tuple(key for key in keys if key in profile.split(","))
         for key in keys:
             layout.prop(root, f'["{key}"]', text=key.replace("_", " ").title())
         for i, color in enumerate(("Red", "Green", "Blue")):

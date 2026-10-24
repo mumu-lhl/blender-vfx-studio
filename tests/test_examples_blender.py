@@ -39,14 +39,25 @@ class StarterTests(unittest.TestCase):
         motes = next(
             r for r in composition.members(charge) if r["vfx_module"] == "particle.emitter"
         )
-        for key, value in dict(rate=0.1, lifetime=1.0, emission_seconds=3.0).items():
+        for key, value in dict(
+            rate=0.1, lifetime=1.0, emission_seconds=3.0, velocity=1.0, spawn_radius=1.4
+        ).items():
             motes[key] = value
         motes.update_tag()
         bpy.context.view_layer.update()
-        for frame, expected in ((10, 0.275), (1, 1.4), (7, 0.65), (10, 0.275)):
+        centers = []
+        for frame in (1, 4, 7, 10):
             actual = particles(motes, frame)
             self.assertEqual(len(actual), 1)
-            self.assertAlmostEqual(actual[0][0].length, expected, places=5)
+            centers.append(actual[0][0])
+        distances = [c.length for c in centers]
+        self.assertTrue(all(a > b for a, b in zip(distances, distances[1:])))
+        travel = [a - b for a, b in zip(distances, distances[1:])]
+        self.assertGreater(travel[2], travel[1])
+        self.assertGreater(travel[1], travel[0])
+        self.assertGreater(centers[0].cross(centers[1]).length, 0.01)
+        repeated = particles(motes, 7)[0][0]
+        self.assertLess((repeated - centers[2]).length, 1e-5)
         motes["velocity"] = 3.0
         motes.update_tag()
         for frame in (7, 10):
@@ -69,7 +80,7 @@ class StarterTests(unittest.TestCase):
         bpy.context.view_layer.update()
         self.assertGreater(particles(ordinary, 7)[0][0].length, particles(ordinary, 1)[0][0].length)
 
-    def test_charge_motes_are_radially_pointed_with_less_geometry_than_round_motes(self):
+    def test_charge_motes_follow_their_curved_velocity_with_less_geometry(self):
         charge = create_effect("energy-charge")
         motes = next(
             r for r in composition.members(charge) if r["vfx_module"] == "particle.emitter"
@@ -77,23 +88,25 @@ class StarterTests(unittest.TestCase):
         for key, value in dict(rate=0.1, lifetime=1.0, emission_seconds=3.0).items():
             motes[key] = value
         motes.update_tag()
-        for frame in (1, 7, 1):
+        for frame in (4, 7, 4):
+            before_center = particles(motes, frame - 0.02)[0][0]
+            after_center = particles(motes, frame + 0.02)[0][0]
             centers = particles(motes, frame)
             self.assertEqual(len(centers), 1)
             center = centers[0][0]
             vertices = mesh(motes, frame).vertices
-            self.assertLess(len(vertices), 12)  # LOW round motes use twelve vertices.
-            radial = center.normalized()
+            self.assertLess(len(vertices), 12)
+            tangent = (after_center - before_center).normalized()
             offsets = [v.co - center for v in vertices]
-            length = max(abs(v.dot(radial)) for v in offsets)
-            width = max((v - radial * v.dot(radial)).length for v in offsets)
+            length = max(abs(v.dot(tangent)) for v in offsets)
+            width = max((v - tangent * v.dot(tangent)).length for v in offsets)
             self.assertGreater(length, width * 5)
         before = particles(motes, 7)[0][1]
         motes["size"] *= 2
         motes.update_tag()
         self.assertAlmostEqual(particles(motes, 7)[0][1], before * 2, places=5)
 
-    def test_charge_rings_reveal_from_transparency_and_follow_group_speed(self):
+    def test_charge_streams_ignite_and_follow_group_speed(self):
         charge = create_effect("energy-charge")
         camera()
         bpy.context.scene.render.dither_intensity = 0
@@ -105,11 +118,11 @@ class StarterTests(unittest.TestCase):
             return sum(sum(pixels[i : i + 3]) for i in range(0, len(pixels), 4))
 
         born = energy(render_pixels(1))
-        early = energy(render_pixels(4))
+        early = energy(render_pixels(7))
         opened = energy(render_pixels(16))
         self.assertLess(born, 1e-5)
         self.assertGreater(early, 0.01)
-        self.assertLess(early, opened * 0.6)
+        self.assertLess(early, opened)
         reference = render_pixels(7)
         self.assertEqual(render_pixels(7), reference)
         charge["speed"] = 2.0
@@ -121,6 +134,24 @@ class StarterTests(unittest.TestCase):
         bpy.context.scene.frame_set(1)
         core.create(bpy.context, "ENERGY_RING", "LOW")
         self.assertGreater(energy(render_pixels(1)), 1)
+
+    def test_charge_core_builds_tension_within_a_bounded_geometry_budget(self):
+        charge = create_effect("energy-charge")
+        core_member = next(
+            r for r in composition.members(charge) if r["vfx_module"] == "shader.shield"
+        )
+
+        def dimensions(frame):
+            vertices = mesh(core_member, frame).vertices
+            radial = sum(v.co.x**2 + v.co.y**2 for v in vertices) / len(vertices)
+            height = max(v.co.z for v in vertices) - min(v.co.z for v in vertices)
+            return radial, height
+
+        early, charged = dimensions(13), dimensions(37)
+        self.assertLess(charged[0], early[0] * 0.8)
+        self.assertGreater(charged[1], early[1] * 1.4)
+        for frame in (1, 7, 22, 37, 46, 48):
+            self.assertLessEqual(vertex_count(charge, frame), 800)
 
     def test_charge_fades_before_its_native_lifetime_cutoff(self):
         root = create_effect("energy-charge")
