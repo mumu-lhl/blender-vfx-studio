@@ -426,6 +426,17 @@ def core_shape(root):
     g.link(twist.outputs[0], curled.inputs[0])
     tip = g.m("Flexible Tongue Tips", "MULTIPLY", u, u)
     flex = g.m("Tip Curl Distance", "MULTIPLY", tip, g.m("Curl Scale", "MULTIPLY", radius, 0.32))
+    flex = g.m(
+        "Restrain Inner Tip Curl",
+        "MULTIPLY",
+        flex,
+        g.m(
+            "Kernel Curl Restraint",
+            "SUBTRACT",
+            1,
+            g.m("Inner Curl Reduction", "MULTIPLY", g.attr("charge_inner"), 0.85),
+        ),
+    )
     curl = g.m("Tip Follows Rising Energy", "ADD", wave, 1.2)
     shaped = []
     for axis, operation in (("X", "SINE"), ("Y", "COSINE")):
