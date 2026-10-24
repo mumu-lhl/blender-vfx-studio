@@ -193,15 +193,14 @@ def _surface(root, *, core=False):
         thin = g.m("Thin Curving Channel", "ABSOLUTE", g.m("Channel Wave", "SINE", phase))
         hot = g.m("Bright Vein", "SUBTRACT", 1, g.stage("Vein Soft Edges", thin, 0.10, 0.32))
         hot = g.m("Concentrated Veins", "MULTIPLY", hot, gather)
-        alpha = g.m(
-            "Opaque Shell Plates",
-            "MULTIPLY",
-            alpha,
-            g.m("Broken Shell Plates", "GREATER_THAN", noise.outputs["Fac"], 0.43),
-        )
-        cel = g.m("Illustrated Light Band", "GREATER_THAN", facing.outputs["Value"], 0.15)
-        cel = g.m("Colored Cel Body", "MULTIPLY_ADD", cel, 0.46)
+        # Three illustrated values describe volume without a glossy gradient or broad random holes.
+        mid = g.m("Lit Midtone", "GREATER_THAN", facing.outputs["Value"], 0.05)
+        bright = g.m("Narrow Lit Face", "GREATER_THAN", facing.outputs["Value"], 0.55)
+        cel = g.m("Dark To Midtone", "MULTIPLY_ADD", mid, 0.18)
         cel.node.inputs[2].default_value = 0.045
+        cel = g.m(
+            "Readable Lit Volume", "ADD", cel, g.m("Lit Face Value", "MULTIPLY", bright, 0.32)
+        )
         body = g.v("Readable Dark And Light Body", "SCALE", color.outputs[0], cel)
     else:
         u, side, strand = (
