@@ -117,10 +117,14 @@ def _surface(root, *, core=False):
     release = g.stage("Release And Break Apart", p, 0.82, 1)
     loss = g.m("Editable Fade", "MULTIPLY", release, g.value("Fade", prop="fade"))
     alpha = g.m(
-        "Charge Envelope", "MULTIPLY", ignite, g.m("Opacity After Release", "SUBTRACT", 1, loss)
+        "Charge Envelope",
+        "MULTIPLY",
+        1 if core else ignite,
+        g.m("Opacity After Release", "SUBTRACT", 1, loss),
     )
     if core:
         alpha = g.m("Editable Opacity", "MULTIPLY", alpha, g.value("Opacity", prop="opacity"))
+    envelope = alpha
     color = g.n("ShaderNodeCombineXYZ", "Editable Energy Color")
     for i in range(3):
         drive(color.inputs[i], "default_value", root, "c", {"c": f"color_{i}"})
@@ -190,27 +194,21 @@ def _surface(root, *, core=False):
         hot = g.m("Bright Vein", "SUBTRACT", 1, g.stage("Vein Soft Edges", thin, 0.10, 0.32))
         hot = g.m("Concentrated Veins", "MULTIPLY", hot, gather)
         alpha = g.m(
-            "Roiling Shell",
+            "Opaque Shell Plates",
             "MULTIPLY",
             alpha,
-            g.m(
-                "Shell Density",
-                "ADD",
-                0.45,
-                g.m(
-                    "Broken Shell Plates",
-                    "MULTIPLY",
-                    g.stage("Plasma Fracture", noise.outputs["Fac"], 0.43, 0.55),
-                    0.55,
-                ),
-            ),
+            g.m("Broken Shell Plates", "GREATER_THAN", noise.outputs["Fac"], 0.43),
         )
         cel = g.m("Illustrated Light Band", "GREATER_THAN", facing.outputs["Value"], 0.15)
         cel = g.m("Colored Cel Body", "MULTIPLY_ADD", cel, 0.46)
         cel.node.inputs[2].default_value = 0.045
         body = g.v("Readable Dark And Light Body", "SCALE", color.outputs[0], cel)
     else:
-        u, side, strand = attribute("charge_u"), attribute("charge_side"), attribute("charge_phase")
+        u, side, strand = (
+            attribute("charge_flow_u"),
+            attribute("charge_side"),
+            attribute("charge_phase"),
+        )
         side = g.m("Absolute Edge", "ABSOLUTE", side)
         center = g.m("Distance From Edge", "SUBTRACT", 1, side)
         soft = g.stage("Small Soft Border", center, 0, 0.18)
@@ -268,20 +266,21 @@ def _surface(root, *, core=False):
     surface_color = mix.outputs[0]
     if core:
         inner = attribute("charge_inner")
-        cracks = g.m("Open Channels In Shell", "MULTIPLY", hot, 0.8)
+        cracks = g.m("Cutout Energy Channels", "GREATER_THAN", hot, 0.3)
         shell_alpha = g.m(
             "Shell Openings", "MULTIPLY", alpha, g.m("Shell Coverage", "SUBTRACT", 1, cracks)
         )
         alpha_mix = g.n("ShaderNodeMixRGB", "Shell And Inner Opacity")
         g.link(inner, alpha_mix.inputs[0])
         g.link(shell_alpha, alpha_mix.inputs[1])
+        inner_survival = g.m(
+            "Inner Dissolves Last",
+            "SUBTRACT",
+            1,
+            g.stage("Inner Dissolve Threshold", g.value("Inner Dissolve", prop="dissolve"), 0.7, 1),
+        )
         g.link(
-            g.m(
-                "Internal Energy Envelope",
-                "MULTIPLY",
-                ignite,
-                g.m("Inner Release", "SUBTRACT", 1, release),
-            ),
+            g.m("Internal Energy Envelope", "MULTIPLY", envelope, inner_survival),
             alpha_mix.inputs[2],
         )
         alpha = alpha_mix.outputs[0]
@@ -394,6 +393,20 @@ def core_shape(root):
     deform = g.n("GeometryNodeSetPosition", "Irregular Flame Silhouette")
     g.link(scale.outputs[0], deform.inputs["Geometry"])
     g.link(twist.outputs[0], deform.inputs["Position"])
+    noise = g.n("ShaderNodeTexNoise", "Roiling Flame Contour", noise_dimensions="4D")
+    noise.inputs["Scale"].default_value = 3.5
+    noise.inputs["Detail"].default_value = 1.0
+    g.link(pos.outputs[0], noise.inputs["Vector"])
+    g.link(
+        g.m("Contour Motion Accelerates", "MULTIPLY", g.m("Contour Clock", "MULTIPLY", p, p), 8),
+        noise.inputs["W"],
+    )
+    centered = g.v("Centered Contour Noise", "SUBTRACT", noise.outputs["Color"], (0.5, 0.5, 0.5))
+    displacement = g.v(
+        "Alive Silhouette", "SCALE", centered, g.m("Contour Amplitude", "MULTIPLY", radius, 0.18)
+    )
+    g.link(displacement, deform.inputs["Offset"])
+
     _finish(g, deform.outputs[0])
     _surface(root, core=True)
     root["vfx_parameter_keys"] = "radius,expansion,opacity,strength,dissolve,noise_scale,fade"
@@ -423,7 +436,9 @@ def ribbons(root, *, ground=False):
     for face in layer.data.polygons:
         face.use_smooth = True
     p = g.value("Charge Clock", expression=PROGRESS)
-    u, side, phase, weight = (g.attr(k) for k in attrs)
+    path_t, side, phase, weight = (g.attr(k) for k in attrs)
+    head = g.stage("Path Draws Toward Core", p, 0, 0.45 if ground else 0.55)
+    u = g.m("Smoothly Advancing Head", "MULTIPLY", path_t, head)
     gather = g.stage("Field Contracts", p, 0.15, 0.82)
     release = g.stage("Field Collapses", p, 0.84, 1)
     remaining = g.m("Remaining Field", "SUBTRACT", 1, release)
@@ -465,12 +480,32 @@ def ribbons(root, *, ground=False):
     wobble = g.m(
         "Uneven Stroke",
         "SINE",
-        g.m("Small Curl", "ADD", g.m("Fine Path", "MULTIPLY", u, 17), phase),
+        g.m(
+            "Small Curl",
+            "ADD",
+            g.m("Fine Path", "MULTIPLY", u, 17),
+            g.m("Moving Curl", "ADD", phase, g.m("Curl Speed", "MULTIPLY", p, 11)),
+        ),
     )
     angle = g.m("Organic Spiral", "ADD", angle, g.m("Curl Amount", "MULTIPLY", wobble, 0.08))
-    taper = g.m("Tapered Ends", "SINE", g.m("Half Wave Along Stroke", "MULTIPLY", u, math.pi))
+    taper = g.m("Tapered Ends", "SINE", g.m("Half Wave Along Stroke", "MULTIPLY", path_t, math.pi))
     width = g.m("Ribbon Width", "MULTIPLY", g.value("Width", prop="width"), taper)
     width = g.m("Width Per Stroke", "MULTIPLY", width, weight)
+    width = g.m("Width Builds With Stroke", "MULTIPLY", width, g.m("Stroke Growth", "SQRT", head))
+    ripple = g.m(
+        "Traveling Width Ripple",
+        "SINE",
+        g.m(
+            "Ripple Motion",
+            "SUBTRACT",
+            g.m("Ripple Along Path", "ADD", g.m("Uneven Edge", "MULTIPLY", u, 23), phase),
+            g.m("Ripple Acceleration", "MULTIPLY", g.m("Ripple Clock", "MULTIPLY", p, p), 22),
+        ),
+    )
+    variation = g.m("Varying Stream Width", "MULTIPLY_ADD", ripple, 0.25)
+    variation.node.inputs[2].default_value = 0.75
+    width = g.m("Unsteady Energy Stream", "MULTIPLY", width, variation)
+
     side_offset = g.m("Across Ribbon", "MULTIPLY", side, width)
     angle = g.m("Ribbon Bank", "ADD", angle, side_offset)
     x = g.m("Spiral X", "MULTIPLY", radius, g.m("Cosine", "COSINE", angle))
@@ -486,12 +521,16 @@ def ribbons(root, *, ground=False):
     shape = g.n("GeometryNodeSetPosition", "Authored Converging Paths")
     g.link(geometry, shape.inputs["Geometry"])
     g.link(g.xyz("Three Dimensional Intake", x, y, z), shape.inputs["Position"])
-    head = g.stage("Path Draws Toward Core", p, 0, 0.45 if ground else 0.55)
-    outside = g.m("Ahead Of Flow", "GREATER_THAN", u, head)
-    trim = g.n("GeometryNodeDeleteGeometry", "Growing Stroke Heads", domain="POINT")
-    g.link(shape.outputs[0], trim.inputs["Geometry"])
-    g.link(outside, trim.inputs["Selection"])
-    _finish(g, trim.outputs[0])
+    store = g.n(
+        "GeometryNodeStoreNamedAttribute",
+        "Preserve Moving Flow Coordinates",
+        data_type="FLOAT",
+        domain="POINT",
+    )
+    store.inputs["Name"].default_value = "charge_flow_u"
+    g.link(shape.outputs[0], store.inputs["Geometry"])
+    g.link(u, store.inputs["Value"])
+    _finish(g, store.outputs[0])
     _surface(root)
     root["vfx_parameter_keys"] = "radius,width,expansion,strength,dissolve,noise_scale,fade"
 

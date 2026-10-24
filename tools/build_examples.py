@@ -163,6 +163,8 @@ def create_effect(key):
         spiral_motes(particles)
         for member in (outer, inner, shield):
             member.children[0].data.materials[0].surface_render_method = "BLENDED"
+        # Depth-correct cutouts keep the inner nucleus behind the outer shell in Eevee.
+        shield.children[0].data.materials[0].surface_render_method = "DITHERED"
         root = composition.create(context, [outer, inner, shield, particles])
         root.name = "Energy Charge"
     elif key == "impact-burst":
@@ -200,10 +202,6 @@ def preview_scene(key):
     scene.view_settings.view_transform = "Standard"
     scene.render.resolution_x = scene.render.resolution_y = 256
     scene.render.resolution_percentage = 100
-    if key == "energy-charge":
-        glow = core.create_screen(bpy.context)
-        glow["strength"], glow["fade"] = 0.25, 0.0
-        glow.update_tag()
     scene.frame_set(frame)
 
 

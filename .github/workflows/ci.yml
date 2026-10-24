@@ -141,7 +141,6 @@ jobs:
           LIBGL_ALWAYS_SOFTWARE: '1'
           EGL_PLATFORM: surfaceless
         run: |
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --legacy
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --engine BLENDER_EEVEE
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --light
@@ -155,6 +154,7 @@ jobs:
           path: |
             work/visual-charge/*/charge-*.png
             work/visual-charge/*/charge.blend
+            work/visual-charge/*/render-settings.json
       - name: Build combat playback evidence (960x540, CPU, no bloom)
         if: runner.os == 'Linux'
         env:
@@ -191,7 +191,7 @@ jobs:
             work/visual-combat/*/video-frames/*.png
             work/visual-combat/*/video-frames/frames.json
       - name: Build and validate starter assets (CPU only)
-        if: github.ref_type == 'tag' && runner.os == 'Linux'
+        if: runner.os == 'Linux'
         run: |
           blender -b --factory-startup --python-exit-code 1 --python tools/build_examples.py
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tests/starter_package_reopen.py

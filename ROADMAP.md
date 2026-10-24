@@ -108,3 +108,7 @@ v0.21.0 标签的三平台测试通过，但 Linux 缺少 EGL 动态库，Eevee 
 ## 蓄力环的显现节奏
 
 [#88](https://github.com/mumu-lhl/blender-vfx-studio/issues/88) 对照实际渲染与节点，发现环的出生透明度为 1，而球壳有前段显现。已在真实新资产材质中加入两段弧的平滑闭合，地面环先完成、轨道后完成；几何和发光不增加。实际查看 Cycles / Eevee 暗、亮背景出现与峰值图，Cycles 峰值与改动前像素一致。局部回归、重定时和原生开场渲染检查跟随 PR 记录，0.22.3 仍未发布。
+
+## 艺术设计重新评估：Energy Charge 优先
+
+用户复核指出原有球壳、细环、月牙与星芒仍过于简单。此前技术检查不等于成熟游戏品质，整体差距见 [艺术评估](docs/ART_DIRECTION_REVIEW.md)。[#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 正在以真实原生资产重设计充能的形体、空间流动、压缩与释放；[#88](https://github.com/mumu-lhl/blender-vfx-studio/issues/88) 的局部环显现不足以解决整体问题，已被此项取代。候选已经过多次实际渲染调整，仍在检查完整动作、兼容和预算，不宣称艺术验收完成；先完成它，再处理 Arc Slash 与 Impact Burst。

@@ -801,7 +801,8 @@ class VFX_PT_main(bpy.types.Panel):
             keys = ("radius", "width", "expansion", "strength", "dissolve", "noise_scale", "fade")
         profile = root.get("vfx_parameter_keys")
         if isinstance(profile, str):
-            keys = tuple(key for key in keys if key in profile.split(","))
+            visible = {key.strip() for key in profile.split(",")}
+            keys = tuple(key for key in keys if key in visible)
         for key in keys:
             layout.prop(root, f'["{key}"]', text=key.replace("_", " ").title())
         for i, color in enumerate(("Red", "Green", "Blue")):

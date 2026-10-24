@@ -151,7 +151,32 @@ class StarterTests(unittest.TestCase):
         self.assertLess(charged[0], early[0] * 0.8)
         self.assertGreater(charged[1], early[1] * 1.4)
         for frame in (1, 7, 22, 37, 46, 48):
-            self.assertLessEqual(vertex_count(charge, frame), 800)
+            self.assertLessEqual(
+                vertex_count(charge, frame), 900
+            )  # Includes the 54-vertex inner kernel.
+
+    def test_authored_core_opacity_dissolve_and_strength_control_all_surfaces(self):
+        charge = create_effect("energy-charge")
+        camera()
+        bpy.context.scene.render.dither_intensity = 0
+        members = composition.members(charge)
+        core_member = next(r for r in members if r["vfx_module"] == "shader.shield")
+        for member in members:
+            if member != core_member:
+                member.children[0].hide_render = True
+
+        def energy():
+            pixels = render_pixels(31)
+            return sum(sum(pixels[i : i + 3]) for i in range(0, len(pixels), 4))
+
+        self.assertGreater(energy(), 0.01)
+        for key, value in (("opacity", 0), ("dissolve", 1), ("strength", 0)):
+            old = core_member[key]
+            core_member[key] = value
+            core_member.update_tag()
+            self.assertLess(energy(), 1e-5, key)
+            core_member[key] = old
+            core_member.update_tag()
 
     def test_charge_fades_before_its_native_lifetime_cutoff(self):
         root = create_effect("energy-charge")
@@ -221,6 +246,14 @@ class StarterTests(unittest.TestCase):
             a, b = assets.load(bpy.context, file), assets.load(bpy.context, file)
             self.assertEqual(len({root["vfx_id"], a["vfx_id"], b["vfx_id"]}), 3)
             self.assertEqual(vertex_count(a, 7), vertex_count(b, 7))
+            if key == "energy-charge":
+                for instance in (a, b):
+                    for member in composition.members(instance):
+                        self.assertIsInstance(member.get("vfx_parameter_keys"), str)
+                        self.assertTrue(
+                            set(member["vfx_parameter_keys"].split(",")).issubset(member.keys())
+                        )
+
             a["duration"] = 100.0
             a.update_tag()
             self.assertNotEqual(a["duration"], b["duration"])
