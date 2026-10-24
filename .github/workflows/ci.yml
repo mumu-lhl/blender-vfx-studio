@@ -132,7 +132,7 @@ jobs:
         with:
           name: impact-burst-visual-review
           path: work/visual-impact/*.png
-      - name: Review Energy Charge tail (960x540, CPU, no bloom)
+      - name: Review Energy Charge gathering and tail (960x540, CPU, no bloom)
         if: runner.os == 'Linux'
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
@@ -142,6 +142,7 @@ jobs:
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --engine BLENDER_EEVEE
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --light
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --engine BLENDER_EEVEE --light
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-charge/cycles/charge.blend --python tests/charge_reopen.py
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-charge/blender_eevee/charge.blend --python tests/charge_reopen.py
       - uses: actions/upload-artifact@v7.0.2

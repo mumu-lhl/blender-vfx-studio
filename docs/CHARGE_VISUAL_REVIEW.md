@@ -1,4 +1,4 @@
-# Energy Charge 的末段淡出
+# Energy Charge：淡出与汇聚
 
 0.22.2 候选修复 [#76](https://github.com/mumu-lhl/blender-vfx-studio/issues/76)。旧入门资产的两层环 Fade=0.35，球壳 Fade=0；第 48 帧仍保留明显亮轮廓，第 49 帧生命周期结束时整体消失。修复把这三层的现有 Fade 参数改为 1，48 帧时长、层数、粒子预算和发光强度不变。
 
@@ -15,4 +15,16 @@ blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python to
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --light
 ```
 
-Linux 无 GPU 时可加 `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless`。结果在 `work/visual-charge/`，含五帧 PNG 和原生场景；CI 附件名为 `energy-charge-visual-review`。本次检查的是淡出和低采样透明，现有双环、球壳与外散圆粒的聚能造型、主次和连续节奏仍需继续改进。
+Linux 无 GPU 时可加 `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless`。结果在 `work/visual-charge/`，含五帧 PNG 和原生场景；CI 附件名为 `energy-charge-visual-review`。末段淡出修复已在 PR #77 合并并通过三平台 CI；0.22.2 尚未发布。
+
+随后 #79 改进新建入门资产的视觉主次。旧版外散圆粒改为从半径 1.4 处向中心移动；Spawn Radius 控制起点、Velocity 控制汇聚速度，剩余距离最低为 0，因此调高速度不会穿过中心再向外散出。出生时间、独立寿命、随机种子和槽位复用仍使用原来的原生 Emitter。默认发射率与存活槽数没有增加，重算任意帧不依赖之前的状态。
+
+一个地面环改为倾斜轨道，用原生驱动绕中心旋转；另一个地面环降低亮度。球壳收紧到 0.65，私有材质保留噪声、透明与淡出，加入深色主体到青色边缘的渐变和前 30% 时间的显现。第一轮单纯降低双环亮度仍缺少焦点，浅背景透明球壳也很弱，因此进行了这些调整，没有提高发光强度或添加合成辉光。
+
+预览现在生成第 4、10、16、22、28、34、42、48、49 帧。它们展示出现、汇聚、轨道转动和退场；静图检查不能代替未采样时刻或实时节奏检查。低质量球壳与环仍能看到多边形轮廓，粒子仍是小圆粒，尚不称为完整的高品质角色蓄力方案。后续需结合真实动作改善粒子形状和蓄力到释放的衔接。
+
+改变只作用于新生成的 Energy Charge 完整资产；普通 Emitter 的运动仍向外。自定义汇聚节点、渐变与轨道驱动随完整 `.blend` 保存、复制和载入。单层参数预设只保存参数，不能保存这些手动编排的节点；复用该造型应使用完整效果保存。`--legacy` 仅恢复旧 Fade 和透明模式，用于检查突切，不会恢复整个旧版造型。
+
+本轮实际查看了 Cycles 暗背景的全部九帧、软件 Eevee 暗背景的第 4、16、22、42、48、49 帧，以及两种引擎亮背景的出现、中段和退场实图。球壳在中段成为主轮廓，轨道由正面转为侧面再转回；末段整体变暗，49 帧清空。亮背景的深色主体比第一轮透明青色轮廓更清楚，但浅蓝细线和微粒仍偏弱。没有把九帧检查写成实时观看。
+
+本地五项入门库测试和原生重开通过，覆盖汇聚距离、抵达中心后的停止、重复跳帧、普通 Emitter 仍向外、实例独立、预算与淡出。最终 Cycles / Eevee 场景在无插件进程重渲染第 22、48 帧，PNG 所有通道与原图一致。三平台完整检查以本轮 PR 的 CI 结果为准。

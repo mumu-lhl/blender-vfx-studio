@@ -34,3 +34,5 @@ blender -b --factory-startup --python-exit-code 1 --python tools/build_examples.
 Arc Slash 已使用资产版本 2 的分层刀光，缩略图展示第 5 帧峰值，不加辉光。它与直接创建的新版刀光相同，只将播放时长设为 18 帧；Attack、Motion Ease、Core Width、Afterimage、Streaks 和 Breakup 等仍可编辑。原有版本 1 的文件不会自动换成新材质。高清检查见 [视觉记录](https://github.com/mumu-lhl/blender-vfx-studio/blob/main/docs/VISUAL_REVIEW.md)。
 
 Impact Burst 与侧栏直接创建的效果使用同一接口和默认参数，缩略图展示第 5 帧。高清三阶段和实际看图范围见 [打击爆发视觉记录](https://github.com/mumu-lhl/blender-vfx-studio/blob/main/docs/IMPACT_VISUAL_REVIEW.md)。
+
+Energy Charge 的后续候选把外散圆粒改为向中心汇聚，并加入倾斜轨道、较暗地面环与带深色主体的球壳。汇聚仍是无缓存的原生节点计算，正的 Velocity 越大，抵达中心越快；不会越过中心再向外移动。这些自定义节点随完整效果保存，单层参数预设不能保存节点结构。0.22.2 尚未发布，检查范围见 [充能记录](CHARGE_VISUAL_REVIEW.md)。

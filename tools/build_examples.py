@@ -13,6 +13,7 @@ from mathutils import Vector
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from blender_vfx_studio import assets, composition, core  # noqa: E402
+from blender_vfx_studio.nodes import PROGRESS, TIME_PROPS, drive, node  # noqa: E402
 
 EXAMPLES = ("energy-charge", "impact-burst", "arc-slash")
 PREVIEWS = {
@@ -41,21 +42,23 @@ def create_effect(key):
         outer = configure(
             core.create(context, "ENERGY_RING", "LOW"),
             color,
-            radius=1.6,
-            width=0.065,
+            radius=0.9,
+            width=0.02,
             duration=48.0,
-            strength=3.5,
+            strength=0.9,
             dissolve=0.12,
             fade=1.0,
         )
-        outer.location.z = -0.8
+        outer.name = "Charge • Orbit"
+        outer.rotation_euler = (1.1, 0.35, 0.25)
+        drive(outer, "rotation_euler", outer, f"0.25+({PROGRESS})*6.283185", TIME_PROPS, 2)
         inner = configure(
             core.create(context, "ENERGY_RING", "LOW"),
             color,
             radius=1.35,
             width=0.025,
             duration=48.0,
-            strength=3.5,
+            strength=0.6,
             dissolve=0.08,
             fade=1.0,
         )
@@ -63,16 +66,41 @@ def create_effect(key):
         shield = configure(
             core.create_shield(context, "LOW"),
             color,
-            radius=1.0,
-            opacity=0.45,
-            strength=2.5,
-            ior=1.05,
-            rim_power=1.2,
-            dissolve=0.2,
-            flow=1.2,
+            radius=0.65,
+            opacity=0.95,
+            strength=1.6,
+            ior=1.3,
+            rim_power=0.05,
+            dissolve=0.1,
+            flow=2.4,
             duration=48.0,
             fade=1.0,
         )
+        # A dark center and cyan edge preserve a focal shape on pale backgrounds.
+        tree = shield.children[0].data.materials[0].node_tree
+        tint = node(tree, "ShaderNodeRGB", "Editable Charge Color", -750, -600)
+        for index in range(3):
+            drive(tint.outputs[0], "default_value", shield, "p", {"p": f"color_{index}"}, index)
+        dark = node(tree, "ShaderNodeVectorMath", "Dark Charge Body", -500, -600, operation="SCALE")
+        tree.links.new(tint.outputs[0], dark.inputs[0])
+        dark.inputs["Scale"].default_value = 0.05
+        gradient = node(tree, "ShaderNodeMixRGB", "Body To Cyan Rim", -250, -600)
+        tree.links.new(tree.nodes["Fresnel Edge"].outputs[0], gradient.inputs[0])
+        tree.links.new(dark.outputs[0], gradient.inputs[1])
+        tree.links.new(tint.outputs[0], gradient.inputs[2])
+        tree.links.new(gradient.outputs[0], tree.nodes["Shield Emission"].inputs["Color"])
+        buildup = node(tree, "ShaderNodeValue", "Charge Build Up", -500, -850)
+        drive(
+            buildup.outputs[0],
+            "default_value",
+            shield,
+            f"min(max(({PROGRESS})/0.3,0),1)",
+            TIME_PROPS,
+        )
+        visible = node(tree, "ShaderNodeMath", "Gathering Opacity", 0, -600, operation="MULTIPLY")
+        tree.links.new(tree.nodes["Final Opacity"].outputs[0], visible.inputs[0])
+        tree.links.new(buildup.outputs[0], visible.inputs[1])
+        tree.links.new(visible.outputs[0], tree.nodes["Shield Surface"].inputs[0])
         # Private starter materials: avoid noisy hashed transparency at low Eevee samples.
         for member in (outer, inner, shield):
             member.children[0].data.materials[0].surface_render_method = "BLENDED"
@@ -83,15 +111,28 @@ def create_effect(key):
             lifetime=0.8,
             emission_seconds=1.2,
             duration=48.0,
-            velocity=1.7,
-            gravity=0.15,
-            spread=0.8,
-            spawn_radius=0.5,
+            velocity=1.5,
+            gravity=0.0,
+            spread=1.0,
+            randomness=0.0,
+            spawn_radius=1.4,
             size=0.035,
             strength=3.0,
             seed=9,
         )
-        particles.location.z = -0.5
+        particles.name = "Charge • Inward Motes"
+        # Edit only this asset's private native graph. Generic emitters still move outward.
+        tree = particles.children[0].modifiers[0].node_group
+        distance = tree.nodes["Radial Distance"]
+        distance.name = distance.label = "Remaining Gathering Radius"
+        distance.operation = "SUBTRACT"
+        tree.links.new(tree.nodes["Spawn Radius"].outputs[0], distance.inputs[0])
+        tree.links.new(tree.nodes["Travel"].outputs[0], distance.inputs[1])
+        stop = node(tree, "ShaderNodeMath", "Stop At Center", 300, -450, operation="MAXIMUM")
+        stop.inputs[1].default_value = 0
+        tree.links.new(distance.outputs[0], stop.inputs[0])
+        tree.links.new(stop.outputs[0], tree.nodes["Radial Motion"].inputs["Scale"])
+        particles.location.z = 0.0
         root = composition.create(context, [outer, inner, shield, particles])
         root.name = "Energy Charge"
     elif key == "impact-burst":

@@ -63,7 +63,7 @@ def main():
     prefix += "-light" if args.light else ""
     folder = ROOT / "work/visual-charge" / prefix
     folder.mkdir(parents=True, exist_ok=True)
-    for frame in (4, 22, 42, 48, 49):
+    for frame in (4, 10, 16, 22, 28, 34, 42, 48, 49):
         scene.frame_set(frame)
         scene.render.filepath = str(folder / f"charge-{prefix}-{frame:04d}.png")
         bpy.ops.render.render(write_still=True)
