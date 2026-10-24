@@ -9,6 +9,7 @@ import bpy
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests"))
+from emitter_test_support import particles
 from particle_test_support import camera, render_pixels
 
 import blender_vfx_studio as addon
@@ -32,6 +33,41 @@ def vertex_count(root, frame):
 class StarterTests(unittest.TestCase):
     def setUp(self):
         bpy.ops.wm.read_factory_settings(use_empty=True)
+
+    def test_charge_motes_gather_without_crossing_center_and_generic_emitter_is_unchanged(self):
+        charge = create_effect("energy-charge")
+        motes = next(
+            r for r in composition.members(charge) if r["vfx_module"] == "particle.emitter"
+        )
+        for key, value in dict(rate=0.1, lifetime=1.0, emission_seconds=3.0).items():
+            motes[key] = value
+        motes.update_tag()
+        bpy.context.view_layer.update()
+        for frame, expected in ((10, 0.275), (1, 1.4), (7, 0.65), (10, 0.275)):
+            actual = particles(motes, frame)
+            self.assertEqual(len(actual), 1)
+            self.assertAlmostEqual(actual[0][0].length, expected, places=5)
+        motes["velocity"] = 3.0
+        motes.update_tag()
+        for frame in (7, 10):
+            self.assertAlmostEqual(particles(motes, frame)[0][0].length, 0, places=5)
+        bpy.context.scene.frame_set(1)
+        ordinary = core.create_emitter(bpy.context)
+        for key in (
+            "rate",
+            "lifetime",
+            "emission_seconds",
+            "duration",
+            "velocity",
+            "gravity",
+            "spread",
+            "randomness",
+            "spawn_radius",
+        ):
+            ordinary[key] = motes[key]
+        ordinary.update_tag()
+        bpy.context.view_layer.update()
+        self.assertGreater(particles(ordinary, 7)[0][0].length, particles(ordinary, 1)[0][0].length)
 
     def test_charge_fades_before_its_native_lifetime_cutoff(self):
         root = create_effect("energy-charge")
