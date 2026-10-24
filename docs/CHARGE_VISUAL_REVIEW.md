@@ -42,9 +42,12 @@ Eevee 曾把后方亮核画在外壳前面，形成完整白色椭圆。核心�
 ```sh
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --sampled
 LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --engine BLENDER_EEVEE --light --sampled
+LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --engine BLENDER_EEVEE --light --view far --view-transform AgX --frames 13 31 42
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/charge_preview.py -- --baseline-asset path/to/old-energy-charge.blend
 ```
 
 固定相机与 960×540 分辨率。`--sampled` 隔一帧渲染并保留额外检查帧；小范围比较可改用 `--frames 13 22 31 37`，二者互斥。结果在 `work/visual-charge/`，包括 PNG、停在第 31 帧的原生场景和 `render-settings.json`。完成记录包含引擎、帧列表及生成脚本哈希，渲染与保存成功后才写入；若源码中途改变则拒绝写入。目录可能遗留旧 PNG，应只使用本次记录列出的帧。
+
+`--view` 可选 `default`、`front`、`side`、`high`、`far`；远景把取景范围扩大一倍。`--view-transform AgX` 使用 AgX / None，默认仍为 Standard。非默认视角和 AgX 分别写入带后缀的独立目录；完成记录保存相机位置、目标、取景范围及实际色彩管理设置，便于在下一轮使用相同条件比较。
 
 `--baseline-asset` 读取真正旧完整资产；旧 `--legacy` 只恢复 Fade 和透明模式，不能作为完整旧外观对照。无插件重开检查会重渲染出现、中段、压缩与退场帧，逐像素比较保存前后结果，并检查生命周期结束后没有特效网格。

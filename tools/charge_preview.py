@@ -31,6 +31,10 @@ def main():
         "--baseline-asset", type=Path, help="Load a complete old asset instead of rebuilding it"
     )
     parser.add_argument("--engine", choices=("CYCLES", "BLENDER_EEVEE"), default="CYCLES")
+    parser.add_argument(
+        "--view", choices=("default", "front", "side", "high", "far"), default="default"
+    )
+    parser.add_argument("--view-transform", choices=("Standard", "AgX"), default="Standard")
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
     if args.frames and (min(args.frames) < 1 or args.sampled):
         parser.error(
@@ -63,12 +67,20 @@ def main():
         "Charge Review Camera", bpy.data.cameras.new("Charge Review Camera")
     )
     scene.collection.objects.link(camera)
-    camera.location = (4, -6, 3.5)
+    views = {
+        "default": ((4, -6, 3.5), 7.2),
+        "front": ((0, -7, 2.5), 7.2),
+        "side": ((7, 0, 2.5), 7.2),
+        "high": ((0, -4, 7), 7.2),
+        "far": ((4, -6, 3.5), 14.4),
+    }
+    position, scale = views[args.view]
+    camera.location = position
     camera.rotation_euler = (
         (Vector((0, 0, 0.1)) - camera.location).to_track_quat("-Z", "Y").to_euler()
     )
     # The original square thumbnail framing crops the ground rings at 16:9.
-    camera.data.type, camera.data.ortho_scale = "ORTHO", 7.2
+    camera.data.type, camera.data.ortho_scale = "ORTHO", scale
     scene.camera = camera
     scene.world = bpy.data.worlds.new("Charge Review Background")
     scene.world.use_nodes = True
@@ -81,12 +93,15 @@ def main():
     scene.eevee.taa_render_samples = 16
     scene.render.resolution_x, scene.render.resolution_y = 960, 540
     scene.render.resolution_percentage = 100
-    scene.view_settings.view_transform = "Standard"
+    scene.view_settings.view_transform = args.view_transform
+    scene.view_settings.look = "None"
     scene.render.image_settings.file_format = "PNG"
     prefix = (
         "baseline-" if args.baseline_asset else "legacy-" if args.legacy else ""
     ) + args.engine.lower()
     prefix += "-light" if args.light else ""
+    prefix += f"-{args.view}" if args.view != "default" else ""
+    prefix += "-agx" if args.view_transform == "AgX" else ""
     folder = ROOT / "work/visual-charge" / prefix
     folder.mkdir(parents=True, exist_ok=True)
     record = folder / "render-settings.json"
@@ -111,6 +126,16 @@ def main():
             {
                 "engine": args.engine,
                 "light": args.light,
+                "view": args.view,
+                "camera_position": list(camera.location),
+                "camera_target": [0, 0, 0.1],
+                "ortho_scale": camera.data.ortho_scale,
+                "color_management": {
+                    "view_transform": scene.view_settings.view_transform,
+                    "look": scene.view_settings.look,
+                    "exposure": scene.view_settings.exposure,
+                    "gamma": scene.view_settings.gamma,
+                },
                 "resolution": [960, 540],
                 "fps": scene.render.fps,
                 "rendered_frames": sorted(frames),
