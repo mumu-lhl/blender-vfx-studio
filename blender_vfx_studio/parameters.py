@@ -172,13 +172,18 @@ SLASH_PARAMETERS_V2 = {
     "breakup": (0.75, 0.0, 1.0, "Directional noise erosion after the strike"),
 }
 
-SLASH_PARAMETERS = {
+SLASH_PARAMETERS_V3 = {
     **SLASH_PARAMETERS_V2,
     "strength": (1.6, 0.0, 1000.0, "Blade emission; illustrated body stays darker"),
     "fade": (1.0, 0.0, 1.0, "Release into separate pieces; noise breakup remains independent"),
     "contour": (0.65, 0.0, 1.0, "Uneven leading hook and torn inner silhouette"),
     "bank": (0.22, -1.0, 1.0, "Depth bend relative to radius; zero flattens the blade"),
     "wake_spread": (0.7, 0.0, 1.0, "Wake separation during the sweep and release"),
+}
+
+SLASH_PARAMETERS = {
+    **SLASH_PARAMETERS_V3,
+    "afterimage": (0.42, 0.0, 1.0, "Opacity of two subordinate native wake ribbons"),
 }
 
 SHIELD_PARAMETERS = {
@@ -214,7 +219,9 @@ def parameters_for(module, asset_version=None):
     if module == "shader.shield":
         return SHIELD_PARAMETERS
     if module == "mesh.slash":
-        return {1: SLASH_PARAMETERS_V1, 2: SLASH_PARAMETERS_V2}.get(asset_version, SLASH_PARAMETERS)
+        return {1: SLASH_PARAMETERS_V1, 2: SLASH_PARAMETERS_V2, 3: SLASH_PARAMETERS_V3}.get(
+            asset_version, SLASH_PARAMETERS
+        )
     if module == "simulation.cloth":
         return SIMULATION_PARAMETERS
     if module == "core.composition":

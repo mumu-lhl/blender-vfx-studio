@@ -278,6 +278,16 @@ class SlashTests(unittest.TestCase):
         update(root, afterimage=0.0)
         self.assertLess(max(render_pixels(7)[0::4]), 1e-5)
 
+    def test_reversing_sweep_keeps_the_leading_mass_and_wakes_on_the_leading_side(self):
+        root = core.create(bpy.context, "ARC_SLASH", "LOW")
+        positive = points(root, 5)
+        update(root, spin=-root["spin"])
+        negative = points(root, 5)
+        for a, b in zip(positive, negative):
+            self.assertAlmostEqual(a[0], b[0], places=5)
+            self.assertAlmostEqual(a[1], -b[1], places=5)
+            self.assertAlmostEqual(a[2], b[2], places=5)
+
     def test_version_two_preset_retains_the_flat_regular_shape(self):
         root = slash.create(bpy.context, "LOW", asset_version=2)
         update(root, spin=0.0, expansion=0.0)

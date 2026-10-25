@@ -6,7 +6,12 @@ import bpy
 
 from . import core, nodes
 from .nodes import ACTIVE, PROGRESS, TIME_PROPS, drive, node
-from .parameters import SLASH_PARAMETERS, SLASH_PARAMETERS_V1, SLASH_PARAMETERS_V2
+from .parameters import (
+    SLASH_PARAMETERS,
+    SLASH_PARAMETERS_V1,
+    SLASH_PARAMETERS_V2,
+    SLASH_PARAMETERS_V3,
+)
 
 
 def create(context, quality="MEDIUM", *, asset_version=4):
@@ -21,7 +26,9 @@ def create(context, quality="MEDIUM", *, asset_version=4):
         "Arc Slash",
         "mesh.slash",
         quality,
-        {1: SLASH_PARAMETERS_V1, 2: SLASH_PARAMETERS_V2}.get(asset_version, SLASH_PARAMETERS),
+        {1: SLASH_PARAMETERS_V1, 2: SLASH_PARAMETERS_V2, 3: SLASH_PARAMETERS_V3}.get(
+            asset_version, SLASH_PARAMETERS
+        ),
         {},
     )
     root["vfx_asset_version"] = asset_version
@@ -38,7 +45,7 @@ def create(context, quality="MEDIUM", *, asset_version=4):
                 taper = max(math.sin(math.pi * shape_u), 0) ** root["taper"]
                 if modern:
                     if asset_version >= 4:
-                        taper *= 1 - 0.62 * bool(band) - 0.1 * band
+                        taper *= 1 - 0.52 * bool(band) - 0.1 * band
                     else:
                         taper *= (1 - root["head_bias"] * (1 - u)) * (0.12 if band else 1)
                 radius = max(root["radius"] * (1 + band * 0.075) - root["width"] * taper * v, 0.001)
@@ -146,6 +153,13 @@ def geometry(obj, root):
     arc = value("Arc Radians", "arc", -1200, 100, "p*0.017453292519943295")
     spin = value("Spin Radians", "spin", -1200, -100, "p*0.017453292519943295")
     centered = math_node("Centered Arc", "SUBTRACT", u.outputs["Attribute"], 0.5, -950, 500)
+    if layered:
+        negative = math_node("Negative Sweep", "LESS_THAN", spin, 0, -1700, 3100)
+        reverse = math_node("Reverse Arc Direction", "MULTIPLY", negative, 2, -1500, 3100)
+        orientation = math_node("Arc Follows Sweep Direction", "SUBTRACT", 1, reverse, -1300, 3100)
+        centered = math_node(
+            "Leading End Follows Spin", "MULTIPLY", centered, orientation, -1100, 3100
+        )
     if modern:
         shorter = math_node("Wake Arc Reduction", "MULTIPLY", band, 0.16, -800, 1800)
         shorter = math_node("Wake Arc Fraction", "SUBTRACT", 1, shorter, -600, 1800)
@@ -196,7 +210,7 @@ def geometry(obj, root):
             amount = math_node("Biased Taper", "MULTIPLY", amount, bias, -400, -1400)
         wake = math_node("Is Wake", "GREATER_THAN", band, 0.5, -1000, -1600)
         narrow = math_node(
-            "Wake Narrowing", "MULTIPLY", wake, 0.62 if layered else 0.88, -800, -1600
+            "Wake Narrowing", "MULTIPLY", wake, 0.52 if layered else 0.88, -800, -1600
         )
         if layered:
             distance = math_node("Outer Wake Is Thinner", "MULTIPLY", band, 0.1, -1000, -3300)
