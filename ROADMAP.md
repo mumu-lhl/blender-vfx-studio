@@ -111,7 +111,7 @@ v0.21.0 标签的三平台测试通过，但 Linux 缺少 EGL 动态库，Eevee 
 
 ## 艺术设计重新评估：Energy Charge 优先
 
-用户复核指出原有球壳、细环、月牙与星芒仍过于简单。此前技术检查不等于成熟游戏品质，整体差距见 [艺术评估](docs/ART_DIRECTION_REVIEW.md)。[#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 正在以真实原生资产重设计充能的形体、空间流动、压缩与释放；[#88](https://github.com/mumu-lhl/blender-vfx-studio/issues/88) 的局部环显现不足以解决整体问题，已被此项取代。充能首轮重设计与刀光版本 3 已合并；整体艺术目标继续开放，当前处理 Impact Burst 的整体造型。
+用户复核指出原有球壳、细环、月牙与星芒仍过于简单。此前技术检查不等于成熟游戏品质，整体差距见 [艺术评估](docs/ART_DIRECTION_REVIEW.md)。[#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 跟踪真实原生资产的整体提升；[#88](https://github.com/mumu-lhl/blender-vfx-studio/issues/88) 的局部环显现不足以解决整体问题，已被此项取代。充能首轮、刀光版本 3 与命中喷流改进已合并，当前优先重做 Energy Charge 的压缩表现，再继续刀光与命中。
 
 [PR #90](https://github.com/mumu-lhl/blender-vfx-studio/pull/90) 三平台 CI 全部通过，已合并。隔帧复核发现核心仍有硬质叶片感，随后增加各瓣独立的卷动和局部鼓胀，流带改用明确色阶；这些修改发生在真实原生生成器。旧版完整资产不重建，当前仍为四层、最高约 826 顶点。尚未发布此重设计，整体质量目标 #89 保持开放；剩余问题和实际看图范围见充能记录。
 
@@ -139,6 +139,11 @@ v0.21.0 标签的三平台测试通过，但 Linux 缺少 EGL 动态库，Eevee 
 
 9 项局部测试与无插件重开通过，包含透明覆盖不变和颜色编辑验证；Cycles、近白远景三阶段高清重开一致。实际读取默认三阶段、正/侧面峰值、Eevee 浅灰/近白远景三阶段、暗背景中段及武器/靶标衔接。主边界比窄暗边试验更清楚，细余烬仍弱，整体艺术目标不据此关闭。详情见 [轮廓检查](docs/IMPACT_CONTRAST_REVIEW.md)。
 
+## Energy Charge：重新建立压缩感
+
+[#99](https://github.com/mumu-lhl/blender-vfx-studio/issues/99) 根据真实连段图及四个参考的实际观图，重做核心而非继续叠加发光。六条有空隙的内卷路径围绕小内核，后段三轴收紧；能量团向内加速并带动截面鼓起。仍为四层、12 个粒子槽、低质量最高 894 顶点，旧完整资产不重建。
+
+11 项局部测试通过。实际看图发现线圈与圆珠感后，改用随移动能量团鼓起的扫掠薄片，并减少微粒绕行；两引擎多个阶段、侧面、俯视和 Eevee 浅背景隔帧图已读取。远景发现亮部融入背景，已在真实核心材质增加可编辑深蓝边界，相同远景重读后轮廓更完整，细点缀仍弱。最终 Cycles 六阶段、实际示例 ZIP 和完整 60 帧 Eevee 连段的原生检查通过，已读取全部 30 张视频解码图和 25–33 相邻帧。充能先交出亮点，刀光与命中随后接管；整体商业品质仍未验收。设计依据、预算和观看范围见 [压缩记录](docs/CHARGE_COMPRESSION_REVIEW.md) 和 [参考笔记](docs/REFERENCE_VISUAL_STUDY.md)。非必要骨架与 GUI 扩展继续暂缓，0.22.3 不发布。
 ## 连续连段检查与当前艺术重做
 
 [#98](https://github.com/mumu-lhl/blender-vfx-studio/issues/98) 已实现完整 60 帧的连续生成、源代码/场景/图片校验、编码、隔帧解码与离线原生检查包。本地编码和无插件检查通过，实际读取了全部 30 张解码图；原生 31/33 帧匹配，60 帧清空。详情与未验收范围见 [连续检查记录](docs/CONTINUOUS_SKILL_REVIEW.md)。

@@ -2,6 +2,8 @@
 
 import math
 
+from mathutils import Vector
+
 from blender_vfx_studio.nodes import ACTIVE, PROGRESS, TIME_PROPS, drive, node
 
 
@@ -64,8 +66,8 @@ class _Fields:
         self.link(p, n.inputs["Value"])
         return n.outputs[0]
 
-    def attr(self, name):
-        n = self.n("GeometryNodeInputNamedAttribute", name, data_type="FLOAT")
+    def attr(self, name, data_type="FLOAT"):
+        n = self.n("GeometryNodeInputNamedAttribute", name, data_type=data_type)
         n.inputs["Name"].default_value = name
         return n.outputs["Attribute"]
 
@@ -105,6 +107,29 @@ def _mesh(layer, vertices, faces, attributes=None):
     mesh.update()
 
 
+def _inward_packet(g, p, u, strand):
+    """A broad head and tapered tail travel toward increasing path coordinates."""
+    phase = g.m(
+        "Unequal Intake Phase",
+        "SUBTRACT",
+        u,
+        g.m("Path Offset", "MULTIPLY", strand, 0.173),
+    )
+    phase = g.m(
+        "Packets Accelerate Inward",
+        "SUBTRACT",
+        phase,
+        g.m("Packet Travel", "MULTIPLY", g.m("Packet Acceleration", "MULTIPLY", p, p), 4),
+    )
+    phase = g.m("Repeated Intake", "FRACT", phase)
+    return g.m(
+        "Inward Energy Packet",
+        "MULTIPLY",
+        g.stage("Packet Trailing Edge", phase, 0.02, 0.38),
+        g.m("Packet Leading Edge", "SUBTRACT", 1, g.stage("Packet Head", phase, 0.58, 0.72)),
+    )
+
+
 def _surface(root, *, core=False):
     material = root.children[0].data.materials[0]
     material.name = "VFX • Charge Plasma Core" if core else "VFX • Charge Flow"
@@ -113,18 +138,15 @@ def _surface(root, *, core=False):
     tree.nodes.clear()
     g = _Fields(tree, root)
     p = g.value("Charge Clock", expression=PROGRESS)
-    ignite = g.stage("Ignition", p, 0, 0.16)
-    release = g.stage("Release And Break Apart", p, 0.82, 1)
-    loss = g.m("Editable Fade", "MULTIPLY", release, g.value("Fade", prop="fade"))
-    alpha = g.m(
-        "Charge Envelope",
-        "MULTIPLY",
-        1 if core else ignite,
-        1 if core else g.m("Opacity After Release", "SUBTRACT", 1, loss),
-    )
     if core:
-        alpha = g.m("Editable Opacity", "MULTIPLY", alpha, g.value("Opacity", prop="opacity"))
-    envelope = alpha
+        alpha = g.value("Core Surface Opacity", prop="opacity")
+    else:
+        ignite = g.stage("Ignition", p, 0, 0.16)
+        release = g.stage("Release And Break Apart", p, 0.82, 1)
+        loss = g.m("Editable Fade", "MULTIPLY", release, g.value("Fade", prop="fade"))
+        alpha = g.m(
+            "Charge Envelope", "MULTIPLY", ignite, g.m("Opacity After Release", "SUBTRACT", 1, loss)
+        )
     color = g.n("ShaderNodeCombineXYZ", "Editable Energy Color")
     for i in range(3):
         drive(color.inputs[i], "default_value", root, "c", {"c": f"color_{i}"})
@@ -143,18 +165,19 @@ def _surface(root, *, core=False):
         g.m("Channel Acceleration", "MULTIPLY", g.m("Charge Squared", "MULTIPLY", p, p), 9),
         noise.inputs["W"],
     )
-    erosion = g.m(
-        "Release Erosion",
-        "ADD",
-        g.value("Dissolve", prop="dissolve"),
-        g.m("Erosion During Release", "MULTIPLY", loss if core else release, 0.8),
-    )
-    alpha = g.m(
-        "Broken Energy Surface",
-        "MULTIPLY",
-        alpha,
-        g.m("Surviving Energy", "GREATER_THAN", noise.outputs["Fac"], erosion),
-    )
+    if not core:
+        erosion = g.m(
+            "Release Erosion",
+            "ADD",
+            g.value("Dissolve", prop="dissolve"),
+            g.m("Erosion During Release", "MULTIPLY", release, 0.8),
+        )
+        alpha = g.m(
+            "Broken Energy Surface",
+            "MULTIPLY",
+            alpha,
+            g.m("Surviving Energy", "GREATER_THAN", noise.outputs["Fac"], erosion),
+        )
     gather = g.stage("Increasing Concentration", p, 0.15, 0.8)
 
     def attribute(name):
@@ -166,33 +189,15 @@ def _surface(root, *, core=False):
         g.link(normal.outputs["Normal"], facing.inputs[0])
         facing.inputs[1].default_value = (-0.45, -0.65, 0.6)
         u = attribute("charge_core_u")
-        angle = g.m(
-            "Angle Around Core",
-            "ARCTAN2",
-            attribute("charge_angle_sin"),
-            attribute("charge_angle_cos"),
+        packet = _inward_packet(g, p, u, attribute("charge_tongue"))
+        uneven = g.m("Uneven Packet Surface", "MULTIPLY_ADD", noise.outputs["Fac"], 0.45)
+        uneven.node.inputs[2].default_value = 0.5
+        hot = g.m(
+            "Bright Intake Heads",
+            "MULTIPLY",
+            packet,
+            uneven,
         )
-        phase = g.m(
-            "Helical Veins",
-            "ADD",
-            g.m("Three Energy Veins", "MULTIPLY", angle, 3),
-            g.m("Veins Rise Along Core", "MULTIPLY", u, 5),
-        )
-        phase = g.m(
-            "Vein Turbulence",
-            "ADD",
-            phase,
-            g.m("Uneven Veins", "MULTIPLY", noise.outputs["Fac"], 1.7),
-        )
-        phase = g.m(
-            "Veins Accelerate",
-            "SUBTRACT",
-            phase,
-            g.m("Flow Speed", "MULTIPLY", g.m("Flow Clock", "MULTIPLY", p, p), 9),
-        )
-        thin = g.m("Thin Curving Channel", "ABSOLUTE", g.m("Channel Wave", "SINE", phase))
-        hot = g.m("Bright Vein", "SUBTRACT", 1, g.stage("Vein Soft Edges", thin, 0.18, 0.45))
-        hot = g.m("Concentrated Veins", "MULTIPLY", hot, gather)
         # Three illustrated values describe volume without a glossy gradient or broad random holes.
         mid = g.m("Lit Midtone", "GREATER_THAN", facing.outputs["Value"], 0.05)
         bright = g.m("Narrow Lit Face", "GREATER_THAN", facing.outputs["Value"], 0.55)
@@ -273,40 +278,13 @@ def _surface(root, *, core=False):
     g.link(hot, mix.inputs[0])
     g.link(body, mix.inputs[1])
     hot_color = g.n("ShaderNodeMixRGB", "Editable Color To Hot Light")
-    hot_color.inputs[0].default_value = 0.85 if core else 0.035
+    hot_color.inputs[0].default_value = 0.08 if core else 0.035
     g.link(color.outputs[0], hot_color.inputs[1])
     hot_color.inputs[2].default_value = (0.9, 0.95, 1.0, 1)
     g.link(hot_color.outputs[0], mix.inputs[2])
     surface_color = mix.outputs[0]
     if core:
         inner = attribute("charge_inner")
-        cracks = g.m("Cutout Energy Channels", "GREATER_THAN", hot, 0.3)
-        shell_alpha = g.m(
-            "Shell Openings", "MULTIPLY", alpha, g.m("Shell Coverage", "SUBTRACT", 1, cracks)
-        )
-        alpha_mix = g.n("ShaderNodeMixRGB", "Shell And Inner Opacity")
-        g.link(inner, alpha_mix.inputs[0])
-        g.link(shell_alpha, alpha_mix.inputs[1])
-        # Opaque spatial erosion avoids stochastic alpha grain in low-sample Eevee.
-        # User Opacity remains continuous; Fade controls erosion during release.
-        inner_survival = g.m(
-            "Inner Dissolves Last",
-            "GREATER_THAN",
-            noise.outputs["Fac"],
-            g.m(
-                "Inner Erosion Threshold",
-                "ADD",
-                g.stage(
-                    "Inner Dissolve Threshold", g.value("Inner Dissolve", prop="dissolve"), 0.7, 1
-                ),
-                g.m("Kernel Release Erosion", "MULTIPLY", loss, 0.85),
-            ),
-        )
-        g.link(
-            g.m("Internal Energy Envelope", "MULTIPLY", envelope, inner_survival),
-            alpha_mix.inputs[2],
-        )
-        alpha = alpha_mix.outputs[0]
         facing = g.n("ShaderNodeVectorMath", "Plasma Facing", operation="DOT_PRODUCT")
         g.link(normal.outputs["Normal"], facing.inputs[0])
         g.link(normal.outputs["Incoming"], facing.inputs[1])
@@ -322,6 +300,12 @@ def _surface(root, *, core=False):
         light_remaining = g.m("Light Left Before Debris", "SUBTRACT", 1, spent)
         pressure = g.m("Spend White Front During Release", "MULTIPLY", pressure, light_remaining)
         center_mix = g.n("ShaderNodeMixRGB", "White Heart Cyan Midtone Ink Edge")
+        front = g.m(
+            "Light Concentrates At Incoming Tips",
+            "MULTIPLY",
+            front,
+            g.stage("Tip Light", u, 0.45, 0.9),
+        )
         g.link(g.m("Hot Front Coverage", "MULTIPLY", front, pressure), center_mix.inputs[0])
         g.link(surface_color, center_mix.inputs[1])
         g.link(hot_color.outputs[0], center_mix.inputs[2])
@@ -340,6 +324,23 @@ def _surface(root, *, core=False):
         g.link(surface_color, core_mix.inputs[1])
         g.link(kernel_color.outputs[0], core_mix.inputs[2])
         surface_color = core_mix.outputs[0]
+        edge = g.m(
+            "Core Silhouette Boundary",
+            "SUBTRACT",
+            1,
+            g.stage(
+                "Core Edge Transition",
+                g.m("Core Two Sided Facing", "ABSOLUTE", facing.outputs["Value"]),
+                0.2,
+                0.7,
+            ),
+        )
+        edge = g.m("Editable Core Edge", "MULTIPLY", edge, g.value("Core Edge Contrast", 0.85))
+        edge_mix = g.n("ShaderNodeMixRGB", "Dark Contour Around Luminous Paths")
+        g.link(edge, edge_mix.inputs[0])
+        g.link(surface_color, edge_mix.inputs[1])
+        g.link(g.v("Core Ink Tint", "SCALE", color.outputs[0], 0.035), edge_mix.inputs[2])
+        surface_color = edge_mix.outputs[0]
     emission = g.n("ShaderNodeEmission", "Native Energy Surface")
     g.link(surface_color, emission.inputs["Color"])
     g.link(g.value("Emission", prop="strength"), emission.inputs["Strength"])
@@ -354,7 +355,7 @@ def _surface(root, *, core=False):
 
 def core_shape(root):
     layer, g, geometry = _geometry(root, "Compressed Flame Core")
-    vertices, faces = [], []
+    vertices, faces, cross_sections = [], [], []
     core_attrs = {
         k: []
         for k in (
@@ -365,52 +366,87 @@ def core_shape(root):
             "charge_tongue",
         )
     }
-    # Three unequal flame tongues share one native editable mesh.
-    for tongue, (steps, sides, height, breadth, offset) in enumerate(
-        [
-            (17, 8, 0.78, 0.68, (0.0, 0.0)),
-            (11, 6, 0.43, 0.24, (-0.45, 0.30)),
-            (11, 6, 0.36, 0.20, (0.40, -0.38)),
-            (9, 6, 0.58, 0.30, (0.0, 0.0)),
-        ]
+    # Unequal curved strands leave actual space around a small nucleus.
+    # These are authored rest paths; native fields below animate compression.
+    for tongue, (phase, turns, reach, rise, breadth) in enumerate(
+        (
+            (0.0, 3.6, 1.05, 0.65, 0.20),
+            (1.35, 2.7, 0.88, 0.6, 0.09),
+            (2.7, 3.5, 1.0, -0.7, 0.10),
+            (3.65, 2.9, 0.75, -0.5, 0.15),
+            (4.8, 2.9, 0.9, 0.5, 0.08),
+            (5.6, 3.8, 0.8, -0.7, 0.075),
+        )
     ):
-        base = len(vertices)
+        primary = tongue in (0, 3)
+        # Spend more path samples on the broad silhouette, keeping the same budget.
+        base, steps, sides = len(vertices), 22 if primary else 10, 6 if primary else 3
+
+        def center(t):
+            angle = phase + turns * t + 0.12 * math.sin(t * 9 + phase)
+            radius = reach * (0.06 + 0.94 * (1 - t) ** 0.85)
+            return Vector(
+                (
+                    radius * math.cos(angle),
+                    radius * math.sin(angle),
+                    math.sin(math.pi * t) * rise * (1 - 0.4 * t),
+                )
+            )
+
         for j in range(steps):
             t = j / (steps - 1)
-            z = (-0.75 + 1.95 * t) * height
-            radius = max(math.sin(math.pi * t), 0.004) ** 0.85 * breadth * (1 - 0.3 * t)
+            point = center(t)
+            tangent = (center(min(t + 0.002, 1)) - center(max(t - 0.002, 0))).normalized()
+            side = tangent.cross(Vector((0, 0, 1))).normalized()
+            up = tangent.cross(side).normalized()
+            width = breadth * max(math.sin(math.pi * t), 0) ** 0.65 * (0.45 + 0.65 * t)
             for k in range(sides):
-                a = k * math.tau / sides + z * 0.65 + tongue * 0.7
-                r = radius * (1 + 0.12 * math.sin(k * 2.3 + t * 8 + tongue))
-                bend = 0.12 * math.sin(t * 3.5 + tongue) * t
-                vertices.append(
-                    (r * math.cos(a) + offset[0] * t + bend, r * math.sin(a) + offset[1] * t, z)
-                )
-                core_attrs["charge_core_u"].append(t)
-                core_attrs["charge_angle_sin"].append(math.sin(a))
-                core_attrs["charge_angle_cos"].append(math.cos(a))
-                core_attrs["charge_inner"].append(1.0 if tongue == 3 else 0.0)
-                core_attrs["charge_tongue"].append(float(tongue))
+                a = k * math.tau / sides + 0.18 * math.sin(t * 5 + tongue)
+                # Flatten the moving head into a swept flame, rather than a bead on a tube.
+                offset = width * (side * math.cos(a) + up * math.sin(a) * 0.28)
+                vertices.append(tuple(point + offset))
+                cross_sections.append(tuple(offset))
+                for name, value in zip(
+                    core_attrs, (t, math.sin(a), math.cos(a), 0.0, float(tongue))
+                ):
+                    core_attrs[name].append(value)
         for j in range(steps - 1):
             for k in range(sides):
                 a, b = base + j * sides + k, base + j * sides + (k + 1) % sides
                 faces.append((a, b, b + sides, a + sides))
+    base, steps, sides = len(vertices), 9, 6
+    for j in range(steps):
+        t = j / (steps - 1)
+        radius = max(math.sin(math.pi * t), 0) * 0.18
+        for k in range(sides):
+            a = k * math.tau / sides
+            vertices.append((radius * math.cos(a), radius * math.sin(a), (t - 0.5) * 0.4))
+            cross_sections.append((0, 0, 0))
+            for name, value in zip(core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0)):
+                core_attrs[name].append(value)
+    for j in range(steps - 1):
+        for k in range(sides):
+            a, b = base + j * sides + k, base + j * sides + (k + 1) % sides
+            faces.append((a, b, b + sides, a + sides))
     _mesh(layer, vertices, faces, core_attrs)
+    cross = layer.data.attributes.new("charge_cross", "FLOAT_VECTOR", "POINT")
+    for slot, value in zip(cross.data, cross_sections):
+        slot.vector = value
     for face in layer.data.polygons:
         face.use_smooth = True
     p = g.value("Charge Clock", expression=PROGRESS)
     ignite = g.stage("Ignition Growth", p, 0, 0.18)
-    gather = g.stage("Compression Builds", p, 0.12, 0.8)
+    gather = g.stage("Compression Builds", p, 0.45, 0.84)
     release = g.stage("Release Collapse", p, 0.84, 1)
     remaining = g.m("Remaining Shape", "SUBTRACT", 1, release)
     width = g.m(
         "Narrow Under Compression",
         "SUBTRACT",
         1,
-        g.m("Compression Amount", "MULTIPLY", gather, 0.32),
+        g.m("Compression Amount", "MULTIPLY", gather, 0.62),
     )
     height = g.m(
-        "Compact Pressure Volume", "ADD", 0.85, g.m("Pressure Height", "MULTIPLY", gather, 0.05)
+        "Compact Pressure Volume", "SUBTRACT", 1, g.m("Pressure Height", "MULTIPLY", gather, 0.4)
     )
     radius = g.m(
         "Core Radius",
@@ -423,6 +459,7 @@ def core_shape(root):
         ),
         g.m("Ignite Then Collapse", "MULTIPLY", ignite, remaining),
     )
+    pressure_width, pressure_height = width, height
     width = g.m("Core Width", "MULTIPLY", width, radius)
     height = g.m("Core Height", "MULTIPLY", height, radius)
     scale = g.n("GeometryNodeTransform", "Stretch And Compress")
@@ -434,7 +471,38 @@ def core_shape(root):
     twist = g.n(
         "ShaderNodeVectorRotate", "Accelerating Helical Distortion", rotation_type="AXIS_ANGLE"
     )
-    g.link(pos.outputs[0], twist.inputs["Vector"])
+    packet = _inward_packet(g, p, g.attr("charge_core_u"), g.attr("charge_tongue"))
+    section = g.m("Energy Heads Swell And Tails Thin", "MULTIPLY_ADD", packet, 1.1)
+    section.node.inputs[2].default_value = 0.22
+    # The nucleus has its own pulse; the moving packet only affects intake paths.
+    section = g.m(
+        "Keep Nucleus Section",
+        "ADD",
+        section,
+        g.m(
+            "Only Strand Sections Pulse",
+            "MULTIPLY",
+            g.attr("charge_inner"),
+            g.m("Nucleus Section Difference", "SUBTRACT", 0.85, section),
+        ),
+    )
+    retained_width = g.m("Retained Strand Width", "SUBTRACT", section, pressure_width)
+    retained_height = g.m("Retained Strand Depth", "SUBTRACT", section, pressure_height)
+    correction = g.v(
+        "Density Builds Between Strands",
+        "MULTIPLY",
+        g.attr("charge_cross", "FLOAT_VECTOR"),
+        g.xyz(
+            "Keep Cross Sections Under Pressure",
+            g.m("Width Retention Scale", "MULTIPLY", retained_width, radius),
+            g.m("Second Width Retention Scale", "MULTIPLY", retained_width, radius),
+            g.m("Depth Retention Scale", "MULTIPLY", retained_height, radius),
+        ),
+    )
+    g.link(
+        g.v("Compress Paths Without Thinning Energy", "ADD", pos.outputs[0], correction),
+        twist.inputs["Vector"],
+    )
     twist.inputs["Axis"].default_value = (0, 0, 1)
     angle = g.m(
         "Twist Along Height",
@@ -460,7 +528,7 @@ def core_shape(root):
     curled = g.n("ShaderNodeSeparateXYZ", "Twisted Flame Coordinates")
     g.link(twist.outputs[0], curled.inputs[0])
     tip = g.m("Flexible Tongue Tips", "MULTIPLY", u, u)
-    flex = g.m("Tip Curl Distance", "MULTIPLY", tip, g.m("Curl Scale", "MULTIPLY", radius, 0.18))
+    flex = g.m("Tip Curl Distance", "MULTIPLY", tip, g.m("Curl Scale", "MULTIPLY", radius, 0.1))
     flex = g.m(
         "Restrain Inner Tip Curl",
         "MULTIPLY",
@@ -470,6 +538,14 @@ def core_shape(root):
             "SUBTRACT",
             1,
             g.m("Inner Curl Reduction", "MULTIPLY", g.attr("charge_inner"), 0.85),
+        ),
+    )
+    flex = g.m(
+        "Tips Converge Under Pressure",
+        "MULTIPLY",
+        flex,
+        g.m(
+            "Tightening Endpoints", "SUBTRACT", 1, g.m("Endpoint Pressure", "MULTIPLY", gather, 0.6)
         ),
     )
     curl = g.m("Tip Follows Rising Energy", "ADD", wave, 1.2)
@@ -490,7 +566,46 @@ def core_shape(root):
         )
     deform = g.n("GeometryNodeSetPosition", "Irregular Flame Silhouette")
     g.link(scale.outputs[0], deform.inputs["Geometry"])
-    g.link(g.xyz("Roiling Flame Volume", *shaped, curled.outputs["Z"]), deform.inputs["Position"])
+    focus = g.m("Keep A Small Dense Nucleus", "MULTIPLY", g.attr("charge_inner"), 0.75)
+    counter_x = g.m(
+        "Nucleus Width Retained",
+        "ADD",
+        1,
+        g.m(
+            "Nucleus Width Compensation",
+            "MULTIPLY",
+            focus,
+            g.m(
+                "Relative Width Loss",
+                "SUBTRACT",
+                g.m("Inverse Pressure Width", "DIVIDE", 1, pressure_width),
+                1,
+            ),
+        ),
+    )
+    counter_z = g.m(
+        "Nucleus Height Retained",
+        "ADD",
+        1,
+        g.m(
+            "Nucleus Height Compensation",
+            "MULTIPLY",
+            focus,
+            g.m(
+                "Relative Height Loss",
+                "SUBTRACT",
+                g.m("Inverse Pressure Height", "DIVIDE", 1, pressure_height),
+                1,
+            ),
+        ),
+    )
+    position = g.v(
+        "Dense Focus Within Contracting Strands",
+        "MULTIPLY",
+        g.xyz("Roiling Flame Volume", *shaped, curled.outputs["Z"]),
+        g.xyz("Nucleus Pressure Balance", counter_x, counter_x, counter_z),
+    )
+    g.link(position, deform.inputs["Position"])
     noise = g.n("ShaderNodeTexNoise", "Roiling Flame Contour", noise_dimensions="4D")
     noise.inputs["Scale"].default_value = 3.5
     noise.inputs["Detail"].default_value = 1.0
@@ -501,9 +616,54 @@ def core_shape(root):
     )
     centered = g.v("Centered Contour Noise", "SUBTRACT", noise.outputs["Color"], (0.5, 0.5, 0.5))
     displacement = g.v(
-        "Alive Silhouette", "SCALE", centered, g.m("Contour Amplitude", "MULTIPLY", radius, 0.18)
+        "Alive Silhouette", "SCALE", centered, g.m("Contour Amplitude", "MULTIPLY", radius, 0.035)
     )
     g.link(displacement, deform.inputs["Offset"])
+
+    breakup = g.n("ShaderNodeTexNoise", "Native Core Breakup", noise_dimensions="4D")
+    g.link(pos.outputs[0], breakup.inputs["Vector"])
+    g.link(g.value("Breakup Scale", prop="noise_scale"), breakup.inputs["Scale"])
+    g.link(g.m("Breakup Clock", "MULTIPLY", p, 3), breakup.inputs["W"])
+    erode = g.m(
+        "Native Release Erosion",
+        "MULTIPLY",
+        g.stage("Strands Release", p, 0.82, 1),
+        g.value("Breakup Fade", prop="fade"),
+    )
+    threshold = g.m(
+        "Erosion Threshold",
+        "ADD",
+        g.value("Core Dissolve", prop="dissolve"),
+        g.m("Release Breakup", "MULTIPLY", erode, 0.95),
+    )
+    kernel = g.m(
+        "Kernel Starts Dissolving Later",
+        "ADD",
+        g.m("Kernel Base Dissolve", "MULTIPLY", g.value("Nucleus Dissolve", prop="dissolve"), 0.35),
+        g.m(
+            "Kernel Releases Quickly",
+            "MULTIPLY",
+            g.stage("Nucleus Release Window", p, 0.84, 0.94),
+            g.value("Nucleus Fade", prop="fade"),
+        ),
+    )
+    threshold = g.m(
+        "Strand And Kernel Erosion",
+        "ADD",
+        threshold,
+        g.m(
+            "Only Nucleus Threshold",
+            "MULTIPLY",
+            g.attr("charge_inner"),
+            g.m("Nucleus Threshold Difference", "SUBTRACT", kernel, threshold),
+        ),
+    )
+    cut = g.n("GeometryNodeDeleteGeometry", "Erode Core Faces", domain="FACE")
+    g.link(deform.outputs[0], cut.inputs["Geometry"])
+    g.link(
+        g.m("Spent Core Faces", "LESS_THAN", breakup.outputs["Fac"], threshold),
+        cut.inputs["Selection"],
+    )
 
     # Invisible nested shells can exhaust Cycles' default transparent bounce budget.
     # Remove their evaluated geometry once hidden or collapsed; keep the editable mesh.
@@ -524,7 +684,7 @@ def core_shape(root):
         g.m("Core Hidden By Parameters", "MAXIMUM", transparent, dissolved),
     )
     hide = g.n("GeometryNodeDeleteGeometry", "Skip Invisible Core Surfaces", domain="POINT")
-    g.link(deform.outputs[0], hide.inputs["Geometry"])
+    g.link(cut.outputs[0], hide.inputs["Geometry"])
     g.link(invisible, hide.inputs["Selection"])
     _finish(g, hide.outputs[0])
     _surface(root, core=True)
@@ -537,7 +697,7 @@ def ribbons(root, *, ground=False):
     )
     vertices, faces = [], []
     attrs = {k: [] for k in ("charge_u", "charge_side", "charge_phase", "charge_weight")}
-    count, steps = (5, 9) if ground else (3, 49)
+    count, steps = (5, 9) if ground else (3, 41)
     for strand in range(count):
         phase = strand * math.tau / count + 0.13 * math.sin(strand * 7)
         for j in range(steps):
@@ -683,7 +843,8 @@ def spiral_motes(root):
     )
     rotate.inputs["Axis"].default_value = (0, 0, 1)
     g.link(direction, rotate.inputs["Vector"])
-    g.link(g.m("Swirl During Flight", "MULTIPLY", phase, 3.5), rotate.inputs["Angle"])
+    turn = g.value("Mote Intake Turn", 1.6)
+    g.link(g.m("Swirl During Flight", "MULTIPLY", phase, turn), rotate.inputs["Angle"])
     position = g.v("Spiral Particle Position", "SCALE", rotate.outputs[0], distance)
     g.link(position, tree.nodes["Particle Motion"].inputs["Position"])
     speed = tree.nodes["Varied Velocity"].outputs[0]
@@ -696,7 +857,7 @@ def spiral_motes(root):
     inward = g.v("Inward Velocity", "SCALE", rotate.outputs[0], inward_speed)
     cross = g.v("Orbit Tangent", "CROSS_PRODUCT", rotate.outputs[0], (0, 0, -1))
     angular_speed = g.m(
-        "Angular Speed", "MULTIPLY", g.m("Speed Per Radius", "DIVIDE", speed, safe), 3.5
+        "Angular Speed", "MULTIPLY", g.m("Speed Per Radius", "DIVIDE", speed, safe), turn
     )
     sideways = g.v(
         "Tangential Velocity",

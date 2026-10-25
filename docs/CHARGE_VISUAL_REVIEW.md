@@ -1,6 +1,6 @@
-# Energy Charge：造型与运动重设计
+# Energy Charge：首轮造型与运动重设计记录
 
-[#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) / [PR #90](https://github.com/mumu-lhl/blender-vfx-studio/pull/90) 跟踪这轮未发布的重设计。用户指出原来的半透明球壳、细环和小粒子缺少聚能感；先前的功能测试与局部修补不构成整体艺术验收。0.22.2 下载包保持原样，普通 Shield、Ring、Emitter 和已有完整资产也不被重建。
+本文保留 [PR #90](https://github.com/mumu-lhl/blender-vfx-studio/pull/90) 首轮候选的设计与检查记录，其中多瓣核心和 826 顶点预算属于当时版本。用户再次复核后认为压缩感仍不足，当前候选已改为内卷路径与小内核，详见 [最新压缩记录](CHARGE_COMPRESSION_REVIEW.md)。整体艺术目标 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 仍开放；0.22.2 下载包、普通模块和已有完整资产保持原样。
 
 ## 原因与实际修改
 

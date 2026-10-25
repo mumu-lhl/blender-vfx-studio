@@ -149,10 +149,10 @@ class StarterTests(unittest.TestCase):
             return radial, height
 
         early, charged = dimensions(13), dimensions(37)
-        self.assertLess(charged[0], early[0] * 0.8)
-        # Pressure concentrates a volume instead of stretching it into a long leaf.
-        self.assertGreater(charged[1], early[1] * 0.8)
-        self.assertLess(charged[1], early[1] * 1.2)
+        self.assertLess(charged[0], early[0] * 0.5)
+        # Pressure contracts all three axes while retaining a visible depth.
+        self.assertGreater(charged[1], early[1] * 0.35)
+        self.assertLess(charged[1], early[1] * 0.85)
         for frame in (1, 7, 22, 37, 46, 48):
             self.assertLessEqual(
                 vertex_count(charge, frame), 900
@@ -181,6 +181,11 @@ class StarterTests(unittest.TestCase):
             core_member[key] = old
             core_member.update_tag()
 
+        # The compressed tail is only a few pixels in the emitter-wide framing.
+        # Inspect the core at a useful scale so erosion cannot hide in sampling.
+        bpy.context.scene.camera.data.ortho_scale = 1
+        bpy.context.scene.render.resolution_x = bpy.context.scene.render.resolution_y = 96
+
         def coverage():
             pixels = render_pixels(44)
             return sum(max(pixels[i : i + 3]) > 1e-5 for i in range(0, len(pixels), 4))
@@ -189,6 +194,32 @@ class StarterTests(unittest.TestCase):
         core_member["fade"] = 0
         core_member.update_tag()
         self.assertGreater(coverage(), eroded)
+
+    def test_charge_core_contour_changes_color_without_expanding_coverage(self):
+        charge = create_effect("energy-charge")
+        camera()
+        scene = bpy.context.scene
+        scene.camera.data.ortho_scale = 2.4
+        scene.render.resolution_x = scene.render.resolution_y = 96
+        scene.render.film_transparent = True
+        scene.render.dither_intensity = 0
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+        for other in composition.members(charge):
+            other.children[0].hide_render = other != member
+        contrast = (
+            member.children[0].data.materials[0].node_tree.nodes["Core Edge Contrast"].outputs[0]
+        )
+        contrast.default_value = 0
+        plain = render_pixels(22)
+        contrast.default_value = 0.85
+        outlined = render_pixels(22)
+        self.assertEqual(plain[3::4], outlined[3::4])
+        self.assertLess(sum(outlined), sum(plain) - 1)
+        for index, value in enumerate((1.0, 0.05, 0.01)):
+            member[f"color_{index}"] = value
+        member.update_tag()
+        warm = render_pixels(22)
+        self.assertGreater(sum(warm[0::4]), sum(warm[2::4]))
 
     def test_hidden_charge_core_reveals_a_light_background(self):
         root = create_effect("energy-charge")

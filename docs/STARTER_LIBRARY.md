@@ -30,4 +30,4 @@ blender -b --factory-startup --python-exit-code 1 --python tools/build_examples.
 
 脚本只接受未打开项目的全新后台进程，输出 3 个 `.blend` 到 `dist/examples/`，并生成带版本号的 examples ZIP；不会删除目录中其他文件。网格、节点、参数和嵌入预览均可重建。每次会产生新的内部编号，因此不保证 Blender 文件跨次构建的二进制完全相同。
 
-0.22.3 尚未发布，艺术重设计由 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 跟踪。该候选用紧凑多瓣电浆核心、收尖的盘卷移动段、地面收束形状和弯曲粒子替代球壳加细环。白核在释放时退为青蓝，再裂解、塌缩；形体与阶段曲线在原生节点中编辑，侧栏保留实际使用的尺寸、颜色、时间等参数。具体造型、预算、对照方法与未完成检查见 [充能记录](CHARGE_VISUAL_REVIEW.md)。新缩略图取消额外辉光；已下载的 0.22.2 保留旧造型。
+0.22.3 尚未发布，艺术重设计由 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 跟踪。Energy Charge 最新候选改用六条有空隙的内卷路径和小内核；能量团沿路径向内加速，后段三轴收紧，白色集中于汇聚前端与内核。外侧保留盘卷移动段、地面收束形状和弯曲粒子，共四层。形体与阶段曲线可在原生节点中编辑，侧栏保留适用的尺寸、颜色、时间等参数。候选仍在视觉复核，预算及观看范围见 [压缩记录](CHARGE_COMPRESSION_REVIEW.md)，早期迭代见 [充能记录](CHARGE_VISUAL_REVIEW.md)。新缩略图取消额外辉光；已下载的 0.22.2 保留旧造型。
