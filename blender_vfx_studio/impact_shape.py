@@ -259,7 +259,7 @@ def jets(root, quality):
             u = i / fine_steps
             path = direction * (u * reach) + side * (bend * math.sin(math.pi * u))
             path.z = lift * math.sin(math.pi * u) + 0.08 * u
-            profile = 3.2 * u**0.45 * (1 - u) ** 1.45
+            profile = 3.5 * u**1.3 * (1 - u) ** 0.55
             for v in (-1, 0, 1):
                 width = side * (v * breadth * profile)
                 width.z = (1 - abs(v)) * breadth * profile * 0.4
@@ -452,6 +452,12 @@ def jets(root, quality):
     size = graph.math("Pressurized Breadth", "MULTIPLY", size, pressure)
     size = graph.math("Releasing Breadth", "MULTIPLY", size, shrink)
     size = graph.math("Pulsing Breadth", "MULTIPLY", size, pulse)
+    fine_width = graph.node("ShaderNodeValue", "Fine Ejection Width")
+    fine_width.outputs[0].default_value = 1.6
+    difference = graph.math("Fine Width Difference", "SUBTRACT", fine_width.outputs[0], 1)
+    difference = graph.math("Only Fine Width Changes", "MULTIPLY", difference, fine)
+    width_factor = graph.math("Role Width Factor", "ADD", difference, 1)
+    size = graph.math("Independent Fine Breadth", "MULTIPLY", size, width_factor)
     root_loss = graph.math("Peeling Begins", "SUBTRACT", local, 0.22, clamp=True)
     root_loss = graph.math("Pressure Tail Peeling", "MULTIPLY", root_loss, 2.2, clamp=True)
     root_loss = graph.math(
@@ -546,6 +552,12 @@ def _erode(root):
     part = graph.node("ShaderNodeAttribute", "Pressure Part", attribute_name="impact_lobe")
     primary = graph.math("Main Pressure Shell", "LESS_THAN", part.outputs["Fac"], 0.5)
     auxiliary = graph.math("Auxiliary Curl Part", "GREATER_THAN", part.outputs["Fac"], 1.5)
+    fine_part = graph.math(
+        "Fine Surface Part",
+        "MULTIPLY",
+        graph.math("Not Main Surface", "GREATER_THAN", part.outputs["Fac"], 0.5),
+        graph.math("Not Curl Surface", "LESS_THAN", part.outputs["Fac"], 1.5),
+    )
     fade = graph.value("Jet Fade", "fade")
     axes = graph.node("ShaderNodeSeparateXYZ", "Along / Across Jet")
     graph.connect(uv.outputs["UV"], axes.inputs[0])
@@ -685,6 +697,12 @@ def _erode(root):
         cutoff,
         graph.math("Pressure Density Support", "MULTIPLY", primary, 0.14),
     )
+    cutoff = graph.math(
+        "Keep Young Ejection Head",
+        "SUBTRACT",
+        cutoff,
+        graph.math("Fine Shape Support", "MULTIPLY", fine_part, 0.13),
+    )
     taper = graph.node("ShaderNodeMapRange", "Outer Tongue Taper", interpolation_type="SMOOTHSTEP")
     graph.connect(axes.outputs["X"], taper.inputs["Value"])
     taper.inputs["From Min"].default_value, taper.inputs["From Max"].default_value = 0.38, 0.98
@@ -743,10 +761,34 @@ def _erode(root):
     graph.connect(hot, volume.inputs[0])
     graph.connect(outlined.outputs[0], volume.inputs[1])
     graph.connect(warm.outputs[0], volume.inputs[2])
-    graph.connect(
-        graph.vector("Cooling Complete Pressure Color", "SCALE", volume.outputs[0], heat_left),
-        emission.inputs["Color"],
+    pressure_color = graph.vector(
+        "Cooling Complete Pressure Color", "SCALE", volume.outputs[0], heat_left
     )
+    leading = graph.node("ShaderNodeMapRange", "Fine Leading Heat", interpolation_type="SMOOTHSTEP")
+    graph.connect(axes.outputs["X"], leading.inputs["Value"])
+    leading.inputs["From Min"].default_value, leading.inputs["From Max"].default_value = 0.4, 0.9
+    leading.inputs["To Max"].default_value = 0.25
+    hot_fine = graph.node("ShaderNodeMixRGB", "Fine Colored Head")
+    graph.connect(leading.outputs[0], hot_fine.inputs[0])
+    graph.connect(tint.outputs[0], hot_fine.inputs[1])
+    hot_fine.inputs[2].default_value = (1, 0.93, 0.65, 1)
+    across = graph.math("Fine Center", "SUBTRACT", axes.outputs["Y"], 0.5)
+    across = graph.math("Fine Center Distance", "ABSOLUTE", across)
+    across = graph.math("Fine Full Width", "MULTIPLY", across, 2)
+    edge = graph.node("ShaderNodeMapRange", "Fine Dark Border", interpolation_type="SMOOTHSTEP")
+    graph.connect(across, edge.inputs["Value"])
+    edge.inputs["From Min"].default_value, edge.inputs["From Max"].default_value = 0.2, 0.85
+    bounded = graph.node("ShaderNodeMixRGB", "Fine Core / Pigmented Edge")
+    graph.connect(edge.outputs[0], bounded.inputs[0])
+    graph.connect(hot_fine.outputs[0], bounded.inputs[1])
+    graph.connect(
+        graph.vector("Fine Edge Tint", "SCALE", tint.outputs[0], 0.035), bounded.inputs[2]
+    )
+    colored = graph.node("ShaderNodeMixRGB", "Pressure / Fine Ejection Color")
+    graph.connect(fine_part, colored.inputs[0])
+    graph.connect(pressure_color, colored.inputs[1])
+    graph.connect(bounded.outputs[0], colored.inputs[2])
+    graph.connect(colored.outputs[0], emission.inputs["Color"])
     transparent = graph.node("ShaderNodeBsdfTransparent", "Dissipated Jet")
     mix = graph.node("ShaderNodeMixShader", "Opaque / Missing Pieces")
     graph.connect(visible, mix.inputs[0])
