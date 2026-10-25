@@ -227,7 +227,7 @@ for frame in (2, 5, 14):
         child[f"expected_shape_{frame}"] = [c for v in state[child["vfx_id"]] for c in v]
 camera()
 bpy.context.scene.camera.data.ortho_scale = 5.5
-for frame in (2, 5, 9, 14):
+for frame in (2, 5, 9, 11, 14):
     root[f"expected_pixels_{frame}"] = render_pixels(frame)
 addon.unregister()
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "work/impact.blend"))

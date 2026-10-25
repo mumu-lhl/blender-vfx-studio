@@ -143,7 +143,7 @@ jobs:
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE --pale --far --view-transform AgX
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-impact/impact-cycles.blend --python tests/impact_visual_reopen.py
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-impact/impact-blender_eevee-light.blend --python tests/impact_visual_reopen.py
-          ffmpeg -v error -y -framerate 24 -start_number 1 -i work/visual-impact/impact-blender_eevee-light-%04d.png -frames:v 25 -c:v libx264 -pix_fmt yuv420p -movflags +faststart work/visual-impact/impact-blender_eevee-light.mp4
+          ffmpeg -v error -y -framerate 24 -start_number 1 -i work/visual-impact/impact-blender_eevee-light-%04d.png -frames:v 25 -c:v libx264 -crf 18 -pix_fmt yuv420p -movflags +faststart work/visual-impact/impact-blender_eevee-light.mp4
           ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate,nb_frames,duration -of json work/visual-impact/impact-blender_eevee-light.mp4 > work/visual-impact/impact-video-info.json
           python - <<'PYTHON'
           import hashlib

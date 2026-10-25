@@ -30,7 +30,7 @@ for frame in (14, 0, 5, 2, 25, 5):
                 curve.driver.is_valid and curve.driver.is_simple_expression
                 for curve in (data.animation_data.drivers if data.animation_data else ())
             )
-for frame in (14, 9, 2, 5):
+for frame in (14, 9, 11, 2, 5):
     if f"expected_pixels_{frame}" in root:
         assert list(root[f"expected_pixels_{frame}"]) == render_pixels(frame)
 print("IMPACT_NATIVE_REOPEN_OK")
