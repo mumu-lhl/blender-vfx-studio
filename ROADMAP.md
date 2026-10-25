@@ -138,3 +138,9 @@ v0.21.0 标签的三平台测试通过，但 Linux 缺少 EGL 动态库，Eevee 
 [#96](https://github.com/mumu-lhl/blender-vfx-studio/issues/96) 在真实主体材质中加入深橙边界，由原生表面法线和视线计算，不改变透明覆盖、几何或运动。Rim Contrast 与 Rim Width 可在材质中编辑，颜色跟随控制器；四层与约 888 顶点不变。
 
 9 项局部测试与无插件重开通过，包含透明覆盖不变和颜色编辑验证；Cycles、近白远景三阶段高清重开一致。实际读取默认三阶段、正/侧面峰值、Eevee 浅灰/近白远景三阶段、暗背景中段及武器/靶标衔接。主边界比窄暗边试验更清楚，细余烬仍弱，整体艺术目标不据此关闭。详情见 [轮廓检查](docs/IMPACT_CONTRAST_REVIEW.md)。
+
+## 连续连段检查与当前艺术重做
+
+[#98](https://github.com/mumu-lhl/blender-vfx-studio/issues/98) 已实现完整 60 帧的连续生成、源代码/场景/图片校验、编码、隔帧解码与离线原生检查包。本地编码和无插件检查通过，实际读取了全部 30 张解码图；原生 31/33 帧匹配，60 帧清空。详情与未验收范围见 [连续检查记录](docs/CONTINUOUS_SKILL_REVIEW.md)。
+
+用户新增四组参考后，继续优先重做充能的压缩和汇聚，而非准备发版。基线仍有白壳、规则月牙与粗硬喷流的问题；[#99](https://github.com/mumu-lhl/blender-vfx-studio/issues/99) 正在处理充能。0.22.3 暂不发标签，整体 #89 保持开放。
