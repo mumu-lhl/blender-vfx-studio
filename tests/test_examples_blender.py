@@ -195,6 +195,32 @@ class StarterTests(unittest.TestCase):
         core_member.update_tag()
         self.assertGreater(coverage(), eroded)
 
+    def test_charge_core_contour_changes_color_without_expanding_coverage(self):
+        charge = create_effect("energy-charge")
+        camera()
+        scene = bpy.context.scene
+        scene.camera.data.ortho_scale = 2.4
+        scene.render.resolution_x = scene.render.resolution_y = 96
+        scene.render.film_transparent = True
+        scene.render.dither_intensity = 0
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+        for other in composition.members(charge):
+            other.children[0].hide_render = other != member
+        contrast = (
+            member.children[0].data.materials[0].node_tree.nodes["Core Edge Contrast"].outputs[0]
+        )
+        contrast.default_value = 0
+        plain = render_pixels(22)
+        contrast.default_value = 0.85
+        outlined = render_pixels(22)
+        self.assertEqual(plain[3::4], outlined[3::4])
+        self.assertLess(sum(outlined), sum(plain) - 1)
+        for index, value in enumerate((1.0, 0.05, 0.01)):
+            member[f"color_{index}"] = value
+        member.update_tag()
+        warm = render_pixels(22)
+        self.assertGreater(sum(warm[0::4]), sum(warm[2::4]))
+
     def test_hidden_charge_core_reveals_a_light_background(self):
         root = create_effect("energy-charge")
         camera()

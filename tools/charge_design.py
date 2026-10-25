@@ -324,6 +324,23 @@ def _surface(root, *, core=False):
         g.link(surface_color, core_mix.inputs[1])
         g.link(kernel_color.outputs[0], core_mix.inputs[2])
         surface_color = core_mix.outputs[0]
+        edge = g.m(
+            "Core Silhouette Boundary",
+            "SUBTRACT",
+            1,
+            g.stage(
+                "Core Edge Transition",
+                g.m("Core Two Sided Facing", "ABSOLUTE", facing.outputs["Value"]),
+                0.2,
+                0.7,
+            ),
+        )
+        edge = g.m("Editable Core Edge", "MULTIPLY", edge, g.value("Core Edge Contrast", 0.85))
+        edge_mix = g.n("ShaderNodeMixRGB", "Dark Contour Around Luminous Paths")
+        g.link(edge, edge_mix.inputs[0])
+        g.link(surface_color, edge_mix.inputs[1])
+        g.link(g.v("Core Ink Tint", "SCALE", color.outputs[0], 0.035), edge_mix.inputs[2])
+        surface_color = edge_mix.outputs[0]
     emission = g.n("ShaderNodeEmission", "Native Energy Surface")
     g.link(surface_color, emission.inputs["Color"])
     g.link(g.value("Emission", prop="strength"), emission.inputs["Strength"])
