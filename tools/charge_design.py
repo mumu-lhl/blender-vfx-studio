@@ -278,7 +278,7 @@ def _surface(root, *, core=False):
     g.link(hot, mix.inputs[0])
     g.link(body, mix.inputs[1])
     hot_color = g.n("ShaderNodeMixRGB", "Editable Color To Hot Light")
-    hot_color.inputs[0].default_value = 0.35 if core else 0.035
+    hot_color.inputs[0].default_value = 0.08 if core else 0.035
     g.link(color.outputs[0], hot_color.inputs[1])
     hot_color.inputs[2].default_value = (0.9, 0.95, 1.0, 1)
     g.link(hot_color.outputs[0], mix.inputs[2])
@@ -353,15 +353,17 @@ def core_shape(root):
     # These are authored rest paths; native fields below animate compression.
     for tongue, (phase, turns, reach, rise, breadth) in enumerate(
         (
-            (0.0, 4.7, 1.05, 0.85, 0.18),
+            (0.0, 3.6, 1.05, 0.65, 0.20),
             (1.35, 2.7, 0.88, 0.6, 0.09),
             (2.7, 3.5, 1.0, -0.7, 0.10),
-            (3.65, 4.3, 0.75, -0.5, 0.15),
+            (3.65, 2.9, 0.75, -0.5, 0.15),
             (4.8, 2.9, 0.9, 0.5, 0.08),
             (5.6, 3.8, 0.8, -0.7, 0.075),
         )
     ):
-        base, steps, sides = len(vertices), 16, 6 if tongue in (0, 3) else 3
+        primary = tongue in (0, 3)
+        # Spend more path samples on the broad silhouette, keeping the same budget.
+        base, steps, sides = len(vertices), 22 if primary else 10, 6 if primary else 3
 
         def center(t):
             angle = phase + turns * t + 0.12 * math.sin(t * 9 + phase)
@@ -383,7 +385,8 @@ def core_shape(root):
             width = breadth * max(math.sin(math.pi * t), 0) ** 0.65 * (0.45 + 0.65 * t)
             for k in range(sides):
                 a = k * math.tau / sides + 0.18 * math.sin(t * 5 + tongue)
-                offset = width * (side * math.cos(a) + up * math.sin(a) * 0.65)
+                # Flatten the moving head into a swept flame, rather than a bead on a tube.
+                offset = width * (side * math.cos(a) + up * math.sin(a) * 0.28)
                 vertices.append(tuple(point + offset))
                 cross_sections.append(tuple(offset))
                 for name, value in zip(
