@@ -386,16 +386,27 @@ def _erode(root):
     graph.connect(shadow, body.inputs[0])
     graph.connect(tint.outputs[0], body.inputs[1])
     graph.connect(dark, body.inputs[2])
-    rim = graph.math("Outer Pressure Rim", "GREATER_THAN", axes.outputs["X"], 0.67)
+    rim = graph.node("ShaderNodeMapRange", "Red Edge Gradient", interpolation_type="SMOOTHSTEP")
+    graph.connect(axes.outputs["X"], rim.inputs["Value"])
+    rim.inputs["From Min"].default_value, rim.inputs["From Max"].default_value = 0.5, 0.9
     rim_color = graph.node("ShaderNodeVectorMath", "Red Orange Rim", operation="MULTIPLY")
     graph.connect(tint.outputs[0], rim_color.inputs[0])
     rim_color.inputs[1].default_value = (0.45, 0.2, 0.3)
     bands = graph.node("ShaderNodeMixRGB", "Orange / Red Edge")
-    graph.connect(rim, bands.inputs[0])
+    graph.connect(rim.outputs[0], bands.inputs[0])
     graph.connect(body.outputs[0], bands.inputs[1])
     graph.connect(rim_color.outputs[0], bands.inputs[2])
-    core = graph.math("Compact Hot Core", "LESS_THAN", axes.outputs["X"], 0.22)
-    spent = graph.math("After Peak Light", "SUBTRACT", progress, 0.24, clamp=True)
+    core_ramp = graph.node(
+        "ShaderNodeMapRange", "Hot Core Gradient", interpolation_type="SMOOTHSTEP"
+    )
+    graph.connect(axes.outputs["X"], core_ramp.inputs["Value"])
+    core_ramp.inputs["From Min"].default_value, core_ramp.inputs["From Max"].default_value = (
+        0.1,
+        0.32,
+    )
+    core_ramp.inputs["To Min"].default_value, core_ramp.inputs["To Max"].default_value = 1, 0
+    core = core_ramp.outputs[0]
+    spent = graph.math("After Peak Light", "SUBTRACT", progress, 0.16, clamp=True)
     spent = graph.math("Spend White Light", "MULTIPLY", spent, 5, clamp=True)
     spent = graph.math("Editable Light Release", "MULTIPLY", spent, fade)
     core = graph.math(
@@ -418,8 +429,33 @@ def _erode(root):
     graph.connect(uv.outputs["UV"], stretch.inputs[0])
     stretch.inputs[1].default_value = (0.4, 10, 1)
     graph.connect(stretch.outputs[0], noise.inputs["Vector"])
-    brush = graph.math("Flow Tone Range", "MULTIPLY", noise.outputs["Fac"], 0.35)
-    brush = graph.math("Preserve Body Color", "ADD", brush, 0.65)
+    streak = graph.math("Fine Flow Fibers", "MULTIPLY", axes.outputs["Y"], 340)
+    streak = graph.math(
+        "Bending Fibers",
+        "ADD",
+        streak,
+        graph.math("Flow Distortion", "MULTIPLY", noise.outputs["Fac"], 17),
+    )
+    streak = graph.math(
+        "Radial Flow Detail",
+        "ADD",
+        streak,
+        graph.math("Along Fiber", "MULTIPLY", axes.outputs["X"], 12),
+    )
+    streak = graph.math(
+        "Advect Fine Fibers",
+        "SUBTRACT",
+        streak,
+        graph.math("Fiber Clock", "MULTIPLY", progress, 12),
+    )
+    streak = graph.math("Fiber Bands", "SINE", streak)
+    streak = graph.math("Positive Fiber Range", "MULTIPLY", streak, 0.5)
+    streak = graph.math("Normalized Fibers", "ADD", streak, 0.5)
+    detail = graph.node("ShaderNodeValue", "Flow Detail Contrast")
+    detail.outputs[0].default_value = 0.45
+    brush = graph.math("Fiber Darkness", "SUBTRACT", 1, streak)
+    brush = graph.math("Editable Flow Contrast", "MULTIPLY", brush, detail.outputs[0])
+    brush = graph.math("Preserve Body Color", "SUBTRACT", 1, brush)
     graph.connect(
         graph.vector("Pressure Flow Detail", "SCALE", body.outputs[0], brush), bands.inputs[1]
     )
@@ -428,7 +464,7 @@ def _erode(root):
     release = graph.math("Jet Dissipation", "MULTIPLY", release, 1.35)
     release = graph.math("Editable Dissipation", "MULTIPLY", release, fade)
     tear = graph.math("Beyond Compression Core", "GREATER_THAN", axes.outputs["X"], 0.22)
-    core_release = graph.math("Release Compression", "SUBTRACT", progress, 0.28, clamp=True)
+    core_release = graph.math("Release Compression", "SUBTRACT", progress, 0.15, clamp=True)
     core_release = graph.math("Core Breakup Stage", "MULTIPLY", core_release, 5, clamp=True)
     core_release = graph.math("Editable Core Breakup", "MULTIPLY", core_release, fade)
     region = graph.math("Body / Spent Core", "MAXIMUM", tear, core_release)
@@ -459,6 +495,17 @@ def wave(root):
     """Break the perfect circle into unequal, slightly warped pressure arcs."""
     tree = root.children[0].modifiers[0].node_group
     graph = _Nodes(tree, root)
+    progress = tree.nodes["Ring Controls"].outputs["Progress"]
+    remaining = graph.math("Pressure Life Remaining", "SUBTRACT", 1, progress)
+    eased = graph.math(
+        "Fast Pressure Front", "SUBTRACT", 1, graph.math("Pressure Drag", "POWER", remaining, 3)
+    )
+    difference = graph.math("Pressure Acceleration", "SUBTRACT", eased, progress)
+    ease = graph.node("ShaderNodeValue", "Pressure Ease")
+    ease.outputs[0].default_value = 0.75
+    difference = graph.math("Editable Pressure Ease", "MULTIPLY", difference, ease.outputs[0])
+    clock = graph.math("Pressure Clock", "ADD", progress, difference)
+    graph.connect(clock, tree.nodes["Expansion Over Life"].inputs[1])
     position = tree.nodes["Radial Position"].outputs[0]
     separate = graph.node("ShaderNodeSeparateXYZ", "Pressure Coordinates")
     graph.connect(position, separate.inputs[0])

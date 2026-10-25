@@ -211,6 +211,18 @@ class ImpactTests(unittest.TestCase):
         update(main, fade=0.0)
         self.assertGreater(light(11), peak * 0.2)
 
+    def test_pressure_front_is_fast_and_expansion_stays_editable(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        wave = next(m for m in composition.members(root) if m["vfx_module"] == "mesh.ring")
+
+        def radius(frame):
+            return max(sum(c * c for c in p) ** 0.5 for p in geometry(root, frame)[wave["vfx_id"]])
+
+        peak = radius(5)
+        self.assertGreater(peak, radius(19) * 0.32)
+        update(wave, expansion=0.5)
+        self.assertLess(radius(5), peak * 0.5)
+
 
 addon.register()
 result = unittest.TextTestRunner(verbosity=2).run(
