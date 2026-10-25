@@ -223,7 +223,7 @@ class SlashTests(unittest.TestCase):
 
     def test_authored_shape_controls_budget_and_retiming(self):
         root = core.create(bpy.context, "ARC_SLASH", "LOW")
-        self.assertEqual(root["vfx_asset_version"], 3)
+        self.assertEqual(root["vfx_asset_version"], 4)
         peak = points(root, 5)
         self.assertLessEqual(len(peak), 600)
         self.assertGreater(max(p[2] for p in peak) - min(p[2] for p in peak), 0.1)
@@ -248,7 +248,45 @@ class SlashTests(unittest.TestCase):
         restored = core.create_from_preset(bpy.context, snapshot)
         update(restored, start=1.0)
         self.assertEqual(points(restored, 5), peak)
-        self.assertEqual(snapshot["asset_version"], 3)
+        self.assertEqual(snapshot["asset_version"], 4)
+
+    def test_head_bias_moves_body_mass_forward_without_changing_the_radius(self):
+        root = core.create(bpy.context, "ARC_SLASH", "LOW")
+        update(root, duration=18.0, spin=0.0, bank=0.0, contour=0.0, head_bias=1.0)
+
+        def widths():
+            vertices = mesh(root, 5).vertices
+            return [vertices[i * 6].co.length - vertices[i * 6 + 5].co.length for i in (8, 24)]
+
+        tail, head = widths()
+        self.assertGreater(head, tail * 3)
+        update(root, head_bias=0.0)
+        tail, head = widths()
+        self.assertAlmostEqual(tail, head, places=5)
+
+    def test_wakes_remain_after_the_main_blade_and_follow_group_speed(self):
+        root = core.create(bpy.context, "ARC_SLASH", "LOW")
+        update(root, duration=18.0)
+        camera()
+        bpy.context.scene.camera.data.ortho_scale = 5.5
+        bpy.context.scene.render.resolution_x = bpy.context.scene.render.resolution_y = 96
+        bpy.context.scene.render.dither_intensity = 0
+        wake = render_pixels(13)
+        self.assertGreater(sum(wake[0::4]), 0.01)
+        update(root, speed=2.0)
+        self.assertEqual(render_pixels(7), wake)
+        update(root, afterimage=0.0)
+        self.assertLess(max(render_pixels(7)[0::4]), 1e-5)
+
+    def test_reversing_sweep_keeps_the_leading_mass_and_wakes_on_the_leading_side(self):
+        root = core.create(bpy.context, "ARC_SLASH", "LOW")
+        positive = points(root, 5)
+        update(root, spin=-root["spin"])
+        negative = points(root, 5)
+        for a, b in zip(positive, negative):
+            self.assertAlmostEqual(a[0], b[0], places=5)
+            self.assertAlmostEqual(a[1], -b[1], places=5)
+            self.assertAlmostEqual(a[2], b[2], places=5)
 
     def test_version_two_preset_retains_the_flat_regular_shape(self):
         root = slash.create(bpy.context, "LOW", asset_version=2)
@@ -261,6 +299,20 @@ class SlashTests(unittest.TestCase):
         outer = [result.vertices[i].co.length for i in range(0, 198, 6)]
         self.assertLess(max(outer) - min(outer), 1e-5)
         self.assertTrue(all(abs(v.co.z) < 1e-6 for v in result.vertices))
+
+    def test_version_three_preset_retains_its_shape_and_rendered_appearance(self):
+        old = slash.create(bpy.context, "LOW", asset_version=3)
+        camera()
+        bpy.context.scene.camera.data.ortho_scale = 5.5
+        expected_shape = points(old, 5)
+        expected_pixels = render_pixels(5)
+        snapshot = presets.loads(presets.dumps(core.preset_snapshot(old)))
+        restored = core.create_from_preset(bpy.context, snapshot)
+        update(restored, start=1.0)
+        old.children[0].hide_render = True
+        self.assertEqual(restored["vfx_asset_version"], 3)
+        self.assertEqual(points(restored, 5), expected_shape)
+        self.assertEqual(render_pixels(5), expected_pixels)
 
     def test_authored_surface_controls_and_release(self):
         root = core.create(bpy.context, "ARC_SLASH", "LOW")
@@ -300,18 +352,23 @@ modern.name = "Persisted Layered Slash"
 for frame in (2, 5, 13):
     result = mesh(modern, frame)
     modern[f"expected_shape_{frame}"] = [c for vertex in result.vertices for c in vertex.co]
-authored = core.create(bpy.context, "ARC_SLASH", "LOW")
-authored.name = "Persisted Authored Slash"
-# The preceding evaluation changed the scene frame; explicitly align all clocks.
-update(authored, start=1.0)
-for frame in (2, 5, 13):
-    authored[f"expected_shape_{frame}"] = [c for point in points(authored, frame) for c in point]
 root.hide_render = modern.hide_render = True
 root.children[0].hide_render = modern.children[0].hide_render = True
 camera()
 bpy.context.scene.camera.data.ortho_scale = 5.5
-for frame in (2, 5, 13):
-    authored[f"expected_pixels_{frame}"] = render_pixels(frame)
+for version, name in ((3, "Persisted Version Three Slash"), (4, "Persisted Authored Slash")):
+    authored = slash.create(bpy.context, "LOW", asset_version=version)
+    authored.name = name
+    # The preceding evaluation changed the scene frame; explicitly align clocks.
+    update(authored, start=1.0)
+    for obj in bpy.context.scene.objects:
+        if obj.get("vfx_role") == "layer":
+            obj.hide_render = obj != authored.children[0]
+    for frame in (2, 5, 13):
+        authored[f"expected_shape_{frame}"] = [
+            c for point in points(authored, frame) for c in point
+        ]
+        authored[f"expected_pixels_{frame}"] = render_pixels(frame)
 addon.unregister()
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "work/slash.blend"))
 print("SLASH_INTEGRATION_OK")
