@@ -5,6 +5,7 @@ import math
 import bmesh
 import bpy
 from mathutils import Vector
+from mathutils.geometry import tessellate_polygon
 
 from . import core
 from .nodes import ACTIVE, PROGRESS, TIME_PROPS, drive, node
@@ -227,6 +228,8 @@ def jets(root, quality):
         for a, b in zip(outline, outline[1:] + outline[:1])
         for j in range(samples)
     ]
+    flat_contour = [Vector((u, v, 0)) for u, v in contour]
+    cap_triangles = tessellate_polygon([flat_contour])
     for index, (angle, reach, bend, lift, breadth, depth, birth) in enumerate(
         (
             (0.75, 1.1, -0.22, 0.25, 0.55, 0.34, 0.0),
@@ -239,15 +242,19 @@ def jets(root, quality):
         n = len(contour)
 
         def point(u, v, thickness):
-            path = direction * (u * reach) + side * (bend * math.sin(math.pi * u))
+            # A turning centerline and its local side frame form a curled
+            # pressure tongue. A straight spine with pointed side lobes reads
+            # as a leaf even when its entire outline moves or rotates.
+            turn = (1.7, -1.3, 2.2)[index]
+            phase = turn * u
+            path = direction * (math.sin(phase) * reach * 1.4 / turn)
+            path += side * ((1 - math.cos(phase)) * reach * 1.4 / turn)
+            path += side * (bend * math.sin(math.pi * u))
             path.z = lift * math.sin(math.pi * u)
-            width = side * (v * breadth) + Vector((0, 0, thickness))
+            local_side = side * math.cos(phase) - direction * math.sin(phase)
+            width = local_side * (v * breadth) + Vector((0, 0, thickness))
             vertex(path, width, direction, 0, index, birth, u, angle / math.tau + v * 0.05)
 
-        top = len(vertices)
-        point(0.36, 0, depth)
-        bottom = len(vertices)
-        point(0.36, 0, -depth * 0.35)
         upper = len(vertices)
         for u, v in contour:
             point(0.36 + (u - 0.36) * 0.55, v * 0.55, depth * 0.72)
@@ -263,12 +270,16 @@ def jets(root, quality):
             k = (j + 1) % n
             faces.extend(
                 (
-                    (top, upper + j, upper + k),
                     (upper + j, boundary + j, boundary + k, upper + k),
-                    (bottom, lower + k, lower + j),
                     (lower + k, boundary + k, boundary + j, lower + j),
                 )
             )
+        # Concave tips cannot be capped by a fan from one central vertex:
+        # overlapping triangles exhaust Cycles' transparent ray budget once
+        # the plume is gone. Tessellate the authored outline before folding.
+        for triangle in cap_triangles:
+            faces.append(tuple(upper + j for j in triangle))
+            faces.append(tuple(lower + j for j in reversed(triangle)))
     fine_steps = {"LOW": 10, "MEDIUM": 16, "HIGH": 24}[quality]
     for index, (angle, reach, bend, lift, breadth, birth) in enumerate(
         (
@@ -498,6 +509,21 @@ def jets(root, quality):
     width = graph.vector(
         "Jet Cross Section", "SCALE", graph.attribute("impact_width", "FLOAT_VECTOR"), size
     )
+    # Roll the cross section as well as the centerline. Moving an unchanged
+    # folded outline made the cooled plumes look like rigid flying leaves.
+    roll_age = graph.math("Pressure Roll Begins", "SUBTRACT", local, 0.1, clamp=True)
+    roll_age = graph.math("Only Pressure Cross Section Rolls", "MULTIPLY", roll_age, primary)
+    roll_along = graph.math("Pressure Tip Roll", "MULTIPLY", along, 3.4)
+    roll_along = graph.math("Pressure Root Roll", "ADD", roll_along, -0.8)
+    twist = graph.node(
+        "ShaderNodeVectorRotate", "Rolling Pressure Cross Section", rotation_type="AXIS_ANGLE"
+    )
+    graph.connect(width, twist.inputs["Vector"])
+    graph.connect(graph.attribute("impact_direction", "FLOAT_VECTOR"), twist.inputs["Axis"])
+    graph.connect(
+        graph.math("Pressure Roll Angle", "MULTIPLY", roll_age, roll_along), twist.inputs["Angle"]
+    )
+    width = twist.outputs["Vector"]
     combined = graph.vector("Curved Jet Body", "ADD", path, width)
     flatten = graph.node("ShaderNodeCombineXYZ", "Editable Depth")
     flatten.inputs["X"].default_value = flatten.inputs["Y"].default_value = 1
@@ -515,12 +541,17 @@ def jets(root, quality):
     )
     core = graph.math("Compression Vertices", "LESS_THAN", graph.attribute("impact_u"), 0.22)
     core = graph.math("Only Main Compression", "MULTIPLY", core, primary)
-    spent = graph.math("Core Life / Fade", "MULTIPLY", local, graph.value("Core Fade", "fade"))
-    spent = graph.math("Core Fully Spent", "GREATER_THAN", spent, 0.52)
+    fade_age = graph.math("Core Life / Fade", "MULTIPLY", local, graph.value("Core Fade", "fade"))
+    spent = graph.math("Core Fully Spent", "GREATER_THAN", fade_age, 0.52)
     selection = graph.math("Spent Inner Pole", "MULTIPLY", core, spent)
     remove = graph.node("GeometryNodeDeleteGeometry", "Remove Spent Compression", domain="POINT")
     graph.connect(graph.tree.nodes["Outside Lifetime"].outputs[0], remove.inputs["Geometry"])
-    graph.connect(selection, remove.inputs["Selection"])
+    spent_body = graph.math("Pressure Fully Dissipated", "GREATER_THAN", fade_age, 0.65)
+    spent_body = graph.math("Only Remove Spent Pressure", "MULTIPLY", spent_body, primary)
+    graph.connect(
+        graph.math("Spent Pressure Geometry", "MAXIMUM", selection, spent_body),
+        remove.inputs["Selection"],
+    )
     graph.connect(remove.outputs[0], graph.tree.nodes["Output"].inputs[0])
     root["vfx_parameter_keys"] = (
         "seed,motion_seconds,velocity,randomness,spawn_radius,size,fade,strength,stretch,planar,motion_ease"
@@ -574,10 +605,10 @@ def _erode(root):
     graph.connect(tint.outputs[0], body.inputs[1])
     graph.connect(dark, body.inputs[2])
     cooling = graph.math("Pressure Heat Spent", "SUBTRACT", progress, 0.2, clamp=True)
-    cooling = graph.math("Pressure Cooling Speed", "MULTIPLY", cooling, 3.5, clamp=True)
+    cooling = graph.math("Pressure Cooling Speed", "MULTIPLY", cooling, 2.5, clamp=True)
     cooling = graph.math("Pressure Body Cools First", "MULTIPLY", cooling, primary)
     cooling = graph.math("Editable Pressure Cooling", "MULTIPLY", cooling, fade)
-    cooling = graph.math("Pressure Color Loss", "MULTIPLY", cooling, 0.9)
+    cooling = graph.math("Pressure Color Loss", "MULTIPLY", cooling, 0.75)
     heat_left = graph.math("Pressure Color Remaining", "SUBTRACT", 1, cooling)
     rim = graph.node("ShaderNodeMapRange", "Red Edge Gradient", interpolation_type="SMOOTHSTEP")
     graph.connect(axes.outputs["X"], rim.inputs["Value"])
@@ -653,7 +684,7 @@ def _erode(root):
         graph.vector("Pressure Flow Detail", "SCALE", body.outputs[0], brush), bands.inputs[1]
     )
     graph.connect(graph.math("Advecting Flow", "MULTIPLY", progress, 1.5), noise.inputs["W"])
-    release_start = graph.math("Pressure Holds Its Mass", "MULTIPLY", primary, 0.1)
+    release_start = graph.math("Pressure Holds Its Mass", "MULTIPLY", primary, 0.02)
     release_start = graph.math(
         "Auxiliary Curl Delay",
         "ADD",
@@ -662,7 +693,7 @@ def _erode(root):
     )
     release_start = graph.math("Role Breakup Start", "ADD", release_start, 0.18)
     release = graph.math("After Main Punch", "SUBTRACT", progress, release_start, clamp=True)
-    rate = graph.math("Pressure Breakup Difference", "MULTIPLY", primary, 1.25)
+    rate = graph.math("Pressure Breakup Difference", "MULTIPLY", primary, 0.7)
     rate = graph.math(
         "Curl Breakup Difference",
         "ADD",
@@ -765,6 +796,39 @@ def _erode(root):
 
 def wave(root):
     """Break the perfect circle into unequal, slightly warped pressure arcs."""
+    layer = root.children[0]
+    # The generic Low ring has 32 sides. Give this wide pressure front 48
+    # without subdividing across its width or changing ordinary ring assets.
+    if root["vfx_quality"] == "LOW":
+        previous = layer.data
+        mesh = bpy.data.meshes.new("VFX • Pressure Front")
+        core._tag(mesh, root["vfx_id"])
+        segments = 48
+        vertices = [
+            (math.cos(i * math.tau / segments), math.sin(i * math.tau / segments), 0)
+            for i in range(segments)
+            for _ in range(2)
+        ]
+        faces = [
+            (i * 2, ((i + 1) % segments) * 2, ((i + 1) % segments) * 2 + 1, i * 2 + 1)
+            for i in range(segments)
+        ]
+        mesh.from_pydata(vertices, [], faces)
+        inner = mesh.attributes.new("vfx_inner", "FLOAT", "POINT")
+        for i, value in enumerate(inner.data):
+            value.value = i % 2
+        uv = mesh.uv_layers.new(name="VFX UV")
+        for face in mesh.polygons:
+            u = face.index / segments
+            for loop, coord in zip(
+                face.loop_indices, ((u, 0), (u + 1 / segments, 0), (u + 1 / segments, 1), (u, 1))
+            ):
+                uv.data[loop].uv = coord
+        mesh.materials.append(previous.materials[0])
+        mesh.update()
+        layer.data = mesh
+        if previous.users == 0:
+            bpy.data.meshes.remove(previous)
     tree = root.children[0].modifiers[0].node_group
     graph = _Nodes(tree, root)
     progress = tree.nodes["Ring Controls"].outputs["Progress"]
@@ -798,6 +862,21 @@ def wave(root):
     graph = _Nodes(material.node_tree, root)
     axes = graph.node("ShaderNodeSeparateXYZ", "Pressure UV")
     graph.connect(material.node_tree.nodes["Ring UV"].outputs["UV"], axes.inputs[0])
+    # The shared Pingpong profile repeats twice over V=0..1 and produced two
+    # thin parallel lines. This front needs one broad crest with soft edges.
+    across = graph.math("Pressure Crest Center", "SUBTRACT", axes.outputs["Y"], 0.5)
+    across = graph.math("Pressure Crest Distance", "ABSOLUTE", across)
+    across = graph.math("Pressure Crest Width", "MULTIPLY", across, 2)
+    crest = graph.math("Single Pressure Crest", "SUBTRACT", 1, across, clamp=True)
+    crest = graph.math("Rounded Pressure Crest", "POWER", crest, 0.65)
+    graph.connect(crest, material.node_tree.nodes["Edge × Noise"].inputs[0])
+    elongated = graph.vector(
+        "Tearing Along Pressure Front",
+        "MULTIPLY",
+        material.node_tree.nodes["UV Flow"].outputs[0],
+        (1, 0.15, 1),
+    )
+    graph.connect(elongated, material.node_tree.nodes["Dissolve Noise"].inputs["Vector"])
     phase = graph.math("Unequal Pressure Arcs", "MULTIPLY", axes.outputs["X"], 18)
     pattern = graph.math("Pressure Gaps", "SINE", phase)
     pattern = graph.math("Open Pressure Sectors", "GREATER_THAN", pattern, -0.15)

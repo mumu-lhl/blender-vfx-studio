@@ -261,6 +261,27 @@ class ImpactTests(unittest.TestCase):
         update(wave, expansion=0.5)
         self.assertLess(radius(5), peak * 0.5)
 
+    def test_dissipated_pressure_does_not_leave_black_cycles_surfaces(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        camera()
+        scene = bpy.context.scene
+        scene.camera.location = (3, -5, 6)
+        scene.camera.rotation_euler = (-scene.camera.location).to_track_quat("-Z", "Y").to_euler()
+        scene.camera.data.ortho_scale = 8.2
+        scene.render.resolution_x = scene.render.resolution_y = 96
+        background = scene.world.node_tree.nodes["Background"]
+        background.inputs["Color"].default_value = (0.18, 0.20, 0.24, 1)
+        background.inputs["Strength"].default_value = 1
+        main = next(m for m in composition.members(root) if m.name.endswith("Main Shards"))
+        for member in composition.members(root):
+            member.children[0].hide_render = member != main
+        # Default Cycles transparent-ray limits must reveal the background
+        # after dissipation. Invisible overlapping caps previously turned black.
+        spent = render_pixels(14)
+        main.children[0].hide_render = True
+        empty = render_pixels(14)
+        self.assertEqual(spent, empty)
+
 
 addon.register()
 result = unittest.TextTestRunner(verbosity=2).run(
