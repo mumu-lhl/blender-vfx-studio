@@ -1,4 +1,4 @@
-"""Blade highlight, colored filaments and dimmer wakes for slash asset version 2."""
+"""Native blade shading and wakes, with preserved older asset versions."""
 
 import bpy
 
@@ -56,11 +56,20 @@ def shader(root, uid):
     link(uv.outputs["UV"], separate.inputs[0])
     u, v = separate.outputs["X"], separate.outputs["Y"]
     progress = value("Progress")
-    shaped = root["vfx_asset_version"] == 3
+    global_progress = progress
+    shaped = root["vfx_asset_version"] >= 3
+    layered = root["vfx_asset_version"] >= 4
     attr = make("ShaderNodeAttribute", "Wake Index", attribute_name="vfx_wake")
     band = attr.outputs["Fac"]
     primary = mathn("Primary Ribbon", "LESS_THAN", band, 0.5)
     wake = mathn("Auxiliary Ribbons", "SUBTRACT", 1, primary)
+    if layered:
+        delay = mathn("Layer Birth Delay", "MULTIPLY", band, 0.06)
+        age = mathn("Time Since Layer Birth", "SUBTRACT", progress, delay)
+        age = mathn("Nonnegative Layer Age", "MAXIMUM", age, 0)
+        span = mathn("Wake Life Extension", "MULTIPLY", band, 0.1)
+        span = mathn("Independent Layer Span", "ADD", span, 1)
+        progress = mathn("Layer Local Clock", "DIVIDE", age, span)
 
     attack = value("Attack", "attack")
     front = mathn("Reveal Front", "DIVIDE", progress, attack, clamp=True)
@@ -82,9 +91,15 @@ def shader(root, uid):
     blade = mathn("Blade Profile", "SUBTRACT", 1, blade, clamp=True)
     blade = mathn("Sharp Blade", "POWER", blade, 0.65)
     white = mathn("Primary Highlight Only", "MULTIPLY", blade, primary)
-    focus = mathn("Leading Highlight", "POWER", u, 2)
-    focus = mathn("Highlight Range", "MULTIPLY", focus, 0.65)
-    focus = mathn("Tail Highlight", "ADD", focus, 0.35)
+    if layered:
+        focus = mathn("Head Light Start", "SUBTRACT", u, 0.35, clamp=True)
+        focus = mathn("Head Light Concentration", "MULTIPLY", focus, 2, clamp=True)
+        focus = mathn("Head Light Range", "MULTIPLY", focus, 0.85)
+        focus = mathn("Faint Trailing Edge", "ADD", focus, 0.15)
+    else:
+        focus = mathn("Leading Highlight", "POWER", u, 2)
+        focus = mathn("Highlight Range", "MULTIPLY", focus, 0.65)
+        focus = mathn("Tail Highlight", "ADD", focus, 0.35)
     white = mathn("Highlight Focus", "MULTIPLY", white, focus)
     if shaped:
         spent = mathn("Spent Blade Light", "SUBTRACT", progress, 0.32, clamp=True)
@@ -98,11 +113,19 @@ def shader(root, uid):
 
     # Stretch noise along the arc: long filaments, narrow variation across width.
     coordinates = make("ShaderNodeCombineXYZ", "Stretched Flow Coordinates")
-    link(mathn("Along Flow", "MULTIPLY", u, 1.8), coordinates.inputs["X"])
-    link(mathn("Across Filaments", "MULTIPLY", v, 5.5), coordinates.inputs["Y"])
+    along_flow = mathn("Along Flow", "MULTIPLY", u, 0.8 if layered else 1.8)
+    if layered:
+        along_flow = mathn(
+            "Flow Along The Sweep",
+            "SUBTRACT",
+            along_flow,
+            mathn("Sweep Flow Clock", "MULTIPLY", progress, 0.9),
+        )
+    link(along_flow, coordinates.inputs["X"])
+    link(mathn("Across Filaments", "MULTIPLY", v, 1.2 if layered else 5.5), coordinates.inputs["Y"])
     link(mathn("Flow Over Life", "MULTIPLY", progress, 0.8), coordinates.inputs["Z"])
     noise = make("ShaderNodeTexNoise", "Directional Filament Noise")
-    noise.inputs["Detail"].default_value = 2
+    noise.inputs["Detail"].default_value = 1 if layered else 2
     link(coordinates.outputs[0], noise.inputs["Vector"])
     link(value("Noise Scale", "noise_scale"), noise.inputs["Scale"])
     late = mathn("After Strike", "SUBTRACT", progress, 0.28, clamp=True)
@@ -128,8 +151,8 @@ def shader(root, uid):
         # faint complete crescent. Keep the old shader path unchanged for v2.
         erode = mathn("Illustrated Cutout", "GREATER_THAN", erode, 0.22)
 
-    filament = mathn("Filament Phase", "MULTIPLY", v, 80)
-    distortion = mathn("Noise Distortion", "MULTIPLY", noise.outputs["Fac"], 14)
+    filament = mathn("Filament Phase", "MULTIPLY", v, 22 if layered else 80)
+    distortion = mathn("Noise Distortion", "MULTIPLY", noise.outputs["Fac"], 5 if layered else 14)
     filament = mathn("Distorted Filaments", "ADD", filament, distortion)
     filament = mathn("Filament Bands", "SINE", filament)
     filament = mathn("Filament Contrast", "MULTIPLY", filament, 0.35)
@@ -151,9 +174,12 @@ def shader(root, uid):
         alpha = mathn("Blade Outer Edge", "MULTIPLY", alpha, edge)
         alpha = mathn("Cutout Body", "MULTIPLY", alpha, erode)
         alpha = mathn("Revealed Body", "MULTIPLY", alpha, reveal)
-        cut_phase = mathn("Tear Along Arc", "MULTIPLY", u, 26)
+        cut_phase = mathn("Tear Along Arc", "MULTIPLY", u, 17 if layered else 26)
         cut_phase = mathn(
-            "Diagonal Tears", "ADD", cut_phase, mathn("Tear Across", "MULTIPLY", v, 7)
+            "Diagonal Tears",
+            "ADD",
+            cut_phase,
+            mathn("Tear Across", "MULTIPLY", v, 3 if layered else 7),
         )
         cut_phase = mathn(
             "Moving Tears", "SUBTRACT", cut_phase, mathn("Tear Clock", "MULTIPLY", progress, 4)
@@ -167,13 +193,20 @@ def shader(root, uid):
         alpha = mathn(
             "Broken Tail", "MULTIPLY", alpha, mathn("Intact Regions", "SUBTRACT", 1, cuts)
         )
-        release_phase = mathn("Release Fragment Phase", "MULTIPLY", u, 19)
+        release_phase = mathn("Release Fragment Phase", "MULTIPLY", u, 11 if layered else 19)
         release_phase = mathn(
             "Irregular Fragment Boundaries",
             "ADD",
             release_phase,
-            mathn("Fragment Variation", "MULTIPLY", noise.outputs["Fac"], 3),
+            mathn("Fragment Variation", "MULTIPLY", noise.outputs["Fac"], 1.2 if layered else 3),
         )
+        if layered:
+            release_phase = mathn(
+                "Separate Layer Fragments",
+                "ADD",
+                release_phase,
+                mathn("Layer Fragment Phase", "MULTIPLY", band, 1.4),
+            )
         islands = mathn("Release Islands", "SINE", release_phase)
         islands = mathn("Island Range", "MULTIPLY", islands, 0.5)
         islands = mathn("Positive Islands", "ADD", islands, 0.5)
@@ -182,10 +215,13 @@ def shader(root, uid):
         threshold = mathn("Editable Fragment Fade", "MULTIPLY", threshold, fade)
         islands = mathn("Surviving Pieces", "GREATER_THAN", islands, threshold)
         alpha = mathn("Separated Release Pieces", "MULTIPLY", alpha, islands)
-    wake_weight = mathn("Wake Distance", "ADD", band, 1)
+    wake_distance = mathn("Wake Layer Distance", "MULTIPLY", band, 0.35) if layered else band
+    wake_weight = mathn("Wake Distance", "ADD", wake_distance, 0.75 if layered else 1)
     wake_weight = mathn("Wake Opacity", "DIVIDE", value("Afterimage", "afterimage"), wake_weight)
     delay = mathn("Wake Delay", "MULTIPLY", band, 0.06)
-    arrived = mathn("Wake Has Arrived", "GREATER_THAN", progress, delay)
+    arrived = mathn(
+        "Wake Has Arrived", "GREATER_THAN", global_progress if layered else progress, delay
+    )
     if shaped:
         packet = mathn("Wake Segments", "MULTIPLY", u, 15)
         packet = mathn(
@@ -222,6 +258,26 @@ def shader(root, uid):
             mathn("Brush Floor", "ADD", mathn("Brush Contrast", "MULTIPLY", detail, 0.2), 0.8),
         )
     body_color = scale("Tinted Body", tint.outputs[0], body)
+    if layered:
+        along_value = mathn("Value Toward Leading Head", "MULTIPLY", u, 0.4)
+        along_value = mathn("Trailing Color Value", "ADD", along_value, 0.6)
+        body_color = scale("Color Mass Follows Head", body_color, along_value)
+        channel = mathn("Broad Flow Channel", "SUBTRACT", noise.outputs["Fac"], 0.48)
+        channel = mathn("Flow Channel Edge", "MULTIPLY", channel, 8, clamp=True)
+        middle = mathn("Inner Channel Center", "SUBTRACT", v, 0.4)
+        middle = mathn("Inner Channel Distance", "ABSOLUTE", middle)
+        middle = mathn("Inner Channel Width", "DIVIDE", middle, 0.24)
+        middle = mathn("Channel Stays Inside Body", "SUBTRACT", 1, middle, clamp=True)
+        channel = mathn("Pointed Inner Flow", "MULTIPLY", channel, middle)
+        channel = mathn(
+            "Editable Flow Detail", "MULTIPLY", channel, value("Flow Streaks", "streaks")
+        )
+        channel = mathn("Subordinate Inner Channel", "MULTIPLY", channel, 0.6)
+        flow = make("ShaderNodeMixRGB", "Moving Colored Flow Beneath White Edge")
+        link(channel, flow.inputs[0])
+        link(body_color, flow.inputs[1])
+        link(scale("Saturated Inner Flow", tint.outputs[0], 0.9), flow.inputs[2])
+        body_color = flow.outputs[0]
     highlight = make("ShaderNodeCombineXYZ", "Cool Blade White")
     for socket, component in zip(highlight.inputs, (0.8, 0.9, 1.0)):
         socket.default_value = component

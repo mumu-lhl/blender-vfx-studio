@@ -695,7 +695,7 @@ class VFX_PT_main(bpy.types.Panel):
                     "streaks",
                     "breakup",
                 )
-            if root["vfx_asset_version"] == 3:
+            if root["vfx_asset_version"] >= 3:
                 keys += ("contour", "bank", "wake_spread")
         elif root["vfx_module"] == "simulation.cloth":
             from . import simulation

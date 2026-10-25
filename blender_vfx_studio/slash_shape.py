@@ -33,7 +33,15 @@ def shape(tree, root, u, across, band, progress, radius, offset):
     contour = value("Contour", "contour")
     envelope = mathn("Contour End Taper", "SINE", mathn("Arc Half Turn", "MULTIPLY", u, 3.14159265))
     envelope = mathn("Nonnegative Contour", "MAXIMUM", envelope, 0)
-    wave = mathn("Uneven Broad Edge", "SINE", mathn("Broad Edge Phase", "MULTIPLY", u, 11))
+    edge_phase = mathn("Broad Edge Phase", "MULTIPLY", u, 11)
+    if root["vfx_asset_version"] >= 4:
+        edge_phase = mathn(
+            "Contour Follows Sweep",
+            "SUBTRACT",
+            edge_phase,
+            mathn("Contour Clock", "MULTIPLY", progress, 4),
+        )
+    wave = mathn("Uneven Broad Edge", "SINE", edge_phase)
     wave = mathn("Broad Edge Depth", "MULTIPLY", wave, 0.045)
     # A compact leading hook gives the silhouette a definite direction. Small
     # trailing notches remain subordinate to that single larger contour change.
@@ -53,14 +61,34 @@ def shape(tree, root, u, across, band, progress, radius, offset):
     contour_field = mathn("Radius Relative Contour", "MULTIPLY", contour_field, radius)
     outer = mathn("Irregular Outer Edge", "ADD", radius, contour_field)
 
-    phase = mathn("Inner Tooth Phase", "MULTIPLY", u, 31)
-    phase = mathn(
-        "Tooth Flow", "SUBTRACT", phase, mathn("Slow Tooth Motion", "MULTIPLY", progress, 2)
-    )
-    tooth = mathn("Inner Teeth", "SINE", phase)
-    tooth = mathn("Positive Teeth", "MAXIMUM", tooth, 0)
-    tooth = mathn("Sharp Inner Teeth", "POWER", tooth, 4)
-    tooth = mathn("Tooth Width", "MULTIPLY", tooth, 0.48)
+    if root["vfx_asset_version"] >= 4:
+        tooth = 0
+        for index, (center, span, depth) in enumerate(
+            ((0.20, 0.10, 0.22), (0.49, 0.05, 0.5), (0.64, 0.07, 0.3))
+        ):
+            label = f"Inner Opening {index + 1}"
+            distance = mathn(label + " Center", "SUBTRACT", u, center)
+            distance = mathn(label + " Distance", "ABSOLUTE", distance)
+            distance = mathn(label + " Span", "DIVIDE", distance, span)
+            opening = mathn(label + " Shape", "SUBTRACT", 1, distance)
+            opening = mathn(label + " Bounds", "MAXIMUM", opening, 0)
+            opening = mathn(label + " Depth", "MULTIPLY", opening, depth)
+            pulse = mathn(label + " Clock", "MULTIPLY", progress, 8)
+            pulse = mathn(label + " Phase", "ADD", pulse, index * 1.7)
+            pulse = mathn(label + " Pulse", "SINE", pulse)
+            pulse = mathn(label + " Variation", "MULTIPLY", pulse, 0.25)
+            pulse = mathn(label + " Retained Depth", "ADD", pulse, 0.75)
+            opening = mathn(label + " Moving Tear", "MULTIPLY", opening, pulse)
+            tooth = mathn(label + " Contribution", "ADD", tooth, opening)
+    else:
+        phase = mathn("Inner Tooth Phase", "MULTIPLY", u, 31)
+        phase = mathn(
+            "Tooth Flow", "SUBTRACT", phase, mathn("Slow Tooth Motion", "MULTIPLY", progress, 2)
+        )
+        tooth = mathn("Inner Teeth", "SINE", phase)
+        tooth = mathn("Positive Teeth", "MAXIMUM", tooth, 0)
+        tooth = mathn("Sharp Inner Teeth", "POWER", tooth, 4)
+        tooth = mathn("Tooth Width", "MULTIPLY", tooth, 0.48)
     tooth = mathn("Editable Teeth", "MULTIPLY", tooth, contour)
     tooth = mathn("Full Inner Width", "ADD", 1, tooth)
     offset = mathn("Torn Inner Edge", "MULTIPLY", offset, tooth)

@@ -9,8 +9,8 @@ from .nodes import ACTIVE, PROGRESS, TIME_PROPS, drive, node
 from .parameters import SLASH_PARAMETERS, SLASH_PARAMETERS_V1, SLASH_PARAMETERS_V2
 
 
-def create(context, quality="MEDIUM", *, asset_version=3):
-    if asset_version not in (1, 2, 3):
+def create(context, quality="MEDIUM", *, asset_version=4):
+    if asset_version not in (1, 2, 3, 4):
         raise ValueError("Unsupported slash asset version")
     modern = asset_version >= 2
     segments = {"LOW": 32, "MEDIUM": 64, "HIGH": 128}.get(quality)
@@ -21,7 +21,7 @@ def create(context, quality="MEDIUM", *, asset_version=3):
         "Arc Slash",
         "mesh.slash",
         quality,
-        {1: SLASH_PARAMETERS_V1, 2: SLASH_PARAMETERS_V2, 3: SLASH_PARAMETERS}[asset_version],
+        {1: SLASH_PARAMETERS_V1, 2: SLASH_PARAMETERS_V2}.get(asset_version, SLASH_PARAMETERS),
         {},
     )
     root["vfx_asset_version"] = asset_version
@@ -34,9 +34,13 @@ def create(context, quality="MEDIUM", *, asset_version=3):
             u = i / segments
             for v in across:
                 angle = (u - 0.5) * math.radians(root["arc"]) * (1 - band * 0.16) - band * 0.14
-                taper = max(math.sin(math.pi * u), 0) ** root["taper"]
+                shape_u = u ** (1 + root["head_bias"] * 3) if asset_version >= 4 else u
+                taper = max(math.sin(math.pi * shape_u), 0) ** root["taper"]
                 if modern:
-                    taper *= (1 - root["head_bias"] * (1 - u)) * (0.12 if band else 1)
+                    if asset_version >= 4:
+                        taper *= 1 - 0.62 * bool(band) - 0.1 * band
+                    else:
+                        taper *= (1 - root["head_bias"] * (1 - u)) * (0.12 if band else 1)
                 radius = max(root["radius"] * (1 + band * 0.075) - root["width"] * taper * v, 0.001)
                 vertices.append((radius * math.cos(angle), radius * math.sin(angle), 0))
                 coordinates.append((u, v))
@@ -115,7 +119,8 @@ def geometry(obj, root):
     progress = value("Progress", None, -1200, -600, PROGRESS, TIME_PROPS)
     motion = progress
     modern = root["vfx_asset_version"] >= 2
-    shaped = root["vfx_asset_version"] == 3
+    shaped = root["vfx_asset_version"] >= 3
+    layered = root["vfx_asset_version"] >= 4
     band = None
     if modern:
         attr = node(
@@ -123,6 +128,14 @@ def geometry(obj, root):
         )
         attr.inputs["Name"].default_value = "vfx_wake"
         band = attr.outputs["Attribute"]
+        if layered:
+            delay = math_node("Layer Birth Delay", "MULTIPLY", band, 0.06, -1700, -2600)
+            age = math_node("Time Since Layer Birth", "SUBTRACT", progress, delay, -1500, -2600)
+            age = math_node("Nonnegative Layer Age", "MAXIMUM", age, 0, -1300, -2600)
+            span = math_node("Wake Life Extension", "MULTIPLY", band, 0.1, -1700, -2800)
+            span = math_node("Independent Layer Span", "ADD", span, 1, -1500, -2800)
+            progress = math_node("Layer Local Clock", "DIVIDE", age, span, -1100, -2600)
+            motion = progress
         one_minus = math_node("Remaining Life", "SUBTRACT", 1, progress, -1200, -1000)
         cubic = math_node("Ease Out Cube", "POWER", one_minus, 3, -1000, -1000)
         eased = math_node("Fast Sweep", "SUBTRACT", 1, cubic, -800, -1000)
@@ -165,18 +178,29 @@ def geometry(obj, root):
         front = math_node("Nonzero Reveal", "MAXIMUM", front, 0.0001, -900, -2100)
         taper_u = math_node("Moving Tip Coordinates", "DIVIDE", taper_u, front, -700, -2100)
         taper_u = math_node("Clamped Tip", "MINIMUM", taper_u, 1, -500, -2100)
+        if layered:
+            bias = value("Head Bias", "head_bias", -1500, -3000)
+            exponent = math_node("Head Concentration", "MULTIPLY", bias, 3, -1300, -3000)
+            exponent = math_node("Leading Mass Power", "ADD", exponent, 1, -1100, -3000)
+            taper_u = math_node("Wide Head Pointed Tail", "POWER", taper_u, exponent, -300, -2100)
     across = math_node("Taper Angle", "MULTIPLY", taper_u, math.pi, -950, -800)
     taper_sine = math_node("Taper Sine", "SINE", across, 0, -700, -800)
     positive = math_node("Nonnegative Taper", "MAXIMUM", taper_sine, 0, -450, -800)
     amount = math_node("Tip Taper", "POWER", positive, taper, -200, -700)
     if modern:
-        bias = value("Head Bias", "head_bias", -1200, -1400)
-        tail = math_node("Tail Weight", "SUBTRACT", 1, u.outputs["Attribute"], -1000, -1400)
-        bias = math_node("Asymmetric Weight", "MULTIPLY", bias, tail, -800, -1400)
-        bias = math_node("Leading Body", "SUBTRACT", 1, bias, -600, -1400)
-        amount = math_node("Biased Taper", "MULTIPLY", amount, bias, -400, -1400)
+        if not layered:
+            bias = value("Head Bias", "head_bias", -1200, -1400)
+            tail = math_node("Tail Weight", "SUBTRACT", 1, u.outputs["Attribute"], -1000, -1400)
+            bias = math_node("Asymmetric Weight", "MULTIPLY", bias, tail, -800, -1400)
+            bias = math_node("Leading Body", "SUBTRACT", 1, bias, -600, -1400)
+            amount = math_node("Biased Taper", "MULTIPLY", amount, bias, -400, -1400)
         wake = math_node("Is Wake", "GREATER_THAN", band, 0.5, -1000, -1600)
-        narrow = math_node("Wake Narrowing", "MULTIPLY", wake, 0.88, -800, -1600)
+        narrow = math_node(
+            "Wake Narrowing", "MULTIPLY", wake, 0.62 if layered else 0.88, -800, -1600
+        )
+        if layered:
+            distance = math_node("Outer Wake Is Thinner", "MULTIPLY", band, 0.1, -1000, -3300)
+            narrow = math_node("Unequal Wake Widths", "ADD", narrow, distance, -600, -1600)
         narrow = math_node("Ribbon Width Factor", "SUBTRACT", 1, narrow, -600, -1600)
         amount = math_node("Wake Width", "MULTIPLY", amount, narrow, -200, -1400)
         shrink = math_node("Release Width", "MULTIPLY", progress, 0.55, -1000, -1800)
