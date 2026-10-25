@@ -5,7 +5,6 @@ import math
 import bmesh
 import bpy
 from mathutils import Vector
-from mathutils.geometry import tessellate_polygon
 
 from . import core
 from .nodes import ACTIVE, PROGRESS, TIME_PROPS, drive, node
@@ -204,82 +203,45 @@ def jets(root, quality):
                 b = base + i * sides + (j + 1) % sides
                 faces.append((a, b, b + sides, a + sides))
 
-    # Fold an authored, branching flame outline into shallow volume. Three
-    # distinct fans replace rounded tube caps; no reference texture is used.
-    outline = (
-        (0.0, 0.0),
-        (0.12, -0.26),
-        (0.28, -0.48),
-        (0.42, -0.24),
-        (0.66, -0.58),
-        (0.58, -0.08),
-        (1.02, -0.18),
-        (0.72, 0.12),
-        (0.94, 0.48),
-        (0.56, 0.30),
-        (0.58, 0.76),
-        (0.36, 0.40),
-        (0.24, 0.54),
-        (0.18, 0.18),
-    )
-    samples = {"LOW": 2, "MEDIUM": 3, "HIGH": 4}[quality]
-    contour = [
-        (a[0] + (b[0] - a[0]) * j / samples, a[1] + (b[1] - a[1]) * j / samples)
-        for a, b in zip(outline, outline[1:] + outline[:1])
-        for j in range(samples)
-    ]
-    flat_contour = [Vector((u, v, 0)) for u, v in contour]
-    cap_triangles = tessellate_polygon([flat_contour])
+    # Curl a six-sided pressure volume around each turning centerline.
     for index, (angle, reach, bend, lift, breadth, depth, birth) in enumerate(
         (
-            (0.75, 1.1, -0.22, 0.25, 0.55, 0.34, 0.0),
-            (3.55, 0.75, 0.25, -0.22, 0.4, 0.3, 0.035),
-            (5.1, 0.9, -0.18, 0.28, 0.35, 0.28, 0.065),
+            (0.75, 1.1, -0.22, 0.25, 0.31, 0.34, 0.0),
+            (3.55, 0.75, 0.25, -0.22, 0.26, 0.30, 0.035),
+            (5.1, 0.9, -0.18, 0.28, 0.24, 0.28, 0.065),
         )
     ):
         direction = Vector((math.cos(angle), math.sin(angle), 0))
         side = Vector((-direction.y, direction.x, 0))
-        n = len(contour)
-
-        def point(u, v, thickness):
-            # A turning centerline and its local side frame form a curled
-            # pressure tongue. A straight spine with pointed side lobes reads
-            # as a leaf even when its entire outline moves or rotates.
-            turn = (1.7, -1.3, 2.2)[index]
+        base = len(vertices)
+        rings = {"LOW": 14, "MEDIUM": 21, "HIGH": 28}[quality]
+        sides = 6
+        turn = (2.3, -1.8, 2.6)[index]
+        for i in range(rings):
+            u = i / (rings - 1)
             phase = turn * u
             path = direction * (math.sin(phase) * reach * 1.4 / turn)
             path += side * ((1 - math.cos(phase)) * reach * 1.4 / turn)
             path += side * (bend * math.sin(math.pi * u))
             path.z = lift * math.sin(math.pi * u)
             local_side = side * math.cos(phase) - direction * math.sin(phase)
-            width = local_side * (v * breadth) + Vector((0, 0, thickness))
-            vertex(path, width, direction, 0, index, birth, u, angle / math.tau + v * 0.05)
-
-        upper = len(vertices)
-        for u, v in contour:
-            point(0.36 + (u - 0.36) * 0.55, v * 0.55, depth * 0.72)
-        lower = len(vertices)
-        for u, v in contour:
-            point(0.36 + (u - 0.36) * 0.55, v * 0.55, -depth * 0.25)
-        boundary = len(vertices)
-        for u, v in contour:
-            # Slightly different lobes keep the three plumes from being copies.
-            v *= 1 + 0.15 * math.sin(u * 9 + index * 2)
-            point(u, v, 0)
-        for j in range(n):
-            k = (j + 1) % n
-            faces.extend(
-                (
-                    (upper + j, boundary + j, boundary + k, upper + k),
-                    (lower + k, boundary + k, boundary + j, lower + j),
+            profile = max(math.sin(math.pi * u), 0) ** 0.65
+            for j in range(sides):
+                phi = j / sides * math.tau
+                billow = 1 + 0.14 * math.sin(u * 16 + j * 1.1 + index * 2)
+                width = local_side * (math.cos(phi) * breadth * profile * billow)
+                width.z = math.sin(phi) * depth * profile * billow
+                vertex(
+                    path,
+                    width,
+                    direction,
+                    0,
+                    index,
+                    birth,
+                    u,
+                    angle / math.tau + math.cos(phi) * 0.05,
                 )
-            )
-        # Concave tips cannot be capped by a fan from one central vertex:
-        # overlapping triangles exhaust Cycles' transparent ray budget once
-        # the plume is gone. Tessellate the authored outline before folding.
-        for triangle in cap_triangles:
-            faces.append(tuple(upper + j for j in triangle))
-            faces.append(tuple(lower + j for j in reversed(triangle)))
+        rows(base, rings, sides, closed=True)
     fine_steps = {"LOW": 10, "MEDIUM": 16, "HIGH": 24}[quality]
     for index, (angle, reach, bend, lift, breadth, birth) in enumerate(
         (
