@@ -57,7 +57,7 @@ Contour 控制前端钩形与内侧缺口，Bank 控制刀面的深度弯曲，�
 
 普通 **Particle Burst** 提供 Shape（0 圆粒、1 尖片）、Stretch（尖片半长相对 Size 的倍数）、Planar（1 将随机散射压到局部 XY 平面）和 Motion Ease（0 匀速运动时钟、1 快出慢停）。例如 Shape=1、Stretch=6 可生成细长尖片。尖片沿轨迹方向转动，前端偏白、尾部较暗；Fade 仍控制尺寸缩减。Motion Ease 改变直接计算的位置与重力时钟，不是物理模拟；修改它会重新计算当前帧。
 
-Impact 候选的短闪和主体采用私有网格，沿用 Burst 控制器保存时间、尺寸、运动等参数，侧栏只显示实际使用的项。Count、Shape、Gravity、Spread 不驱动这两个造型，普通 Burst 不受影响。主体的 Size、Stretch、Planar、运动参数与 Fade 可以编辑；完整编排请用 Save Complete Effect 保存，单层参数 JSON 会重新创建普通 Burst。
+Impact 候选的短闪和主体采用私有网格，沿用 Burst 控制器保存时间、尺寸、运动等参数，侧栏只显示实际使用的项。Count、Shape、Gravity、Spread 不驱动这两个造型，普通 Burst 不受影响。主体的 Size、Stretch、Planar、运动参数与 Fade 可以编辑；材质中的 Rim Contrast / Rim Width 控制浅背景下的深色边界，设 Rim Contrast=0 可关闭；完整编排请用 Save Complete Effect 保存，单层参数 JSON 会重新创建普通 Burst。
 
 0.22.1 的 Impact 主尖片额外区分亮面和暗面，轮廓略宽，白色尖端保留。选择 `Impact • Main Shards` 下的网格，在 Shader Editor 中调整 **Side Contrast**（建议 0–1；0 关闭面色差异）。**Illustrated Light** 的向量设置固定的世界空间明暗方向，不依赖灯光。颜色和 Emission 仍在控制器上调整。这是该组合的材质编辑；使用 **Save Complete Effect** 保存它，单层参数 JSON 不保存手动节点编辑，普通 Particle Burst 不附带这套面色。
 

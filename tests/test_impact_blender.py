@@ -128,6 +128,29 @@ class ImpactTests(unittest.TestCase):
         self.assertGreater(sum(blue[2::4]), sum(blue[0::4]))
         self.assertNotEqual(blue, faceted)
 
+    def test_body_rim_changes_color_without_changing_coverage(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        camera()
+        scene = bpy.context.scene
+        scene.render.film_transparent = True
+        scene.render.resolution_x = scene.render.resolution_y = 96
+        main = next(m for m in composition.members(root) if m.name.endswith("Main Shards"))
+        for member in composition.members(root):
+            member.children[0].hide_render = member != main
+        contrast = main.children[0].data.materials[0].node_tree.nodes["Rim Contrast"].outputs[0]
+        contrast.default_value = 0
+        plain = render_pixels(5)
+        contrast.default_value = 0.95
+        outlined = render_pixels(5)
+        self.assertEqual(plain[3::4], outlined[3::4])
+        plain_light = sum(v for i, v in enumerate(plain) if i % 4 != 3)
+        rim_light = sum(v for i, v in enumerate(outlined) if i % 4 != 3)
+        self.assertLess(rim_light, plain_light * 0.98)
+        self.assertGreater(rim_light, plain_light * 0.55)
+        update(main, color_0=0.015, color_1=0.65, color_2=0.05)
+        green = render_pixels(5)
+        self.assertGreater(sum(green[1::4]), sum(green[0::4]) * 1.3)
+
     def test_core_flash_and_sparse_tail_have_distinct_rendered_stages(self):
         root = core.create(bpy.context, "IMPACT_BURST", "LOW")
         camera()
