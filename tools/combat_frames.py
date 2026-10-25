@@ -5,13 +5,18 @@ import hashlib
 import json
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools.combat_video import PROFILES  # noqa: E402
 
-def extract(folder):
+
+def extract(folder, profile="combat"):
     folder = Path(folder)
-    movie = folder / "combat.mp4"
+    _, _, prefix, count = PROFILES[profile]
+    movie = folder / f"{prefix}.mp4"
     ffmpeg, ffprobe = shutil.which("ffmpeg"), shutil.which("ffprobe")
     if not ffmpeg or not ffprobe:
         raise RuntimeError("Install FFmpeg (including ffprobe) before extracting frames")
@@ -36,9 +41,9 @@ def extract(folder):
         960,
         540,
         "24/1",
-        "36",
+        str(count),
     ):
-        raise ValueError("Expected a 36-frame 960x540 review movie at 24 fps")
+        raise ValueError(f"Expected a {count}-frame 960x540 review movie at 24 fps")
     source_digest = hashlib.sha256(movie.read_bytes()).hexdigest()
     output = folder / "video-frames"
     output.mkdir(exist_ok=True)
@@ -56,7 +61,7 @@ def extract(folder):
                 "-fps_mode",
                 "vfr",
                 "-frames:v",
-                "18",
+                str((count + 1) // 2),
                 "-start_number",
                 "1",
                 str(Path(temporary) / "frame-%02d.png"),
@@ -64,17 +69,21 @@ def extract(folder):
             check=True,
         )
         samples = []
-        for index, frame in enumerate(range(1, 37, 2), 1):
+        if hashlib.sha256(movie.read_bytes()).hexdigest() != source_digest:
+            raise ValueError("Review movie changed during decoding")
+        for index, frame in enumerate(range(1, count + 1, 2), 1):
             filename = f"frame-{index:02d}.png"
             (Path(temporary) / filename).replace(output / filename)
             samples.append({"file": filename, "source_frame": frame, "seconds": (frame - 1) / 24})
     record = {"movie_sha256": source_digest, "step": 2, "samples": samples}
     (output / "frames.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
-    print(f"DECODED_VIDEO_SAMPLES {output} (18 frames; visual review not automatic)")
+    print(f"DECODED_VIDEO_SAMPLES {output} ({len(samples)} frames; visual review not automatic)")
     return output
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("folder", type=Path)
-    extract(parser.parse_args().folder)
+    parser.add_argument("--profile", choices=PROFILES, default="combat")
+    args = parser.parse_args()
+    extract(args.folder, args.profile)
