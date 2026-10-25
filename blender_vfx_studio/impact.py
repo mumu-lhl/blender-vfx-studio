@@ -68,14 +68,14 @@ def create(context, quality="LOW"):
         stretch=2.0,
         planar=1.0,
         motion_ease=0.0,
-        size=0.32,
+        size=0.42,
         spawn_radius=0.0,
         velocity=0.0,
         gravity=0.0,
         spread=1.0,
         randomness=0.6,
         fade=1.0,
-        strength=1.2,
+        strength=2.4,
         seed=31,
     )
     _shade_shards(flash)

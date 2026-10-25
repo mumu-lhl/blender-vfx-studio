@@ -112,7 +112,7 @@ def flash(root):
     """A compact nucleus and four unequal narrow spokes, lasting three frames."""
     sphere = bmesh.new()
     try:
-        bmesh.ops.create_icosphere(sphere, subdivisions=1, radius=0.22)
+        bmesh.ops.create_icosphere(sphere, subdivisions=1, radius=0.3)
         sphere.verts.ensure_lookup_table()
         sphere.verts.index_update()
         vertices = [(v.co.x, v.co.y * 0.85, v.co.z * 0.65) for v in sphere.verts]
