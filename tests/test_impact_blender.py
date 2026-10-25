@@ -48,7 +48,17 @@ class ImpactTests(unittest.TestCase):
         wave = next(child for child in children if child["vfx_module"] == "mesh.ring")
         self.assertAlmostEqual(wave.matrix_world.translation.z, 3.95, places=5)
         self.assertTrue(all(abs(child.matrix_world.translation.x - 2) < 1e-5 for child in children))
-        for frame, active in ((0, 0), (1, 2), (2, 3), (3, 4), (8, 3), (19, 2), (20, 1), (25, 0)):
+        for frame, active in (
+            (0, 0),
+            (1, 2),
+            (2, 3),
+            (3, 4),
+            (4, 3),
+            (8, 3),
+            (19, 2),
+            (20, 1),
+            (25, 0),
+        ):
             state = geometry(root, frame)
             self.assertEqual(sum(bool(points) for points in state.values()), active, frame)
             self.assertLess(sum(len(points) for points in state.values()), 1000)
@@ -229,10 +239,15 @@ class ImpactTests(unittest.TestCase):
         self.assertGreater(peak, 1)
         # A protected inner pole used to turn into a persistent opaque cup
         # during outward peeling, despite the keyframe-only check passing.
-        self.assertLess(light(10), peak * 0.08)
-        self.assertLess(light(11), peak * 0.03)
+        # Pressure masses now retain a cooled, outward-moving afterburn;
+        # the pivot must still clear instead of leaving the old opaque cup.
+        self.assertLess(light(10), peak * 0.5)
+        pixels = render_pixels(11)
+        center = (48 * 96 + 48) * 4
+        self.assertLess(max(pixels[center : center + 3]), 0.05)
+        self.assertLess(light(15), peak * 0.08)
         update(main, fade=0.0)
-        self.assertGreater(light(11), peak * 0.2)
+        self.assertGreater(light(15), peak * 0.2)
 
     def test_pressure_front_is_fast_and_expansion_stays_editable(self):
         root = core.create(bpy.context, "IMPACT_BURST", "LOW")
