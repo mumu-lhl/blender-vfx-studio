@@ -138,12 +138,18 @@ jobs:
         run: |
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE --light --sampled
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --light
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE --pale --far --view-transform AgX
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-impact/impact-cycles.blend --python tests/impact_visual_reopen.py
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-impact/impact-blender_eevee-light.blend --python tests/impact_visual_reopen.py
       - uses: actions/upload-artifact@v7.0.2
         if: runner.os == 'Linux'
         with:
           name: impact-burst-visual-review
-          path: work/visual-impact/*.png
+          path: |
+            work/visual-impact/*.png
+            work/visual-impact/*-settings.json
       - name: Review Energy Charge gathering and tail (960x540, CPU, no bloom)
         if: runner.os == 'Linux'
         env:

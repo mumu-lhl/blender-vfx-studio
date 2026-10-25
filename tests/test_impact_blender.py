@@ -140,9 +140,55 @@ class ImpactTests(unittest.TestCase):
         self.assertGreater(energy(stages[0]), energy(stages[2]) * 2)
         self.assertGreater(energy(stages[1]), energy(stages[2]) * 2)
         center = (24 * 48 + 24) * 4
-        self.assertGreater(min(stages[0][center : center + 3]), 0.25)
+        # The authored flash has a directional silhouette and a dark side;
+        # verify a compact bright region instead of requiring its pivot pixel
+        # to be white on every face.
+        focus = [
+            min(stages[0][(y * 48 + x) * 4 : (y * 48 + x) * 4 + 3])
+            for y in range(18, 31)
+            for x in range(18, 34)
+        ]
+        self.assertGreater(max(focus), 0.25)
         self.assertLess(max(stages[2][center : center + 3]), 0.05)
         self.assertFalse(any(geometry(root, 25).values()))
+        settling = render_pixels(9)
+
+        def white_count(pixels):
+            return sum(min(pixels[i : i + 3]) > 0.6 for i in range(0, len(pixels), 4))
+
+        self.assertGreater(white_count(stages[1]), 0)
+        self.assertLess(white_count(settling), white_count(stages[1]) * 0.4)
+
+    def test_authored_pressure_controls_depth_budget_and_retiming(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        shards = next(m for m in composition.members(root) if m.name.endswith("Main Shards"))
+        expected = geometry(root, 5)
+        self.assertLessEqual(sum(map(len, geometry(root, 3).values())), 900)
+        original = expected[shards["vfx_id"]]
+        self.assertGreater(max(p[2] for p in original) - min(p[2] for p in original), 0.1)
+        for key, value in (
+            ("size", 0.2),
+            ("velocity", 1.8),
+            ("seed", 19),
+            ("stretch", 2),
+            ("randomness", 0),
+            ("motion_ease", 0),
+            ("motion_seconds", 0.3),
+            ("spawn_radius", 0.2),
+            ("fade", 0),
+        ):
+            previous = shards[key]
+            update(shards, **{key: value})
+            self.assertNotEqual(geometry(root, 5)[shards["vfx_id"]], original, key)
+            update(shards, **{key: previous})
+        update(shards, planar=1.0)
+        self.assertTrue(all(abs(p[2]) < 1e-6 for p in geometry(root, 5)[shards["vfx_id"]]))
+        update(shards, planar=0.35)
+        self.assertEqual(geometry(root, 5), expected)
+        update(root, speed=2.0)
+        self.assertEqual(geometry(root, 3), expected)
+        update(root, speed=1.0, duration=48.0)
+        self.assertEqual(geometry(root, 9), expected)
 
 
 addon.register()
@@ -158,6 +204,10 @@ for frame in (2, 5, 14):
     state = geometry(root, frame)
     for child in composition.members(root):
         child[f"expected_shape_{frame}"] = [c for v in state[child["vfx_id"]] for c in v]
+camera()
+bpy.context.scene.camera.data.ortho_scale = 5.5
+for frame in (2, 5, 9, 14):
+    root[f"expected_pixels_{frame}"] = render_pixels(frame)
 addon.unregister()
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "work/impact.blend"))
 print("IMPACT_INTEGRATION_OK")

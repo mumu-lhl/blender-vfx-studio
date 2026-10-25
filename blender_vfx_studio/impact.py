@@ -1,6 +1,9 @@
 """Editable four-layer hit: short flash, directional shards, wave and embers."""
 
 from . import composition, core
+from .impact_shape import flash as flash_shape
+from .impact_shape import jets
+from .impact_shape import wave as wave_shape
 from .nodes import PROGRESS, TIME_PROPS, drive, node
 
 
@@ -17,8 +20,8 @@ def _shade_shards(root):
     sides = node(tree, "ShaderNodeMapRange", "Side Facets", -500, -400)
     sides.interpolation_type = "SMOOTHSTEP"
     link(facing.outputs["Value"], sides.inputs["Value"])
-    sides.inputs["From Min"].default_value = -0.4
-    sides.inputs["From Max"].default_value = 0.4
+    sides.inputs["From Min"].default_value = 0.25
+    sides.inputs["From Max"].default_value = 0.95
     sides.inputs["To Min"].default_value = 1
     sides.inputs["To Max"].default_value = 0
     contrast = node(tree, "ShaderNodeValue", "Side Contrast", -500, -700)
@@ -58,23 +61,25 @@ def create(context, quality="LOW"):
     flash = configure(
         core.create_particle(context, quality),
         "Impact • Core Flash",
-        (0.8, 0.9, 1),
-        duration=6.0,
+        (1.0, 0.6, 0.15),
+        duration=4.0,
         count=5,
         shape=1,
         stretch=2.0,
         planar=1.0,
         motion_ease=0.0,
-        size=0.24,
+        size=0.32,
         spawn_radius=0.0,
         velocity=0.0,
         gravity=0.0,
         spread=1.0,
         randomness=0.6,
         fade=1.0,
-        strength=2.4,
+        strength=1.2,
         seed=31,
     )
+    _shade_shards(flash)
+    flash_shape(flash)
     shards = configure(
         core.create_particle(context, quality),
         "Impact • Main Shards",
@@ -83,7 +88,7 @@ def create(context, quality="LOW"):
         count=12,
         shape=1,
         stretch=4.0,
-        planar=0.9,
+        planar=0.35,
         motion_ease=0.75,
         size=0.11,
         spawn_radius=0.05,
@@ -93,10 +98,10 @@ def create(context, quality="LOW"):
         spread=1.0,
         randomness=0.7,
         fade=1.0,
-        strength=2.0,
+        strength=1.6,
         seed=17,
     )
-    _shade_shards(shards)
+    jets(shards, quality)
     wave = configure(
         core.create(context, "SHOCKWAVE", quality),
         "Impact • Shockwave",
@@ -122,6 +127,7 @@ def create(context, quality="LOW"):
         dict(TIME_PROPS, c="dissolve", f="fade"),
     )
     wave.location.z -= 0.05
+    wave_shape(wave)
     embers = configure(
         core.create_particle(context, quality),
         "Impact • Embers",
@@ -131,11 +137,11 @@ def create(context, quality="LOW"):
         count=18,
         shape=1,
         stretch=2.5,
-        planar=0.65,
-        motion_ease=0.3,
-        size=0.024,
+        planar=0.35,
+        motion_ease=0.55,
+        size=0.034,
         spawn_radius=0.12,
-        velocity=3.8,
+        velocity=2.8,
         motion_seconds=0.7,
         gravity=1.8,
         spread=1.0,
@@ -144,6 +150,9 @@ def create(context, quality="LOW"):
         strength=1.0,
         seed=29,
     )
+    embers.children[0].modifiers[0].node_group.nodes["Shard Narrowing"].inputs[
+        1
+    ].default_value = -0.5
     group = composition.create(context, [flash, shards, wave, embers])
     group.name = "Impact Burst"
     # Keep the composition origin at the cursor while preserving every member's pose.

@@ -1,0 +1,40 @@
+# Impact Burst 造型候选
+
+这是 [#93](https://github.com/mumu-lhl/blender-vfx-studio/issues/93) 的开发草稿，尚未合并或发布，也没有完成艺术验收。已发布的 0.22.2 保留原有星芒和尖片。此前的历史检查见 [原视觉记录](IMPACT_VISUAL_REVIEW.md)，不能直接当作本候选的结论。
+
+## 为什么重做
+
+实际读取旧生成器的第 2、5、14 帧后，开场仍是五个平面尖片叠出的星芒，峰值是规则圆环和相近的放射尖片。随机方向与白尖渐变增加了细节，却没有形成有体积、方向和主次的爆发主体。
+
+第一轮把尖片换成宽曲面，实图变成了橙色花瓣；随后尝试定向壳体，又出现像金属碎片的表面。根因分别是曲面都连接在同一中心、沿相似弧线展开，以及把连续法线明暗和白尖渐变直接用于大面积主体。这两种外观都没有作为完成结果保留。
+
+当前候选使用紧凑的短闪、一个有深度的破裂主体、较暗的压力弧和延迟余烬。主体以局部 XY 为主要展开平面，Z 保存弯曲深度；各方向尖端的长度与宽度不同，其中一支更大。白核、亮橙主体和红色外缘分开。白色先退出，主体裂成短段，最后保留少量暖色碎片与余烬。压力弧同时改变轮廓和覆盖范围，避免完整圆环持续描边。
+
+所有修改发生在实际创建接口调用的 `impact.py` / `impact_shape.py`，预览只提供相机与背景。默认显示对象和材质仍各为 4 个，Low 最多约 807 顶点，上限预算为 900；旧资产约为 414 顶点。短闪强度由 2.4 降至 1.2，主体由 2.0 降至 1.6，没有增加粒子槽位或额外辉光。几何预算不能代表视口帧率，实际低配置设备尚未测量。
+
+## 编辑与保存
+
+组合的 Start / Duration / Speed / Loop 仍统一控制四层。短闪可调整 Size、Fade、Strength；主体沿用 Size、Stretch、Velocity、Motion Seconds、Motion Ease、Planar、Seed、Randomness、Spawn Radius、Fade 和 Strength。Size 改变主体横向形状，Stretch 和运动参数改变展开范围，Planar=1 压平到 XY。Shader Editor 的 Side Contrast 控制主体明暗面，Illustrated Light 指定绘制风格的明暗方向，不跟随场景灯光。
+
+这两个成员沿用 Burst 控制器保存参数，但形状由私有节点生成。Count、Shape、Gravity、Spread 不驱动这些造型，侧栏已隐藏它们；普通 Particle Burst 仍保持原来的全部参数与行为。颜色、时间、网格、节点和动画保存在 Blender 原生数据中，无逐帧 Python、外部纹理或缓存。
+
+请用 **Save Complete Effect** 保存这套编排。只导出单层参数 JSON 后重新创建，会得到普通 Burst，无法还原这些私有形状。旧完整资产载入时不会重建节点，也不会换成新造型。已经用实际 0.22.2 examples ZIP 验证旧 Impact 的载入、复制、删除原件与无插件重开，414 顶点及旧面色设置保持不变。
+
+## 实际检查与尚未完成的部分
+
+本轮已多次读取三阶段 Cycles 960×540 PNG，确认宽曲面、壳体方向和材质各自造成的问题。Eevee 暗/浅灰抽帧与 AgX 近白远景仍在复核，精确已读帧与最新结论跟随本轮 PR 更新。没有实时观看视频，也没有使用真实角色。
+
+当前峰值仍有连续色面偏大、扁平感偏强的问题；要继续判断主尖端、内部断口、退场碎片是否构成可信的命中爆发。不会仅凭测试通过将草稿转为艺术验收通过。
+
+6 项 Blender 测试覆盖形状参数、平面化、预算、重定时、独立副本、完整资产、Ungroup All、安全删除、材质编辑与阶段变化。原生重开检查同时比较几何与像素。高清重开、暗亮背景抽帧和衔接场景的最终状态以 PR 实际结果为准。
+
+在仓库根目录使用新的后台进程重建，软件 Eevee 可设置 `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless`：
+
+```sh
+blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py
+blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE --light --sampled
+blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE --pale --far --view-transform AgX
+blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --baseline-asset /path/to/old-impact.blend
+```
+
+`--baseline-asset` 载入真实旧资产；`--legacy` 只重建更早的圆环与圆粒组合，不能代替 0.22.2 对照。结果在 `work/visual-impact/`，包括 PNG、原生场景和 `*-settings.json`。按记录中的图片列表检查本次结果，避免混入旧图；记录绑定生成器哈希、实际帧、相机、背景、色彩管理和旧资产哈希。
