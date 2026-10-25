@@ -170,7 +170,7 @@ def jets(root, quality):
     """A torn pressure shell carries the hit, with two smaller trailing tongues."""
     vertices, faces, paths, widths, directions, lobes, heat, uv = [], [], [], [], [], [], [], []
     steps = {"LOW": 12, "MEDIUM": 24, "HIGH": 40}[quality]
-    sectors = {"LOW": 32, "MEDIUM": 48, "HIGH": 64}[quality]
+    sectors = {"LOW": 40, "MEDIUM": 56, "HIGH": 72}[quality]
     rows = {"LOW": 8, "MEDIUM": 12, "HIGH": 18}[quality]
     for i in range(rows + 1):
         u = i / rows
@@ -188,7 +188,8 @@ def jets(root, quality):
                 (5.5, 0.24, 0.65),
             ):
                 delta = abs((angle - center + math.pi) % math.tau - math.pi)
-                reach += max(1 - delta / span, 0) * height
+                weight = max(1 - delta / span, 0)
+                reach += (0.5 - 0.5 * math.cos(math.pi * weight)) * height
             sweep = angle + 0.4 * u * u
             direction = Vector((math.cos(sweep), math.sin(sweep), 0))
             radial = u * 0.65 * (0.7 + 0.3 * reach)
@@ -427,7 +428,7 @@ def _erode(root):
     noise.inputs["Detail"].default_value = 1
     stretch = graph.node("ShaderNodeVectorMath", "Along Flow Noise", operation="MULTIPLY")
     graph.connect(uv.outputs["UV"], stretch.inputs[0])
-    stretch.inputs[1].default_value = (0.4, 10, 1)
+    stretch.inputs[1].default_value = (1.1, 10, 1)
     graph.connect(stretch.outputs[0], noise.inputs["Vector"])
     streak = graph.math("Fine Flow Fibers", "MULTIPLY", axes.outputs["Y"], 340)
     streak = graph.math(
@@ -479,6 +480,11 @@ def _erode(root):
     focus = graph.math("Never Preserve Spent Core", "MULTIPLY", focus, tear)
     focus = graph.math("Main Jet Density", "MULTIPLY", focus, 0.14)
     cutoff = graph.math("Subordinate Flow Density", "SUBTRACT", 0.47, focus)
+    taper = graph.node("ShaderNodeMapRange", "Outer Tongue Taper", interpolation_type="SMOOTHSTEP")
+    graph.connect(axes.outputs["X"], taper.inputs["Value"])
+    taper.inputs["From Min"].default_value, taper.inputs["From Max"].default_value = 0.38, 0.98
+    taper.inputs["To Max"].default_value = 0.12
+    cutoff = graph.math("Pointed Flow Ends", "ADD", cutoff, taper.outputs[0])
     tear = graph.math("Torn Flow Cutoff", "MULTIPLY", region, cutoff)
     cutoff = graph.math("Flow Then Release", "ADD", tear, release)
     visible = graph.math("Remaining Jet Pieces", "GREATER_THAN", noise.outputs["Fac"], cutoff)
