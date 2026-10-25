@@ -756,7 +756,11 @@ class VFX_PT_main(bpy.types.Panel):
                 "strength",
             )
         elif root["vfx_module"] == "particle.burst":
-            layout.label(text="Particle Burst · stateless")
+            layout.label(
+                text="Authored mesh layer"
+                if root.get("vfx_parameter_keys")
+                else "Particle Burst · stateless"
+            )
             keys = (
                 "count",
                 "seed",
@@ -771,7 +775,8 @@ class VFX_PT_main(bpy.types.Panel):
                 "strength",
             )
             if root["vfx_asset_version"] == 2:
-                layout.label(text="Shape: 0 Round / 1 Shard")
+                if not root.get("vfx_parameter_keys"):
+                    layout.label(text="Shape: 0 Round / 1 Shard")
                 keys += ("shape", "stretch", "planar", "motion_ease")
         elif root["vfx_module"] == "screen.glare":
             layout.label(text="Screen · scene compositor")

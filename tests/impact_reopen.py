@@ -1,8 +1,12 @@
 """Compare saved impact geometry and drivers at arbitrary frames without extension code."""
 
 import sys
+from pathlib import Path
 
 import bpy
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from particle_test_support import render_pixels
 
 assert not any("blender_vfx_studio" in name for name in sys.modules)
 root = bpy.data.objects["Persisted Impact"]
@@ -26,4 +30,7 @@ for frame in (14, 0, 5, 2, 25, 5):
                 curve.driver.is_valid and curve.driver.is_simple_expression
                 for curve in (data.animation_data.drivers if data.animation_data else ())
             )
+for frame in (14, 9, 11, 2, 5):
+    if f"expected_pixels_{frame}" in root:
+        assert list(root[f"expected_pixels_{frame}"]) == render_pixels(frame)
 print("IMPACT_NATIVE_REOPEN_OK")
