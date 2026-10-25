@@ -184,7 +184,6 @@ def jets(root, quality):
     widths, directions, lobes = [], [], []
     phases, births, heat, uv = [], [], [], []
     steps = {"LOW": 12, "MEDIUM": 24, "HIGH": 40}[quality]
-    radial_steps = {"LOW": 18, "MEDIUM": 26, "HIGH": 38}[quality]
 
     def vertex(path, width, direction, role, index, birth, u, v):
         vertices.append(tuple(path + width))
@@ -204,43 +203,72 @@ def jets(root, quality):
                 b = base + i * sides + (j + 1) % sides
                 faces.append((a, b, b + sides, a + sides))
 
-    # Spend the mesh budget on a few rounded, curled masses instead of seven
-    # equally sampled tubes. Cross sections follow each authored path tangent.
-    for index, (angle, reach, bend, lift, breadth, depth, front, back, birth) in enumerate(
+    # Fold an authored, branching flame outline into shallow volume. Three
+    # distinct fans replace rounded tube caps; no reference texture is used.
+    outline = (
+        (0.0, 0.0),
+        (0.12, -0.26),
+        (0.28, -0.48),
+        (0.42, -0.24),
+        (0.66, -0.58),
+        (0.58, -0.08),
+        (1.02, -0.18),
+        (0.72, 0.12),
+        (0.94, 0.48),
+        (0.56, 0.30),
+        (0.58, 0.76),
+        (0.36, 0.40),
+        (0.24, 0.54),
+        (0.18, 0.18),
+    )
+    samples = {"LOW": 2, "MEDIUM": 3, "HIGH": 4}[quality]
+    contour = [
+        (a[0] + (b[0] - a[0]) * j / samples, a[1] + (b[1] - a[1]) * j / samples)
+        for a, b in zip(outline, outline[1:] + outline[:1])
+        for j in range(samples)
+    ]
+    for index, (angle, reach, bend, lift, breadth, depth, birth) in enumerate(
         (
-            (0.75, 0.75, -0.45, 0.55, 0.45, 0.85, 0.75, 0.8, 0.0),
-            (3.55, 0.55, 0.32, -0.45, 0.32, 0.75, 0.55, 0.65, 0.035),
-            (5.1, 0.65, -0.3, 0.4, 0.28, 0.8, 1.2, 0.8, 0.065),
+            (0.75, 1.1, -0.22, 0.25, 0.55, 0.34, 0.0),
+            (3.55, 0.75, 0.25, -0.22, 0.4, 0.3, 0.035),
+            (5.1, 0.9, -0.18, 0.28, 0.35, 0.28, 0.065),
         )
     ):
         direction = Vector((math.cos(angle), math.sin(angle), 0))
-        sideways = Vector((-direction.y, direction.x, 0))
-        base, sides = len(vertices), 8 if quality == "HIGH" else 6
+        side = Vector((-direction.y, direction.x, 0))
+        n = len(contour)
 
-        def center(u):
-            point = direction * (u * reach) + sideways * (
-                bend * math.sin(math.pi * u) * (0.2 + 0.8 * u)
-            )
-            point.z = lift * math.sin(math.pi * u) + 0.08 * reach * u
-            return point
+        def point(u, v, thickness):
+            path = direction * (u * reach) + side * (bend * math.sin(math.pi * u))
+            path.z = lift * math.sin(math.pi * u)
+            width = side * (v * breadth) + Vector((0, 0, thickness))
+            vertex(path, width, direction, 0, index, birth, u, angle / math.tau + v * 0.05)
 
-        peak = front / (front + back)
-        for i in range(radial_steps + 1):
-            u = i / radial_steps
-            path = center(u)
-            tangent = (center(min(u + 0.001, 1)) - center(max(u - 0.001, 0))).normalized()
-            side = tangent.cross(Vector((0, 0, 1))).normalized()
-            up = tangent.cross(side).normalized()
-            profile = (u / peak) ** front * ((1 - u) / (1 - peak)) ** back
-            profile *= 1 + 0.12 * math.sin(u * 12 + index * 2)
-            for j in range(sides):
-                cross = j / sides * math.tau + 0.2 * math.sin(u * 5 + index)
-                width = breadth * profile * (side * math.cos(cross) + up * math.sin(cross) * depth)
-                vertex(
-                    path, width, direction, 0, index, birth, u, angle / math.tau + j / sides * 0.1
+        top = len(vertices)
+        point(0.36, 0, depth)
+        bottom = len(vertices)
+        point(0.36, 0, -depth * 0.35)
+        upper = len(vertices)
+        for u, v in contour:
+            point(0.36 + (u - 0.36) * 0.55, v * 0.55, depth * 0.72)
+        lower = len(vertices)
+        for u, v in contour:
+            point(0.36 + (u - 0.36) * 0.55, v * 0.55, -depth * 0.25)
+        boundary = len(vertices)
+        for u, v in contour:
+            # Slightly different lobes keep the three plumes from being copies.
+            v *= 1 + 0.15 * math.sin(u * 9 + index * 2)
+            point(u, v, 0)
+        for j in range(n):
+            k = (j + 1) % n
+            faces.extend(
+                (
+                    (top, upper + j, upper + k),
+                    (upper + j, boundary + j, boundary + k, upper + k),
+                    (bottom, lower + k, lower + j),
+                    (lower + k, boundary + k, boundary + j, lower + j),
                 )
-        rows(base, radial_steps + 1, sides, closed=True)
-
+            )
     fine_steps = {"LOW": 10, "MEDIUM": 16, "HIGH": 24}[quality]
     for index, (angle, reach, bend, lift, breadth, birth) in enumerate(
         (
@@ -395,10 +423,45 @@ def jets(root, quality):
     middle = graph.math("Stable Jet Ends", "SINE", middle)
     sway = graph.math("Middle Curl", "MULTIPLY", sway, middle)
     sway = graph.math("Growing Curl", "MULTIPLY", sway, local)
-    sway = graph.math("Curl Range", "MULTIPLY", sway, 0.22)
+    curl_range = graph.math("Pressure Curl Range", "MULTIPLY", primary, 0.53)
+    curl_range = graph.math("Role Curl Range", "ADD", curl_range, 0.22)
+    sway = graph.math("Curl Range", "MULTIPLY", sway, curl_range)
     sway = graph.math("Curl Distance", "MULTIPLY", sway, distance)
     path = graph.vector(
         "Bending Ejection", "ADD", path, graph.vector("Curl Offset", "SCALE", side, sway)
+    )
+    along = graph.attribute("impact_u")
+    pull = graph.math("Pressure Tip Weight", "MULTIPLY", along, along)
+    pull = graph.math(
+        "Pressure Stretch Age",
+        "MULTIPLY",
+        pull,
+        graph.math("Pressure Age Squared", "MULTIPLY", local, local),
+    )
+    pull = graph.math("Only Pressure Stretches", "MULTIPLY", pull, primary)
+    pull = graph.math("Tip Pull Distance", "MULTIPLY", pull, distance)
+    pull = graph.math("Tip Pull Amount", "MULTIPLY", pull, 0.55)
+    path = graph.vector(
+        "Pull Flame Tips Outward",
+        "ADD",
+        path,
+        graph.vector(
+            "Pressure Stretch", "SCALE", graph.attribute("impact_direction", "FLOAT_VECTOR"), pull
+        ),
+    )
+    roll = graph.math("Pressure Roll Along Flow", "MULTIPLY", along, 5)
+    roll = graph.math("Pressure Roll Clock", "ADD", roll, phase)
+    roll = graph.math("Pressure Roll Wave", "SINE", roll)
+    roll = graph.math("Roll Ends", "MULTIPLY", roll, middle)
+    roll = graph.math("Growing Pressure Roll", "MULTIPLY", roll, local)
+    roll = graph.math("Only Pressure Rolls", "MULTIPLY", roll, primary)
+    roll = graph.math("Pressure Roll Distance", "MULTIPLY", roll, distance)
+    roll = graph.math("Pressure Roll Depth", "MULTIPLY", roll, 0.5)
+    path = graph.vector(
+        "Rolling Flame Volume",
+        "ADD",
+        path,
+        graph.vector("Pressure Roll Offset", "SCALE", (0, 0, 1), roll),
     )
     rise = graph.math("Fine Ejection Snap", "MULTIPLY", fine, 0.075)
     rise = graph.math("Role Pressure Rise", "SUBTRACT", 0.13, rise)
@@ -416,6 +479,22 @@ def jets(root, quality):
     size = graph.math("Pressurized Breadth", "MULTIPLY", size, pressure)
     size = graph.math("Releasing Breadth", "MULTIPLY", size, shrink)
     size = graph.math("Pulsing Breadth", "MULTIPLY", size, pulse)
+    root_loss = graph.math("Peeling Begins", "SUBTRACT", local, 0.22, clamp=True)
+    root_loss = graph.math("Pressure Tail Peeling", "MULTIPLY", root_loss, 2.2, clamp=True)
+    root_loss = graph.math(
+        "Pressure Tail Region",
+        "MULTIPLY",
+        root_loss,
+        graph.math("Behind Pressure Head", "SUBTRACT", 1, along, clamp=True),
+    )
+    root_loss = graph.math("Only Pressure Tails Peel", "MULTIPLY", root_loss, primary)
+    root_loss = graph.math("Tail Peeling Amount", "MULTIPLY", root_loss, 0.8)
+    size = graph.math(
+        "Narrow Roots Before Tips",
+        "MULTIPLY",
+        size,
+        graph.math("Remaining Tail Width", "SUBTRACT", 1, root_loss),
+    )
     width = graph.vector(
         "Jet Cross Section", "SCALE", graph.attribute("impact_width", "FLOAT_VECTOR"), size
     )
@@ -481,15 +560,14 @@ def _erode(root):
     facing = graph.node("ShaderNodeVectorMath", "Illustrated Light", operation="DOT_PRODUCT")
     graph.connect(normal.outputs["Normal"], facing.inputs[0])
     facing.inputs[1].default_value = (-0.36, -0.48, 0.8)
-    shade = graph.node("ShaderNodeMapRange", "Rounded Jet Shade", interpolation_type="SMOOTHSTEP")
-    graph.connect(facing.outputs["Value"], shade.inputs["Value"])
-    shade.inputs["From Min"].default_value, shade.inputs["From Max"].default_value = 0.35, 0.85
-    shade.inputs["To Min"].default_value, shade.inputs["To Max"].default_value = 1, 0
+    middle = graph.math("Pressure Midtone", "GREATER_THAN", facing.outputs["Value"], 0.25)
+    bright = graph.math("Pressure Lit Face", "GREATER_THAN", facing.outputs["Value"], 0.65)
+    shade = graph.math("Two Lit Pressure Bands", "ADD", middle, bright)
+    shade = graph.math("Pressure Band Range", "MULTIPLY", shade, 0.5)
+    shade = graph.math("Three Illustrated Values", "SUBTRACT", 1, shade)
     contrast = graph.node("ShaderNodeValue", "Side Contrast")
     contrast.outputs[0].default_value = 0.6
-    shadow = graph.math(
-        "Editable Shadow Contrast", "MULTIPLY", shade.outputs[0], contrast.outputs[0]
-    )
+    shadow = graph.math("Editable Shadow Contrast", "MULTIPLY", shade, contrast.outputs[0])
     dark = graph.vector("Deep Orange Edge", "SCALE", tint.outputs[0], 0.055)
     body = graph.node("ShaderNodeMixRGB", "Two Tone Pressure")
     graph.connect(shadow, body.inputs[0])
@@ -663,11 +741,11 @@ def _erode(root):
     front.inputs["From Min"].default_value, front.inputs["From Max"].default_value = 0.35, 0.95
     hot = graph.math("Warm Facing Volume", "MULTIPLY", hot, front.outputs[0])
     hot = graph.math("Only Pressure Has Warm Interior", "MULTIPLY", hot, primary)
-    hot = graph.math("Pressure Interior Weight", "MULTIPLY", hot, 0.8)
+    hot = graph.math("Pressure Interior Weight", "MULTIPLY", hot, 0.5)
     warm = graph.node("ShaderNodeMixRGB", "Editable Tint To Pressure Heat")
-    warm.inputs[0].default_value = 0.4
+    warm.inputs[0].default_value = 0.35
     graph.connect(tint.outputs[0], warm.inputs[1])
-    warm.inputs[2].default_value = (1, 0.94, 0.72, 1)
+    warm.inputs[2].default_value = (1, 0.94, 0.05, 1)
     volume = graph.node("ShaderNodeMixRGB", "Hot Pressure Volume")
     graph.connect(hot, volume.inputs[0])
     graph.connect(outlined.outputs[0], volume.inputs[1])

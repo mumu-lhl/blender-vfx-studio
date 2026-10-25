@@ -158,4 +158,4 @@ v0.21.0 标签的三平台测试通过，但 Linux 缺少 EGL 动态库，Eevee 
 
 ## Impact Burst：气流、细喷射与紧凑短闪
 
-[#104](https://github.com/mumu-lhl/blender-vfx-studio/issues/104) 正在重新分配主层：三团体积气流、四条细喷射和两条卷流各有出生、运动与冷却阶段；短闪改为小球核与不等细辐条。仍为四层，Low 实测最高 882 顶点。9 项局部测试通过，已读取多轮 Cycles 关键帧；主体仍偏实体块，尚未完成 Eevee、远景和新连段复核，继续迭代。具体节点问题和测试调整见 [压力气流记录](docs/IMPACT_PRESSURE_REVIEW.md)。
+[#104](https://github.com/mumu-lhl/blender-vfx-studio/issues/104) 正在重新分配主层：三团气流、四条细喷射和两条卷流各有出生、运动与冷却阶段；短闪改为小球核与不等细辐条。实际看图淘汰了豆荚、圆实体和硬壳，最新主体使用有厚度的分叉火焰轮廓，随时间拉伸、卷动并收紧根部。仍为四层，Low 实测最高 798 顶点。9 项局部测试与低分辨率原生重开通过，已读取多轮 Cycles 及部分 Eevee 浅背景图；面片感、浅背景细层和远景/新连段仍需复核。具体节点问题和测试调整见 [压力气流记录](docs/IMPACT_PRESSURE_REVIEW.md)。
