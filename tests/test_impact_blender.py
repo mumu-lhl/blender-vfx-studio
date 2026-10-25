@@ -261,6 +261,38 @@ class ImpactTests(unittest.TestCase):
         update(wave, expansion=0.5)
         self.assertLess(radius(5), peak * 0.5)
 
+    def test_fine_width_control_preserves_pressure_and_auxiliary_geometry(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        main = next(m for m in composition.members(root) if m.name.endswith("Main Shards"))
+        layer = main.children[0]
+        width = layer.modifiers[0].node_group.nodes["Fine Ejection Width"].outputs[0]
+
+        def parts():
+            bpy.context.scene.frame_set(5)
+            mesh = layer.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+            return {
+                role: [
+                    tuple(v.co)
+                    for v, part in zip(mesh.vertices, mesh.attributes["impact_lobe"].data)
+                    if part.value == role
+                ]
+                for role in (0, 1, 2)
+            }
+
+        before = parts()
+        width.default_value = 2.0
+        after = parts()
+        self.assertEqual(after[0], before[0])
+        self.assertEqual(after[2], before[2])
+        self.assertNotEqual(after[1], before[1])
+        path = ROOT / "work/impact-fine-width.blend"
+        assets.write(path, root)
+        core.delete(root)
+        restored = assets.load(bpy.context, path)
+        main = next(m for m in composition.members(restored) if m.name.endswith("Main Shards"))
+        layer = main.children[0]
+        self.assertEqual(parts(), after)
+
     def test_dissipated_pressure_does_not_leave_black_cycles_surfaces(self):
         root = core.create(bpy.context, "IMPACT_BURST", "LOW")
         camera()
