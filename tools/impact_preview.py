@@ -53,6 +53,7 @@ def setup(
     pale=False,
     far=False,
     view_transform="Standard",
+    view="default",
 ):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     root = (
@@ -65,7 +66,12 @@ def setup(
     scene = bpy.context.scene
     camera = bpy.data.objects.new("Acceptance Camera", bpy.data.cameras.new("Acceptance Camera"))
     scene.collection.objects.link(camera)
-    camera.location = (3, -5, 6)
+    camera.location = {
+        "default": (3, -5, 6),
+        "front": (0, -8, 1.5),
+        "side": (8, 0, 1.5),
+        "high": (0.1, 0, 8),
+    }[view]
     camera.rotation_euler = (-camera.location).to_track_quat("-Z", "Y").to_euler()
     camera.data.type, camera.data.ortho_scale = "ORTHO", 14 if far else 8.2
     scene.camera = camera
@@ -98,6 +104,7 @@ def main():
     parser.add_argument("--pale", action="store_true")
     parser.add_argument("--far", action="store_true")
     parser.add_argument("--view-transform", choices=("Standard", "AgX"), default="Standard")
+    parser.add_argument("--view", choices=("default", "front", "side", "high"), default="default")
     parser.add_argument("--baseline-asset", type=Path, help="Import an actual old complete effect")
     parser.add_argument("--sampled", action="store_true")
     parser.add_argument("--sequence", action="store_true", help="Render all 25 frames for playback")
@@ -130,6 +137,7 @@ def main():
         pale=args.pale,
         far=args.far,
         view_transform=args.view_transform,
+        view=args.view,
     )
     folder = ROOT / "work/visual-impact"
     folder.mkdir(parents=True, exist_ok=True)
@@ -139,6 +147,7 @@ def main():
     prefix += "-pale" if args.pale else ""
     prefix += "-far" if args.far else ""
     prefix += "-agx" if args.view_transform == "AgX" else ""
+    prefix += f"-{args.view}" if args.view != "default" else ""
     stages = [("appear", 2), ("peak", 5), ("decay", 14)]
     if args.sequence or args.sampled or args.frames:
         frames = (
@@ -176,6 +185,7 @@ def main():
                 "fps_base": scene.render.fps_base,
                 "saved_frame": scene.frame_current,
                 "camera_location": list(scene.camera.location),
+                "view": args.view,
                 "ortho_scale": scene.camera.data.ortho_scale,
                 "background_color": list(
                     scene.world.node_tree.nodes["Background"].inputs["Color"].default_value

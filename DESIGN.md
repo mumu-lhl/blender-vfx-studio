@@ -182,6 +182,6 @@ Impact Burst 复用现有组合与创建接口，创建短闪、尖片、冲击�
 
 Particle Burst 版本 2 在圆粒与低面数尖片之间选择。实例化前保存顶点属性 `vfx_spark_heat`，材质用它计算从暗尾到白尖的颜色。Geometry Nodes 根据轨迹切线对齐尖片；静止时使用原散射方向，让中心短闪仍有放射轮廓。Planar 先压缩随机 Z，再应用 Spread 的方向偏置。
 
-Impact 的新造型草稿在 `impact_shape.py` 为短闪和主体建立私有网格及节点，继续使用四层组合和已有控制器。主体将展开路径与横向形状分别保存为点属性，再由当前进度计算压力、移动和尺寸；材质独立计算色块与空间侵蚀。它不改变普通 Burst/Ring 的生成器或保存格式，旧完整资产不重建。侧栏用已有 `vfx_parameter_keys` 隐藏未使用的 Burst 参数；单层参数 JSON 仍重建普通模块，完整造型需保存 `.blend`。此草稿的艺术状态见 `docs/IMPACT_DESIGN_CANDIDATE.md`。
+Impact 的新造型草稿在 `impact_shape.py` 为短闪和主体建立私有网格及节点，继续使用四层组合和已有控制器。主体由七条带横截面的喷流和两条辅助带组成，将展开路径、横向形状与独立运动相位分别保存为点属性，再由当前进度计算压力、移动和尺寸；材质独立计算色块与空间侵蚀。它不改变普通 Burst/Ring 的生成器或保存格式，旧完整资产不重建。侧栏用已有 `vfx_parameter_keys` 隐藏未使用的 Burst 参数；单层参数 JSON 仍重建普通模块，完整造型需保存 `.blend`。此草稿的艺术状态见 `docs/IMPACT_DESIGN_CANDIDATE.md`。
 
 运动时钟为 `p + (1-(1-p)^3-p) * motion_ease`，其中 p 为归一化生命周期；再乘 Motion Seconds。位置和重力都使用这个时钟，尺寸淡出仍使用 p。这是可跳帧的造型控制，不保存受力历史。旧 Burst 版本 1 和 Continuous Emitter 不接入这些新节点。

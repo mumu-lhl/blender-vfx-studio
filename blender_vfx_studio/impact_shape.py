@@ -19,7 +19,7 @@ class _Nodes:
         return n
 
     def connect(self, source, target):
-        if isinstance(source, (int, float)):
+        if isinstance(source, (int, float, tuple)):
             target.default_value = source
         else:
             self.tree.links.new(source, target)
@@ -112,9 +112,9 @@ def flash(root):
     vertices, faces, heat, uv = [], [], [], []
     for lobe, (direction, height, width) in enumerate(
         (
-            ((1, 0.05, 0.18), 0.95, 0.30),
-            ((1, 0.45, 0.45), 0.85, 0.16),
-            ((1, -0.35, 0.10), 0.65, 0.14),
+            ((1, 0.05, 0.18), 1.0, 0.16),
+            ((-0.5, 0.9, 0.45), 0.65, 0.11),
+            ((-0.4, -0.8, 0.10), 0.85, 0.10),
         )
     ):
         axis = Vector(direction).normalized()
@@ -167,47 +167,54 @@ def flash(root):
 
 
 def jets(root, quality):
-    """A torn pressure shell carries the hit, with two smaller trailing tongues."""
-    vertices, faces, paths, widths, directions, lobes, heat, uv = [], [], [], [], [], [], [], []
+    """Seven unequal closed jets carry the hit, with two smaller trailing tongues."""
+    vertices, faces, paths = [], [], []
+    widths, directions, lobes = [], [], []
+    phases, heat, uv = [], [], []
     steps = {"LOW": 12, "MEDIUM": 24, "HIGH": 40}[quality]
-    sectors = {"LOW": 40, "MEDIUM": 56, "HIGH": 72}[quality]
-    rows = {"LOW": 8, "MEDIUM": 12, "HIGH": 18}[quality]
-    for i in range(rows + 1):
-        u = i / rows
-        for j in range(sectors + 1):
-            angle = j / sectors * math.tau
-            reach = 0.67
-            for center, span, height in (
-                (0.1, 0.28, 0.55),
-                (0.75, 0.32, 1.3),
-                (1.6, 0.30, 0.45),
-                (2.3, 0.21, 0.65),
-                (3.1, 0.32, 0.4),
-                (3.95, 0.25, 0.75),
-                (4.6, 0.3, 0.5),
-                (5.5, 0.24, 0.65),
-            ):
-                delta = abs((angle - center + math.pi) % math.tau - math.pi)
-                weight = max(1 - delta / span, 0)
-                reach += (0.5 - 0.5 * math.cos(math.pi * weight)) * height
-            sweep = angle + 0.4 * u * u
-            direction = Vector((math.cos(sweep), math.sin(sweep), 0))
-            radial = u * 0.65 * (0.7 + 0.3 * reach)
-            bulge = 0.65 * math.sin(math.pi * u) * (1 + 0.14 * math.cos(angle * 3))
-            path = Vector((direction.x * radial, direction.y * radial, u * 0.35 * reach + bulge))
-            profile = u**0.85
-            width = direction * (profile * 0.8 * reach**1.3)
-            vertices.append(tuple(path + width))
-            paths.append(tuple(path))
-            widths.append(tuple(width))
-            directions.append(tuple(direction))
-            lobes.append(0)
-            heat.append(0.95 * (1 - u))
-            uv.append((u, j / sectors))
-    for i in range(rows):
-        for j in range(sectors):
-            a = i * (sectors + 1) + j
-            faces.append((a, a + 1, a + sectors + 2, a + sectors + 1))
+    radial_steps = {"LOW": 8, "MEDIUM": 12, "HIGH": 18}[quality]
+    # Closed cross-sections give the ejection volume, rather than leaving a
+    # continuous sheet whose cutouts look like torn fabric. Unequal reaches
+    # and widths leave gaps around the target instead of filling a whole disc.
+    for ray, (angle, reach, bend, lift, breadth) in enumerate(
+        (
+            (0.75, 1.95, -0.20, 0.32, 0.24),
+            (1.90, 1.15, 0.18, -0.22, 0.10),
+            (2.80, 1.05, -0.20, 0.15, 0.085),
+            (3.72, 1.55, 0.16, 0.42, 0.14),
+            (4.55, 0.95, -0.12, -0.28, 0.075),
+            (5.30, 1.30, 0.18, 0.12, 0.11),
+            (6.12, 0.90, -0.16, 0.26, 0.06),
+        )
+    ):
+        direction = Vector((math.cos(angle), math.sin(angle), 0))
+        side = Vector((-direction.y, direction.x, 0))
+        base = len(vertices)
+        for i in range(radial_steps + 1):
+            u = i / radial_steps
+            path = direction * (u * reach) + side * (bend * math.sin(math.pi * u))
+            path.z = lift * math.sin(math.pi * u) + 0.12 * reach * u
+            profile = 3.2 * u**0.45 * (1 - u) ** 1.45
+            profile *= 1 + 0.18 * math.sin(u * 15 + ray * 1.7)
+            for j in range(6):
+                cross = j / 6 * math.tau + 0.35 * math.sin(u * 5 + ray)
+                width = side * (math.cos(cross) * breadth * profile)
+                width.z = math.sin(cross) * breadth * profile * (0.65 + 0.12 * ray)
+                vertices.append(tuple(path + width))
+                paths.append(tuple(path))
+                widths.append(tuple(width))
+                directions.append(tuple(direction))
+                lobes.append(0)
+                phases.append(ray * 1.8)
+                heat.append(0.95 * (1 - u))
+                # Keep the material's angular coordinate continuous across
+                # each tube; the repeated UV seam lies on the closing edge.
+                uv.append((u, angle / math.tau + j / 6 * 0.10))
+        for i in range(radial_steps):
+            for j in range(6):
+                a = base + i * 6 + j
+                b = base + i * 6 + (j + 1) % 6
+                faces.append((a, b, b + 6, a + 6))
     for lobe, (angle, reach, bend, lift, breadth) in enumerate(
         (
             (-2.3, 0.55, -0.18, 0.22, 0.09),
@@ -245,6 +252,7 @@ def jets(root, quality):
                 directions.append(tuple(direction))
                 widths.append(tuple(width))
                 lobes.append(lobe)
+                phases.append(lobe + 0.7)
                 heat.append((0.95 if lobe == 0 else 0.55 if lobe < 3 else 0.3) * (1 - u))
                 uv.append((u, (v + 1) / 2))
         for i in range(steps):
@@ -260,6 +268,7 @@ def jets(root, quality):
             "impact_width": ("FLOAT_VECTOR", widths),
             "impact_direction": ("FLOAT_VECTOR", directions),
             "impact_lobe": ("FLOAT", lobes),
+            "impact_phase": ("FLOAT", phases),
             "impact_u": ("FLOAT", [value[0] for value in uv]),
             "vfx_spark_heat": ("FLOAT", heat),
         },
@@ -310,8 +319,8 @@ def jets(root, quality):
     path = graph.vector(
         "Jet Centerline", "SCALE", graph.attribute("impact_path", "FLOAT_VECTOR"), distance
     )
-    late = graph.math("After Pressure Peak", "SUBTRACT", local, 0.4, clamp=True)
-    late = graph.math("Peeling Shell", "MULTIPLY", late, 1.8, clamp=True)
+    late = graph.math("After Pressure Peak", "SUBTRACT", local, 0.24, clamp=True)
+    late = graph.math("Peeling Shell", "MULTIPLY", late, 1.35, clamp=True)
     primary = graph.math("Pressure Shell Part", "LESS_THAN", lobe, 0.5)
     difference = graph.math("Shell / Tongue Drift", "SUBTRACT", late, local)
     difference = graph.math("Only Peel Main Shell", "MULTIPLY", difference, primary)
@@ -321,12 +330,36 @@ def jets(root, quality):
         "Outward Jet Drift", "SCALE", graph.attribute("impact_direction", "FLOAT_VECTOR"), drift
     )
     path = graph.vector("Separating Ejection", "ADD", path, drift)
+    phase = graph.math("Jet Flow Clock", "MULTIPLY", local, 14)
+    phase = graph.math("Independent Jet Phase", "ADD", phase, graph.attribute("impact_phase"))
+    pulse = graph.math("Flow Along Jet", "MULTIPLY", graph.attribute("impact_u"), 9)
+    pulse = graph.math("Traveling Pressure", "SUBTRACT", pulse, phase)
+    pulse = graph.math("Pressure Pulses", "SINE", pulse)
+    pulse = graph.math("Pulse Depth", "MULTIPLY", pulse, 0.22)
+    pulse = graph.math("Living Cross Section", "ADD", pulse, 0.78)
+    side = graph.vector(
+        "Jet Bend Direction",
+        "CROSS_PRODUCT",
+        graph.attribute("impact_direction", "FLOAT_VECTOR"),
+        (0, 0, 1),
+    )
+    sway = graph.math("Jet Curl", "SINE", phase)
+    middle = graph.math("Jet Middle Phase", "MULTIPLY", graph.attribute("impact_u"), math.pi)
+    middle = graph.math("Stable Jet Ends", "SINE", middle)
+    sway = graph.math("Middle Curl", "MULTIPLY", sway, middle)
+    sway = graph.math("Growing Curl", "MULTIPLY", sway, local)
+    sway = graph.math("Curl Range", "MULTIPLY", sway, 0.22)
+    sway = graph.math("Curl Distance", "MULTIPLY", sway, distance)
+    path = graph.vector(
+        "Bending Ejection", "ADD", path, graph.vector("Curl Offset", "SCALE", side, sway)
+    )
     pressure = graph.math("Pressure Rise", "DIVIDE", local, 0.12, clamp=True)
     shrink = graph.math("Width Loss", "MULTIPLY", local, graph.value("Fade", "fade"))
     shrink = graph.math("Width Remaining", "SUBTRACT", 1, shrink)
     size = graph.math("Body Breadth", "MULTIPLY", graph.value("Size", "size"), 8)
     size = graph.math("Pressurized Breadth", "MULTIPLY", size, pressure)
     size = graph.math("Releasing Breadth", "MULTIPLY", size, shrink)
+    size = graph.math("Pulsing Breadth", "MULTIPLY", size, pulse)
     width = graph.vector(
         "Jet Cross Section", "SCALE", graph.attribute("impact_width", "FLOAT_VECTOR"), size
     )
@@ -378,10 +411,15 @@ def _erode(root):
     facing = graph.node("ShaderNodeVectorMath", "Illustrated Light", operation="DOT_PRODUCT")
     graph.connect(normal.outputs["Normal"], facing.inputs[0])
     facing.inputs[1].default_value = (-0.36, -0.48, 0.8)
-    shadow = graph.math("Single Shadow Tone", "LESS_THAN", facing.outputs["Value"], 0.78)
+    shade = graph.node("ShaderNodeMapRange", "Rounded Jet Shade", interpolation_type="SMOOTHSTEP")
+    graph.connect(facing.outputs["Value"], shade.inputs["Value"])
+    shade.inputs["From Min"].default_value, shade.inputs["From Max"].default_value = 0.35, 0.85
+    shade.inputs["To Min"].default_value, shade.inputs["To Max"].default_value = 1, 0
     contrast = graph.node("ShaderNodeValue", "Side Contrast")
-    contrast.outputs[0].default_value = 0.85
-    shadow = graph.math("Editable Shadow Contrast", "MULTIPLY", shadow, contrast.outputs[0])
+    contrast.outputs[0].default_value = 0.6
+    shadow = graph.math(
+        "Editable Shadow Contrast", "MULTIPLY", shade.outputs[0], contrast.outputs[0]
+    )
     dark = graph.vector("Deep Orange Edge", "SCALE", tint.outputs[0], 0.055)
     body = graph.node("ShaderNodeMixRGB", "Two Tone Pressure")
     graph.connect(shadow, body.inputs[0])
@@ -402,8 +440,8 @@ def _erode(root):
     )
     graph.connect(axes.outputs["X"], core_ramp.inputs["Value"])
     core_ramp.inputs["From Min"].default_value, core_ramp.inputs["From Max"].default_value = (
-        0.1,
-        0.32,
+        0.025,
+        0.16,
     )
     core_ramp.inputs["To Min"].default_value, core_ramp.inputs["To Max"].default_value = 1, 0
     core = core_ramp.outputs[0]
@@ -428,7 +466,7 @@ def _erode(root):
     noise.inputs["Detail"].default_value = 1
     stretch = graph.node("ShaderNodeVectorMath", "Along Flow Noise", operation="MULTIPLY")
     graph.connect(uv.outputs["UV"], stretch.inputs[0])
-    stretch.inputs[1].default_value = (1.1, 10, 1)
+    stretch.inputs[1].default_value = (2.2, 10, 1)
     graph.connect(stretch.outputs[0], noise.inputs["Vector"])
     streak = graph.math("Fine Flow Fibers", "MULTIPLY", axes.outputs["Y"], 340)
     streak = graph.math(
@@ -461,8 +499,8 @@ def _erode(root):
         graph.vector("Pressure Flow Detail", "SCALE", body.outputs[0], brush), bands.inputs[1]
     )
     graph.connect(graph.math("Advecting Flow", "MULTIPLY", progress, 1.5), noise.inputs["W"])
-    release = graph.math("After Main Punch", "SUBTRACT", progress, 0.28, clamp=True)
-    release = graph.math("Jet Dissipation", "MULTIPLY", release, 1.35)
+    release = graph.math("After Main Punch", "SUBTRACT", progress, 0.24, clamp=True)
+    release = graph.math("Jet Dissipation", "MULTIPLY", release, 1.8)
     release = graph.math("Editable Dissipation", "MULTIPLY", release, fade)
     tear = graph.math("Beyond Compression Core", "GREATER_THAN", axes.outputs["X"], 0.22)
     core_release = graph.math("Release Compression", "SUBTRACT", progress, 0.15, clamp=True)
@@ -479,7 +517,7 @@ def _erode(root):
     focus = graph.math("Protect Main Jet", "MULTIPLY", focus, primary)
     focus = graph.math("Never Preserve Spent Core", "MULTIPLY", focus, tear)
     focus = graph.math("Main Jet Density", "MULTIPLY", focus, 0.14)
-    cutoff = graph.math("Subordinate Flow Density", "SUBTRACT", 0.47, focus)
+    cutoff = graph.math("Subordinate Flow Density", "SUBTRACT", 0.36, focus)
     taper = graph.node("ShaderNodeMapRange", "Outer Tongue Taper", interpolation_type="SMOOTHSTEP")
     graph.connect(axes.outputs["X"], taper.inputs["Value"])
     taper.inputs["From Min"].default_value, taper.inputs["From Max"].default_value = 0.38, 0.98
@@ -488,6 +526,21 @@ def _erode(root):
     tear = graph.math("Torn Flow Cutoff", "MULTIPLY", region, cutoff)
     cutoff = graph.math("Flow Then Release", "ADD", tear, release)
     visible = graph.math("Remaining Jet Pieces", "GREATER_THAN", noise.outputs["Fac"], cutoff)
+    distance = graph.math("Distance To Burning Edge", "SUBTRACT", noise.outputs["Fac"], cutoff)
+    edge = graph.node("ShaderNodeMapRange", "Burning Edge Width", interpolation_type="SMOOTHSTEP")
+    graph.connect(distance, edge.inputs["Value"])
+    edge.inputs["From Max"].default_value = 0.09
+    edge.inputs["To Min"].default_value, edge.inputs["To Max"].default_value = 1, 0
+    cooling = graph.math("After Edge Flash", "SUBTRACT", progress, 0.28, clamp=True)
+    cooling = graph.math("Edge Cooling", "MULTIPLY", cooling, 3, clamp=True)
+    cooling = graph.math("Editable Edge Cooling", "MULTIPLY", cooling, fade)
+    cooling = graph.math("Remaining Edge Heat", "SUBTRACT", 1, cooling)
+    edge_heat = graph.math("Hot Edge Then Embers", "MULTIPLY", edge.outputs[0], cooling)
+    color_edge = graph.node("ShaderNodeMixRGB", "Hot Torn Edge")
+    graph.connect(edge_heat, color_edge.inputs[0])
+    graph.connect(color.outputs[0], color_edge.inputs[1])
+    color_edge.inputs[2].default_value = (1, 0.65, 0.12, 1)
+    graph.connect(color_edge.outputs[0], emission.inputs["Color"])
     transparent = graph.node("ShaderNodeBsdfTransparent", "Dissipated Jet")
     mix = graph.node("ShaderNodeMixShader", "Opaque / Missing Pieces")
     graph.connect(visible, mix.inputs[0])
