@@ -149,10 +149,10 @@ class StarterTests(unittest.TestCase):
             return radial, height
 
         early, charged = dimensions(13), dimensions(37)
-        self.assertLess(charged[0], early[0] * 0.8)
-        # Pressure concentrates a volume instead of stretching it into a long leaf.
-        self.assertGreater(charged[1], early[1] * 0.8)
-        self.assertLess(charged[1], early[1] * 1.2)
+        self.assertLess(charged[0], early[0] * 0.5)
+        # Pressure contracts all three axes while retaining a visible depth.
+        self.assertGreater(charged[1], early[1] * 0.35)
+        self.assertLess(charged[1], early[1] * 0.85)
         for frame in (1, 7, 22, 37, 46, 48):
             self.assertLessEqual(
                 vertex_count(charge, frame), 900
@@ -180,6 +180,11 @@ class StarterTests(unittest.TestCase):
             self.assertLess(energy(), 1e-5, key)
             core_member[key] = old
             core_member.update_tag()
+
+        # The compressed tail is only a few pixels in the emitter-wide framing.
+        # Inspect the core at a useful scale so erosion cannot hide in sampling.
+        bpy.context.scene.camera.data.ortho_scale = 1
+        bpy.context.scene.render.resolution_x = bpy.context.scene.render.resolution_y = 96
 
         def coverage():
             pixels = render_pixels(44)
