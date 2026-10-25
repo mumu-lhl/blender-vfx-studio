@@ -12,7 +12,7 @@
 
 **Impact Burst（24 帧）** 包含白色短闪、12 个橙色定向尖片、较暗的侵蚀冲击波和 18 个稍晚出现的余烬，共 4 层。短闪先消失，冲击波随后断开，尖片逐渐缩短。修改环的 Expansion 控制扩散距离，修改粒子的 Stretch、Planar、Motion Ease 调整尖片长宽、散射平面和减速。组合 Duration 调整整体播放时长，Ungroup All 可拆开全部层。
 
-**Arc Slash（18 帧）** 是单层紫色程序化刀光，不需要角色动画或采样路径。Arc 调整弧度，Width 调整宽度，Spin 调整生命周期内的旋转；Attack、Motion Ease、Core Width、Afterimage、Streaks 和 Breakup 可继续调整展开、减速、锋刃、残影、拉丝和侵蚀。它与直接创建的资产版本 2 刀光相同，只把时长设为 18 帧；版本 1 文件不会自动换成新材质。
+**Arc Slash（18 帧）** 是单层紫色程序化刀光，不需要角色动画或采样路径。Arc 调整弧度，Width 调整宽度，Spin 调整旋转；Attack、Motion Ease、Core Width、Afterimage、Streaks 和 Breakup 调整展开、减速、锋刃、残影、笔触与侵蚀。0.22.2 包含版本 2 的规则月牙；当前未发布候选改用版本 3 的钩形与亮暗分面，并加入 Contour、Bank、Wake Spread 控制轮廓、深度与残影分离。它与侧栏直接创建的刀光使用同一生成器，只把时长设为 18 帧；旧文件不自动升级。
 
 全部示例采用 Low 质量，保留原生对象、网格、材质和 Geometry Nodes。使用 VFX Duplicate 创建独立副本，使用 VFX Delete 删除。示例不需要外部贴图、角色或缓存；不加载插件也能播放和渲染，继续使用侧栏创作则需要启用插件。
 

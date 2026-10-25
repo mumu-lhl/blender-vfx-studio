@@ -1,47 +1,43 @@
 # Arc Slash 视觉检查
 
-本轮先改刀光，Impact Burst 随后处理。复杂骨架扩展和跨平台 GUI 扩展暂缓；原有后台兼容性检查继续运行。
+当前源码正在重做刀光，尚未发布。0.22.2 的资产仍是版本 2 的规则月牙；新建效果使用版本 3，不会覆盖旧文件。整体商业级艺术品质尚未验收。
 
-## 实际改变了什么
+## 问题与实际修改
 
-旧预览只有均匀发光的月牙。新版把视觉权重分给窄亮锋刃、渐变拉丝主体和两条较短、较暗的残影。
-前端快速展开并收尖，挥斩随后减速；内侧和尾部先被侵蚀，最后只留下低亮细丝。这里采用战斗特效常用的焦点、主次和快入慢出原则。
+版本 2 的几何节点把所有外缘点放在同一个圆上，残影只是固定半径和角度偏移，整个刀面位于平面。材质有拉丝与噪声，却改变不了规则轮廓。实际峰值图仍像一条发光月牙，退场留下过长的完整细线。
 
-所有变化都在新建的 Arc Slash 中，7 个新参数可以关键帧编辑。高清预览只将 Duration 设为 18 帧，使用固定相机和固定背景，不添加辉光合成、灯光美化或额外效果。
-入门库使用同一创建接口和参数，并选择峰值作为缩略图；缩略图也不加辉光。
+版本 3 在真实生成器中加入一个偏向前端的主钩形、较小的外缘变化和内侧缺口。第一轮外缘扰动过强，实图出现生硬的波浪肩部；随后减小辅助起伏，并降低残影的轮廓扰动。Bank 将刀面弯入深度，Wake Spread 让两条较暗残影逐渐分离。
 
-## 看过的实图和发现
+材质用冷白锋刃、亮紫中带和深紫内侧建立主次；细笔触只辅助色块。峰值后先降低锋刃白色，再把主体拆成短段并侵蚀，避免靠透明度留下完整月牙。Fade 控制分段退场，Breakup 控制噪声侵蚀，Dissolve=1 仍会完全隐藏材质。默认发光从 2.2 降至 1.6，没有增加几何数量或额外辉光。
 
-2026-10-23，在 Linux Blender 5.2.2 中生成并通过图像查看工具逐张读取了 960×540 PNG：第 2 帧出现、第 5 帧峰值、第 11 帧衰减。
-Cycles 使用 CPU、24 samples；另检查 Eevee 的三个阶段，以及 Cycles 浅灰背景的峰值和衰减。暗背景三阶段同时用于最终验收，浅背景用于检查轮廓的可辨识程度。
+Contour、Bank、Wake Spread 与原有控制都可关键帧编辑。Low 仍是一个显示对象、一个材质、594 顶点和 480 个四边面。无外部纹理、缓存或逐帧 Python；形体与材质保存在原生节点中。
 
-初版出现时前端像平切口，已改为随展开位置移动的尖端；初版衰减仍是一整条描边，已让后段侵蚀穿过锋刃。初版残影太像平行描线，已缩短并错开。
-Eevee 的抖动透明在细线中产生颗粒，改为原生 Blended（混合透明）后重渲染，已实际确认颗粒减轻且保留主体细节。
+## 实际看图范围
 
-最终峰值能分辨浅色锋刃、紫色主体和较暗残影；衰减阶段的主体明显减薄、断裂，亮度也下降。浅背景上主体和锋刃仍可辨识，但暗残影较难看见，不能据此承诺所有角色背景都有同样对比。
-本轮没有角色实战镜头、Windows/macOS 视口或集成显卡帧率验收；这些不作为本轮视觉交付的前置扩展。
+本轮在 Blender 5.2.2 中用图像查看工具读取实际 960×540 PNG，包括 Cycles 暗背景的出现、峰值、衰减，以及浅灰背景斜视角三阶段。Eevee 使用软件渲染、16 samples；暗/浅灰背景序列抽取第 1、2、3、5、7、9、11、13、15、17、19 帧。
 
-发布页附带 `slash-cycles-appear.png`、`slash-cycles-peak.png`、`slash-cycles-decay.png`，每张均为 960×540。
-Linux PR 与标签流程均生成 Eevee 和浅背景三阶段图，CI 显式安装 EGL/Mesa 并强制软件 OpenGL；Actions 提供 `arc-slash-visual-review` 下载包，可在合并前检查实际 PNG。
+已读取暗/浅灰两个序列的全部 22 帧：第 2–5 帧快速展开，峰值的锋刃和深色内面均能辨认；第 7 帧开始分段，第 9–11 帧只留短笔触，后段退净。暗背景能辨认分离的辅助残影；浅背景上它们仍弱，不能承诺所有背景上的细节都清楚。
 
-## 复现与数据验证
+另实际读取 Eevee、AgX、近白背景、远景的三阶段图。峰值仍能辨认深紫主体、钩形与浅色锋刃；颜色比 Standard 更柔和，辅助残影很弱，衰减短笔触也接近背景。这个结果支持主体轮廓的可读性，不代表所有细节通过。背景线性 RGB 为 0.72/0.76/0.8，远景相机宽度为 14，常规为 9.2；AgX 会把该背景显示为较柔和的灰白。
 
-在全新克隆中运行，默认生成暗背景的 Cycles 三阶段；只在新的后台进程使用这些命令：
+版本 2 通过明确的资产版本重新构建，其 Cycles 三阶段与修改前保存的实际 PNG 逐像素一致。这证明保留了旧版生成结果；它不是两版等参数的性能比较。
+
+抽帧只检查这些时刻的形状、位置与层次，没有实时观看视频，不能验证实际播放掉帧或未抽取帧的闪烁。角色实战镜头、集成显卡视口帧率和更多镜头仍未验收。
+
+## 复现与验证
+
+在仓库根目录，用新的后台进程执行：
 
 ```sh
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py
-blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE
-blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --light
+blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE --light --sampled
+blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --light --angled
+blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --asset-version 2
+blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE --pale --far --view-transform AgX
 ```
 
-输出在 `work/visual-slash/`，包含 PNG 和可检查的原生 `.blend`。`--legacy` 可渲染版本 1 的默认效果作为旧结构参考；两版默认颜色、尺寸和亮度不同，不能把它当成等参数的性能比较。
+输出在 `work/visual-slash/`，包括 PNG、原生 `.blend` 和 `*-settings.json`。记录包含实际帧列表、图片文件名、源文件哈希、相机与引擎；旧图片可能仍在目录中，应按记录选择本次结果。`--frames 2 5 11` 指定抽查帧，`--far` 拉远相机，`--legacy` 保留版本 1 的对照入口。
 
-本地及三平台 CI 的 146 项测试、14 个无插件重开进程、安装/卸载和 Ruff 已通过。刀光的 8 项检查包含旧版预设重建、新版参数改变几何和像素、侵蚀和完全溶解、独立复制/载入及资源清理。
-实际从 v0.20.0 发布包取出的旧刀光也已载入、保存参数和复制，仍保持版本 1。新版不自动重建旧文件的节点。
+11 项 Blender 刀光测试通过，覆盖版本 1/2 保留、新版形状控制与重定时、实例独立、参数及完整资产复用、表面控制和几何预算。保存后在不导入插件、关闭自动执行的新进程跳帧：版本 3 的几何与三个阶段低分辨率像素保持一致。另对 Cycles 暗背景及 Eevee 浅灰背景的三阶段高清 PNG 完成原生重开逐通道对比；19 帧所有效果层不再输出几何。实际 examples ZIP 也通过无插件检查。测试不代替上面的实际看图。
 
-另外把高清预览保存后，关闭自动执行、不加载插件，在新进程渲染同一峰值，确认 PNG 所有像素通道与原结果完全一致。
-实际生成的 examples ZIP 另在无插件进程检查三项资产、时间边界和嵌入预览。自动像素检查只验证外部行为，不替代上面的实际看图。
-
-v0.21.0 的发布流程因 runner 缺少 libEGL.so.1 在 Eevee 启动时退出，未发布安装包。修复为 v0.21.1，保留原失败标签，不跳过 Eevee 验证。
-
-最终安装包与高清图见 [v0.21.1 发布页](https://github.com/mumu-lhl/blender-vfx-studio/releases/tag/v0.21.1)。实际下载包已通过 SHA256，扩展 ZIP 与全新标签克隆构建逐字节一致；实际 examples ZIP 通过无插件验证。已读取发布的 Cycles 三阶段及 Eevee 峰值 PNG，确认尺寸为 960×540、层次和本地检查一致。
+版本 2 首轮改进与 v0.21.1 发布验证属于历史结果，详见 [该版本发布页](https://github.com/mumu-lhl/blender-vfx-studio/releases/tag/v0.21.1)。当前候选的 CI、合并与后续问题由 [#91](https://github.com/mumu-lhl/blender-vfx-studio/issues/91) 跟踪。

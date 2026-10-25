@@ -142,7 +142,7 @@ class SlashTests(unittest.TestCase):
         self.assertTrue(0 < counts[0] < counts[1] < counts[2] < 5000)
 
     def test_modern_geometry_parameters_and_stateless_playback(self):
-        root = core.create(bpy.context, "ARC_SLASH", "LOW")
+        root = slash.create(bpy.context, "LOW", asset_version=2)
         self.assertEqual(root["vfx_asset_version"], 2)
         peak = points(root, 5)
         update(root, motion_ease=0.0)
@@ -161,7 +161,7 @@ class SlashTests(unittest.TestCase):
         self.assertLess(len(mesh(root, 5).vertices), 1000)
 
     def test_modern_render_has_attack_peak_release_and_editable_detail(self):
-        root = core.create(bpy.context, "ARC_SLASH")
+        root = slash.create(bpy.context, asset_version=2)
         camera()
         bpy.context.scene.camera.data.ortho_scale = 5.5
         frames = [render_pixels(frame) for frame in (2, 5, 13)]
@@ -199,7 +199,7 @@ class SlashTests(unittest.TestCase):
         self.assertNotIn("afterimage", old_copy)
         self.assertEqual(points(legacy, 7), points(old_copy, 7))
         bpy.context.scene.frame_set(1)
-        modern = core.create(bpy.context, "ARC_SLASH")
+        modern = slash.create(bpy.context, asset_version=2)
         update(modern, attack=0.12, core_width=0.08, afterimage=0.4, breakup=0.6)
         modern.children[0].data.materials[0].node_tree.nodes.new(
             "ShaderNodeValue"
@@ -221,6 +221,70 @@ class SlashTests(unittest.TestCase):
         self.assertEqual(len(bpy.data.meshes), 0)
         self.assertEqual(len(bpy.data.materials), 0)
 
+    def test_authored_shape_controls_budget_and_retiming(self):
+        root = core.create(bpy.context, "ARC_SLASH", "LOW")
+        self.assertEqual(root["vfx_asset_version"], 3)
+        peak = points(root, 5)
+        self.assertLessEqual(len(peak), 600)
+        self.assertGreater(max(p[2] for p in peak) - min(p[2] for p in peak), 0.1)
+        for key in ("contour", "bank", "wake_spread"):
+            original = root[key]
+            update(root, **{key: 0.0})
+            self.assertNotEqual(points(root, 5), peak, key)
+            update(root, **{key: original})
+            self.assertEqual(points(root, 5), peak)
+        update(root, bank=0.0)
+        self.assertTrue(all(abs(p[2]) < 1e-6 for p in points(root, 5)))
+        update(root, bank=0.22, speed=2.0)
+        self.assertEqual(points(root, 3), peak)
+        self.assertEqual(points(root, 9), [])
+        update(root, speed=1.0)
+        self.assertEqual(points(root, 0), [])
+        self.assertEqual(points(root, 5), peak)
+        clone = core.duplicate(bpy.context, root)
+        update(clone, contour=0.0)
+        self.assertEqual(points(root, 5), peak)
+        snapshot = presets.loads(presets.dumps(core.preset_snapshot(root)))
+        restored = core.create_from_preset(bpy.context, snapshot)
+        update(restored, start=1.0)
+        self.assertEqual(points(restored, 5), peak)
+        self.assertEqual(snapshot["asset_version"], 3)
+
+    def test_version_two_preset_retains_the_flat_regular_shape(self):
+        root = slash.create(bpy.context, "LOW", asset_version=2)
+        update(root, spin=0.0, expansion=0.0)
+        data = presets.loads(presets.dumps(core.preset_snapshot(root)))
+        restored = core.create_from_preset(bpy.context, data)
+        self.assertEqual(points(root, 5), points(restored, 5))
+        self.assertNotIn("contour", restored)
+        result = mesh(restored, 5)
+        outer = [result.vertices[i].co.length for i in range(0, 198, 6)]
+        self.assertLess(max(outer) - min(outer), 1e-5)
+        self.assertTrue(all(abs(v.co.z) < 1e-6 for v in result.vertices))
+
+    def test_authored_surface_controls_and_release(self):
+        root = core.create(bpy.context, "ARC_SLASH", "LOW")
+        camera()
+        bpy.context.scene.camera.data.ortho_scale = 5.5
+        peak = render_pixels(5)
+        update(root, afterimage=0.0, streaks=0.0, core_width=0.3)
+        changed = render_pixels(5)
+        self.assertGreater(sum(abs(a - b) for a, b in zip(peak, changed)), 1)
+        update(root, dissolve=1.0)
+        hidden = render_pixels(5)
+        self.assertLess(max(c for i, c in enumerate(hidden) if i % 4 != 3), 0.01)
+        update(root, dissolve=0.15)
+        tail = render_pixels(13)
+        self.assertLess(sum(tail[::4]), sum(peak[::4]) * 0.3)
+        # Isolate fragment fading from noise erosion and resolve the narrow
+        # surviving bands, rather than asserting on a single 48px sample.
+        bpy.context.scene.render.resolution_x = bpy.context.scene.render.resolution_y = 96
+        update(root, breakup=0.0, dissolve=0.0)
+        tail = render_pixels(11)
+        update(root, fade=0.0)
+        held = render_pixels(11)
+        self.assertGreater(sum(held[::4]), sum(tail[::4]) * 1.5)
+
 
 addon.register()
 result = unittest.TextTestRunner(verbosity=2).run(
@@ -231,11 +295,23 @@ if not result.wasSuccessful():
 bpy.ops.wm.read_factory_settings(use_empty=True)
 root = create()
 root.name = "Persisted Slash"
-modern = core.create(bpy.context, "ARC_SLASH", "LOW")
+modern = slash.create(bpy.context, "LOW", asset_version=2)
 modern.name = "Persisted Layered Slash"
 for frame in (2, 5, 13):
     result = mesh(modern, frame)
     modern[f"expected_shape_{frame}"] = [c for vertex in result.vertices for c in vertex.co]
+authored = core.create(bpy.context, "ARC_SLASH", "LOW")
+authored.name = "Persisted Authored Slash"
+# The preceding evaluation changed the scene frame; explicitly align all clocks.
+update(authored, start=1.0)
+for frame in (2, 5, 13):
+    authored[f"expected_shape_{frame}"] = [c for point in points(authored, frame) for c in point]
+root.hide_render = modern.hide_render = True
+root.children[0].hide_render = modern.children[0].hide_render = True
+camera()
+bpy.context.scene.camera.data.ortho_scale = 5.5
+for frame in (2, 5, 13):
+    authored[f"expected_pixels_{frame}"] = render_pixels(frame)
 addon.unregister()
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "work/slash.blend"))
 print("SLASH_INTEGRATION_OK")

@@ -117,13 +117,19 @@ jobs:
           EGL_PLATFORM: surfaceless
         run: |
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE --sampled
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE --light --sampled
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --light
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE --pale --far --view-transform AgX
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-slash/slash-cycles.blend --python tests/slash_visual_reopen.py
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-slash/slash-blender_eevee-light.blend --python tests/slash_visual_reopen.py
       - uses: actions/upload-artifact@v7.0.2
         if: runner.os == 'Linux'
         with:
           name: arc-slash-visual-review
-          path: work/visual-slash/*.png
+          path: |
+            work/visual-slash/*.png
+            work/visual-slash/*-settings.json
       - name: Render Impact Burst visual review (960x540, CPU, no bloom)
         if: runner.os == 'Linux'
         env:
