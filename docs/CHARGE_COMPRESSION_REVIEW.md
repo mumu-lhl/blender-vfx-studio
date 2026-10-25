@@ -16,6 +16,8 @@
 
 Geometry Nodes 中的 `Compression Builds`、`Compression Amount`、`Pressure Height` 和 `Packets Accelerate Inward` 分别控制压缩窗口、横向收紧、高度和汇聚节奏。材质的 `Bright Intake Heads` 与 `Concentrated Inner Light` 分开控制流团和内核。侧栏保留实际使用的尺寸、时间、颜色、透明度、消蚀等控制。完整节点需使用 **Save Complete Effect** 保存，参数 JSON 仍只恢复基础模块。
 
+微粒总旋转量由约 200° 降到约 92°，减少前半程切向绕行，让向内运动更明确。`Mote Intake Turn` 同时控制轨迹与朝向计算，手动修改后尖端仍跟随真实运动方向；侧栏 Size 从 0.055 调为 0.07，提高小图中的辨认度。没有增加数量、发射率或发光强度，抵达中心后仍停止。
+
 默认核心保持不透明，通过 Geometry Nodes 删除消散区域的面；完全隐藏或塌缩后跳过其求值几何，避免透明层叠消耗 Cycles 穿透次数。Fade=0 保留消蚀前的面，但生命周期和整体塌缩仍生效。Opacity、Dissolve、Strength 的隐藏行为保持可测试。
 
 普通 Shield、Ring、Emitter 和已有完整 `.blend` 不重建；旧节点、手动编辑和动画保留。没有提高发光强度，也没有外部纹理、缓存或帧处理器。

@@ -151,7 +151,7 @@ def create_effect(key):
             spread=1.0,
             randomness=0.0,
             spawn_radius=1.7,
-            size=0.055,
+            size=0.07,
             strength=2.0,
             seed=9,
         )

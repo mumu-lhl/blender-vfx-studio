@@ -826,7 +826,8 @@ def spiral_motes(root):
     )
     rotate.inputs["Axis"].default_value = (0, 0, 1)
     g.link(direction, rotate.inputs["Vector"])
-    g.link(g.m("Swirl During Flight", "MULTIPLY", phase, 3.5), rotate.inputs["Angle"])
+    turn = g.value("Mote Intake Turn", 1.6)
+    g.link(g.m("Swirl During Flight", "MULTIPLY", phase, turn), rotate.inputs["Angle"])
     position = g.v("Spiral Particle Position", "SCALE", rotate.outputs[0], distance)
     g.link(position, tree.nodes["Particle Motion"].inputs["Position"])
     speed = tree.nodes["Varied Velocity"].outputs[0]
@@ -839,7 +840,7 @@ def spiral_motes(root):
     inward = g.v("Inward Velocity", "SCALE", rotate.outputs[0], inward_speed)
     cross = g.v("Orbit Tangent", "CROSS_PRODUCT", rotate.outputs[0], (0, 0, -1))
     angular_speed = g.m(
-        "Angular Speed", "MULTIPLY", g.m("Speed Per Radius", "DIVIDE", speed, safe), 3.5
+        "Angular Speed", "MULTIPLY", g.m("Speed Per Radius", "DIVIDE", speed, safe), turn
     )
     sideways = g.v(
         "Tangential Velocity",
