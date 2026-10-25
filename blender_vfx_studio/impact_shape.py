@@ -540,7 +540,22 @@ def _erode(root):
     graph.connect(edge_heat, color_edge.inputs[0])
     graph.connect(color.outputs[0], color_edge.inputs[1])
     color_edge.inputs[2].default_value = (1, 0.65, 0.12, 1)
-    graph.connect(color_edge.outputs[0], emission.inputs["Color"])
+    facing = graph.node("ShaderNodeVectorMath", "View Facing", operation="DOT_PRODUCT")
+    graph.connect(normal.outputs["Normal"], facing.inputs[0])
+    graph.connect(normal.outputs["Incoming"], facing.inputs[1])
+    facing = graph.math("Both Sides Facing", "ABSOLUTE", facing.outputs["Value"])
+    band = graph.node("ShaderNodeMapRange", "Rim Width", interpolation_type="SMOOTHSTEP")
+    graph.connect(facing, band.inputs["Value"])
+    band.inputs["From Min"].default_value, band.inputs["From Max"].default_value = 0.3, 0.85
+    band.inputs["To Min"].default_value, band.inputs["To Max"].default_value = 1, 0
+    contrast = graph.node("ShaderNodeValue", "Rim Contrast")
+    contrast.outputs[0].default_value = 0.85
+    rim = graph.math("Editable Silhouette", "MULTIPLY", band.outputs[0], contrast.outputs[0])
+    outlined = graph.node("ShaderNodeMixRGB", "Orange Silhouette")
+    graph.connect(rim, outlined.inputs[0])
+    graph.connect(color_edge.outputs[0], outlined.inputs[1])
+    graph.connect(dark, outlined.inputs[2])
+    graph.connect(outlined.outputs[0], emission.inputs["Color"])
     transparent = graph.node("ShaderNodeBsdfTransparent", "Dissipated Jet")
     mix = graph.node("ShaderNodeMixShader", "Opaque / Missing Pieces")
     graph.connect(visible, mix.inputs[0])
