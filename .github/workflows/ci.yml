@@ -137,6 +137,8 @@ jobs:
           EGL_PLATFORM: surfaceless
         run: |
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --view front
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --view side
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE --light --sequence
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --light
