@@ -40,4 +40,4 @@ blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python to
 
 11 项 Blender 刀光测试通过，覆盖版本 1/2 保留、新版形状控制与重定时、实例独立、参数及完整资产复用、表面控制和几何预算。保存后在不导入插件、关闭自动执行的新进程跳帧：版本 3 的几何与三个阶段低分辨率像素保持一致。另对 Cycles 暗背景及 Eevee 浅灰背景的三阶段高清 PNG 完成原生重开逐通道对比；19 帧所有效果层不再输出几何。实际 examples ZIP 也通过无插件检查。测试不代替上面的实际看图。
 
-版本 2 首轮改进与 v0.21.1 发布验证属于历史结果，详见 [该版本发布页](https://github.com/mumu-lhl/blender-vfx-studio/releases/tag/v0.21.1)。当前候选的 CI、合并与后续问题由 [#91](https://github.com/mumu-lhl/blender-vfx-studio/issues/91) 跟踪。
+版本 2 首轮改进与 v0.21.1 发布验证属于历史结果，详见 [该版本发布页](https://github.com/mumu-lhl/blender-vfx-studio/releases/tag/v0.21.1)。版本 3 的 [PR #92](https://github.com/mumu-lhl/blender-vfx-studio/pull/92) 在三平台 CI 全部成功后已合并，#91 已关闭，0.22.3 仍未发布。整体艺术目标 #89 继续开放。
