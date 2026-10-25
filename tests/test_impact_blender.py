@@ -48,7 +48,17 @@ class ImpactTests(unittest.TestCase):
         wave = next(child for child in children if child["vfx_module"] == "mesh.ring")
         self.assertAlmostEqual(wave.matrix_world.translation.z, 3.95, places=5)
         self.assertTrue(all(abs(child.matrix_world.translation.x - 2) < 1e-5 for child in children))
-        for frame, active in ((0, 0), (1, 2), (2, 3), (3, 4), (8, 3), (19, 2), (20, 1), (25, 0)):
+        for frame, active in (
+            (0, 0),
+            (1, 2),
+            (2, 3),
+            (3, 4),
+            (4, 3),
+            (8, 3),
+            (19, 2),
+            (20, 1),
+            (25, 0),
+        ):
             state = geometry(root, frame)
             self.assertEqual(sum(bool(points) for points in state.values()), active, frame)
             self.assertLess(sum(len(points) for points in state.values()), 1000)
@@ -229,10 +239,15 @@ class ImpactTests(unittest.TestCase):
         self.assertGreater(peak, 1)
         # A protected inner pole used to turn into a persistent opaque cup
         # during outward peeling, despite the keyframe-only check passing.
-        self.assertLess(light(10), peak * 0.08)
-        self.assertLess(light(11), peak * 0.03)
+        # Pressure masses now retain a cooled, outward-moving afterburn;
+        # the pivot must still clear instead of leaving the old opaque cup.
+        self.assertLess(light(10), peak * 0.5)
+        pixels = render_pixels(11)
+        center = (48 * 96 + 48) * 4
+        self.assertLess(max(pixels[center : center + 3]), 0.05)
+        self.assertLess(light(15), peak * 0.08)
         update(main, fade=0.0)
-        self.assertGreater(light(11), peak * 0.2)
+        self.assertGreater(light(15), peak * 0.2)
 
     def test_pressure_front_is_fast_and_expansion_stays_editable(self):
         root = core.create(bpy.context, "IMPACT_BURST", "LOW")
@@ -245,6 +260,27 @@ class ImpactTests(unittest.TestCase):
         self.assertGreater(peak, radius(19) * 0.32)
         update(wave, expansion=0.5)
         self.assertLess(radius(5), peak * 0.5)
+
+    def test_dissipated_pressure_does_not_leave_black_cycles_surfaces(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        camera()
+        scene = bpy.context.scene
+        scene.camera.location = (3, -5, 6)
+        scene.camera.rotation_euler = (-scene.camera.location).to_track_quat("-Z", "Y").to_euler()
+        scene.camera.data.ortho_scale = 8.2
+        scene.render.resolution_x = scene.render.resolution_y = 96
+        background = scene.world.node_tree.nodes["Background"]
+        background.inputs["Color"].default_value = (0.18, 0.20, 0.24, 1)
+        background.inputs["Strength"].default_value = 1
+        main = next(m for m in composition.members(root) if m.name.endswith("Main Shards"))
+        for member in composition.members(root):
+            member.children[0].hide_render = member != main
+        # Default Cycles transparent-ray limits must reveal the background
+        # after dissipation. Invisible overlapping caps previously turned black.
+        spent = render_pixels(14)
+        main.children[0].hide_render = True
+        empty = render_pixels(14)
+        self.assertEqual(spent, empty)
 
 
 addon.register()
