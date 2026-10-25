@@ -26,7 +26,7 @@
 
 **Arc Slash：版本 4 已合并。** [PR #103](https://github.com/mumu-lhl/blender-vfx-studio/pull/103) 把宽度峰值向前移，增加不等缺口、独立残弧年龄与低频彩色流带。仍为 Low 594 顶点、一个显示对象；旧版 1/2/3 保留。四项 CI 成功，实际读取多背景、远景和完整连段抽帧，原生重开与旧版重建检查通过。后段残影仍有灰色薄片感，细尾偏弱。见 [刀光记录](docs/SLASH_LAYER_REVIEW.md)。
 
-**Impact Burst：主体重做已实现并验证。** [PR #105](https://github.com/mumu-lhl/blender-vfx-studio/pull/105) / [#104](https://github.com/mumu-lhl/blender-vfx-studio/issues/104) 将七条相似喷流重新分为三团卷曲主体、四条细喷射和两条辅助卷流，短闪改为紧凑球核，压力弧改为单个宽波峰；清理完全消散的透明几何，修正实际 Cycles 尾部黑片。Low 最高 824 顶点、四个显示对象、四个材质。10 项局部测试、四种条件的高清原生重开、示例 ZIP 与完整 60 帧连段检查通过，全部 30 张视频隔帧图已读取。侧面仍偏实体，远景细层较弱。见 [主体记录](docs/IMPACT_PRESSURE_REVIEW.md)。
+**Impact Burst：主体重做已合并。** [PR #105](https://github.com/mumu-lhl/blender-vfx-studio/pull/105) / [#104](https://github.com/mumu-lhl/blender-vfx-studio/issues/104) 将七条相似喷流重新分为三团卷曲主体、四条细喷射和两条辅助卷流，短闪改为紧凑球核，压力弧改为单个宽波峰；清理完全消散的透明几何，修正实际 Cycles 尾部黑片。Low 最高 824 顶点、四个显示对象、四个材质。四项 CI 成功，10 项局部测试、四种条件的高清原生重开、示例 ZIP 与完整 60 帧连段检查通过，全部 30 张视频隔帧图已读取。侧面仍偏实体，远景细层较弱。见 [主体记录](docs/IMPACT_PRESSURE_REVIEW.md)。
 
 **细喷射改进已在继续。** [PR #107](https://github.com/mumu-lhl/blender-vfx-studio/pull/107) / [#106](https://github.com/mumu-lhl/blender-vfx-studio/issues/106) 把细喷射的较宽头部向前移，增加独立原生节点宽度控制、彩色内芯和深色边界，不增加数量、发光强度或顶点预算。11 项局部测试与无插件重开通过，实际 Cycles / Eevee 近白远景对照中峰值主要笔触更清楚，最终四种条件的高清重开、实际示例 ZIP 和完整连段检查已通过，全部 30 张视频隔帧图已读取。详细记录随该 PR 保存。
 
