@@ -198,41 +198,6 @@ jobs:
             work/visual-charge/*/charge-*.png
             work/visual-charge/*/charge.blend
             work/visual-charge/*/render-settings.json
-      - name: Build combat playback evidence (960x540, CPU, no bloom)
-        if: runner.os == 'Linux'
-        env:
-          LIBGL_ALWAYS_SOFTWARE: '1'
-          EGL_PLATFORM: surfaceless
-        run: |
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --sequence
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --light
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --sequence
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --wide
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --light
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --wide --light --sequence
-          python tools/combat_video.py work/visual-combat/dark
-          python tools/combat_video.py work/visual-combat/blender_eevee-near-dark
-          python tools/combat_video.py work/visual-combat/blender_eevee-wide-light
-          python tools/combat_frames.py work/visual-combat/dark
-          python tools/combat_frames.py work/visual-combat/blender_eevee-near-dark
-          python tools/combat_frames.py work/visual-combat/blender_eevee-wide-light
-          python tools/combat_review.py work/visual-combat
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-combat/dark/combat.blend --python tests/combat_reopen.py
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-combat/blender_eevee-near-dark/combat.blend --python tests/combat_reopen.py
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-combat/blender_eevee-wide-light/combat.blend --python tests/combat_reopen.py
-      - uses: actions/upload-artifact@v7.0.2
-        if: runner.os == 'Linux'
-        with:
-          name: combat-shot-visual-review
-          path: |
-            work/visual-combat/*/combat-*.png
-            work/visual-combat/*/combat.blend
-            work/visual-combat/*/combat.mp4
-            work/visual-combat/*/render-settings.json
-            work/visual-combat/*/video-info.json
-            work/visual-combat/index.html
-            work/visual-combat/*/video-frames/*.png
-            work/visual-combat/*/video-frames/frames.json
       - name: Build and validate starter assets (CPU only)
         if: runner.os == 'Linux'
         run: |
@@ -256,6 +221,56 @@ jobs:
             work/visual-slash/*.png
             work/visual-impact/*.png
             work/visual-charge/*/charge-*.png
+
+  combat_review:
+    name: Combat shots · software Eevee and Cycles
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      EGL_PLATFORM: surfaceless
+      LP_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Download official Blender with checksum verification
+        run: python tools/fetch_blender.py --version 5.2.2
+      - *linux_render_dependencies
+      - name: Build combat playback evidence (960x540, CPU, no bloom)
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: surfaceless
+        run: |
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/combat_preview.py -- --sequence
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/combat_preview.py -- --light
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --sequence
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --wide
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --light
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/combat_preview.py -- --engine BLENDER_EEVEE --wide --light --sequence
+          python tools/combat_video.py work/visual-combat/dark
+          python tools/combat_video.py work/visual-combat/blender_eevee-near-dark
+          python tools/combat_video.py work/visual-combat/blender_eevee-wide-light
+          python tools/combat_frames.py work/visual-combat/dark
+          python tools/combat_frames.py work/visual-combat/blender_eevee-near-dark
+          python tools/combat_frames.py work/visual-combat/blender_eevee-wide-light
+          python tools/combat_review.py work/visual-combat
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 work/visual-combat/dark/combat.blend --python tests/combat_reopen.py
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 work/visual-combat/blender_eevee-near-dark/combat.blend --python tests/combat_reopen.py
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 work/visual-combat/blender_eevee-wide-light/combat.blend --python tests/combat_reopen.py
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: combat-shot-visual-review
+          path: |
+            work/visual-combat/*/combat-*.png
+            work/visual-combat/*/combat.blend
+            work/visual-combat/*/combat.mp4
+            work/visual-combat/*/render-settings.json
+            work/visual-combat/*/video-info.json
+            work/visual-combat/index.html
+            work/visual-combat/*/video-frames/*.png
+            work/visual-combat/*/video-frames/frames.json
 
   handoff_review:
     name: Charge to hit · software Eevee
@@ -285,7 +300,7 @@ jobs:
 
   release:
     if: github.event_name == 'push' && github.ref_type == 'tag'
-    needs: [blender, handoff_review]
+    needs: [blender, combat_review, handoff_review]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
