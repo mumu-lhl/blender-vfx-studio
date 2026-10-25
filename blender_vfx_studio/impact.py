@@ -1,4 +1,4 @@
-"""Editable four-layer hit: short flash, directional shards, wave and embers."""
+"""Editable four-layer hit: short flash, pressure body, broken wave and embers."""
 
 from . import composition, core
 from .impact_shape import flash as flash_shape

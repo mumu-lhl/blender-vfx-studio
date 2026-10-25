@@ -138,11 +138,33 @@ jobs:
         run: |
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE --light --sampled
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE --light --sequence
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --light
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE --pale --far --view-transform AgX
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-impact/impact-cycles.blend --python tests/impact_visual_reopen.py
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-impact/impact-blender_eevee-light.blend --python tests/impact_visual_reopen.py
+          ffmpeg -v error -y -framerate 24 -start_number 1 -i work/visual-impact/impact-blender_eevee-light-%04d.png -frames:v 25 -c:v libx264 -pix_fmt yuv420p -movflags +faststart work/visual-impact/impact-blender_eevee-light.mp4
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate,nb_frames,duration -of json work/visual-impact/impact-blender_eevee-light.mp4 > work/visual-impact/impact-video-info.json
+          python - <<'PYTHON'
+          import hashlib
+          import json
+          from pathlib import Path
+          folder = Path("work/visual-impact")
+          settings = folder / "impact-blender_eevee-light-settings.json"
+          source = json.loads(settings.read_text(encoding="utf-8"))
+          info_file = folder / "impact-video-info.json"
+          info = json.loads(info_file.read_text(encoding="utf-8"))["streams"][0]
+          assert source["frames"] == list(range(1, 26)) and source["fps"] == 24 and source["fps_base"] == 1
+          assert (info["width"], info["height"], info["r_frame_rate"], info["nb_frames"]) == (960, 540, "24/1", "25")
+          assert abs(float(info["duration"]) - 25 / 24) < 0.001
+          digest = hashlib.sha256(settings.read_bytes())
+          for frame in source["frames"]:
+              digest.update((folder / source["images"][str(frame)]).read_bytes())
+          info["source_sha256"] = digest.hexdigest()
+          info["video_sha256"] = hashlib.sha256((folder / "impact-blender_eevee-light.mp4").read_bytes()).hexdigest()
+          info["realtime_playback_reviewed"] = False
+          info_file.write_text(json.dumps(info, indent=2) + "\n", encoding="utf-8")
+          PYTHON
       - uses: actions/upload-artifact@v7.0.2
         if: runner.os == 'Linux'
         with:
@@ -150,6 +172,9 @@ jobs:
           path: |
             work/visual-impact/*.png
             work/visual-impact/*-settings.json
+            work/visual-impact/*.mp4
+            work/visual-impact/*.blend
+            work/visual-impact/impact-video-info.json
       - name: Review Energy Charge gathering and tail (960x540, CPU, no bloom)
         if: runner.os == 'Linux'
         env:

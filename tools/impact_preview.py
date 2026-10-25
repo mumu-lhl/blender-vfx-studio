@@ -84,6 +84,7 @@ def setup(
     scene.eevee.taa_render_samples = 16
     scene.render.resolution_x, scene.render.resolution_y = 960, 540
     scene.render.resolution_percentage = 100
+    scene.frame_start, scene.frame_end, scene.render.fps = 1, 25, 24
     scene.view_settings.view_transform = view_transform
     scene.view_settings.look = "None"
     scene.render.image_settings.file_format = "PNG"
@@ -99,12 +100,15 @@ def main():
     parser.add_argument("--view-transform", choices=("Standard", "AgX"), default="Standard")
     parser.add_argument("--baseline-asset", type=Path, help="Import an actual old complete effect")
     parser.add_argument("--sampled", action="store_true")
+    parser.add_argument("--sequence", action="store_true", help="Render all 25 frames for playback")
     parser.add_argument("--frames", type=int, nargs="+")
     parser.add_argument("--engine", choices=("CYCLES", "BLENDER_EEVEE"), default="CYCLES")
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
     if not bpy.app.background or "--factory-startup" not in sys.argv or bpy.data.filepath:
         raise RuntimeError("Use a fresh background process with --factory-startup and no project")
-    if (args.legacy and args.baseline_asset) or (args.sampled and args.frames):
+    if (args.legacy and args.baseline_asset) or sum(
+        (args.sampled, args.sequence, bool(args.frames))
+    ) > 1:
         parser.error("Choose one effect source and one frame selection")
     if args.frames and min(args.frames) < 1:
         parser.error("Frames must be positive")
@@ -136,9 +140,13 @@ def main():
     prefix += "-far" if args.far else ""
     prefix += "-agx" if args.view_transform == "AgX" else ""
     stages = [("appear", 2), ("peak", 5), ("decay", 14)]
-    if args.sampled or args.frames:
+    if args.sequence or args.sampled or args.frames:
         frames = (
-            [1, 2, 3, 5, 7, 9, 11, 14, 17, 21, 24, 25] if args.sampled else sorted(set(args.frames))
+            list(range(1, 26))
+            if args.sequence
+            else [1, 2, 3, 5, 7, 9, 11, 14, 17, 21, 24, 25]
+            if args.sampled
+            else sorted(set(args.frames))
         )
         stages = [(f"{frame:04d}", frame) for frame in frames]
     record = folder / f"impact-{prefix}-settings.json"
@@ -147,6 +155,7 @@ def main():
         bpy.context.scene.frame_set(frame)
         bpy.context.scene.render.filepath = str(folder / f"impact-{prefix}-{stage}.png")
         bpy.ops.render.render(write_still=True)
+    bpy.context.scene.frame_set(5)
     bpy.ops.wm.save_as_mainfile(filepath=str(folder / f"impact-{prefix}.blend"))
     if hashes() != source_hashes:
         raise RuntimeError("Builder changed during rendering; repeat this review")
@@ -163,6 +172,9 @@ def main():
                 if args.baseline_asset
                 else None,
                 "resolution": [960, 540],
+                "fps": scene.render.fps,
+                "fps_base": scene.render.fps_base,
+                "saved_frame": scene.frame_current,
                 "camera_location": list(scene.camera.location),
                 "ortho_scale": scene.camera.data.ortho_scale,
                 "background_color": list(

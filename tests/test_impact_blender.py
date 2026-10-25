@@ -190,6 +190,27 @@ class ImpactTests(unittest.TestCase):
         update(root, speed=1.0, duration=48.0)
         self.assertEqual(geometry(root, 9), expected)
 
+    def test_spent_main_body_clears_before_the_ember_tail(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        camera()
+        bpy.context.scene.camera.data.ortho_scale = 5.5
+        bpy.context.scene.render.resolution_x = bpy.context.scene.render.resolution_y = 96
+        for member in composition.members(root):
+            member.children[0].hide_render = not member.name.endswith("Main Shards")
+        main = next(m for m in composition.members(root) if m.name.endswith("Main Shards"))
+
+        def light(frame):
+            return sum(value for i, value in enumerate(render_pixels(frame)) if i % 4 != 3)
+
+        peak = light(5)
+        self.assertGreater(peak, 1)
+        # A protected inner pole used to turn into a persistent opaque cup
+        # during outward peeling, despite the keyframe-only check passing.
+        self.assertLess(light(10), peak * 0.08)
+        self.assertLess(light(11), peak * 0.03)
+        update(main, fade=0.0)
+        self.assertGreater(light(11), peak * 0.2)
+
 
 addon.register()
 result = unittest.TextTestRunner(verbosity=2).run(

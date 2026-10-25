@@ -192,13 +192,14 @@ def jets(root, quality):
             sweep = angle + 0.4 * u * u
             direction = Vector((math.cos(sweep), math.sin(sweep), 0))
             radial = u * 0.65 * (0.7 + 0.3 * reach)
-            path = Vector((direction.x * radial, direction.y * radial, u * 0.35 * reach))
+            bulge = 0.65 * math.sin(math.pi * u) * (1 + 0.14 * math.cos(angle * 3))
+            path = Vector((direction.x * radial, direction.y * radial, u * 0.35 * reach + bulge))
             profile = u**0.85
             width = direction * (profile * 0.8 * reach**1.3)
             vertices.append(tuple(path + width))
             paths.append(tuple(path))
             widths.append(tuple(width))
-            directions.append((0, 0, 0))
+            directions.append(tuple(direction))
             lobes.append(0)
             heat.append(0.95 * (1 - u))
             uv.append((u, j / sectors))
@@ -249,7 +250,7 @@ def jets(root, quality):
             for j in range(3):
                 a = base + i * 4 + j
                 faces.append((a, a + 4, a + 5, a + 1))
-    _mesh(
+    layer = _mesh(
         root,
         vertices,
         faces,
@@ -258,10 +259,14 @@ def jets(root, quality):
             "impact_width": ("FLOAT_VECTOR", widths),
             "impact_direction": ("FLOAT_VECTOR", directions),
             "impact_lobe": ("FLOAT", lobes),
+            "impact_u": ("FLOAT", [value[0] for value in uv]),
             "vfx_spark_heat": ("FLOAT", heat),
         },
         uv,
     )
+    for face in layer.data.polygons:
+        face.use_smooth = True
+    layer.data.update()
     graph, position = _geometry(root, "Torn Impact Pressure Shell")
     progress = graph.value("Progress", expression=PROGRESS)
     lobe = graph.attribute("impact_lobe")
@@ -304,7 +309,13 @@ def jets(root, quality):
     path = graph.vector(
         "Jet Centerline", "SCALE", graph.attribute("impact_path", "FLOAT_VECTOR"), distance
     )
-    drift = graph.math("Detached Jet Tails", "MULTIPLY", local, distance)
+    late = graph.math("After Pressure Peak", "SUBTRACT", local, 0.4, clamp=True)
+    late = graph.math("Peeling Shell", "MULTIPLY", late, 1.8, clamp=True)
+    primary = graph.math("Pressure Shell Part", "LESS_THAN", lobe, 0.5)
+    difference = graph.math("Shell / Tongue Drift", "SUBTRACT", late, local)
+    difference = graph.math("Only Peel Main Shell", "MULTIPLY", difference, primary)
+    drift = graph.math("Independent Release Motion", "ADD", local, difference)
+    drift = graph.math("Detached Jet Tails", "MULTIPLY", drift, distance)
     drift = graph.vector(
         "Outward Jet Drift", "SCALE", graph.attribute("impact_direction", "FLOAT_VECTOR"), drift
     )
@@ -333,6 +344,15 @@ def jets(root, quality):
     graph.connect(
         graph.vector("Depth Shaped Jets", "MULTIPLY", combined, flatten.outputs[0]), position
     )
+    core = graph.math("Compression Vertices", "LESS_THAN", graph.attribute("impact_u"), 0.22)
+    core = graph.math("Only Main Compression", "MULTIPLY", core, primary)
+    spent = graph.math("Core Life / Fade", "MULTIPLY", progress, graph.value("Core Fade", "fade"))
+    spent = graph.math("Core Fully Spent", "GREATER_THAN", spent, 0.52)
+    selection = graph.math("Spent Inner Pole", "MULTIPLY", core, spent)
+    remove = graph.node("GeometryNodeDeleteGeometry", "Remove Spent Compression", domain="POINT")
+    graph.connect(graph.tree.nodes["Outside Lifetime"].outputs[0], remove.inputs["Geometry"])
+    graph.connect(selection, remove.inputs["Selection"])
+    graph.connect(remove.outputs[0], graph.tree.nodes["Output"].inputs[0])
     root["vfx_parameter_keys"] = (
         "seed,motion_seconds,velocity,randomness,spawn_radius,size,fade,strength,stretch,planar,motion_ease"
     )
@@ -398,12 +418,32 @@ def _erode(root):
     graph.connect(uv.outputs["UV"], stretch.inputs[0])
     stretch.inputs[1].default_value = (0.4, 10, 1)
     graph.connect(stretch.outputs[0], noise.inputs["Vector"])
+    brush = graph.math("Flow Tone Range", "MULTIPLY", noise.outputs["Fac"], 0.35)
+    brush = graph.math("Preserve Body Color", "ADD", brush, 0.65)
+    graph.connect(
+        graph.vector("Pressure Flow Detail", "SCALE", body.outputs[0], brush), bands.inputs[1]
+    )
     graph.connect(graph.math("Advecting Flow", "MULTIPLY", progress, 1.5), noise.inputs["W"])
     release = graph.math("After Main Punch", "SUBTRACT", progress, 0.28, clamp=True)
     release = graph.math("Jet Dissipation", "MULTIPLY", release, 1.35)
     release = graph.math("Editable Dissipation", "MULTIPLY", release, fade)
     tear = graph.math("Beyond Compression Core", "GREATER_THAN", axes.outputs["X"], 0.22)
-    tear = graph.math("Torn Flow Cutoff", "MULTIPLY", tear, 0.38)
+    core_release = graph.math("Release Compression", "SUBTRACT", progress, 0.28, clamp=True)
+    core_release = graph.math("Core Breakup Stage", "MULTIPLY", core_release, 5, clamp=True)
+    core_release = graph.math("Editable Core Breakup", "MULTIPLY", core_release, fade)
+    region = graph.math("Body / Spent Core", "MAXIMUM", tear, core_release)
+    angle = graph.math("Pressure Angle", "MULTIPLY", axes.outputs["Y"], math.tau)
+    focus = graph.math("Main Jet Center", "SUBTRACT", angle, 0.75)
+    focus = graph.math("Main Jet Distance", "ABSOLUTE", focus)
+    focus = graph.math("Main Jet Span", "DIVIDE", focus, 0.32)
+    focus = graph.math("Main Jet Weight", "SUBTRACT", 1, focus, clamp=True)
+    part = graph.node("ShaderNodeAttribute", "Pressure Part", attribute_name="impact_lobe")
+    primary = graph.math("Main Pressure Shell", "LESS_THAN", part.outputs["Fac"], 0.5)
+    focus = graph.math("Protect Main Jet", "MULTIPLY", focus, primary)
+    focus = graph.math("Never Preserve Spent Core", "MULTIPLY", focus, tear)
+    focus = graph.math("Main Jet Density", "MULTIPLY", focus, 0.14)
+    cutoff = graph.math("Subordinate Flow Density", "SUBTRACT", 0.47, focus)
+    tear = graph.math("Torn Flow Cutoff", "MULTIPLY", region, cutoff)
     cutoff = graph.math("Flow Then Release", "ADD", tear, release)
     visible = graph.math("Remaining Jet Pieces", "GREATER_THAN", noise.outputs["Fac"], cutoff)
     transparent = graph.node("ShaderNodeBsdfTransparent", "Dissipated Jet")

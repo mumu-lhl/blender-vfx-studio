@@ -10,6 +10,8 @@
 
 当前候选使用紧凑的短闪、一个有深度的破裂主体、较暗的压力弧和延迟余烬。主体以局部 XY 为主要展开平面，Z 保存弯曲深度；各方向尖端的长度与宽度不同，其中一支更大。白核、亮橙主体和红色外缘分开。白色先退出，主体裂成短段，最后保留少量暖色碎片与余烬。压力弧同时改变轮廓和覆盖范围，避免完整圆环持续描边。
 
+峰值的整块色面曾显得扁平，现将主体拱起，用平滑法线形成弯曲的明暗分界，并让材质沿展开方向形成细纹和断口。主尖端保留较完整的形状，辅助方向更早拆散。退场还会把碎片从中心向外移，而不只缩小或变暗。
+
 所有修改发生在实际创建接口调用的 `impact.py` / `impact_shape.py`，预览只提供相机与背景。默认显示对象和材质仍各为 4 个，Low 最多约 807 顶点，上限预算为 900；旧资产约为 414 顶点。短闪强度由 2.4 降至 1.2，主体由 2.0 降至 1.6，没有增加粒子槽位或额外辉光。几何预算不能代表视口帧率，实际低配置设备尚未测量。
 
 ## 编辑与保存
@@ -26,15 +28,20 @@
 
 当前峰值仍有连续色面偏大、扁平感偏强的问题；要继续判断主尖端、内部断口、退场碎片是否构成可信的命中爆发。不会仅凭测试通过将草稿转为艺术验收通过。
 
-6 项 Blender 测试覆盖形状参数、平面化、预算、重定时、独立副本、完整资产、Ungroup All、安全删除、材质编辑与阶段变化。原生重开检查同时比较几何与像素。高清重开、暗亮背景抽帧和衔接场景的最终状态以 PR 实际结果为准。
+连续相邻帧暴露过一个关键帧检查漏掉的问题：第 11 帧出现棕色杯状残留。原本重合在中心的一圈顶点向外移动后形成了环，而材质一直保护这部分不被侵蚀。现在白核退场后解除保护，随后在几何节点中移除耗尽的内圈；基础网格仍保留，往回跳帧可以恢复。已实际查看修复后的 9、10、11、14 帧 Cycles PNG，杯状残留消失。
+
+7 项 Blender 测试覆盖形状参数、平面化、预算、重定时、独立副本、完整资产、Ungroup All、安全删除、材质编辑与阶段变化，并检查主体在余烬阶段不能留下整片色面。原生重开同时比较几何与像素。高清重开、暗亮背景抽帧和衔接场景的最终状态以 PR 实际结果为准。
 
 在仓库根目录使用新的后台进程重建，软件 Eevee 可设置 `LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless`：
 
 ```sh
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE --light --sampled
+blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE --light --sequence
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --engine BLENDER_EEVEE --pale --far --view-transform AgX
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/impact_preview.py -- --baseline-asset /path/to/old-impact.blend
 ```
 
 `--baseline-asset` 载入真实旧资产；`--legacy` 只重建更早的圆环与圆粒组合，不能代替 0.22.2 对照。结果在 `work/visual-impact/`，包括 PNG、原生场景和 `*-settings.json`。按记录中的图片列表检查本次结果，避免混入旧图；记录绑定生成器哈希、实际帧、相机、背景、色彩管理和旧资产哈希。
+
+`--sequence` 输出 1–25 帧，场景固定为 24 fps，并停在第 5 帧保存，避免打开原生场景时只看到空的末帧。Linux CI 将完整浅背景序列编码为 MP4，核对 960×540、25 帧及 24 fps，并记录视频与源 PNG 的哈希。生成视频不代表已实时观看。
