@@ -1,5 +1,6 @@
 """Render the saved handoff without the extension; ensure the final frame is clear."""
 
+import hashlib
 import json
 import sys
 from array import array
@@ -11,6 +12,8 @@ assert not any("blender_vfx_studio" in name for name in sys.modules)
 scene = bpy.context.scene
 assert scene.frame_current == 31
 folder = Path(bpy.data.filepath).parent
+project = Path(bpy.data.filepath)
+project_hash = hashlib.sha256(project.read_bytes()).hexdigest()
 record = json.loads((folder / "review-settings.json").read_text(encoding="utf-8"))
 if "portable_render_path" in record:
     assert scene.render.filepath == record["portable_render_path"]
@@ -34,3 +37,24 @@ for frame in (31, 33):
     bpy.data.images.remove(expected)
     bpy.data.images.remove(actual)
 print("CHARGE_HANDOFF_NATIVE_ALL_CHANNELS_IDENTICAL_AND_TAIL_CLEAR")
+assert hashlib.sha256(project.read_bytes()).hexdigest() == project_hash
+(folder / "native-check.json").write_text(
+    json.dumps(
+        {
+            "scene_sha256": project_hash,
+            "native_render_verified": True,
+            "frames": [31, 33],
+            "source_frame_sha256": {
+                f"handoff-{frame:04d}.png": hashlib.sha256(
+                    (folder / f"handoff-{frame:04d}.png").read_bytes()
+                ).hexdigest()
+                for frame in (31, 33)
+            },
+            "clear_frame": 60,
+            "realtime_playback_reviewed": False,
+        },
+        indent=2,
+    )
+    + "\n",
+    encoding="utf-8",
+)

@@ -10,6 +10,28 @@ from tools.combat_video import encode, sequence_digest
 
 
 class VideoPreflightTests(unittest.TestCase):
+    def test_handoff_requires_all_sixty_frames(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            movie = folder / "handoff.mp4"
+            movie.write_bytes(b"previous handoff movie")
+            (folder / "review-settings.json").write_text(
+                json.dumps({"frames": [1, 7, 31, 33, 60], "fps": 24, "resolution": [960, 540]})
+            )
+            with self.assertRaisesRegex(ValueError, "complete 60-frame"):
+                encode(folder, "handoff")
+            self.assertEqual(movie.read_bytes(), b"previous handoff movie")
+
+    def test_handoff_digest_includes_the_last_frame(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            (folder / "review-settings.json").write_text(json.dumps({"frames": list(range(1, 61))}))
+            for frame in range(1, 61):
+                (folder / f"handoff-{frame:04d}.png").write_bytes(b"source hash fixture")
+            before = sequence_digest(folder, "handoff")
+            (folder / "handoff-0060.png").write_bytes(b"changed last frame")
+            self.assertNotEqual(before, sequence_digest(folder, "handoff"))
+
     def test_review_page_excludes_stale_or_incomplete_videos(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)

@@ -9,27 +9,37 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+PROFILES = {
+    "combat": ("render-settings.json", "rendered_frames", "combat", 36),
+    "handoff": ("review-settings.json", "frames", "handoff", 60),
+}
 
-def sequence_digest(folder):
+
+def sequence_digest(folder, profile="combat"):
     """Bind a movie's encoding record to the exact settings and source PNGs."""
     folder = Path(folder)
-    digest = hashlib.sha256((folder / "render-settings.json").read_bytes())
-    for frame in range(1, 37):
-        digest.update((folder / f"combat-{frame:04d}.png").read_bytes())
+    settings_name, _, prefix, count = PROFILES[profile]
+    digest = hashlib.sha256((folder / settings_name).read_bytes())
+    for frame in range(1, count + 1):
+        digest.update((folder / f"{prefix}-{frame:04d}.png").read_bytes())
     return digest.hexdigest()
 
 
-def encode(folder):
+def encode(folder, profile="combat"):
     folder = Path(folder)
-    settings = json.loads((folder / "render-settings.json").read_text(encoding="utf-8"))
+    settings_name, frames_key, prefix, count = PROFILES[profile]
+    settings = json.loads((folder / settings_name).read_text(encoding="utf-8"))
     if (
-        settings.get("rendered_frames") != list(range(1, 37))
+        settings.get(frames_key) != list(range(1, count + 1))
         or settings.get("fps") != 24
+        or settings.get("fps_base", 1) != 1
         or settings.get("resolution") != [960, 540]
     ):
-        raise ValueError("Render a complete 36-frame 960x540 sequence at 24 fps before encoding")
-    for frame in range(1, 37):
-        path = folder / f"combat-{frame:04d}.png"
+        raise ValueError(
+            f"Render a complete {count}-frame 960x540 sequence at 24 fps before encoding"
+        )
+    for frame in range(1, count + 1):
+        path = folder / f"{prefix}-{frame:04d}.png"
         with path.open("rb") as stream:
             header = stream.read(24)
         if (
@@ -41,8 +51,8 @@ def encode(folder):
     ffmpeg, ffprobe = shutil.which("ffmpeg"), shutil.which("ffprobe")
     if not ffmpeg or not ffprobe:
         raise RuntimeError("Install FFmpeg (including ffprobe) before encoding review videos")
-    source_digest = sequence_digest(folder)
-    destination = folder / "combat.mp4"
+    source_digest = sequence_digest(folder, profile)
+    destination = folder / f"{prefix}.mp4"
     with tempfile.TemporaryDirectory(dir=folder) as temporary:
         movie = Path(temporary) / "combat.mp4"
         subprocess.run(
@@ -55,9 +65,9 @@ def encode(folder):
                 "-start_number",
                 "1",
                 "-i",
-                str(folder / "combat-%04d.png"),
+                str(folder / f"{prefix}-%04d.png"),
                 "-frames:v",
-                "36",
+                str(count),
                 "-c:v",
                 "libx264",
                 "-crf",
@@ -92,14 +102,19 @@ def encode(folder):
             info["width"] == 960
             and info["height"] == 540
             and info["r_frame_rate"] == "24/1"
-            and info["nb_frames"] == "36"
-            and abs(float(info["duration"]) - 1.5) < 0.001
+            and info["nb_frames"] == str(count)
+            and abs(float(info["duration"]) - count / 24) < 0.001
         ):
             raise ValueError(f"Unexpected video stream: {info}")
+        if sequence_digest(folder, profile) != source_digest:
+            raise ValueError("Render sources changed during encoding")
         movie.replace(destination)
     info["source_sha256"] = source_digest
+    info["video_sha256"] = hashlib.sha256(destination.read_bytes()).hexdigest()
+    info["profile"] = profile
+    info["realtime_playback_reviewed"] = False
     (folder / "video-info.json").write_text(json.dumps(info, indent=2) + "\n", encoding="utf-8")
-    print(f"ENCODED_REVIEW_VIDEO {destination} (36 frames, 24 fps; playback not reviewed)")
+    print(f"ENCODED_REVIEW_VIDEO {destination} ({count} frames, 24 fps; playback not reviewed)")
     return destination
 
 
@@ -108,4 +123,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "folder", type=Path, help="Folder containing combat-0001.png through combat-0036.png"
     )
-    encode(parser.parse_args().folder)
+    parser.add_argument("--profile", choices=PROFILES, default="combat")
+    args = parser.parse_args()
+    encode(args.folder, args.profile)
