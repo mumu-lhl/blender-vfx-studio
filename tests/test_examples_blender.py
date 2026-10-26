@@ -212,6 +212,40 @@ class StarterTests(unittest.TestCase):
         )
         self.assertLess(auxiliary_area, 1e-6)
 
+    def test_release_pinches_only_the_nucleus_and_follows_group_speed(self):
+        charge = create_effect("energy-charge")
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+        tree = member.children[0].modifiers[0].node_group
+
+        def shape(frame):
+            evaluated = mesh(member, frame)
+            inner = evaluated.attributes["charge_inner"].data
+            nucleus = [
+                v.co.copy() for v, part in zip(evaluated.vertices, inner) if part.value > 0.5
+            ]
+            outside = [
+                tuple(v.co) for v, part in zip(evaluated.vertices, inner) if part.value < 0.5
+            ]
+            spans = [max(v[i] for v in nucleus) - min(v[i] for v in nucleus) for i in range(3)]
+            return spans[2] / max(spans[:2]), outside, [tuple(v.co) for v in evaluated.vertices]
+
+        aspect, outside, reference = shape(43)
+        pinch = tree.nodes["Release Pinch"].outputs[0]
+        stretch = tree.nodes["Release Stretch"].outputs[0]
+        original = pinch.default_value, stretch.default_value
+        pinch.default_value = stretch.default_value = 0
+        relaxed, unchanged, _ = shape(43)
+        self.assertGreater(aspect, relaxed * 2)
+        self.assertEqual(outside, unchanged)
+        pinch.default_value, stretch.default_value = original
+        charge["speed"] = 2
+        charge.update_tag()
+        _, _, accelerated = shape(22)
+        self.assertEqual(len(reference), len(accelerated))
+        self.assertLess(
+            max((Vector(a) - Vector(b)).length for a, b in zip(reference, accelerated)), 1e-5
+        )
+
     def test_primary_bundle_heads_travel_toward_the_core(self):
         charge = create_effect("energy-charge")
         member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")

@@ -475,7 +475,7 @@ def _surface(root, *, core=False, ground=False):
                     "Nucleus Energy Remaining",
                     "SUBTRACT",
                     1,
-                    g.stage("Nucleus Hands Off Energy", p, 0.84, 0.94),
+                    g.stage("Nucleus Hands Off Energy", p, 0.88, 0.96),
                 ),
             ),
             kernel_color.inputs[0],
@@ -913,6 +913,25 @@ def core_shape(root):
         ),
     )
     position = g.v("Stored Energy Volume", "SCALE", position, growth)
+    pulse = g.m(
+        "Stored Energy Discharge",
+        "MULTIPLY",
+        g.stage("Release Pinch Begins", p, 0.84, 0.88),
+        g.m("Release Pinch Ends", "SUBTRACT", 1, g.stage("Release Pinch Settles", p, 0.90, 0.96)),
+    )
+    pulse = g.m("Only The Nucleus Discharges", "MULTIPLY", pulse, g.attr("charge_inner"))
+    pinch = g.m(
+        "Nucleus Width During Discharge",
+        "SUBTRACT",
+        1,
+        g.m("Release Width Pinch", "MULTIPLY", pulse, g.value("Release Pinch", 0.55)),
+    )
+    stretch = g.m(
+        "Nucleus Height During Discharge", "MULTIPLY_ADD", pulse, g.value("Release Stretch", 1.4)
+    )
+    stretch.node.inputs[2].default_value = 1
+    discharge_axes = g.xyz("Nucleus Discharge Proportions", pinch, pinch, stretch)
+    position = g.v("Stored Energy Becomes A Short Needle", "MULTIPLY", position, discharge_axes)
     g.link(position, deform.inputs["Position"])
     noise = g.n("ShaderNodeTexNoise", "Roiling Flame Contour", noise_dimensions="4D")
     noise.inputs["Scale"].default_value = 3.5
@@ -928,7 +947,11 @@ def core_shape(root):
     )
     # Scaling the nucleus includes its contour displacement, so a zero seed
     # remains collapsed rather than leaving a small cloud of noisy vertices.
-    g.link(g.v("Stored Energy Contour", "SCALE", displacement, growth), deform.inputs["Offset"])
+    displacement = g.v("Stored Energy Contour", "SCALE", displacement, growth)
+    g.link(
+        g.v("Discharging Contour", "MULTIPLY", displacement, discharge_axes),
+        deform.inputs["Offset"],
+    )
 
     breakup = g.n("ShaderNodeTexNoise", "Native Core Breakup", noise_dimensions="4D")
     g.link(pos.outputs[0], breakup.inputs["Vector"])
@@ -953,7 +976,7 @@ def core_shape(root):
         g.m(
             "Kernel Releases Quickly",
             "MULTIPLY",
-            g.stage("Nucleus Release Window", p, 0.84, 0.94),
+            g.stage("Nucleus Release Window", p, 0.88, 0.96),
             g.value("Nucleus Fade", prop="fade"),
         ),
     )

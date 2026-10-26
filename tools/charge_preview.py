@@ -106,7 +106,7 @@ def main():
     folder.mkdir(parents=True, exist_ok=True)
     record = folder / "render-settings.json"
     record.unlink(missing_ok=True)
-    frames = {1, 4, 7, 13, 22, 31, 37, 42, 46, 48, 49}
+    frames = {1, 4, 7, 13, 22, 31, 37, 42, 43, 45, 46, 48, 49}
     if args.sampled:
         frames.update(range(1, 50, 2))
     if args.frames:
