@@ -12,6 +12,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   blender:
+    if: false # Temporary diagnostic branch; use the isolated Eevee probe.
     name: Blender · ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -223,6 +224,7 @@ jobs:
             work/visual-charge/*/charge-*.png
 
   combat_review:
+    if: false # Temporary diagnostic branch; use the isolated Eevee probe.
     name: Combat shots · software Eevee and Cycles
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -273,6 +275,7 @@ jobs:
             work/visual-combat/*/video-frames/frames.json
 
   handoff_review:
+    if: false # Temporary diagnostic branch; use the isolated Eevee probe.
     name: Charge to hit · software Eevee
     runs-on: ubuntu-24.04
     timeout-minutes: 25
