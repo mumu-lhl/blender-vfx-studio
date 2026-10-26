@@ -36,7 +36,7 @@ Radius 是出生时外半径，Width 是环宽，Expansion 是一个周期增加
 Arc 控制弧度（1–359 度），Spin 控制总旋转角度，正负值改变旋转方向。Attack 是展开所占的生命周期比例，例如 18 帧中 Attack=0.18 约用 3.2 帧展开。
 Motion Ease 控制挥斩后的减速，0 为匀速；Head Bias 将主体宽度偏向前端。Radius / Width / Expansion 控制基本尺寸，Taper 控制收尖。
 
-Core Width 控制窄亮锋刃的相对宽度，Afterimage 控制两条辅助残影的透明度，设为 0 可关闭残影。
+Core Width 控制窄亮锋刃的相对宽度，Afterimage 在开发版资产版本 5 中控制两条有色残影的面积，设为 0 可关闭残影；版本 1–4 仍控制透明度。
 Streaks 控制主体笔触的对比，Breakup 控制挥斩后的噪声侵蚀；Dissolve=1 会完全隐藏材质。新版 Fade 控制退场时的分段镂空，设为 0 可保留这些段，但不关闭 Breakup。
 Strength 控制整体发光，颜色控制主体；锋刃使用较浅的冷白色，因此仍有亮度和色彩层次。
 

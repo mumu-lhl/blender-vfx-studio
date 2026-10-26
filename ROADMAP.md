@@ -22,19 +22,19 @@
 
 ## 当前视觉开发
 
-**Energy Charge：汇聚与积蓄重做已合并。** 最新 [PR #115](https://github.com/mumu-lhl/blender-vfx-studio/pull/115) 接续进流和外层路径改进：主体与辅助流分别控制宽度，亮前沿跟随能量团，三条外层短弯流从不同高度抵达核心；外围收紧时，小蓝核逐渐积蓄为亮核。新增原生初始/蓄满尺寸控制，四层、12 个粒子槽、Low 最高 894 顶点不变，旧完整资产不重建。
+**Energy Charge：束流、材质流动与释放已重做。** [PR #117](https://github.com/mumu-lhl/blender-vfx-studio/pull/117) 将主体改为错开前沿的双束，减少辅助流，材质通道跟随能量团向内移动；内核积蓄后原位收束释放。四层、12 个粒子槽、Low 最高 894 顶点不变，旧完整资产不重建。18 项局部测试、四种高清重开、示例 ZIP 和五项 CI 通过，已实际读取完整连段全部 30 张视频隔帧图。远景主体仍细碎，整体 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 继续开放，见 [束流记录](docs/CHARGE_STREAM_REVIEW.md)。
 
-16 项局部 Blender 测试、四种高清条件重开、实际示例 ZIP 与完整连段检查通过，五项 CI 成功。已实际查看多背景、多视角、Actions 产物及完整视频全部 30 张隔帧图。宽裙边减少，积蓄阶段更明确，但弯叶、薄片和远景细流问题未解决，整体目标 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 继续开放。细节见 [进流](docs/CHARGE_INTAKE_REVIEW.md)、[外层路径](docs/CHARGE_FLOW_REVIEW.md) 和 [内核积蓄](docs/CHARGE_NUCLEUS_REVIEW.md) 记录。
+**压力核改进已合并。** [PR #121](https://github.com/mumu-lhl/blender-vfx-studio/pull/121) 把平滑椭圆内核重新分为有间隙的三段蓝白束。18 项测试、四种高清重开、实际示例 ZIP 已通过，多视角、远景与 30 个 Eevee 阶段帧已读取。五项 CI 与完整连段通过，实际 Actions PNG 和全部 30 张视频解码图已读取。远景仍偏小，俯视下竖向释放较弱，未整体艺术验收，见 [内核记录](docs/CHARGE_FOCUS_REVIEW.md)。
 
-**整套束流与运动方向已完成本轮复核。** [#116](https://github.com/mumu-lhl/blender-vfx-studio/issues/116) 比较有截面的双束、向内移动的材质通道及长尾短头的外层流段。18 项局部测试通过，另加入内核释放时的原位收束亮线，多轮实际关键帧已读取；四种高清条件重开、实际示例 ZIP、五项 CI 和 Actions 完整连段检查通过；已读取全部 30 张视频隔帧图。远景细碎问题保留，不视为整体艺术通过。见 [束流记录](docs/CHARGE_STREAM_REVIEW.md)。
-
-**Arc Slash：版本 4 已合并。** [PR #103](https://github.com/mumu-lhl/blender-vfx-studio/pull/103) 把宽度峰值向前移，增加不等缺口、独立残弧年龄与低频彩色流带。仍为 Low 594 顶点、一个显示对象；旧版 1/2/3 保留。四项 CI 成功，实际读取多背景、远景和完整连段抽帧，原生重开与旧版重建检查通过。后段残影仍有灰色薄片感，细尾偏弱。见 [刀光记录](docs/SLASH_LAYER_REVIEW.md)。
+**Arc Slash：版本 5 的有色残影已复核。** [PR #119](https://github.com/mumu-lhl/blender-vfx-studio/pull/119) 保留版本 4 的主刀面，把灰色矩形片段改为保留本色、两端收尖的残弧；Afterimage 调整面积，旧版本保持透明度含义。Low 594 顶点、单显示对象不变。16 项刀光、11 项预设检查及五种高清重开、示例 ZIP 通过；实际 Low 资产也做了高清三阶段读取与原生像素比较。三组战斗视频全部 54 张隔帧图已读取。五项 CI 及完整连段通过，全部 30 张视频解码图已读取。当前保留硬笔触和远景细尾问题，见 [残影记录](docs/SLASH_WAKE_REVIEW.md)。
 
 **Impact Burst：主体重做已合并。** [PR #105](https://github.com/mumu-lhl/blender-vfx-studio/pull/105) / [#104](https://github.com/mumu-lhl/blender-vfx-studio/issues/104) 将七条相似喷流重新分为三团卷曲主体、四条细喷射和两条辅助卷流，短闪改为紧凑球核，压力弧改为单个宽波峰；清理完全消散的透明几何，修正实际 Cycles 尾部黑片。Low 最高 824 顶点、四个显示对象、四个材质。四项 CI 成功，10 项局部测试、四种条件的高清原生重开、示例 ZIP 与完整 60 帧连段检查通过，全部 30 张视频隔帧图已读取。侧面仍偏实体，远景细层较弱。见 [主体记录](docs/IMPACT_PRESSURE_REVIEW.md)。
 
 **细喷射改进已合并。** [PR #107](https://github.com/mumu-lhl/blender-vfx-studio/pull/107) / [#106](https://github.com/mumu-lhl/blender-vfx-studio/issues/106) 把细喷射的较宽头部向前移，增加独立原生节点宽度控制、彩色内芯和深色边界，不增加数量、发光强度或顶点预算。11 项局部测试与无插件重开通过，实际 Cycles / Eevee 近白远景对照中峰值主要笔触更清楚，最终四种条件的高清重开、实际示例 ZIP 和完整连段检查已通过，全部 30 张视频隔帧图已读取。详细记录随该 PR 保存。
 
 [#69](https://github.com/mumu-lhl/blender-vfx-studio/issues/69) 已按用户授权的隔帧方法完成旧版三个视频检查；其结论不自动适用于新生成器。现在的工具支持生成完整 60 帧、24 fps、960×540 连段，绑定源码、场景与图像校验，并生成视频解码图和无插件离线检查包。见 [连续检查记录](docs/CONTINUOUS_SKILL_REVIEW.md)。没有实时播放、真实角色镜头或低配置视口帧率验收。
+
+软件 Eevee 的完整连段在原生像素检查后退出崩溃，见 [#122](https://github.com/mumu-lhl/blender-vfx-studio/issues/122)。#123 / #127 已合并，失败时保留原始帧与崩溃文件，检查结束后主动释放临时场景。十次对照和五项完整 CI 均通过，仍不宣称覆盖所有驱动退出路径；临时诊断 #125 已关闭，未合并。
 
 ## 接下来的优先级
 
