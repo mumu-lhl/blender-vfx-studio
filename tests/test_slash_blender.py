@@ -223,7 +223,7 @@ class SlashTests(unittest.TestCase):
 
     def test_authored_shape_controls_budget_and_retiming(self):
         root = core.create(bpy.context, "ARC_SLASH", "LOW")
-        self.assertEqual(root["vfx_asset_version"], 4)
+        self.assertEqual(root["vfx_asset_version"], 5)
         peak = points(root, 5)
         self.assertLessEqual(len(peak), 600)
         self.assertGreater(max(p[2] for p in peak) - min(p[2] for p in peak), 0.1)
@@ -248,7 +248,31 @@ class SlashTests(unittest.TestCase):
         restored = core.create_from_preset(bpy.context, snapshot)
         update(restored, start=1.0)
         self.assertEqual(points(restored, 5), peak)
-        self.assertEqual(snapshot["asset_version"], 4)
+        self.assertEqual(snapshot["asset_version"], 5)
+
+    def test_colored_wake_changes_its_area_without_changing_primary_or_old_assets(self):
+        old = slash.create(bpy.context, "LOW", asset_version=4)
+        current = slash.create(bpy.context, "LOW")
+        update(old, start=1.0)
+        update(current, start=1.0)
+        band_size = len(current.children[0].data.vertices) // 3
+        previous, actual = points(old, 5), points(current, 5)
+        self.assertEqual(previous[:band_size], actual[:band_size])
+        self.assertNotEqual(previous[band_size:], actual[band_size:])
+        update(current, afterimage=0.0)
+        hidden = points(current, 5)
+        self.assertEqual(hidden[:band_size], actual[:band_size])
+        for band in (1, 2):
+            for section in range(33):
+                row = hidden[band * band_size + section * 6 : band * band_size + (section + 1) * 6]
+                # Bank can bend depth across the blade; radial width is gone.
+                radii = [math.hypot(p[0], p[1]) for p in row]
+                self.assertLess(max(radii) - min(radii), 1e-5)
+        snapshot = presets.loads(presets.dumps(core.preset_snapshot(old)))
+        restored = core.create_from_preset(bpy.context, snapshot)
+        update(restored, start=1.0)
+        self.assertEqual(restored["vfx_asset_version"], 4)
+        self.assertEqual(points(restored, 5), previous)
 
     def test_head_bias_moves_body_mass_forward_without_changing_the_radius(self):
         root = core.create(bpy.context, "ARC_SLASH", "LOW")
@@ -356,7 +380,11 @@ root.hide_render = modern.hide_render = True
 root.children[0].hide_render = modern.children[0].hide_render = True
 camera()
 bpy.context.scene.camera.data.ortho_scale = 5.5
-for version, name in ((3, "Persisted Version Three Slash"), (4, "Persisted Authored Slash")):
+for version, name in (
+    (3, "Persisted Version Three Slash"),
+    (4, "Persisted Authored Slash"),
+    (5, "Persisted Colored Wake Slash"),
+):
     authored = slash.create(bpy.context, "LOW", asset_version=version)
     authored.name = name
     # The preceding evaluation changed the scene frame; explicitly align clocks.
