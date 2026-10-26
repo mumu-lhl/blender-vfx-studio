@@ -58,3 +58,8 @@ assert hashlib.sha256(project.read_bytes()).hexdigest() == project_hash
     + "\n",
     encoding="utf-8",
 )
+
+# Release Eevee's temporary scene while its graphics context is still alive.
+# Mesa 25.2.8 on Ubuntu can otherwise crash during process teardown (#122).
+bpy.ops.wm.read_factory_settings(use_empty=True)
+print("CHARGE_HANDOFF_TEMPORARY_SCENE_RELEASED")
