@@ -326,10 +326,21 @@ def _surface(root, *, core=False):
         g.link(leading_color.outputs[0], center_mix.inputs[2])
         surface_color = center_mix.outputs[0]
         kernel_color = g.n("ShaderNodeMixRGB", "Concentrated Inner Light")
-        brightness = g.m("Inner Compression Brightness", "MULTIPLY_ADD", gather, 0.3)
-        brightness.node.inputs[2].default_value = 0.55
+        stored = g.stage("Stored Energy Concentration", p, 0.45, 0.84)
+        brightness = g.m("Inner Compression Brightness", "MULTIPLY_ADD", stored, 0.77)
+        brightness.node.inputs[2].default_value = 0.08
         g.link(
-            g.m("Spend Inner White During Release", "MULTIPLY", brightness, light_remaining),
+            g.m(
+                "Spend Inner White During Release",
+                "MULTIPLY",
+                brightness,
+                g.m(
+                    "Nucleus Energy Remaining",
+                    "SUBTRACT",
+                    1,
+                    g.stage("Nucleus Hands Off Energy", p, 0.84, 0.94),
+                ),
+            ),
             kernel_color.inputs[0],
         )
         g.link(color.outputs[0], kernel_color.inputs[1])
@@ -670,6 +681,27 @@ def core_shape(root):
         g.xyz("Roiling Flame Volume", *shaped, curled.outputs["Z"]),
         g.xyz("Nucleus Pressure Balance", counter_x, counter_x, counter_z),
     )
+    seed_size = g.value("Nucleus Seed Size", 0.65)
+    stored_size = g.value("Nucleus Stored Size", 1.35)
+    growth = g.m(
+        "Nucleus Stores Incoming Energy",
+        "MULTIPLY_ADD",
+        gather,
+        g.m("Stored Size Range", "SUBTRACT", stored_size, seed_size),
+    )
+    g.link(seed_size, growth.node.inputs[2])
+    growth = g.m(
+        "Nucleus Growth Only",
+        "ADD",
+        1,
+        g.m(
+            "Inner Growth Difference",
+            "MULTIPLY",
+            g.attr("charge_inner"),
+            g.m("Growth Relative To Strands", "SUBTRACT", growth, 1),
+        ),
+    )
+    position = g.v("Stored Energy Volume", "SCALE", position, growth)
     g.link(position, deform.inputs["Position"])
     noise = g.n("ShaderNodeTexNoise", "Roiling Flame Contour", noise_dimensions="4D")
     noise.inputs["Scale"].default_value = 3.5
@@ -683,7 +715,9 @@ def core_shape(root):
     displacement = g.v(
         "Alive Silhouette", "SCALE", centered, g.m("Contour Amplitude", "MULTIPLY", radius, 0.035)
     )
-    g.link(displacement, deform.inputs["Offset"])
+    # Scaling the nucleus includes its contour displacement, so a zero seed
+    # remains collapsed rather than leaving a small cloud of noisy vertices.
+    g.link(g.v("Stored Energy Contour", "SCALE", displacement, growth), deform.inputs["Offset"])
 
     breakup = g.n("ShaderNodeTexNoise", "Native Core Breakup", noise_dimensions="4D")
     g.link(pos.outputs[0], breakup.inputs["Vector"])

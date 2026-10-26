@@ -6,13 +6,15 @@
 
 所有示例从第 1 帧开始，默认不循环。载入保留原时间和变换，不会自动放到当前帧或 3D Cursor。选择组合控制器可调整整体 Start、Duration、Speed 和 Loop；在组合面板选择某一层，则可修改该层的颜色、尺寸和时间。
 
-**Energy Charge（48 帧）** 在 0.22.2 中由倾斜旋转的轨道环、低亮地面环、带深色主体与青色边缘的球壳，以及向中心汇聚的连续粒子组成，共 4 层。Spawn Radius 决定微粒出生位置，正的 Velocity 越大，抵达中心越快；抵达后停止，不会穿过中心再向外散出。粒子在控制器局部空间运动，移动整体也会移动已出生粒子，不保留角色走过的世界轨迹。
+**Energy Charge（48 帧）** 在 0.22.2 中包含轨道环、地面环、球壳及向内汇聚的连续粒子，共 4 层。开发版本将它们改为有空隙的核心路径、直接汇入中心的外层短弯流、地面进流和弯曲粒子；外部收紧时，内核由较小的蓝色体积积蓄为亮核。仍为 4 层，不需要外部贴图或缓存。旧完整文件不自动换造型或材质。
 
-0.22.2 的环和球壳在末段逐渐变暗。它们的私有材质采用 Blended 透明，减少低采样 Eevee 中的颗粒；旧文件不会在载入时换材质或覆盖参数。出现、中段和退场的实际检查范围见 [充能记录](CHARGE_VISUAL_REVIEW.md)。
+粒子的 Spawn Radius 控制出生距离，正的 Velocity 越大，抵达中心越快；到达后停止，不穿过中心向外散出。粒子在控制器局部空间运动，移动整体也会移动已出生粒子，不保留角色走过的世界轨迹。
 
-**Impact Burst（24 帧）** 包含白色短闪、12 个橙色定向尖片、较暗的侵蚀冲击波和 18 个稍晚出现的余烬，共 4 层。短闪先消失，冲击波随后断开，尖片逐渐缩短。修改环的 Expansion 控制扩散距离，修改粒子的 Stretch、Planar、Motion Ease 调整尖片长宽、散射平面和减速。组合 Duration 调整整体播放时长，Ungroup All 可拆开全部层。
+开发版核心的 Geometry Nodes 提供 Main Intake Guide Width、Auxiliary Guide Width 和 Auxiliary Packet Width，分别调整主体连接、辅助连接与辅助头部。Nucleus Seed Size / Nucleus Stored Size 调整初始和蓄满的内核尺寸；外层丝带的 Spiral Turns / Intake Vertical Reach 调整绕行角度与起始高度。这些私有造型需用 Complete Effect 保存。具体选择哪个对象、观看范围和限制见 [进流](CHARGE_INTAKE_REVIEW.md)、[外层路径](CHARGE_FLOW_REVIEW.md) 与 [内核积蓄](CHARGE_NUCLEUS_REVIEW.md) 记录。
 
-**Arc Slash（18 帧）** 是单层紫色程序化刀光，不需要角色动画或采样路径。Arc 调整弧度，Width 调整宽度，Spin 调整旋转；Attack、Motion Ease、Core Width、Afterimage、Streaks 和 Breakup 调整展开、减速、锋刃、残影、笔触与侵蚀。0.22.2 包含版本 2 的规则月牙。当前开发分支的版本 4 把体积推向前端，让两条残弧独立揭示和退场，并用较宽的流动笔触减少细丝；Head Bias 控制前端偏重，Contour、Bank、Wake Spread 控制轮廓、深度与残影分离。候选仍在 [视觉复核](SLASH_LAYER_REVIEW.md)。它与侧栏直接创建的刀光使用同一生成器，只把时长设为 18 帧；版本 1/2/3 及旧完整文件不自动升级。
+**Impact Burst（24 帧）** 在 0.22.2 中由白色短闪、12 个橙色尖片、冲击波和稍晚出现的余烬组成，共 4 层。开发版本改为紧凑闪核、三团主体、四条细喷射、两条卷流及单波峰压力弧，继续分层退场。它与侧栏直接创建使用同一生成器；Size 调整主层整体，主层 Geometry Nodes 的 Fine Ejection Width 单独调整细喷射宽度。外层仍可分别修改时间与颜色，Ungroup All 一次拆开全部层。形体和远景仍需打磨，见 [主体](IMPACT_PRESSURE_REVIEW.md) 和 [细喷射](IMPACT_FINE_REVIEW.md) 记录。
+
+**Arc Slash（18 帧）** 是单层紫色程序化刀光，不需要角色动画或采样路径。Arc 调整弧度，Width 调整宽度，Spin 调整旋转；Attack、Motion Ease、Core Width、Afterimage、Streaks 和 Breakup 调整展开、减速、锋刃、残影、笔触与侵蚀。0.22.2 包含版本 2 的规则月牙。当前开发分支的版本 4 把体积推向前端，让两条残弧独立揭示和退场，并用较宽的流动笔触减少细丝；Head Bias 控制前端偏重，Contour、Bank、Wake Spread 控制轮廓、深度与残影分离。版本 4 已合并，仍在继续提升艺术品质；实际观看范围见 [分层记录](SLASH_LAYER_REVIEW.md)。它与侧栏直接创建的刀光使用同一生成器，只把时长设为 18 帧；版本 1/2/3 及旧完整文件不自动升级。
 
 全部示例采用 Low 质量，保留原生对象、网格、材质和 Geometry Nodes。使用 VFX Duplicate 创建独立副本，使用 VFX Delete 删除。示例不需要外部贴图、角色或缓存；不加载插件也能播放和渲染，继续使用侧栏创作则需要启用插件。
 
@@ -30,4 +32,4 @@ blender -b --factory-startup --python-exit-code 1 --python tools/build_examples.
 
 脚本只接受未打开项目的全新后台进程，输出 3 个 `.blend` 到 `dist/examples/`，并生成带版本号的 examples ZIP；不会删除目录中其他文件。网格、节点、参数和嵌入预览均可重建。每次会产生新的内部编号，因此不保证 Blender 文件跨次构建的二进制完全相同。
 
-0.22.3 尚未发布，艺术重设计由 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 跟踪。Energy Charge 最新候选改用六条有空隙的内卷路径和小内核；能量团沿路径向内加速，后段三轴收紧，白色集中于汇聚前端与内核。外侧保留盘卷移动段、地面收束形状和弯曲粒子，共四层。形体与阶段曲线可在原生节点中编辑，侧栏保留适用的尺寸、颜色、时间等参数。候选仍在视觉复核，预算及观看范围见 [压缩记录](CHARGE_COMPRESSION_REVIEW.md)，早期迭代见 [充能记录](CHARGE_VISUAL_REVIEW.md)。新缩略图取消额外辉光；已下载的 0.22.2 保留旧造型。
+0.22.3 尚未发布，整体艺术重设计由 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 跟踪。开发版可从成功 Actions 的 `blender-vfx-studio-extension` 附件取得独立 examples ZIP，或按上面的命令自行生成。当前仍有片状能量段、远景细流偏弱等问题；具体状态见 [Roadmap](../ROADMAP.md)。上述技术检查不代表实时播放、真实角色镜头或商业艺术验收，已下载的 0.22.2 保留旧造型。

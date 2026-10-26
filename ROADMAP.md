@@ -22,11 +22,9 @@
 
 ## 当前视觉开发
 
-**Energy Charge：压缩重做已合并。** [PR #101](https://github.com/mumu-lhl/blender-vfx-studio/pull/101) 将球壳与细环改为有空隙的内卷路径、小内核、移动能量团及汇聚粒子，后段三轴收紧，浅背景增加深蓝轮廓。四项 CI 成功；已读取完整连段的 30 张视频隔帧图，并完成高清与示例资产的无插件检查。Low 最高 894 顶点，仍有薄片感和远景细流不足，整体目标 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 保持开放。见 [压缩记录](docs/CHARGE_COMPRESSION_REVIEW.md)。
+**Energy Charge：汇聚与积蓄重做已合并。** 最新 [PR #115](https://github.com/mumu-lhl/blender-vfx-studio/pull/115) 接续进流和外层路径改进：主体与辅助流分别控制宽度，亮前沿跟随能量团，三条外层短弯流从不同高度抵达核心；外围收紧时，小蓝核逐渐积蓄为亮核。新增原生初始/蓄满尺寸控制，四层、12 个粒子槽、Low 最高 894 顶点不变，旧完整资产不重建。
 
-**充能进流已完成一轮改进。** [PR #111](https://github.com/mumu-lhl/blender-vfx-studio/pull/111) / [#110](https://github.com/mumu-lhl/blender-vfx-studio/issues/110) 将两个主体路径改成开放的内收钩形，区分主体与四条辅助流，并让材质亮前沿跟随几何中的同一能量团。13 项局部测试、四种高清条件重开、实际入门资产 ZIP 与完整连段检查通过；已实际读取浅背景 30 张阶段图、远景与其他视角，以及完整视频的 30 张隔帧图。五项 CI 成功；仍有弯叶感、侧面薄片和尾段硬碎片，整体艺术目标未完成。见 [进流记录](docs/CHARGE_INTAKE_REVIEW.md)。
-
-**外层汇聚方向已完成本轮复核。** [PR #113](https://github.com/mumu-lhl/blender-vfx-studio/pull/113) / [#112](https://github.com/mumu-lhl/blender-vfx-studio/issues/112) 将绕过整圈的外层丝带改为从不同高度抵达核心的短弯流，并修正截面内的扭斜。15 项局部测试、四种高清条件重开、示例包和完整连段检查通过；已实际查看多阶段、多视角、CI 产物及全部 30 张视频隔帧图。宽裙边减少，但片状能量段、远景细流和尾部碎片仍待改善。见 [外层路径记录](docs/CHARGE_FLOW_REVIEW.md)。
+16 项局部 Blender 测试、四种高清条件重开、实际示例 ZIP 与完整连段检查通过，五项 CI 成功。已实际查看多背景、多视角、Actions 产物及完整视频全部 30 张隔帧图。宽裙边减少，积蓄阶段更明确，但弯叶、薄片和远景细流问题未解决，整体目标 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 继续开放。细节见 [进流](docs/CHARGE_INTAKE_REVIEW.md)、[外层路径](docs/CHARGE_FLOW_REVIEW.md) 和 [内核积蓄](docs/CHARGE_NUCLEUS_REVIEW.md) 记录。
 
 **Arc Slash：版本 4 已合并。** [PR #103](https://github.com/mumu-lhl/blender-vfx-studio/pull/103) 把宽度峰值向前移，增加不等缺口、独立残弧年龄与低频彩色流带。仍为 Low 594 顶点、一个显示对象；旧版 1/2/3 保留。四项 CI 成功，实际读取多背景、远景和完整连段抽帧，原生重开与旧版重建检查通过。后段残影仍有灰色薄片感，细尾偏弱。见 [刀光记录](docs/SLASH_LAYER_REVIEW.md)。
 
@@ -38,7 +36,7 @@
 
 ## 接下来的优先级
 
-1. 继续改善 Energy Charge 的截面、尾段碎片和远景细流，让能量团的体量、消散与汇聚方向更一致。保留当前压缩范围及可编辑宽度控制。
+1. 继续改善 Energy Charge 的头尾轮廓、局部扭转、尾段碎片和远景细流。单纯加厚截面的试验增加了实体叶片感，已撤回；后续保留当前汇聚与积蓄节奏，从实际造型处理问题。
 2. 继续打磨刀光残影薄片感和命中主体实体感，强化不同视角下的释放与命中关系。每轮修改真实生成器，比较同镜头多阶段实图，不能以测试或发光代替艺术判断。
 3. 在已有绑定能力上验证真实角色、遮挡和镜头变化；实际设备的视口性能另行测量。保持三平台后台、安全删除、独立实例、无插件播放与安装检查。
 4. 当前视觉问题解决后再扩展高级模拟、资产迁移和非必要交互功能。
