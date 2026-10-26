@@ -1,0 +1,59 @@
+name: Temporary Eevee exit probe
+on: pull_request
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      EGL_PLATFORM: surfaceless
+      LP_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.12'
+      - run: python tools/fetch_blender.py --version 5.2.2
+      - name: Build a truthful two-frame diagnostic scene
+        run: |
+          mkdir -p work
+          cat > work/exit-probe.py <<'PYTHON'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path.cwd()))
+          from tools import charge_handoff
+          charge_handoff.FRAMES = (31, 33)
+          charge_handoff.main()
+          PYTHON
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python work/exit-probe.py -- --engine BLENDER_EEVEE --light
+      - name: Repeat unchanged native checks and preserve every exit status
+        run: |
+          python - <<'PYTHON'
+          import json, pathlib, shutil, subprocess
+          folder = pathlib.Path('work/exit-probe')
+          folder.mkdir(exist_ok=True)
+          results = []
+          command = ['blender', '-b', 'work/charge-handoff/blender_eevee-light/handoff.blend', '--disable-autoexec', '--python-exit-code', '1', '-t', '2', '--python', 'tests/charge_handoff_reopen.py']
+          for attempt in range(1, 4):
+              crash = pathlib.Path('/tmp/blender.crash.txt')
+              crash.unlink(missing_ok=True)
+              with (folder / f'native-{attempt}.log').open('w') as log:
+                  result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
+              results.append(result.returncode)
+              if crash.is_file():
+                  shutil.copy2(crash, folder / f'crash-{attempt}.txt')
+          (folder / 'exit-status.json').write_text(json.dumps(results))
+          print('Native process exit codes:', results)
+          raise SystemExit(1 if any(results) else 0)
+          PYTHON
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: temporary-eevee-exit-probe
+          path: |
+            work/exit-probe/
+            work/charge-handoff/
+          if-no-files-found: ignore
+          retention-days: 7
