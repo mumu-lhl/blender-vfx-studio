@@ -215,9 +215,9 @@ def jets(root, quality):
         direction = Vector((math.cos(angle), math.sin(angle), 0))
         side = Vector((-direction.y, direction.x, 0))
         base = len(vertices)
-        rings = {"LOW": 14, "MEDIUM": 21, "HIGH": 28}[quality]
-        sides = 6
-        turn = (2.3, -1.8, 2.6)[index]
+        rings = {"LOW": 12, "MEDIUM": 21, "HIGH": 28}[quality]
+        sides = 8
+        turn = (0.45, -0.8, 0.65)[index]
         for i in range(rings):
             u = i / (rings - 1)
             phase = turn * u
@@ -226,37 +226,28 @@ def jets(root, quality):
             path += side * (bend * math.sin(math.pi * u))
             path.z = lift * math.sin(math.pi * u)
             local_side = side * math.cos(phase) - direction * math.sin(phase)
+            profile = max(math.sin(math.pi * u ** (1.2 + index * 0.15)), 0) ** 0.7
             for j in range(sides):
-                # Separate folded tongues instead of opening an otherwise
-                # complete tube whose far side still fills the silhouette.
-                lane, corner = divmod(j, 3)
-                across = corner - 1
                 phi = j / sides * math.tau
-                contour = 1 + 0.20 * math.sin(u * 13 + lane * 2 + index * 1.4)
-                lane_profile = max(math.sin(math.pi * u ** (1.45 + lane * 0.3)), 0) ** 0.8
-                center = (lane * 2 - 1) * breadth * 0.57
-                width = local_side * (
-                    (center + across * breadth * (0.44 - lane * 0.10)) * lane_profile * contour
+                billow = (
+                    1
+                    + 0.24 * math.sin(u * 16 + index * 2)
+                    + 0.18 * math.sin(phi * 3 + u * 9 + index)
                 )
-                width.z = (
-                    math.cos(across * math.pi * 0.5) * depth * 0.65 + (lane - 0.5) * depth * 0.3
-                ) * lane_profile
+                width = local_side * (math.cos(phi) * breadth * profile * billow)
+                width.z = math.sin(phi) * depth * profile * billow
                 vertex(
                     path,
                     width,
                     direction,
                     0,
                     index,
-                    birth + lane * 0.018,
+                    birth,
                     u,
                     angle / math.tau + math.cos(phi) * 0.05,
-                    support=lane,
+                    support=(0, 1, 0.5)[index],
                 )
-        for i in range(rings - 1):
-            for j in range(sides):
-                a = base + i * sides + j
-                b = base + i * sides + (j // 3) * 3 + (j + 1) % 3
-                faces.append((a, b, b + sides, a + sides))
+        rows(base, rings, sides, closed=True)
     fine_steps = {"LOW": 10, "MEDIUM": 16, "HIGH": 24}[quality]
     for index, (angle, reach, bend, lift, breadth, birth) in enumerate(
         (
@@ -505,7 +496,7 @@ def jets(root, quality):
     graph.connect(width, twist.inputs["Vector"])
     graph.connect(graph.attribute("impact_direction", "FLOAT_VECTOR"), twist.inputs["Axis"])
     roll_amount = graph.node("ShaderNodeValue", "Pressure Unfurl")
-    roll_amount.outputs[0].default_value = 1.0
+    roll_amount.outputs[0].default_value = 1
     graph.connect(
         graph.math(
             "Editable Pressure Roll",
@@ -624,7 +615,7 @@ def _erode(root):
     graph.connect(axes.outputs["X"], core_ramp.inputs["Value"])
     core_ramp.inputs["From Min"].default_value, core_ramp.inputs["From Max"].default_value = (
         0.025,
-        0.16,
+        0.36,
     )
     core_ramp.inputs["To Min"].default_value, core_ramp.inputs["To Max"].default_value = 1, 0
     core = core_ramp.outputs[0]
@@ -650,7 +641,14 @@ def _erode(root):
     stretch = graph.node("ShaderNodeVectorMath", "Along Flow Noise", operation="MULTIPLY")
     graph.connect(uv.outputs["UV"], stretch.inputs[0])
     stretch.inputs[1].default_value = (2.2, 10, 1)
-    graph.connect(stretch.outputs[0], noise.inputs["Vector"])
+    volume_space = graph.vector(
+        "Pressure Object Coordinates", "MULTIPLY", uv.outputs["Object"], (1.8, 1.8, 1.8)
+    )
+    coordinates = graph.node("ShaderNodeMixRGB", "Volume Pressure / UV Fine Flow")
+    graph.connect(primary, coordinates.inputs[0])
+    graph.connect(stretch.outputs[0], coordinates.inputs[1])
+    graph.connect(volume_space, coordinates.inputs[2])
+    graph.connect(coordinates.outputs[0], noise.inputs["Vector"])
     streak = graph.math("Fine Flow Fibers", "MULTIPLY", axes.outputs["Y"], 100)
     streak = graph.math(
         "Bending Fibers",
@@ -732,6 +730,15 @@ def _erode(root):
     taper.inputs["From Min"].default_value, taper.inputs["From Max"].default_value = 0.38, 0.98
     taper.inputs["To Max"].default_value = 0.12
     cutoff = graph.math("Pointed Flow Ends", "ADD", cutoff, taper.outputs[0])
+    fracture = graph.node("ShaderNodeValue", "Pressure Fracture")
+    fracture.outputs[0].default_value = 0.5
+    young = graph.math("Pressure Fracture Handoff", "MULTIPLY", progress, 2, clamp=True)
+    young = graph.math("Early Pressure Fracture", "SUBTRACT", 1, young)
+    fracture_amount = graph.math(
+        "Editable Pressure Fracture", "MULTIPLY", young, fracture.outputs[0]
+    )
+    fracture_amount = graph.math("Only Pressure Fractures", "MULTIPLY", fracture_amount, primary)
+    cutoff = graph.math("Broken Pressure Body", "ADD", cutoff, fracture_amount)
     tear = graph.math("Torn Flow Cutoff", "MULTIPLY", region, cutoff)
     cutoff = graph.math("Flow Then Release", "ADD", tear, release)
     visible = graph.math("Remaining Jet Pieces", "GREATER_THAN", noise.outputs["Fac"], cutoff)
@@ -771,10 +778,8 @@ def _erode(root):
     hot = graph.math("Pressure Center Distance", "ABSOLUTE", hot)
     hot = graph.math("Pressure Center Width", "DIVIDE", hot, 0.45)
     hot = graph.math("Inner Pressure Heat", "SUBTRACT", 1, hot, clamp=True)
-    front = graph.node("ShaderNodeMapRange", "Pressure Inner Face", interpolation_type="SMOOTHSTEP")
-    graph.connect(facing, front.inputs["Value"])
-    front.inputs["From Min"].default_value, front.inputs["From Max"].default_value = 0.35, 0.95
-    hot = graph.math("Warm Facing Volume", "MULTIPLY", hot, front.outputs[0])
+    front = graph.math("Pressure Lit Plane", "GREATER_THAN", facing, 0.58)
+    hot = graph.math("Warm Facing Volume", "MULTIPLY", hot, front)
     hot = graph.math("Only Pressure Has Warm Interior", "MULTIPLY", hot, primary)
     hot = graph.math("Pressure Interior Weight", "MULTIPLY", hot, 0.5)
     warm = graph.node("ShaderNodeMixRGB", "Editable Tint To Pressure Heat")
@@ -815,9 +820,9 @@ def _erode(root):
     support = graph.node(
         "ShaderNodeAttribute", "Supporting Pressure Tongue", attribute_name="impact_support"
     )
-    support_value = graph.node("ShaderNodeValue", "Pressure Support Value")
-    support_value.outputs[0].default_value = 0.45
-    loss = graph.math("Supporting Pressure Value Loss", "SUBTRACT", 1, support_value.outputs[0])
+    value = graph.node("ShaderNodeValue", "Pressure Support Value")
+    value.outputs[0].default_value = 0.65
+    loss = graph.math("Supporting Pressure Value Loss", "SUBTRACT", 1, value.outputs[0])
     loss = graph.math("Only Supporting Tongues Darken", "MULTIPLY", loss, support.outputs["Fac"])
     factor = graph.math("Main Pressure Value Unchanged", "SUBTRACT", 1, loss)
     graph.connect(
