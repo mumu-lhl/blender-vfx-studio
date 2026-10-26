@@ -182,11 +182,12 @@ def jets(root, quality):
     """Three pressure plumes, four fine ejections and two trailing curls."""
     vertices, faces, paths = [], [], []
     widths, directions, lobes = [], [], []
-    phases, births, heat, uv = [], [], [], []
+    phases, births, heat, uv, supports = [], [], [], [], []
     steps = {"LOW": 12, "MEDIUM": 24, "HIGH": 40}[quality]
 
-    def vertex(path, width, direction, role, index, birth, u, v):
+    def vertex(path, width, direction, role, index, birth, u, v, support=0):
         vertices.append(tuple(path + width))
+        supports.append(float(support))
         paths.append(tuple(path))
         widths.append(tuple(width))
         directions.append(tuple(direction))
@@ -225,23 +226,37 @@ def jets(root, quality):
             path += side * (bend * math.sin(math.pi * u))
             path.z = lift * math.sin(math.pi * u)
             local_side = side * math.cos(phase) - direction * math.sin(phase)
-            profile = max(math.sin(math.pi * u), 0) ** 0.65
             for j in range(sides):
+                # Separate folded tongues instead of opening an otherwise
+                # complete tube whose far side still fills the silhouette.
+                lane, corner = divmod(j, 3)
+                across = corner - 1
                 phi = j / sides * math.tau
-                billow = 1 + 0.14 * math.sin(u * 16 + j * 1.1 + index * 2)
-                width = local_side * (math.cos(phi) * breadth * profile * billow)
-                width.z = math.sin(phi) * depth * profile * billow
+                contour = 1 + 0.20 * math.sin(u * 13 + lane * 2 + index * 1.4)
+                lane_profile = max(math.sin(math.pi * u ** (1.45 + lane * 0.3)), 0) ** 0.8
+                center = (lane * 2 - 1) * breadth * 0.57
+                width = local_side * (
+                    (center + across * breadth * (0.44 - lane * 0.10)) * lane_profile * contour
+                )
+                width.z = (
+                    math.cos(across * math.pi * 0.5) * depth * 0.65 + (lane - 0.5) * depth * 0.3
+                ) * lane_profile
                 vertex(
                     path,
                     width,
                     direction,
                     0,
                     index,
-                    birth,
+                    birth + lane * 0.018,
                     u,
                     angle / math.tau + math.cos(phi) * 0.05,
+                    support=lane,
                 )
-        rows(base, rings, sides, closed=True)
+        for i in range(rings - 1):
+            for j in range(sides):
+                a = base + i * sides + j
+                b = base + i * sides + (j // 3) * 3 + (j + 1) % 3
+                faces.append((a, b, b + sides, a + sides))
     fine_steps = {"LOW": 10, "MEDIUM": 16, "HIGH": 24}[quality]
     for index, (angle, reach, bend, lift, breadth, birth) in enumerate(
         (
@@ -298,6 +313,7 @@ def jets(root, quality):
             "impact_lobe": ("FLOAT", lobes),
             "impact_phase": ("FLOAT", phases),
             "impact_birth": ("FLOAT", births),
+            "impact_support": ("FLOAT", supports),
             "impact_u": ("FLOAT", [value[0] for value in uv]),
             "vfx_spark_heat": ("FLOAT", heat),
         },
@@ -488,8 +504,16 @@ def jets(root, quality):
     )
     graph.connect(width, twist.inputs["Vector"])
     graph.connect(graph.attribute("impact_direction", "FLOAT_VECTOR"), twist.inputs["Axis"])
+    roll_amount = graph.node("ShaderNodeValue", "Pressure Unfurl")
+    roll_amount.outputs[0].default_value = 1.0
     graph.connect(
-        graph.math("Pressure Roll Angle", "MULTIPLY", roll_age, roll_along), twist.inputs["Angle"]
+        graph.math(
+            "Editable Pressure Roll",
+            "MULTIPLY",
+            graph.math("Pressure Roll Angle", "MULTIPLY", roll_age, roll_along),
+            roll_amount.outputs[0],
+        ),
+        twist.inputs["Angle"],
     )
     width = twist.outputs["Vector"]
     combined = graph.vector("Curved Jet Body", "ADD", path, width)
@@ -788,7 +812,18 @@ def _erode(root):
     graph.connect(fine_part, colored.inputs[0])
     graph.connect(pressure_color, colored.inputs[1])
     graph.connect(bounded.outputs[0], colored.inputs[2])
-    graph.connect(colored.outputs[0], emission.inputs["Color"])
+    support = graph.node(
+        "ShaderNodeAttribute", "Supporting Pressure Tongue", attribute_name="impact_support"
+    )
+    support_value = graph.node("ShaderNodeValue", "Pressure Support Value")
+    support_value.outputs[0].default_value = 0.45
+    loss = graph.math("Supporting Pressure Value Loss", "SUBTRACT", 1, support_value.outputs[0])
+    loss = graph.math("Only Supporting Tongues Darken", "MULTIPLY", loss, support.outputs["Fac"])
+    factor = graph.math("Main Pressure Value Unchanged", "SUBTRACT", 1, loss)
+    graph.connect(
+        graph.vector("Pressure Color Hierarchy", "SCALE", colored.outputs[0], factor),
+        emission.inputs["Color"],
+    )
     transparent = graph.node("ShaderNodeBsdfTransparent", "Dissipated Jet")
     mix = graph.node("ShaderNodeMixShader", "Opaque / Missing Pieces")
     graph.connect(visible, mix.inputs[0])
