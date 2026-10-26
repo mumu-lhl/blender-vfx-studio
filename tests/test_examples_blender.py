@@ -200,6 +200,17 @@ class StarterTests(unittest.TestCase):
             r for r in composition.members(loaded) if r["vfx_module"] == "shader.shield"
         )
         self.assertEqual(paths(), after)
+        tree = core_member.children[0].modifiers[0].node_group
+        tree.nodes["Auxiliary Guide Width"].outputs[0].default_value = 0
+        tree.nodes["Auxiliary Packet Width"].outputs[0].default_value = 0
+        collapsed = mesh(core_member, 31)
+        roles = collapsed.attributes["charge_tongue"].data
+        auxiliary_area = sum(
+            face.area
+            for face in collapsed.polygons
+            if int(roles[face.vertices[0]].value) in (1, 2, 4, 5)
+        )
+        self.assertLess(auxiliary_area, 1e-6)
 
     def test_core_intake_shape_and_color_follow_group_speed_together(self):
         charge = create_effect("energy-charge")

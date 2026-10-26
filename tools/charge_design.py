@@ -484,7 +484,6 @@ def core_shape(root):
     g.link(g.xyz("Core Proportions", width, width, height), scale.inputs["Scale"])
     pos = g.n("GeometryNodeInputPosition", "Core Position")
     axes = g.n("ShaderNodeSeparateXYZ", "Height Along Flame")
-    g.link(pos.outputs[0], axes.inputs[0])
     twist = g.n(
         "ShaderNodeVectorRotate", "Accelerating Helical Distortion", rotation_type="AXIS_ANGLE"
     )
@@ -557,10 +556,12 @@ def core_shape(root):
             g.m("Depth Retention Scale", "MULTIPLY", retained_height, radius),
         ),
     )
-    g.link(
-        g.v("Compress Paths Without Thinning Energy", "ADD", pos.outputs[0], correction),
-        twist.inputs["Vector"],
-    )
+    adjusted = g.v("Compress Paths Without Thinning Energy", "ADD", pos.outputs[0], correction)
+    g.link(adjusted, twist.inputs["Vector"])
+    # Shape fields must read the adjusted section too. Otherwise a zero-width
+    # strand still separates because each original vertex twists and roils
+    # from a different rest position.
+    g.link(adjusted, axes.inputs[0])
     twist.inputs["Axis"].default_value = (0, 0, 1)
     angle = g.m(
         "Twist Along Height",
@@ -667,7 +668,7 @@ def core_shape(root):
     noise = g.n("ShaderNodeTexNoise", "Roiling Flame Contour", noise_dimensions="4D")
     noise.inputs["Scale"].default_value = 3.5
     noise.inputs["Detail"].default_value = 1.0
-    g.link(pos.outputs[0], noise.inputs["Vector"])
+    g.link(adjusted, noise.inputs["Vector"])
     g.link(
         g.m("Contour Motion Accelerates", "MULTIPLY", g.m("Contour Clock", "MULTIPLY", p, p), 8),
         noise.inputs["W"],
