@@ -11,11 +11,12 @@ from .parameters import (
     SLASH_PARAMETERS_V1,
     SLASH_PARAMETERS_V2,
     SLASH_PARAMETERS_V3,
+    SLASH_PARAMETERS_V4,
 )
 
 
-def create(context, quality="MEDIUM", *, asset_version=4):
-    if asset_version not in (1, 2, 3, 4):
+def create(context, quality="MEDIUM", *, asset_version=5):
+    if asset_version not in (1, 2, 3, 4, 5):
         raise ValueError("Unsupported slash asset version")
     modern = asset_version >= 2
     segments = {"LOW": 32, "MEDIUM": 64, "HIGH": 128}.get(quality)
@@ -26,9 +27,12 @@ def create(context, quality="MEDIUM", *, asset_version=4):
         "Arc Slash",
         "mesh.slash",
         quality,
-        {1: SLASH_PARAMETERS_V1, 2: SLASH_PARAMETERS_V2, 3: SLASH_PARAMETERS_V3}.get(
-            asset_version, SLASH_PARAMETERS
-        ),
+        {
+            1: SLASH_PARAMETERS_V1,
+            2: SLASH_PARAMETERS_V2,
+            3: SLASH_PARAMETERS_V3,
+            4: SLASH_PARAMETERS_V4,
+        }.get(asset_version, SLASH_PARAMETERS),
         {},
     )
     root["vfx_asset_version"] = asset_version
@@ -220,6 +224,38 @@ def geometry(obj, root):
         shrink = math_node("Release Width", "MULTIPLY", progress, 0.55, -1000, -1800)
         shrink = math_node("Width Envelope", "SUBTRACT", 1, shrink, -800, -1800)
         amount = math_node("Width Over Life", "MULTIPLY", amount, shrink, 0, -1400)
+    if root["vfx_asset_version"] >= 5:
+        # Same moving islands as the shader, with actual pointed geometry.
+        phase = math_node(
+            "Wake Fragment Along Arc", "MULTIPLY", u.outputs["Attribute"], 15, -1700, -3600
+        )
+        phase = math_node(
+            "Wake Fragment Offset",
+            "ADD",
+            phase,
+            math_node("Wake Fragment Layer", "MULTIPLY", band, 1.7, -1700, -3800),
+            -1500,
+            -3600,
+        )
+        phase = math_node(
+            "Wake Fragment Travel",
+            "SUBTRACT",
+            phase,
+            math_node("Wake Fragment Clock", "MULTIPLY", progress, 6, -1500, -3800),
+            -1300,
+            -3600,
+        )
+        profile = math_node("Wake Fragment Curve", "SINE", phase, 0, -1100, -3600)
+        profile = math_node("Wake Fragment Ends", "ADD", profile, 0.25, -900, -3600)
+        profile = math_node("Nonnegative Wake Width", "MAXIMUM", profile, 0, -700, -3600)
+        profile = math_node("Wake Width Normalized", "DIVIDE", profile, 1.25, -500, -3600)
+        area = value("Afterimage Area", "afterimage", -1700, -4000)
+        area = math_node("Wake Area Width", "SQRT", area, 0, -1500, -4000)
+        profile = math_node("Editable Fragment Width", "MULTIPLY", profile, area, -300, -3600)
+        delta = math_node("Fragment Width Difference", "SUBTRACT", profile, 1, -100, -3600)
+        delta = math_node("Wake Only Width Difference", "MULTIPLY", delta, wake, 100, -3600)
+        profile = math_node("Keep Primary Width", "ADD", delta, 1, 300, -3600)
+        amount = math_node("Tapered Colored Wake Width", "MULTIPLY", amount, profile, 500, -3600)
     offset = math_node("Tapered Width", "MULTIPLY", width, amount, 50, -500)
     offset = math_node("Inner Offset", "MULTIPLY", offset, inner.outputs["Attribute"], 300, -300)
     radius = value("Radius", "radius", -450, 100)

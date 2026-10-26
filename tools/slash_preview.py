@@ -83,7 +83,7 @@ def main():
     parser.add_argument("--pale", action="store_true", help="Near-white background instead of gray")
     parser.add_argument("--view-transform", choices=("Standard", "AgX"), default="Standard")
     parser.add_argument("--engine", choices=("CYCLES", "BLENDER_EEVEE"), default="CYCLES")
-    parser.add_argument("--asset-version", type=int, choices=(1, 2, 3, 4))
+    parser.add_argument("--asset-version", type=int, choices=(1, 2, 3, 4, 5))
     parser.add_argument("--sampled", action="store_true", help="Render every other frame plus peak")
     parser.add_argument("--frames", type=int, nargs="+")
     parser.add_argument("--angled", action="store_true", help="Review the native blade depth")

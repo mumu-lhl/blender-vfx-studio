@@ -37,7 +37,11 @@ for frame in (13, 2, 5, 0, 17, 5):
             c.driver.is_valid and c.driver.is_simple_expression for c in data.animation_data.drivers
         )
 assert "blender_vfx_studio" not in sys.modules
-for version, name in ((3, "Persisted Version Three Slash"), (4, "Persisted Authored Slash")):
+for version, name in (
+    (3, "Persisted Version Three Slash"),
+    (4, "Persisted Authored Slash"),
+    (5, "Persisted Colored Wake Slash"),
+):
     root = bpy.data.objects[name]
     assert root["vfx_asset_version"] == version
     for obj in bpy.context.scene.objects:

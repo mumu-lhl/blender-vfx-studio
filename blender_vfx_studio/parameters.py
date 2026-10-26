@@ -181,9 +181,14 @@ SLASH_PARAMETERS_V3 = {
     "wake_spread": (0.7, 0.0, 1.0, "Wake separation during the sweep and release"),
 }
 
-SLASH_PARAMETERS = {
+SLASH_PARAMETERS_V4 = {
     **SLASH_PARAMETERS_V3,
     "afterimage": (0.42, 0.0, 1.0, "Opacity of two subordinate native wake ribbons"),
+}
+
+SLASH_PARAMETERS = {
+    **SLASH_PARAMETERS_V4,
+    "afterimage": (0.42, 0.0, 1.0, "Visible area of two tapered colored wake ribbons"),
 }
 
 SHIELD_PARAMETERS = {
@@ -219,9 +224,12 @@ def parameters_for(module, asset_version=None):
     if module == "shader.shield":
         return SHIELD_PARAMETERS
     if module == "mesh.slash":
-        return {1: SLASH_PARAMETERS_V1, 2: SLASH_PARAMETERS_V2, 3: SLASH_PARAMETERS_V3}.get(
-            asset_version, SLASH_PARAMETERS
-        )
+        return {
+            1: SLASH_PARAMETERS_V1,
+            2: SLASH_PARAMETERS_V2,
+            3: SLASH_PARAMETERS_V3,
+            4: SLASH_PARAMETERS_V4,
+        }.get(asset_version, SLASH_PARAMETERS)
     if module == "simulation.cloth":
         return SIMULATION_PARAMETERS
     if module == "core.composition":
