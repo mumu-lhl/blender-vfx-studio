@@ -1,6 +1,6 @@
 # 开发进度与后续计划
 
-更新：2026-10-25（UTC）。目标 Blender 5.2 LTS，优先 Eevee。最新发布版为 0.22.2；0.22.3 仍在开发，不发布标签。七类效果已有可用入口，但功能范围与艺术品质都还需要完善。
+更新：2026-10-26（UTC）。目标 Blender 5.2 LTS，优先 Eevee。最新发布版为 0.22.2；0.22.3 仍在开发，不发布标签。七类效果已有可用入口，但功能范围与艺术品质都还需要完善。
 
 当前重点是适合二次元角色战斗动画的视觉品质。先做好充能、释放、命中与消散，再扩充效果库。复杂骨架、跨平台 GUI 和新的模拟类型暂缓。[艺术评估](docs/ART_DIRECTION_REVIEW.md) 记录当前差距，[参考笔记](docs/REFERENCE_VISUAL_STUDY.md) 记录四组作品的实际观图与拆解。
 
@@ -24,11 +24,13 @@
 
 **Energy Charge：压缩重做已合并。** [PR #101](https://github.com/mumu-lhl/blender-vfx-studio/pull/101) 将球壳与细环改为有空隙的内卷路径、小内核、移动能量团及汇聚粒子，后段三轴收紧，浅背景增加深蓝轮廓。四项 CI 成功；已读取完整连段的 30 张视频隔帧图，并完成高清与示例资产的无插件检查。Low 最高 894 顶点，仍有薄片感和远景细流不足，整体目标 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 保持开放。见 [压缩记录](docs/CHARGE_COMPRESSION_REVIEW.md)。
 
+**充能进流的下一轮改进已开始。** [#110](https://github.com/mumu-lhl/blender-vfx-studio/issues/110) 将两个主体路径改成开放的内收钩形，区分主体与四条辅助流，并让材质亮前沿跟随几何中的同一能量团。13 项局部测试与无插件重开通过，已读取多轮 Cycles 图，最终多背景、Eevee 和连续复核尚未完成；不把局部候选当作整体艺术验收。见 [进流记录](docs/CHARGE_INTAKE_REVIEW.md)。
+
 **Arc Slash：版本 4 已合并。** [PR #103](https://github.com/mumu-lhl/blender-vfx-studio/pull/103) 把宽度峰值向前移，增加不等缺口、独立残弧年龄与低频彩色流带。仍为 Low 594 顶点、一个显示对象；旧版 1/2/3 保留。四项 CI 成功，实际读取多背景、远景和完整连段抽帧，原生重开与旧版重建检查通过。后段残影仍有灰色薄片感，细尾偏弱。见 [刀光记录](docs/SLASH_LAYER_REVIEW.md)。
 
 **Impact Burst：主体重做已合并。** [PR #105](https://github.com/mumu-lhl/blender-vfx-studio/pull/105) / [#104](https://github.com/mumu-lhl/blender-vfx-studio/issues/104) 将七条相似喷流重新分为三团卷曲主体、四条细喷射和两条辅助卷流，短闪改为紧凑球核，压力弧改为单个宽波峰；清理完全消散的透明几何，修正实际 Cycles 尾部黑片。Low 最高 824 顶点、四个显示对象、四个材质。四项 CI 成功，10 项局部测试、四种条件的高清原生重开、示例 ZIP 与完整 60 帧连段检查通过，全部 30 张视频隔帧图已读取。侧面仍偏实体，远景细层较弱。见 [主体记录](docs/IMPACT_PRESSURE_REVIEW.md)。
 
-**细喷射改进已在继续。** [PR #107](https://github.com/mumu-lhl/blender-vfx-studio/pull/107) / [#106](https://github.com/mumu-lhl/blender-vfx-studio/issues/106) 把细喷射的较宽头部向前移，增加独立原生节点宽度控制、彩色内芯和深色边界，不增加数量、发光强度或顶点预算。11 项局部测试与无插件重开通过，实际 Cycles / Eevee 近白远景对照中峰值主要笔触更清楚，最终四种条件的高清重开、实际示例 ZIP 和完整连段检查已通过，全部 30 张视频隔帧图已读取。详细记录随该 PR 保存。
+**细喷射改进已合并。** [PR #107](https://github.com/mumu-lhl/blender-vfx-studio/pull/107) / [#106](https://github.com/mumu-lhl/blender-vfx-studio/issues/106) 把细喷射的较宽头部向前移，增加独立原生节点宽度控制、彩色内芯和深色边界，不增加数量、发光强度或顶点预算。11 项局部测试与无插件重开通过，实际 Cycles / Eevee 近白远景对照中峰值主要笔触更清楚，最终四种条件的高清重开、实际示例 ZIP 和完整连段检查已通过，全部 30 张视频隔帧图已读取。详细记录随该 PR 保存。
 
 [#69](https://github.com/mumu-lhl/blender-vfx-studio/issues/69) 已按用户授权的隔帧方法完成旧版三个视频检查；其结论不自动适用于新生成器。现在的工具支持生成完整 60 帧、24 fps、960×540 连段，绑定源码、场景与图像校验，并生成视频解码图和无插件离线检查包。见 [连续检查记录](docs/CONTINUOUS_SKILL_REVIEW.md)。没有实时播放、真实角色镜头或低配置视口帧率验收。
 

@@ -122,12 +122,13 @@ def _inward_packet(g, p, u, strand):
         g.m("Packet Travel", "MULTIPLY", g.m("Packet Acceleration", "MULTIPLY", p, p), 4),
     )
     phase = g.m("Repeated Intake", "FRACT", phase)
-    return g.m(
+    packet = g.m(
         "Inward Energy Packet",
         "MULTIPLY",
         g.stage("Packet Trailing Edge", phase, 0.02, 0.38),
         g.m("Packet Leading Edge", "SUBTRACT", 1, g.stage("Packet Head", phase, 0.58, 0.72)),
     )
+    return packet, phase
 
 
 def _surface(root, *, core=False):
@@ -189,7 +190,7 @@ def _surface(root, *, core=False):
         g.link(normal.outputs["Normal"], facing.inputs[0])
         facing.inputs[1].default_value = (-0.45, -0.65, 0.6)
         u = attribute("charge_core_u")
-        packet = _inward_packet(g, p, u, attribute("charge_tongue"))
+        packet, packet_phase = _inward_packet(g, p, u, attribute("charge_tongue"))
         uneven = g.m("Uneven Packet Surface", "MULTIPLY_ADD", noise.outputs["Fac"], 0.45)
         uneven.node.inputs[2].default_value = 0.5
         hot = g.m(
@@ -291,8 +292,8 @@ def _surface(root, *, core=False):
         front = g.stage(
             "Hot Facing With Dark Silhouette",
             g.m("Two Sided Plasma Facing", "ABSOLUTE", facing.outputs["Value"]),
-            0.72,
-            0.78,
+            0.3,
+            0.8,
         )
         pressure = g.m("Pressure Concentrates Light", "MULTIPLY_ADD", gather, 0.5)
         pressure.node.inputs[2].default_value = 0.45
@@ -304,11 +305,25 @@ def _surface(root, *, core=False):
             "Light Concentrates At Incoming Tips",
             "MULTIPLY",
             front,
-            g.stage("Tip Light", u, 0.45, 0.9),
+            g.m(
+                "Moving Intake Front",
+                "MULTIPLY",
+                g.stage("Intake Front Arrives", packet_phase, 0.5, 0.58),
+                g.m(
+                    "Intake Front Passes",
+                    "SUBTRACT",
+                    1,
+                    g.stage("Intake Front Leaves", packet_phase, 0.64, 0.72),
+                ),
+            ),
         )
         g.link(g.m("Hot Front Coverage", "MULTIPLY", front, pressure), center_mix.inputs[0])
         g.link(surface_color, center_mix.inputs[1])
-        g.link(hot_color.outputs[0], center_mix.inputs[2])
+        leading_color = g.n("ShaderNodeMixRGB", "Narrow Moving Plasma Front")
+        leading_color.inputs[0].default_value = 0.7
+        g.link(color.outputs[0], leading_color.inputs[1])
+        leading_color.inputs[2].default_value = (0.8, 0.98, 1, 1)
+        g.link(leading_color.outputs[0], center_mix.inputs[2])
         surface_color = center_mix.outputs[0]
         kernel_color = g.n("ShaderNodeMixRGB", "Concentrated Inner Light")
         brightness = g.m("Inner Compression Brightness", "MULTIPLY_ADD", gather, 0.3)
@@ -370,10 +385,10 @@ def core_shape(root):
     # These are authored rest paths; native fields below animate compression.
     for tongue, (phase, turns, reach, rise, breadth) in enumerate(
         (
-            (0.0, 3.6, 1.05, 0.65, 0.20),
+            (0.0, 2.15, 1.1, 0.55, 0.20),
             (1.35, 2.7, 0.88, 0.6, 0.09),
             (2.7, 3.5, 1.0, -0.7, 0.10),
-            (3.65, 2.9, 0.75, -0.5, 0.15),
+            (3.65, 1.65, 0.88, -0.45, 0.13),
             (4.8, 2.9, 0.9, 0.5, 0.08),
             (5.6, 3.8, 0.8, -0.7, 0.075),
         )
@@ -384,7 +399,9 @@ def core_shape(root):
 
         def center(t):
             angle = phase + turns * t + 0.12 * math.sin(t * 9 + phase)
-            radius = reach * (0.06 + 0.94 * (1 - t) ** 0.85)
+            if primary:
+                angle += 0.28 * math.sin(math.tau * t)
+            radius = reach * (0.06 + 0.94 * (1 - t) ** (1.25 if primary else 0.85))
             return Vector(
                 (
                     radius * math.cos(angle),
@@ -402,8 +419,8 @@ def core_shape(root):
             width = breadth * max(math.sin(math.pi * t), 0) ** 0.65 * (0.45 + 0.65 * t)
             for k in range(sides):
                 a = k * math.tau / sides + 0.18 * math.sin(t * 5 + tongue)
-                # Flatten the moving head into a swept flame, rather than a bead on a tube.
-                offset = width * (side * math.cos(a) + up * math.sin(a) * 0.28)
+                depth = 0.5 if primary else 0.28
+                offset = width * (side * math.cos(a) + up * math.sin(a) * depth)
                 vertices.append(tuple(point + offset))
                 cross_sections.append(tuple(offset))
                 for name, value in zip(
@@ -471,9 +488,50 @@ def core_shape(root):
     twist = g.n(
         "ShaderNodeVectorRotate", "Accelerating Helical Distortion", rotation_type="AXIS_ANGLE"
     )
-    packet = _inward_packet(g, p, g.attr("charge_core_u"), g.attr("charge_tongue"))
-    section = g.m("Energy Heads Swell And Tails Thin", "MULTIPLY_ADD", packet, 1.1)
-    section.node.inputs[2].default_value = 0.22
+    packet, _ = _inward_packet(g, p, g.attr("charge_core_u"), g.attr("charge_tongue"))
+    main_guide = g.value("Main Intake Guide Width", 0.14)
+    section = g.m(
+        "Energy Heads Swell And Tails Thin",
+        "MULTIPLY_ADD",
+        packet,
+        g.m("Main Intake Width Range", "SUBTRACT", 1.32, main_guide),
+    )
+    g.link(main_guide, section.node.inputs[2])
+    primary = g.m(
+        "Broad Intake Paths",
+        "MAXIMUM",
+        g.m("First Main Intake", "LESS_THAN", g.attr("charge_tongue"), 0.5),
+        g.m(
+            "Second Main Intake",
+            "LESS_THAN",
+            g.m(
+                "Second Intake Distance",
+                "ABSOLUTE",
+                g.m("Second Intake Index", "SUBTRACT", g.attr("charge_tongue"), 3),
+            ),
+            0.5,
+        ),
+    )
+    auxiliary = g.m("Secondary Intake Paths", "SUBTRACT", 1, primary)
+    guide = g.value("Auxiliary Guide Width", 0.0)
+    concentrated = g.m(
+        "Auxiliary Packet Volume",
+        "MULTIPLY_ADD",
+        g.m("Auxiliary Packet Taper", "POWER", packet, 2),
+        g.m("Auxiliary Width Range", "SUBTRACT", g.value("Auxiliary Packet Width", 1.32), guide),
+    )
+    g.link(guide, concentrated.node.inputs[2])
+    section = g.m(
+        "Different Main And Secondary Sections",
+        "ADD",
+        section,
+        g.m(
+            "Secondary Section Difference",
+            "MULTIPLY",
+            auxiliary,
+            g.m("Thinner Between Energy Packets", "SUBTRACT", concentrated, section),
+        ),
+    )
     # The nucleus has its own pulse; the moving packet only affects intake paths.
     section = g.m(
         "Keep Nucleus Section",
