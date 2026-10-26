@@ -16,7 +16,7 @@ assert not any(
     for obj in scene.objects
     if obj.get("vfx_role") == "layer"
 )
-for frame in (4, 7, 22, 37, 42, 48):
+for frame in (4, 7, 22, 37, 42, 43, 48):
     scene.frame_set(frame)
     scene.render.filepath = str(folder / f"native-check-{frame}.png")
     bpy.ops.render.render(write_still=True)

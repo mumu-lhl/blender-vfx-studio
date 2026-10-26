@@ -212,6 +212,66 @@ class StarterTests(unittest.TestCase):
         )
         self.assertLess(auxiliary_area, 1e-6)
 
+    def test_release_pinches_only_the_nucleus_and_follows_group_speed(self):
+        charge = create_effect("energy-charge")
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+        tree = member.children[0].modifiers[0].node_group
+
+        def shape(frame):
+            evaluated = mesh(member, frame)
+            inner = evaluated.attributes["charge_inner"].data
+            nucleus = [
+                v.co.copy() for v, part in zip(evaluated.vertices, inner) if part.value > 0.5
+            ]
+            outside = [
+                tuple(v.co) for v, part in zip(evaluated.vertices, inner) if part.value < 0.5
+            ]
+            spans = [max(v[i] for v in nucleus) - min(v[i] for v in nucleus) for i in range(3)]
+            return spans[2] / max(spans[:2]), outside, [tuple(v.co) for v in evaluated.vertices]
+
+        aspect, outside, reference = shape(43)
+        pinch = tree.nodes["Release Pinch"].outputs[0]
+        stretch = tree.nodes["Release Stretch"].outputs[0]
+        original = pinch.default_value, stretch.default_value
+        pinch.default_value = stretch.default_value = 0
+        relaxed, unchanged, _ = shape(43)
+        self.assertGreater(aspect, relaxed * 2)
+        self.assertEqual(outside, unchanged)
+        pinch.default_value, stretch.default_value = original
+        charge["speed"] = 2
+        charge.update_tag()
+        _, _, accelerated = shape(22)
+        self.assertEqual(len(reference), len(accelerated))
+        self.assertLess(
+            max((Vector(a) - Vector(b)).length for a, b in zip(reference, accelerated)), 1e-5
+        )
+
+    def test_primary_bundle_heads_travel_toward_the_core(self):
+        charge = create_effect("energy-charge")
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+        positions = []
+        for frame in (7, 13, 19):
+            evaluated = mesh(member, frame)
+            rings = {}
+            for vertex, role, filament, u in zip(
+                evaluated.vertices,
+                evaluated.attributes["charge_tongue"].data,
+                evaluated.attributes["charge_filament"].data,
+                evaluated.attributes["charge_core_u"].data,
+            ):
+                if role.value == 0 and filament.value == 0:
+                    rings.setdefault(u.value, []).append(vertex.co.copy())
+            sections = []
+            for u, points in rings.items():
+                center = sum(points, Vector()) / len(points)
+                area = sum((point - center).length_squared for point in points) / len(points)
+                sections.append((u, area))
+            positions.append(
+                sum(u * area for u, area in sections) / sum(area for _, area in sections)
+            )
+        self.assertGreater(positions[1], positions[0] + 0.1)
+        self.assertGreater(positions[2], positions[1] + 0.1)
+
     def test_nucleus_stores_volume_while_the_surrounding_paths_compress(self):
         charge = create_effect("energy-charge")
         member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
@@ -350,6 +410,18 @@ class StarterTests(unittest.TestCase):
         outlined = render_pixels(22)
         self.assertEqual(plain[3::4], outlined[3::4])
         self.assertLess(sum(outlined), sum(plain) - 1)
+        channels = (
+            member.children[0]
+            .data.materials[0]
+            .node_tree.nodes["Intake Channel Contrast"]
+            .outputs[0]
+        )
+        channels.default_value = 0
+        smooth = render_pixels(22)
+        channels.default_value = 1
+        streaked = render_pixels(22)
+        self.assertEqual(smooth[3::4], streaked[3::4])
+        self.assertGreater(max(abs(a - b) for a, b in zip(smooth, streaked)), 0.01)
         for index, value in enumerate((1.0, 0.05, 0.01)):
             member[f"color_{index}"] = value
         member.update_tag()

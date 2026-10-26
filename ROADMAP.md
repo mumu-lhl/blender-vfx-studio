@@ -26,6 +26,8 @@
 
 16 项局部 Blender 测试、四种高清条件重开、实际示例 ZIP 与完整连段检查通过，五项 CI 成功。已实际查看多背景、多视角、Actions 产物及完整视频全部 30 张隔帧图。宽裙边减少，积蓄阶段更明确，但弯叶、薄片和远景细流问题未解决，整体目标 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 继续开放。细节见 [进流](docs/CHARGE_INTAKE_REVIEW.md)、[外层路径](docs/CHARGE_FLOW_REVIEW.md) 和 [内核积蓄](docs/CHARGE_NUCLEUS_REVIEW.md) 记录。
 
+**整套束流与运动方向已完成本轮复核。** [#116](https://github.com/mumu-lhl/blender-vfx-studio/issues/116) 比较有截面的双束、向内移动的材质通道及长尾短头的外层流段。18 项局部测试通过，另加入内核释放时的原位收束亮线，多轮实际关键帧已读取；四种高清条件重开、实际示例 ZIP、五项 CI 和 Actions 完整连段检查通过；已读取全部 30 张视频隔帧图。远景细碎问题保留，不视为整体艺术通过。见 [束流记录](docs/CHARGE_STREAM_REVIEW.md)。
+
 **Arc Slash：版本 4 已合并。** [PR #103](https://github.com/mumu-lhl/blender-vfx-studio/pull/103) 把宽度峰值向前移，增加不等缺口、独立残弧年龄与低频彩色流带。仍为 Low 594 顶点、一个显示对象；旧版 1/2/3 保留。四项 CI 成功，实际读取多背景、远景和完整连段抽帧，原生重开与旧版重建检查通过。后段残影仍有灰色薄片感，细尾偏弱。见 [刀光记录](docs/SLASH_LAYER_REVIEW.md)。
 
 **Impact Burst：主体重做已合并。** [PR #105](https://github.com/mumu-lhl/blender-vfx-studio/pull/105) / [#104](https://github.com/mumu-lhl/blender-vfx-studio/issues/104) 将七条相似喷流重新分为三团卷曲主体、四条细喷射和两条辅助卷流，短闪改为紧凑球核，压力弧改为单个宽波峰；清理完全消散的透明几何，修正实际 Cycles 尾部黑片。Low 最高 824 顶点、四个显示对象、四个材质。四项 CI 成功，10 项局部测试、四种条件的高清原生重开、示例 ZIP 与完整 60 帧连段检查通过，全部 30 张视频隔帧图已读取。侧面仍偏实体，远景细层较弱。见 [主体记录](docs/IMPACT_PRESSURE_REVIEW.md)。
