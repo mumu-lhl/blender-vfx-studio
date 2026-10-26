@@ -298,6 +298,26 @@ jobs:
           name: charge-handoff-review
           path: dist/blender-vfx-studio-handoff-*.zip
 
+      - name: Collect handoff crash report
+        if: failure()
+        run: |
+          python - <<'PYTHON'
+          import pathlib, shutil
+          crash = pathlib.Path('/tmp/blender.crash.txt')
+          if crash.is_file():
+              target = pathlib.Path('work/charge-handoff/debug')
+              target.mkdir(parents=True, exist_ok=True)
+              shutil.copy2(crash, target / crash.name)
+          PYTHON
+      - name: Preserve failed handoff evidence
+        if: failure()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: charge-handoff-failure
+          path: work/charge-handoff/
+          if-no-files-found: ignore
+          retention-days: 7
+
   release:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     needs: [blender, combat_review, handoff_review]
