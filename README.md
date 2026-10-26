@@ -51,7 +51,7 @@ Contour 控制前端钩形与内侧缺口，Bank 控制刀面的深度弯曲，�
 
 ## Impact Burst 打击爆发
 
-在 **Create Mesh VFX** 中选择 **Impact Burst**，会在 3D Cursor 处创建一个 24 帧的四层组合。已发布的 0.22.2 使用中心白色短闪、橙色尖片、冲击波和延迟余烬。当前 0.22.3 开发版改用有横截面的弯曲喷流、暖色侵蚀边缘、压力弧和错峰退场，仍未发布；具体问题与实际检查范围见 [造型记录](docs/IMPACT_DESIGN_CANDIDATE.md)。默认只播放一次，不添加辉光合成。
+在 **Create Mesh VFX** 中选择 **Impact Burst**，会在 3D Cursor 处创建一个 24 帧的四层组合。已发布的 0.22.2 使用中心白色短闪、橙色尖片、冲击波和延迟余烬。当前 0.22.3 开发版改用断裂的三团压力体积、四条细喷射、两条辅助卷流、压力弧和错峰退场，仍未发布；具体问题与实际检查范围见 [当前主体记录](docs/IMPACT_SURFACE_REVIEW.md)。默认只播放一次，不添加辉光合成。
 
 选中组合调整整体 Start / Duration / Speed；选中成员可以分别调整颜色、强度和时间。需要独立编辑时点击 **Ungroup All**，保留拆分时各层状态。完整效果导出保留这四层及手动节点；单层参数 JSON 只保存该层参数，不保存手动节点。
 
@@ -59,11 +59,11 @@ Contour 控制前端钩形与内侧缺口，Bank 控制刀面的深度弯曲，�
 
 Impact 候选的短闪和主体采用私有网格，沿用 Burst 控制器保存时间、尺寸、运动等参数，侧栏只显示实际使用的项。Count、Shape、Gravity、Spread 不驱动这两个造型，普通 Burst 不受影响。主体的 Size、Stretch、Planar、运动参数与 Fade 可以编辑；材质中的 Rim Contrast / Rim Width 控制浅背景下的深色边界，设 Rim Contrast=0 可关闭；完整编排请用 Save Complete Effect 保存，单层参数 JSON 会重新创建普通 Burst。
 
-0.22.1 的 Impact 主尖片额外区分亮面和暗面，轮廓略宽，白色尖端保留。选择 `Impact • Main Shards` 下的网格，在 Shader Editor 中调整 **Side Contrast**（建议 0–1；0 关闭面色差异）。**Illustrated Light** 的向量设置固定的世界空间明暗方向，不依赖灯光。颜色和 Emission 仍在控制器上调整。这是该组合的材质编辑；使用 **Save Complete Effect** 保存它，单层参数 JSON 不保存手动节点编辑，普通 Particle Burst 不附带这套面色。
+要调整主体的细节，选择 `Impact • Main Shards` 下的网格：Geometry Nodes 的 **Pressure Unfurl** 调整截面翻卷，**Fine Ejection Width** 调整细喷射宽度。Shader Editor 的 **Pressure Fracture** 调整早期破口，**Pressure Support Value** 调整辅助压力块明暗；1 关闭这项明暗差异。已有资产保留原节点；这些控制需要用 **Save Complete Effect** 保存。
 
-Actions 的 `combat-shot-visual-review` 附件解压后，可直接打开 `index.html` 播放完整视频，并下载原生预览场景；页面明确区分视频与静态关键帧。验收条件和本地生成方法见 [镜头记录](docs/COMBAT_VISUAL_REVIEW.md)。视频生成不代表已经观看；#69 已按用户允许的实际 MP4 隔帧抽样方案检查，实时播放仍未验证。
+普通 Burst 新建资产使用版本 2，旧版本 1 资产与参数预设继续按原结构读取。Impact 的短闪和主体使用私有造型，不会随载入自动更新。旧版主尖片的 Side Contrast / Illustrated Light 只适用于仍采用尖片材质的资产；当前主体请使用上面的压力控制。
 
-Burst 新建资产为版本 2；旧版本 1 资产和参数预设继续按原结构读取，不会被自动重建。Continuous Emitter 保持原有圆粒与时间模型。0.22.1 进一步增厚中心短闪和主尖片，并缩短短闪、提前侵蚀冲击波；已有完整效果保留原参数和节点。实际 MP4 已按用户允许的隔帧抽样方案检查，实时播放仍未验证，Eevee 远景亮背景的帧序列与检查范围见 [镜头记录](docs/COMBAT_VISUAL_REVIEW.md)。高清实图、复现方法和限制见 [打击爆发视觉检查](docs/IMPACT_VISUAL_REVIEW.md)。
+Actions 的 `combat-shot-visual-review` 附件提供完整视频与原生场景。视频生成不等于已经观看；旧版 #69 已按用户允许的 MP4 隔帧方法检查，新生成器需重新复核。复现命令和限制见 [镜头记录](docs/COMBAT_VISUAL_REVIEW.md) 与 [当前主体记录](docs/IMPACT_SURFACE_REVIEW.md)，实时播放仍未验证。
 
 ## Fresnel 能量护盾
 
