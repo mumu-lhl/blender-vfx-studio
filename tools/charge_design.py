@@ -376,7 +376,7 @@ def _surface(root, *, core=False, ground=False):
             color.outputs[0],
             g.m("Guided Ribbon Color", "MULTIPLY", along, across),
         )
-        density = g.value("Flow Packet Density", 3 if ground else 1.6)
+        density = g.value("Flow Packet Density", 1.2 if ground else 1.6)
         wave = g.m(
             "Flow Bands",
             "ADD",
@@ -1125,7 +1125,7 @@ def ribbons(root, *, ground=False):
     )
     vertices, faces = [], []
     attrs = {k: [] for k in ("charge_u", "charge_side", "charge_phase", "charge_weight")}
-    count, steps = (5, 9) if ground else (3, 41)
+    count, steps = (3, 15) if ground else (3, 41)
     for strand in range(count):
         phase = strand * math.tau / count + 0.13 * math.sin(strand * 7)
         for j in range(steps):
@@ -1237,6 +1237,18 @@ def ribbons(root, *, ground=False):
         z,
         g.m("Twisted Cross Section", "MULTIPLY", side_offset, 0.25 if ground else 1.4),
     )
+    if ground:
+        z = g.m(
+            "Ground Intake Joins The Core",
+            "ADD",
+            z,
+            g.m(
+                "Ground Stroke Lifts Toward Its Head",
+                "MULTIPLY",
+                g.m("Curved Ground Approach", "MULTIPLY", u, u),
+                g.value("Ground Intake Lift", 0.8),
+            ),
+        )
     shape = g.n("GeometryNodeSetPosition", "Authored Converging Paths")
     g.link(geometry, shape.inputs["Geometry"])
     g.link(g.xyz("Three Dimensional Intake", x, y, z), shape.inputs["Position"])
