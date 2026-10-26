@@ -212,6 +212,29 @@ class StarterTests(unittest.TestCase):
         )
         self.assertLess(auxiliary_area, 1e-6)
 
+    def test_nucleus_stores_volume_while_the_surrounding_paths_compress(self):
+        charge = create_effect("energy-charge")
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+
+        def radius(frame):
+            evaluated = mesh(member, frame)
+            points = [
+                vertex.co.copy()
+                for vertex, inner in zip(
+                    evaluated.vertices, evaluated.attributes["charge_inner"].data
+                )
+                if inner.value > 0.5
+            ]
+            center = sum(points, Vector()) / len(points)
+            return (sum((point - center).length_squared for point in points) / len(points)) ** 0.5
+
+        early, charged = radius(13), radius(37)
+        self.assertGreater(charged, early * 1.5)
+        self.assertLess(charged, early * 3)
+        tree = member.children[0].modifiers[0].node_group
+        tree.nodes["Nucleus Seed Size"].outputs[0].default_value = 0.7
+        self.assertGreater(radius(13), early * 1.2)
+
     def test_outer_intakes_arrive_at_the_core_from_different_heights(self):
         charge = create_effect("energy-charge")
         outer = next(
