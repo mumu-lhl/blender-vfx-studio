@@ -326,6 +326,48 @@ class ImpactTests(unittest.TestCase):
         self.assertEqual(before[1], after[1])
         self.assertEqual(before[2], after[2])
 
+    def test_pressure_crest_height_preserves_other_layers_and_zero_width_collapses(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        wave = next(m for m in composition.members(root) if m["vfx_module"] == "mesh.ring")
+        before = geometry(root, 5)
+        raised = before[wave["vfx_id"]]
+        self.assertGreater(max(p[2] for p in raised) - min(p[2] for p in raised), 0.01)
+        layer = wave.children[0]
+        layer.modifiers[0].node_group.nodes["Pressure Crest Height"].outputs[0].default_value = 0
+        flat = geometry(root, 5)
+        for uid, points in before.items():
+            if uid != wave["vfx_id"]:
+                self.assertEqual(flat[uid], points)
+        points = flat[wave["vfx_id"]]
+        self.assertLess(max(p[2] for p in points) - min(p[2] for p in points), 1e-6)
+        layer.modifiers[0].node_group.nodes["Pressure Crest Height"].outputs[0].default_value = 0.9
+        update(wave, width=0)
+        bpy.context.scene.frame_set(5)
+        evaluated = layer.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+        self.assertLess(sum(face.area for face in evaluated.polygons), 1e-6)
+
+    def test_pressure_crest_ink_changes_color_without_changing_coverage(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        wave = next(m for m in composition.members(root) if m["vfx_module"] == "mesh.ring")
+        for member in composition.members(root):
+            member.children[0].hide_render = member != wave
+        camera()
+        scene = bpy.context.scene
+        scene.render.film_transparent = True
+        scene.render.resolution_x = scene.render.resolution_y = 192
+        ink = (
+            wave.children[0]
+            .data.materials[0]
+            .node_tree.nodes["Pressure Crest Edge Contrast"]
+            .outputs[0]
+        )
+        ink.default_value = 0
+        plain = render_pixels(5)
+        ink.default_value = 1
+        outlined = render_pixels(5)
+        self.assertEqual(plain[3::4], outlined[3::4])
+        self.assertGreater(max(abs(a - b) for a, b in zip(plain, outlined)), 0.02)
+
     def test_dissipated_pressure_does_not_leave_black_cycles_surfaces(self):
         root = core.create(bpy.context, "IMPACT_BURST", "LOW")
         camera()

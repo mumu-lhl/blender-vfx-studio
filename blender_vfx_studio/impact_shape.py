@@ -838,41 +838,63 @@ def _erode(root):
     graph.connect(mix.outputs[0], output.inputs["Surface"])
 
 
+def _pressure_arcs(graph, u):
+    """The same unequal tapered arcs shape geometry and material coverage."""
+    result = 0
+    for index, (start, end, weight) in enumerate(
+        ((0.04, 0.31, 1.0), (0.45, 0.62, 0.6), (0.73, 0.95, 0.75))
+    ):
+        label = f"Pressure Arc {index + 1}"
+        x = graph.math(label + " Start", "SUBTRACT", u, start)
+        x = graph.math(label + " Span", "DIVIDE", x, end - start, clamp=True)
+        x = graph.math(label + " Phase", "MULTIPLY", x, math.pi)
+        x = graph.math(label + " Curve", "SINE", x)
+        x = graph.math(label + " Nonnegative", "MAXIMUM", x, 0)
+        x = graph.math(label + " Broad Middle", "POWER", x, 0.65)
+        x = graph.math(label + " Weight", "MULTIPLY", x, weight)
+        result = graph.math(label + " Combined", "MAXIMUM", result, x)
+    return result
+
+
 def wave(root):
     """Break the perfect circle into unequal, slightly warped pressure arcs."""
     layer = root.children[0]
-    # The generic Low ring has 32 sides. Give this wide pressure front 48
-    # without subdividing across its width or changing ordinary ring assets.
-    if root["vfx_quality"] == "LOW":
-        previous = layer.data
-        mesh = bpy.data.meshes.new("VFX • Pressure Front")
-        core._tag(mesh, root["vfx_id"])
-        segments = 48
-        vertices = [
-            (math.cos(i * math.tau / segments), math.sin(i * math.tau / segments), 0)
-            for i in range(segments)
-            for _ in range(2)
-        ]
-        faces = [
-            (i * 2, ((i + 1) % segments) * 2, ((i + 1) % segments) * 2 + 1, i * 2 + 1)
-            for i in range(segments)
-        ]
-        mesh.from_pydata(vertices, [], faces)
-        inner = mesh.attributes.new("vfx_inner", "FLOAT", "POINT")
-        for i, value in enumerate(inner.data):
-            value.value = i % 2
-        uv = mesh.uv_layers.new(name="VFX UV")
-        for face in mesh.polygons:
-            u = face.index / segments
-            for loop, coord in zip(
-                face.loop_indices, ((u, 0), (u + 1 / segments, 0), (u + 1 / segments, 1), (u, 1))
-            ):
-                uv.data[loop].uv = coord
-        mesh.materials.append(previous.materials[0])
-        mesh.update()
-        layer.data = mesh
-        if previous.users == 0:
-            bpy.data.meshes.remove(previous)
+    previous = layer.data
+    mesh = bpy.data.meshes.new("VFX • Pressure Front")
+    core._tag(mesh, root["vfx_id"])
+    segments = {"LOW": 32, "MEDIUM": 64, "HIGH": 128}[root["vfx_quality"]]
+    vertices = [
+        (math.cos(i * math.tau / segments), math.sin(i * math.tau / segments), 0)
+        for i in range(segments)
+        for _ in range(3)
+    ]
+    faces = [
+        (i * 3 + j, ((i + 1) % segments) * 3 + j, ((i + 1) % segments) * 3 + j + 1, i * 3 + j + 1)
+        for i in range(segments)
+        for j in range(2)
+    ]
+    mesh.from_pydata(vertices, [], faces)
+    for name, values in (
+        ("vfx_inner", [i % 3 / 2 for i in range(len(vertices))]),
+        ("impact_wave_u", [i // 3 / segments for i in range(len(vertices))]),
+    ):
+        attr = mesh.attributes.new(name, "FLOAT", "POINT")
+        for slot, value in zip(attr.data, values):
+            slot.value = value
+    uv = mesh.uv_layers.new(name="VFX UV")
+    for face in mesh.polygons:
+        i, j = divmod(face.index, 2)
+        u, v = i / segments, j / 2
+        for loop, coord in zip(
+            face.loop_indices,
+            ((u, v), (u + 1 / segments, v), (u + 1 / segments, v + 0.5), (u, v + 0.5)),
+        ):
+            uv.data[loop].uv = coord
+    mesh.materials.append(previous.materials[0])
+    mesh.update()
+    layer.data = mesh
+    if previous.users == 0:
+        bpy.data.meshes.remove(previous)
     tree = root.children[0].modifiers[0].node_group
     graph = _Nodes(tree, root)
     progress = tree.nodes["Ring Controls"].outputs["Progress"]
@@ -886,6 +908,12 @@ def wave(root):
     difference = graph.math("Editable Pressure Ease", "MULTIPLY", difference, ease.outputs[0])
     clock = graph.math("Pressure Clock", "ADD", progress, difference)
     graph.connect(clock, tree.nodes["Expansion Over Life"].inputs[1])
+    arc = _pressure_arcs(graph, graph.attribute("impact_wave_u"))
+    width = tree.nodes["Inner Offset"].outputs[0]
+    graph.connect(
+        graph.math("Tapered Pressure Arc Width", "MULTIPLY", width, arc),
+        tree.nodes["Ring Width"].inputs[1],
+    )
     position = tree.nodes["Radial Position"].outputs[0]
     separate = graph.node("ShaderNodeSeparateXYZ", "Pressure Coordinates")
     graph.connect(position, separate.inputs[0])
@@ -897,8 +925,30 @@ def wave(root):
     ellipse = graph.node("ShaderNodeCombineXYZ", "Directional Pressure Plane")
     for socket, value in zip(ellipse.inputs, (1.2, 0.73, 1)):
         socket.default_value = value
+    plane = graph.vector("Elliptical Pressure", "MULTIPLY", position, ellipse.outputs[0])
+    across = graph.attribute("vfx_inner")
+    centered = graph.math("Centered Crest Row", "MULTIPLY_ADD", across, 2)
+    centered.node.inputs[2].default_value = -1
+    crest = graph.math("Crest From Center", "ABSOLUTE", centered)
+    crest = graph.math("Raised Middle Row", "SUBTRACT", 1, crest)
+    height = graph.node("ShaderNodeValue", "Pressure Crest Height")
+    height.outputs[0].default_value = 0.9
+    z = graph.math(
+        "Width Relative Crest Height",
+        "MULTIPLY",
+        graph.value("Crest Width", "width"),
+        height.outputs[0],
+    )
+    for label, factor in (
+        ("Crest Cross Section", crest),
+        ("Crest Arc Taper", arc),
+        ("Crest Settles", remaining),
+    ):
+        z = graph.math(label, "MULTIPLY", z, factor)
+    rise = graph.node("ShaderNodeCombineXYZ", "Pressure Crest Lift")
+    graph.connect(z, rise.inputs["Z"])
     graph.connect(
-        graph.vector("Elliptical Pressure", "MULTIPLY", position, ellipse.outputs[0]),
+        graph.vector("Raised Pressure Front", "ADD", plane, rise.outputs[0]),
         tree.nodes["Procedural Ring"].inputs["Position"],
     )
     material = root.children[0].data.materials[0]
@@ -913,7 +963,21 @@ def wave(root):
     across = graph.math("Pressure Crest Width", "MULTIPLY", across, 2)
     crest = graph.math("Single Pressure Crest", "SUBTRACT", 1, across, clamp=True)
     crest = graph.math("Rounded Pressure Crest", "POWER", crest, 0.65)
-    graph.connect(crest, material.node_tree.nodes["Edge × Noise"].inputs[0])
+    graph.connect(
+        graph.math("Pigmented Crest Body", "GREATER_THAN", crest, 0.28),
+        material.node_tree.nodes["Edge × Noise"].inputs[0],
+    )
+    flow = material.node_tree.nodes["UV Flow"]
+    flow.inputs[1].driver_remove("default_value", 0)
+    travel = graph.node("ShaderNodeValue", "Pressure Flow Travel")
+    travel.outputs[0].default_value = 0.35
+    clock = graph.value("Pressure Flow Clock", expression=PROGRESS)
+    offset = graph.node("ShaderNodeCombineXYZ", "Pressure Texture Travel")
+    graph.connect(
+        graph.math("Crest Texture Moves Slowly", "MULTIPLY", clock, travel.outputs[0]),
+        offset.inputs["X"],
+    )
+    graph.connect(offset.outputs[0], flow.inputs[1])
     elongated = graph.vector(
         "Tearing Along Pressure Front",
         "MULTIPLY",
@@ -921,11 +985,26 @@ def wave(root):
         (1, 0.15, 1),
     )
     graph.connect(elongated, material.node_tree.nodes["Dissolve Noise"].inputs["Vector"])
-    phase = graph.math("Unequal Pressure Arcs", "MULTIPLY", axes.outputs["X"], 18)
-    pattern = graph.math("Pressure Gaps", "SINE", phase)
-    pattern = graph.math("Open Pressure Sectors", "GREATER_THAN", pattern, -0.15)
+    arc = _pressure_arcs(graph, axes.outputs["X"])
+    pattern = graph.math("Visible Pressure Sectors", "GREATER_THAN", arc, 0.015)
     opacity = material.node_tree.nodes["Opacity"].outputs[0]
     graph.connect(
         graph.math("Broken Pressure Surface", "MULTIPLY", opacity, pattern),
         material.node_tree.nodes["Soft Dissolve Surface"].inputs[0],
     )
+    tint = graph.node("ShaderNodeCombineXYZ", "Editable Pressure Color")
+    emission = material.node_tree.nodes["Emission"]
+    for i in range(3):
+        emission.inputs["Color"].driver_remove("default_value", i)
+        drive(tint.inputs[i], "default_value", root, "c", {"c": f"color_{i}"})
+    contrast = graph.node("ShaderNodeValue", "Pressure Crest Edge Contrast")
+    contrast.outputs[0].default_value = 0.75
+    boundary = graph.math("Pressure Ink Boundary", "GREATER_THAN", across, 0.58)
+    amount = graph.math("Editable Pressure Ink", "MULTIPLY", boundary, contrast.outputs[0])
+    paint = graph.node("ShaderNodeMixRGB", "Pressure Color And Ink")
+    graph.connect(amount, paint.inputs[0])
+    graph.connect(tint.outputs[0], paint.inputs[1])
+    graph.connect(
+        graph.vector("Pressure Ink Tint", "SCALE", tint.outputs[0], 0.08), paint.inputs[2]
+    )
+    graph.connect(paint.outputs[0], emission.inputs["Color"])
