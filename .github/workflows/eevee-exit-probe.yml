@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mode: [legacy, empty-scene, single-thread, no-shader-cache]
+        mode: [current, empty-scene]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
@@ -109,7 +109,7 @@ jobs:
               wrapper = pathlib.Path('work/cleanup-probe.py')
               wrapper.write_text("import bpy, runpy\nstate = runpy.run_path('tests/charge_handoff_reopen.py')\nbpy.ops.wm.read_factory_settings(use_empty=True)\n")
               command[-1] = str(wrapper)
-          for attempt in range(1, 4):
+          for attempt in range(1, 11 if mode == 'empty-scene' else 4):
               crash = pathlib.Path('/tmp/blender.crash.txt')
               crash.unlink(missing_ok=True)
               with (folder / f'native-{attempt}.log').open('w') as log:
