@@ -304,7 +304,7 @@ blender -b --factory-startup --python-exit-code 1 --python tools/preview.py
 blender -b --factory-startup --python-exit-code 1 --python tools/preview.py -- --engine BLENDER_EEVEE --scale 25
 ```
 
-构建的安装包在 `dist/`。未发布开发版本也可从 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 成功构建的 `blender-vfx-studio-extension` 附件下载，解压后安装其中的 ZIP。
+构建的安装包在 `dist/`。未发布开发版本可从 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 成功构建的 `blender-vfx-studio-extension` 附件下载。解压后，名称为 `blender-vfx-studio-版本.zip` 的文件用于安装插件；`blender-vfx-studio-examples-版本.zip` 是独立入门资产库，按上节载入，不能当作插件安装。
 
 测试使用真实 Blender 后台模式检查参数、时间、实例隔离、安全删除、保存重开和安装/卸载。预览场景及 PNG 写入不提交到 Git 的 `work/`。静态检查使用 Ruff，固定版本见 CI 配置。
 
@@ -312,4 +312,4 @@ blender -b --factory-startup --python-exit-code 1 --python tools/preview.py -- -
 
 代码分工见 [DESIGN.md](DESIGN.md)，参数和时间约定见 [CONTEXT.md](CONTEXT.md)。许可证：**GPL-3.0-or-later**。
 
-当前发布的是 [0.22.2](https://github.com/mumu-lhl/blender-vfx-studio/releases/tag/v0.22.2)，附原生衔接检查包。0.22.3 尚未发布；Energy Charge 整体艺术重设计的进度、实图范围与限制见 [充能记录](docs/CHARGE_VISUAL_REVIEW.md) 和 [PR #90](https://github.com/mumu-lhl/blender-vfx-studio/pull/90)。下载的 0.22.2 保留原造型，不会自动换成新候选；安装和参数编辑见 [使用指南](docs/STARTER_LIBRARY.md)。
+当前发布的是 [0.22.2](https://github.com/mumu-lhl/blender-vfx-studio/releases/tag/v0.22.2)，附原生衔接检查包。0.22.3 尚未发布；当前充能、刀光与命中的改进、实际观看范围及未解决问题见 [Roadmap](ROADMAP.md) 和 [艺术缺口](docs/ART_DIRECTION_REVIEW.md)。下载的 0.22.2 保留原造型，不会自动换成开发版新造型；安装和参数编辑见 [使用指南](docs/STARTER_LIBRARY.md)。
