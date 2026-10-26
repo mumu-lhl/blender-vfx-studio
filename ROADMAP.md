@@ -24,7 +24,7 @@
 
 **Energy Charge：束流、材质流动与释放已重做。** [PR #117](https://github.com/mumu-lhl/blender-vfx-studio/pull/117) 将主体改为错开前沿的双束，减少辅助流，材质通道跟随能量团向内移动；内核积蓄后原位收束释放。四层、12 个粒子槽、Low 最高 894 顶点不变，旧完整资产不重建。18 项局部测试、四种高清重开、示例 ZIP 和五项 CI 通过，已实际读取完整连段全部 30 张视频隔帧图。远景主体仍细碎，整体 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 继续开放，见 [束流记录](docs/CHARGE_STREAM_REVIEW.md)。
 
-**压力核是下一轮候选。** [PR #121](https://github.com/mumu-lhl/blender-vfx-studio/pull/121) 把平滑椭圆内核重新分为有间隙的三段蓝白束。18 项测试、四种高清重开、实际示例 ZIP 已通过，多视角、远景与 30 个 Eevee 阶段帧已读取。远景仍偏小，俯视下竖向释放较弱，未整体艺术验收；完整 CI 还受 #122 的退出问题影响，见 [候选记录](docs/CHARGE_FOCUS_REVIEW.md)。
+**压力核是下一轮候选。** [PR #121](https://github.com/mumu-lhl/blender-vfx-studio/pull/121) 把平滑椭圆内核重新分为有间隙的三段蓝白束。18 项测试、四种高清重开、实际示例 ZIP 已通过，多视角、远景与 30 个 Eevee 阶段帧已读取。远景仍偏小，俯视下竖向释放较弱，未整体艺术验收；完整 CI 还受 #122 的退出问题影响，候选记录随该 PR 保存。
 
 **Arc Slash：版本 5 的有色残影正在复核。** [PR #119](https://github.com/mumu-lhl/blender-vfx-studio/pull/119) 保留版本 4 的主刀面，把灰色矩形片段改为保留本色、两端收尖的残弧；Afterimage 调整面积，旧版本保持透明度含义。Low 594 顶点、单显示对象不变。16 项刀光、11 项预设检查及五种高清重开、示例 ZIP 通过；实际 Low 资产也做了高清三阶段读取与原生像素比较。三组战斗视频全部 54 张隔帧图已读取。当前保留硬笔触和远景细尾问题，退出崩溃修正后的完整 CI 尚在进行，见 [残影记录](docs/SLASH_WAKE_REVIEW.md)。
 
