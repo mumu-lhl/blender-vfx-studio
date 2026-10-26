@@ -715,7 +715,9 @@ def core_shape(root):
     displacement = g.v(
         "Alive Silhouette", "SCALE", centered, g.m("Contour Amplitude", "MULTIPLY", radius, 0.035)
     )
-    g.link(displacement, deform.inputs["Offset"])
+    # Scaling the nucleus includes its contour displacement, so a zero seed
+    # remains collapsed rather than leaving a small cloud of noisy vertices.
+    g.link(g.v("Stored Energy Contour", "SCALE", displacement, growth), deform.inputs["Offset"])
 
     breakup = g.n("ShaderNodeTexNoise", "Native Core Breakup", noise_dimensions="4D")
     g.link(pos.outputs[0], breakup.inputs["Vector"])

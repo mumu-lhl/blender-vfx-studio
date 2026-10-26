@@ -234,6 +234,8 @@ class StarterTests(unittest.TestCase):
         tree = member.children[0].modifiers[0].node_group
         tree.nodes["Nucleus Seed Size"].outputs[0].default_value = 0.7
         self.assertGreater(radius(13), early * 1.2)
+        tree.nodes["Nucleus Seed Size"].outputs[0].default_value = 0
+        self.assertLess(radius(13), 1e-6)
 
     def test_outer_intakes_arrive_at_the_core_from_different_heights(self):
         charge = create_effect("energy-charge")
