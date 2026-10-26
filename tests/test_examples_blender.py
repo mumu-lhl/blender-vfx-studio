@@ -246,6 +246,41 @@ class StarterTests(unittest.TestCase):
             max((Vector(a) - Vector(b)).length for a, b in zip(reference, accelerated)), 1e-5
         )
 
+    def test_stored_compression_changes_only_nucleus_and_follows_group_time(self):
+        charge = create_effect("energy-charge")
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+        control = member.children[0].modifiers[0].node_group.nodes["Nucleus Compression"].outputs[0]
+
+        def shape(frame):
+            evaluated = mesh(member, frame)
+            points, outside = [], []
+            for v, part in zip(evaluated.vertices, evaluated.attributes["charge_inner"].data):
+                (points if part.value > 0.5 else outside).append(tuple(v.co))
+            spans = [max(v[i] for v in points) - min(v[i] for v in points) for i in range(3)]
+            return spans, outside, points
+
+        compressed, outside, reference = shape(37)
+        early = shape(13)
+        discharged = shape(45)
+        control.default_value = 0
+        relaxed, unchanged, _ = shape(37)
+        self.assertEqual(outside, unchanged)
+        self.assertLess(compressed[2], relaxed[2] * 0.6)
+        self.assertGreater(compressed[0], relaxed[0] * 1.3)
+        volume_ratio = (compressed[0] * compressed[1] * compressed[2]) / (
+            relaxed[0] * relaxed[1] * relaxed[2]
+        )
+        self.assertAlmostEqual(volume_ratio, 1, places=4)
+        self.assertEqual(early, shape(13))
+        self.assertEqual(discharged, shape(45))
+        control.default_value = 0.6
+        charge["speed"] = 2
+        charge.update_tag()
+        _, _, accelerated = shape(19)
+        self.assertLess(
+            max((Vector(a) - Vector(b)).length for a, b in zip(reference, accelerated)), 1e-5
+        )
+
     def test_primary_bundle_heads_travel_toward_the_core(self):
         charge = create_effect("energy-charge")
         member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
