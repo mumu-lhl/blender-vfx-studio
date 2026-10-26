@@ -951,6 +951,62 @@ def core_shape(root):
         ),
     )
     position = g.v("Stored Energy Volume", "SCALE", position, growth)
+    # The stored volume flattens while the intake paths keep moving. Expanding
+    # its cross section compensates for the lost height, then discharge turns
+    # that compact shape into a needle without changing the outer strands.
+    compression = g.m(
+        "Bound Nucleus Compression",
+        "MINIMUM",
+        g.m("Nonnegative Nucleus Compression", "MAXIMUM", g.value("Nucleus Compression", 0.6), 0),
+        0.85,
+    )
+    stored_tension = g.m(
+        "Compression Ends As Energy Releases",
+        "MULTIPLY",
+        gather,
+        g.m(
+            "Pressure Becomes Discharge",
+            "SUBTRACT",
+            1,
+            g.stage("Nucleus Unloads Compression", p, 0.84, 0.88),
+        ),
+    )
+    compressed_height = g.m(
+        "Stored Height Loss",
+        "SUBTRACT",
+        1,
+        g.m("Compression Tracks Stored Energy", "MULTIPLY", stored_tension, compression),
+    )
+    compressed_width = g.m(
+        "Stored Volume Width", "SQRT", g.m("Keep Stored Volume", "DIVIDE", 1, compressed_height)
+    )
+    nucleus = g.attr("charge_inner")
+    sideways = g.m(
+        "Nucleus Expands Sideways",
+        "ADD",
+        1,
+        g.m(
+            "Only Nucleus Width Expands",
+            "MULTIPLY",
+            nucleus,
+            g.m("Extra Stored Width", "SUBTRACT", compressed_width, 1),
+        ),
+    )
+    vertical = g.m(
+        "Nucleus Compacts Vertically",
+        "ADD",
+        1,
+        g.m(
+            "Only Nucleus Height Compacts",
+            "MULTIPLY",
+            nucleus,
+            g.m("Lost Stored Height", "SUBTRACT", compressed_height, 1),
+        ),
+    )
+    compression_axes = g.xyz("Nucleus Compression Proportions", sideways, sideways, vertical)
+    position = g.v(
+        "Incoming Energy Pressurizes The Nucleus", "MULTIPLY", position, compression_axes
+    )
     pulse = g.m(
         "Stored Energy Discharge",
         "MULTIPLY",
@@ -986,6 +1042,7 @@ def core_shape(root):
     # Scaling the nucleus includes its contour displacement, so a zero seed
     # remains collapsed rather than leaving a small cloud of noisy vertices.
     displacement = g.v("Stored Energy Contour", "SCALE", displacement, growth)
+    displacement = g.v("Compressed Nucleus Contour", "MULTIPLY", displacement, compression_axes)
     g.link(
         g.v("Discharging Contour", "MULTIPLY", displacement, discharge_axes),
         deform.inputs["Offset"],
