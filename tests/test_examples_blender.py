@@ -158,6 +158,72 @@ class StarterTests(unittest.TestCase):
                 vertex_count(charge, frame), 900
             )  # Includes the 54-vertex inner kernel.
 
+    def test_auxiliary_intake_width_preserves_main_paths_and_survives_assets(self):
+        charge = create_effect("energy-charge")
+        core_member = next(
+            r for r in composition.members(charge) if r["vfx_module"] == "shader.shield"
+        )
+        guide = (
+            core_member.children[0]
+            .modifiers[0]
+            .node_group.nodes["Auxiliary Guide Width"]
+            .outputs[0]
+        )
+
+        def paths():
+            evaluated = mesh(core_member, 13)
+            return {
+                role: [
+                    tuple(v.co)
+                    for v, part in zip(
+                        evaluated.vertices, evaluated.attributes["charge_tongue"].data
+                    )
+                    if part.value == role
+                ]
+                for role in range(7)
+            }
+
+        before = paths()
+        guide.default_value = 0.16
+        after = paths()
+        for role in (0, 3, 6):
+            self.assertEqual(len(before[role]), len(after[role]))
+            self.assertLess(
+                max((Vector(a) - Vector(b)).length for a, b in zip(before[role], after[role])), 1e-5
+            )
+        self.assertTrue(any(before[role] != after[role] for role in (1, 2, 4, 5)))
+        path = WORK / "charge-intake-controls.blend"
+        assets.write(path, charge)
+        core.delete(charge)
+        loaded = assets.load(bpy.context, path)
+        core_member = next(
+            r for r in composition.members(loaded) if r["vfx_module"] == "shader.shield"
+        )
+        self.assertEqual(paths(), after)
+        tree = core_member.children[0].modifiers[0].node_group
+        tree.nodes["Auxiliary Guide Width"].outputs[0].default_value = 0
+        tree.nodes["Auxiliary Packet Width"].outputs[0].default_value = 0
+        collapsed = mesh(core_member, 31)
+        roles = collapsed.attributes["charge_tongue"].data
+        auxiliary_area = sum(
+            face.area
+            for face in collapsed.polygons
+            if int(roles[face.vertices[0]].value) in (1, 2, 4, 5)
+        )
+        self.assertLess(auxiliary_area, 1e-6)
+
+    def test_core_intake_shape_and_color_follow_group_speed_together(self):
+        charge = create_effect("energy-charge")
+        camera()
+        bpy.context.scene.render.dither_intensity = 0
+        for member in composition.members(charge):
+            member.children[0].hide_render = member["vfx_module"] != "shader.shield"
+        original = render_pixels(31)
+        self.assertGreater(sum(value for i, value in enumerate(original) if i % 4 != 3), 1)
+        charge["speed"] = 2.0
+        charge.update_tag()
+        self.assertEqual(render_pixels(16), original)
+
     def test_authored_core_opacity_dissolve_and_strength_control_all_surfaces(self):
         charge = create_effect("energy-charge")
         camera()
