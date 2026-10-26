@@ -293,6 +293,8 @@ Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使�
 
 开发版 Energy Charge 会先汇聚、压紧中心，再收束释放。选中 `Charge • Compressed Core` 下的网格，在 Geometry Nodes 用 **Nucleus Compression** 调整积蓄时的压扁程度，0 关闭，默认 0.6。**Nucleus Seed Size / Nucleus Stored Size** 调整初始与蓄满大小，**Release Pinch / Release Stretch** 调整释放形态。修改后用 **Save Complete Effect** 保存；旧完整资产保留原节点。实际观看范围见 [压缩记录](docs/CHARGE_TENSION_REVIEW.md)。
 
+地面层由三条较连贯的进流向核心上行。选中 `Charge • Ground Intake` 下的网格，用 Geometry Nodes 的 **Ground Intake Lift** 调整终点高度，默认 0.8 配合该层初始位置 Z=-0.8；0 回到低位平面。路径随组合移动，单独移动本层时需调整高度。材质的 **Flow Packet Density** 调整分段密度。观看范围与限制见 [地面进流记录](docs/CHARGE_GROUND_REVIEW.md)。
+
 资产保留从第 1 帧开始的播放时间，不自动定位到当前帧。0.22.2 的充能缩略图使用额外 Screen 辉光，当前艺术重设计取消了它；载入均不会改动你的合成链。具体参数、时间和重建方法见 [入门库指南](docs/STARTER_LIBRARY.md)。
 
 ## 从源码构建与验证

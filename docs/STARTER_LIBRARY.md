@@ -10,7 +10,7 @@
 
 粒子的 Spawn Radius 控制出生距离，正的 Velocity 越大，抵达中心越快；到达后停止，不穿过中心向外散出。粒子在控制器局部空间运动，移动整体也会移动已出生粒子，不保留角色走过的世界轨迹。
 
-开发版核心的 Geometry Nodes 提供 Main Intake Guide Width、Auxiliary Guide Width 和 Auxiliary Packet Width，分别调整主体连接、辅助连接与辅助头部。Nucleus Compression 调整积蓄时的压扁程度，0 关闭；Nucleus Seed Size / Nucleus Stored Size 调整初始和蓄满尺寸，Release Pinch / Release Stretch 调整释放形变；核心材质的 Nucleus White Threshold 越高，白色区域越小。外层丝带的 Spiral Turns / Intake Vertical Reach 调整绕行角度与起始高度。这些私有造型需用 Complete Effect 保存。具体选择哪个对象、观看范围和限制见 [进流](CHARGE_INTAKE_REVIEW.md)、[外层路径](CHARGE_FLOW_REVIEW.md) 、[束流](CHARGE_STREAM_REVIEW.md) 与 [内核](CHARGE_FOCUS_REVIEW.md) 记录。
+开发版核心的 Geometry Nodes 提供 Main Intake Guide Width、Auxiliary Guide Width 和 Auxiliary Packet Width，分别调整主体连接、辅助连接与辅助头部。Nucleus Compression 调整积蓄时的压扁程度，0 关闭；Nucleus Seed Size / Nucleus Stored Size 调整初始和蓄满尺寸，Release Pinch / Release Stretch 调整释放形变；核心材质的 Nucleus White Threshold 越高，白色区域越小。外层丝带的 Spiral Turns / Intake Vertical Reach 调整绕行角度与起始高度。地面层为三条上行进流；其 Geometry Nodes 的 Ground Intake Lift 调整抬升高度，默认 0.8 配合本层位置 Z=-0.8，路径随组合移动。这些私有造型需用 Complete Effect 保存。具体选择哪个对象、观看范围和限制见 [进流](CHARGE_INTAKE_REVIEW.md)、[外层路径](CHARGE_FLOW_REVIEW.md) 、[束流](CHARGE_STREAM_REVIEW.md) 与 [内核](CHARGE_FOCUS_REVIEW.md) 记录。
 
 **Impact Burst（24 帧）** 在 0.22.2 中由白色短闪、12 个橙色尖片、冲击波和稍晚出现的余烬组成，共 4 层。开发版本改为紧凑闪核、三团有不同明暗的断裂主体、四条细喷射、两条卷流及三段有隆起截面的压力弧，继续分层退场。它与侧栏直接创建使用同一生成器；Size 调整主层整体，主层 Geometry Nodes 的 Fine Ejection Width 单独调整细喷射宽度。外层仍可分别修改时间与颜色，Ungroup All 一次拆开全部层。形体和远景仍需打磨，见 [当前主体](IMPACT_SURFACE_REVIEW.md) 和 [细喷射](IMPACT_FINE_REVIEW.md) 记录。
 
