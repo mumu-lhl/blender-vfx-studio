@@ -61,6 +61,8 @@ Impact 候选的短闪和主体采用私有网格，沿用 Burst 控制器保存
 
 要调整主体的细节，选择 `Impact • Main Shards` 下的网格：Geometry Nodes 的 **Pressure Unfurl** 调整截面翻卷，**Fine Ejection Width** 调整细喷射宽度。Shader Editor 的 **Pressure Fracture** 调整早期破口，**Pressure Support Value** 调整辅助压力块明暗；1 关闭这项明暗差异。已有资产保留原节点；这些控制需要用 **Save Complete Effect** 保存。
 
+选择 `Impact • Shockwave` 下的网格，可在 Geometry Nodes 用 **Pressure Crest Height** 调整波面隆起高度；设为 0 可恢复平面。在材质中，**Pressure Crest Edge Contrast** 调整暗边，**Pressure Flow Travel** 调整噪声在寿命内移动的距离。Width 调整实际宽度，Dissolve 调整破碎程度；当前波面由三段长短、宽窄不同的压力弧组成。观看范围和限制见 [压力弧记录](docs/IMPACT_WAVE_REVIEW.md)。
+
 普通 Burst 新建资产使用版本 2，旧版本 1 资产与参数预设继续按原结构读取。Impact 的短闪和主体使用私有造型，不会随载入自动更新。旧版主尖片的 Side Contrast / Illustrated Light 只适用于仍采用尖片材质的资产；当前主体请使用上面的压力控制。
 
 Actions 的 `combat-shot-visual-review` 附件提供完整视频与原生场景。视频生成不等于已经观看；旧版 #69 已按用户允许的 MP4 隔帧方法检查，新生成器需重新复核。复现命令和限制见 [镜头记录](docs/COMBAT_VISUAL_REVIEW.md) 与 [当前主体记录](docs/IMPACT_SURFACE_REVIEW.md)，实时播放仍未验证。
