@@ -385,10 +385,10 @@ def core_shape(root):
     # These are authored rest paths; native fields below animate compression.
     for tongue, (phase, turns, reach, rise, breadth) in enumerate(
         (
-            (0.0, 2.15, 1.1, 0.55, 0.20),
+            (0.0, 2.15, 1.1, 0.65, 0.20),
             (1.35, 2.7, 0.88, 0.6, 0.09),
             (2.7, 3.5, 1.0, -0.7, 0.10),
-            (3.65, 1.65, 0.88, -0.45, 0.13),
+            (3.65, 1.65, 0.88, -0.5, 0.13),
             (4.8, 2.9, 0.9, 0.5, 0.08),
             (5.6, 3.8, 0.8, -0.7, 0.075),
         )
@@ -401,7 +401,7 @@ def core_shape(root):
             angle = phase + turns * t + 0.12 * math.sin(t * 9 + phase)
             if primary:
                 angle += 0.28 * math.sin(math.tau * t)
-            radius = reach * (0.06 + 0.94 * (1 - t) ** (1.25 if primary else 0.85))
+            radius = reach * (0.06 + 0.94 * (1 - t) ** 0.85)
             return Vector(
                 (
                     radius * math.cos(angle),
