@@ -480,7 +480,31 @@ def _surface(root, *, core=False, ground=False):
             ),
             kernel_color.inputs[0],
         )
-        g.link(color.outputs[0], kernel_color.inputs[1])
+        # Broad colored pressure faces surround a restricted white heart.
+        kernel_face = g.m(
+            "Nucleus White Face",
+            "GREATER_THAN",
+            g.m("Nucleus Facing Magnitude", "ABSOLUTE", facing.outputs["Value"]),
+            g.value("Nucleus White Threshold", 0.72),
+        )
+        kernel_height = g.m("Nucleus Light Toward Tip", "GREATER_THAN", u, 0.3)
+        kernel_face = g.m("Nucleus White Patch", "MULTIPLY", kernel_face, kernel_height)
+        white_amount = kernel_color.inputs[0].links[0].from_socket
+        g.link(
+            g.m("Restricted Nucleus White", "MULTIPLY", white_amount, kernel_face),
+            kernel_color.inputs[0],
+        )
+        kernel_body = g.m(
+            "Nucleus Blue Faces",
+            "MULTIPLY_ADD",
+            g.m("Nucleus Midtone Face", "GREATER_THAN", facing.outputs["Value"], 0.08),
+            0.5,
+        )
+        g.link(g.value("Nucleus Blue Depth", 0.18), kernel_body.node.inputs[2])
+        g.link(
+            g.v("Nucleus Colored Pressure Body", "SCALE", color.outputs[0], kernel_body),
+            kernel_color.inputs[1],
+        )
         kernel_color.inputs[2].default_value = (0.9, 0.98, 1, 1)
         core_mix = g.n("ShaderNodeMixRGB", "Light Beneath Broken Shell")
         g.link(inner, core_mix.inputs[0])
@@ -661,20 +685,34 @@ def core_shape(root):
                 next_k = (k // 3) * 3 + (k + 1) % 3 if primary else (k + 1) % sides
                 a, b = base + j * sides + k, base + j * sides + next_k
                 faces.append((a, b, b + sides, a + sides))
-    base, steps, sides = len(vertices), 9, 6
-    for j in range(steps):
-        t = j / (steps - 1)
-        radius = max(math.sin(math.pi * t), 0) * 0.18
-        for k in range(sides):
-            a = k * math.tau / sides
-            vertices.append((radius * math.cos(a), radius * math.sin(a), (t - 0.5) * 0.4))
-            cross_sections.append((0, 0, 0))
-            for name, value in zip(core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0, 0.0, 0.0)):
-                core_attrs[name].append(value)
-    for j in range(steps - 1):
-        for k in range(sides):
-            a, b = base + j * sides + k, base + j * sides + (k + 1) % sides
-            faces.append((a, b, b + sides, a + sides))
+    # Three unequal closed flame sections preserve gaps through the nucleus.
+    # Each uses 18 vertices: the original 54-vertex kernel budget is unchanged.
+    for lobe in range(3):
+        base, steps, sides = len(vertices), 6, 3
+        phase = lobe * math.tau / 3
+        for j in range(steps):
+            t = j / (steps - 1)
+            profile = max(math.sin(math.pi * t), 0) ** 0.8
+            angle = phase + t * 0.9
+            reach = profile * (0.065 + lobe * 0.01)
+            center = Vector(
+                (math.cos(angle) * reach, math.sin(angle) * reach, (t - 0.5) * (0.5 - lobe * 0.05))
+            )
+            radius = profile * (0.105 - lobe * 0.012)
+            for k in range(sides):
+                a = k * math.tau / sides + phase + t * 0.5
+                vertices.append(
+                    tuple(center + Vector((radius * math.cos(a), radius * math.sin(a), 0)))
+                )
+                cross_sections.append((0, 0, 0))
+                for name, value in zip(
+                    core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0, 0.0, 0.0)
+                ):
+                    core_attrs[name].append(value)
+        for j in range(steps - 1):
+            for k in range(sides):
+                a, b = base + j * sides + k, base + j * sides + (k + 1) % sides
+                faces.append((a, b, b + sides, a + sides))
     _mesh(layer, vertices, faces, core_attrs)
     cross = layer.data.attributes.new("charge_cross", "FLOAT_VECTOR", "POINT")
     for slot, value in zip(cross.data, cross_sections):
@@ -893,7 +931,7 @@ def core_shape(root):
         g.xyz("Nucleus Pressure Balance", counter_x, counter_x, counter_z),
     )
     seed_size = g.value("Nucleus Seed Size", 0.65)
-    stored_size = g.value("Nucleus Stored Size", 1.35)
+    stored_size = g.value("Nucleus Stored Size", 1.9)
     growth = g.m(
         "Nucleus Stores Incoming Energy",
         "MULTIPLY_ADD",
