@@ -26,7 +26,7 @@
 
 **充能进流已完成一轮改进。** [PR #111](https://github.com/mumu-lhl/blender-vfx-studio/pull/111) / [#110](https://github.com/mumu-lhl/blender-vfx-studio/issues/110) 将两个主体路径改成开放的内收钩形，区分主体与四条辅助流，并让材质亮前沿跟随几何中的同一能量团。13 项局部测试、四种高清条件重开、实际入门资产 ZIP 与完整连段检查通过；已实际读取浅背景 30 张阶段图、远景与其他视角，以及完整视频的 30 张隔帧图。五项 CI 成功；仍有弯叶感、侧面薄片和尾段硬碎片，整体艺术目标未完成。见 [进流记录](docs/CHARGE_INTAKE_REVIEW.md)。
 
-**外层汇聚方向正在复核。** [#112](https://github.com/mumu-lhl/blender-vfx-studio/issues/112) 将绕过整圈的外层丝带改为从不同高度抵达核心的短弯流，并修正截面内的扭斜。15 项局部测试通过，已看 Cycles 前后图，Eevee 与连续复核尚未完成；见 [外层路径记录](docs/CHARGE_FLOW_REVIEW.md)。
+**外层汇聚方向已完成本轮复核。** [PR #113](https://github.com/mumu-lhl/blender-vfx-studio/pull/113) / [#112](https://github.com/mumu-lhl/blender-vfx-studio/issues/112) 将绕过整圈的外层丝带改为从不同高度抵达核心的短弯流，并修正截面内的扭斜。15 项局部测试、四种高清条件重开、示例包和完整连段检查通过；已实际查看多阶段、多视角、CI 产物及全部 30 张视频隔帧图。宽裙边减少，但片状能量段、远景细流和尾部碎片仍待改善。见 [外层路径记录](docs/CHARGE_FLOW_REVIEW.md)。
 
 **内核积蓄正在试验。** [#114](https://github.com/mumu-lhl/blender-vfx-studio/issues/114) 让外围收紧时中央体量逐渐增长，延后亮色集中，避免从早段开始一直显示近白内核。16 项局部测试与初步 Cycles 前后图已完成，多条件及连续复核仍待完成；见 [内核记录](docs/CHARGE_NUCLEUS_REVIEW.md)。
 
