@@ -291,7 +291,9 @@ jobs:
       - name: Render and validate the complete native skill sequence
         run: |
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/charge_handoff.py -- --engine BLENDER_EEVEE --light --sequence
-          blender -b work/charge-handoff/blender_eevee-light/handoff.blend --disable-autoexec --python-exit-code 1 -t 2 --python tests/charge_handoff_reopen.py
+          # Mesa 25.2.8 disk-cache teardown can crash after successful pixel checks (#122).
+          # Keep normal exit and every assertion; scope this to the fresh native check.
+          MESA_SHADER_CACHE_DISABLE=true blender -b work/charge-handoff/blender_eevee-light/handoff.blend --disable-autoexec --python-exit-code 1 -t 2 --python tests/charge_handoff_reopen.py
           python tools/handoff_bundle.py work/charge-handoff/blender_eevee-light
       - uses: actions/upload-artifact@v7.0.2
         with:
