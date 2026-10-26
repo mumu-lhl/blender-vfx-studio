@@ -212,6 +212,32 @@ class StarterTests(unittest.TestCase):
         )
         self.assertLess(auxiliary_area, 1e-6)
 
+    def test_primary_bundle_heads_travel_toward_the_core(self):
+        charge = create_effect("energy-charge")
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+        positions = []
+        for frame in (7, 13, 19):
+            evaluated = mesh(member, frame)
+            rings = {}
+            for vertex, role, filament, u in zip(
+                evaluated.vertices,
+                evaluated.attributes["charge_tongue"].data,
+                evaluated.attributes["charge_filament"].data,
+                evaluated.attributes["charge_core_u"].data,
+            ):
+                if role.value == 0 and filament.value == 0:
+                    rings.setdefault(u.value, []).append(vertex.co.copy())
+            sections = []
+            for u, points in rings.items():
+                center = sum(points, Vector()) / len(points)
+                area = sum((point - center).length_squared for point in points) / len(points)
+                sections.append((u, area))
+            positions.append(
+                sum(u * area for u, area in sections) / sum(area for _, area in sections)
+            )
+        self.assertGreater(positions[1], positions[0] + 0.1)
+        self.assertGreater(positions[2], positions[1] + 0.1)
+
     def test_nucleus_stores_volume_while_the_surrounding_paths_compress(self):
         charge = create_effect("energy-charge")
         member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
@@ -350,6 +376,18 @@ class StarterTests(unittest.TestCase):
         outlined = render_pixels(22)
         self.assertEqual(plain[3::4], outlined[3::4])
         self.assertLess(sum(outlined), sum(plain) - 1)
+        channels = (
+            member.children[0]
+            .data.materials[0]
+            .node_tree.nodes["Intake Channel Contrast"]
+            .outputs[0]
+        )
+        channels.default_value = 0
+        smooth = render_pixels(22)
+        channels.default_value = 1
+        streaked = render_pixels(22)
+        self.assertEqual(smooth[3::4], streaked[3::4])
+        self.assertGreater(max(abs(a - b) for a, b in zip(smooth, streaked)), 0.01)
         for index, value in enumerate((1.0, 0.05, 0.01)):
             member[f"color_{index}"] = value
         member.update_tag()

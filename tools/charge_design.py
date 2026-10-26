@@ -107,7 +107,7 @@ def _mesh(layer, vertices, faces, attributes=None):
     mesh.update()
 
 
-def _inward_packet(g, p, u, strand):
+def _inward_packet(g, p, u, strand, filament):
     """A broad head and tapered tail travel toward increasing path coordinates."""
     phase = g.m(
         "Unequal Intake Phase",
@@ -116,22 +116,43 @@ def _inward_packet(g, p, u, strand):
         g.m("Path Offset", "MULTIPLY", strand, 0.173),
     )
     phase = g.m(
+        "Filament Intake Stagger",
+        "SUBTRACT",
+        phase,
+        g.m("Filament Phase Offset", "MULTIPLY", filament, 0.21),
+    )
+    phase = g.m(
         "Packets Accelerate Inward",
         "SUBTRACT",
         phase,
         g.m("Packet Travel", "MULTIPLY", g.m("Packet Acceleration", "MULTIPLY", p, p), 4),
     )
     phase = g.m("Repeated Intake", "FRACT", phase)
+    primary = g.m(
+        "Primary Intake Selection",
+        "MAXIMUM",
+        g.m("First Primary Intake", "LESS_THAN", strand, 0.5),
+        g.m(
+            "Second Primary Intake",
+            "LESS_THAN",
+            g.m("Primary Index Distance", "ABSOLUTE", g.m("Primary Index", "SUBTRACT", strand, 3)),
+            0.5,
+        ),
+    )
+    compression = g.m("Primary Packet Compression", "MULTIPLY_ADD", primary, 0.45)
+    compression.node.inputs[2].default_value = 1
+    phase = g.m("Shorter Primary Packet", "MULTIPLY", phase, compression)
+
     packet = g.m(
         "Inward Energy Packet",
         "MULTIPLY",
-        g.stage("Packet Trailing Edge", phase, 0.02, 0.38),
+        g.stage("Packet Trailing Edge", phase, 0.02, 0.48),
         g.m("Packet Leading Edge", "SUBTRACT", 1, g.stage("Packet Head", phase, 0.58, 0.72)),
     )
-    return packet, phase
+    return packet, phase, primary
 
 
-def _surface(root, *, core=False):
+def _surface(root, *, core=False, ground=False):
     material = root.children[0].data.materials[0]
     material.name = "VFX • Charge Plasma Core" if core else "VFX • Charge Flow"
     tree = material.node_tree
@@ -190,7 +211,9 @@ def _surface(root, *, core=False):
         g.link(normal.outputs["Normal"], facing.inputs[0])
         facing.inputs[1].default_value = (-0.45, -0.65, 0.6)
         u = attribute("charge_core_u")
-        packet, packet_phase = _inward_packet(g, p, u, attribute("charge_tongue"))
+        packet, packet_phase, primary = _inward_packet(
+            g, p, u, attribute("charge_tongue"), attribute("charge_filament")
+        )
         uneven = g.m("Uneven Packet Surface", "MULTIPLY_ADD", noise.outputs["Fac"], 0.45)
         uneven.node.inputs[2].default_value = 0.5
         hot = g.m(
@@ -199,7 +222,114 @@ def _surface(root, *, core=False):
             packet,
             uneven,
         )
-        # Three illustrated values describe volume without a glossy gradient or broad random holes.
+        across = g.m(
+            "Filament Center Distance",
+            "SUBTRACT",
+            1,
+            g.m("Absolute Filament Side", "ABSOLUTE", attribute("charge_filament_side")),
+        )
+        center_light = g.m("Concentrated Light Within Filament", "POWER", across, 2)
+        center_light = g.m("Filament Body And Vein", "MULTIPLY_ADD", center_light, 0.4)
+        center_light.node.inputs[2].default_value = 0.6
+        hot = g.m(
+            "Narrow Painted Intake Light",
+            "MULTIPLY",
+            hot,
+            g.m(
+                "Only Primary Width Shading",
+                "ADD",
+                1,
+                g.m(
+                    "Primary Vein Difference",
+                    "MULTIPLY",
+                    primary,
+                    g.m("Vein Below Flat Brightness", "SUBTRACT", center_light, 1),
+                ),
+            ),
+        )
+
+        channels = noise
+        channels.name = "Advected Intake Channels"
+        g.link(g.m("Slow Channel Churn", "MULTIPLY", p, 0.35), channels.inputs["W"])
+        g.link(
+            g.xyz(
+                "Coordinates Along The Moving Intake",
+                g.m("Longitudinal Channel Stretch", "MULTIPLY", packet_phase, 1.3),
+                g.m(
+                    "Channels Around The First Side", "MULTIPLY", attribute("charge_angle_sin"), 1.9
+                ),
+                g.m(
+                    "Channels Around The Second Side",
+                    "MULTIPLY",
+                    attribute("charge_angle_cos"),
+                    1.9,
+                ),
+            ),
+            channels.inputs["Vector"],
+        )
+        g.link(
+            g.m(
+                "Intake Channel Scale",
+                "MULTIPLY",
+                g.value("Channel Detail", prop="noise_scale"),
+                0.55,
+            ),
+            channels.inputs["Scale"],
+        )
+        channels.inputs["Detail"].default_value = 2
+        painted = g.stage("Readable Flow Channels", channels.outputs["Fac"], 0.32, 0.68)
+        contrast = g.value("Intake Channel Contrast", 0.65)
+        painted = g.m("Channel Values", "MULTIPLY_ADD", painted, contrast)
+        g.link(g.m("Unbroken Channel Body", "SUBTRACT", 1, contrast), painted.node.inputs[2])
+        hot = g.m(
+            "Light Follows The Advected Channels",
+            "MULTIPLY",
+            hot,
+            g.m(
+                "Only Primary Channel Values",
+                "ADD",
+                1,
+                g.m(
+                    "Primary Channel Difference",
+                    "MULTIPLY",
+                    primary,
+                    g.m("Channel Value Difference", "SUBTRACT", painted, 1),
+                ),
+            ),
+        )
+        fraying = g.value("Intake Fraying", 0.23)
+        edge_fraying = g.m(
+            "Stronger Edge Fraying",
+            "MULTIPLY_ADD",
+            g.m("Intake Side", "ABSOLUTE", attribute("charge_filament_side")),
+            0.43,
+        )
+        edge_fraying.node.inputs[2].default_value = 1
+        fringe = g.m("Intake Fraying Threshold", "MULTIPLY", fraying, edge_fraying)
+        survive = g.m("Long Wisps Survive", "GREATER_THAN", channels.outputs["Fac"], fringe)
+        survive = g.m(
+            "Fraying Can Be Disabled",
+            "MAXIMUM",
+            survive,
+            g.m("Intake Fraying Off", "LESS_THAN", fraying, 1e-6),
+        )
+        alpha = g.m(
+            "Frayed Primary Surface",
+            "MULTIPLY",
+            alpha,
+            g.m(
+                "Only Primary Fraying",
+                "ADD",
+                1,
+                g.m(
+                    "Primary Fraying Difference",
+                    "MULTIPLY",
+                    primary,
+                    g.m("Fraying Below Full Opacity", "SUBTRACT", survive, 1),
+                ),
+            ),
+        )
+        # Three illustrated values describe volume without a glossy gradient.
         mid = g.m("Lit Midtone", "GREATER_THAN", facing.outputs["Value"], 0.05)
         bright = g.m("Narrow Lit Face", "GREATER_THAN", facing.outputs["Value"], 0.55)
         cel = g.m("Dark To Midtone", "MULTIPLY_ADD", mid, 0.18)
@@ -246,24 +376,31 @@ def _surface(root, *, core=False):
             color.outputs[0],
             g.m("Guided Ribbon Color", "MULTIPLY", along, across),
         )
+        density = g.value("Flow Packet Density", 3 if ground else 1.6)
         wave = g.m(
             "Flow Bands",
             "ADD",
-            g.m("Three Flow Packets", "MULTIPLY", u, 3),
+            g.m("Packets Along Each Stream", "MULTIPLY", u, density),
             g.m("Unequal Packet Phase", "MULTIPLY", strand, 0.2),
+        )
+        travel = g.m(
+            "Accelerating Packet Travel",
+            "MULTIPLY",
+            g.m("Packet Time", "MULTIPLY", p, p),
+            g.value("Inward Flow Travel", 4 if ground else 4.5),
         )
         wave = g.m(
             "Flow Moves Inward",
             "SUBTRACT",
             wave,
-            g.m("Accelerating Packet Clock", "MULTIPLY", g.m("Packet Time", "MULTIPLY", p, p), 12),
+            g.m("Packet Clock Follows Density", "MULTIPLY", travel, density),
         )
         wave = g.m("Repeated Packets", "FRACT", wave)
         hot = g.m(
             "Packet Length",
             "MULTIPLY",
-            g.stage("Packet Arrives", wave, 0.05, 0.2),
-            g.m("Packet Tail", "SUBTRACT", 1, g.stage("Packet Passes", wave, 0.55, 0.85)),
+            g.stage("Packet Arrives", wave, 0.02, 0.52),
+            g.m("Packet Tail", "SUBTRACT", 1, g.stage("Packet Passes", wave, 0.56, 0.70)),
         )
         packet = hot
         hot = g.m("Packet Follows Core", "MULTIPLY", hot, across)
@@ -361,12 +498,55 @@ def _surface(root, *, core=False):
                 0.7,
             ),
         )
+        side = attribute("charge_filament_side")
+        lane = attribute("charge_filament")
+        notch_clock = g.m(
+            "Advected Filament Nicks",
+            "ADD",
+            g.m("Nicks Along Packet", "MULTIPLY", packet_phase, 17),
+            g.m("Unequal Filament Nicks", "MULTIPLY", lane, 2.4),
+        )
+        coverage = g.m(
+            "Nicked Edge Width", "MULTIPLY_ADD", g.m("Edge Lobes", "SINE", notch_clock), 0.12
+        )
+        coverage.node.inputs[2].default_value = 0.88
+        shift = g.m(
+            "Unequal Filament Edges",
+            "MULTIPLY",
+            g.m("Edge Bias", "SINE", g.m("Longer Edge Lobes", "MULTIPLY", packet_phase, 9)),
+            0.10,
+        )
+        across = g.m(
+            "Distance Across Filament",
+            "ABSOLUTE",
+            g.m("Shifted Filament Center", "ADD", side, shift),
+        )
+        border = g.stage(
+            "Ink Along Nicked Edge",
+            g.m("Relative Filament Width", "DIVIDE", across, coverage),
+            0.75,
+            0.98,
+        )
+        edge = g.m(
+            "View And Filament Boundary",
+            "MAXIMUM",
+            edge,
+            g.m("Only Filament Ink", "MULTIPLY", border, primary),
+        )
         edge = g.m("Editable Core Edge", "MULTIPLY", edge, g.value("Core Edge Contrast", 0.85))
         edge_mix = g.n("ShaderNodeMixRGB", "Dark Contour Around Luminous Paths")
         g.link(edge, edge_mix.inputs[0])
         g.link(surface_color, edge_mix.inputs[1])
         g.link(g.v("Core Ink Tint", "SCALE", color.outputs[0], 0.035), edge_mix.inputs[2])
-        surface_color = edge_mix.outputs[0]
+        hierarchy = g.m(
+            "Filament Value Hierarchy",
+            "SUBTRACT",
+            1,
+            g.m("Secondary Filament Value", "MULTIPLY", lane, 0.3),
+        )
+        surface_color = g.v(
+            "Primary And Supporting Filament Color", "SCALE", edge_mix.outputs[0], hierarchy
+        )
     emission = g.n("ShaderNodeEmission", "Native Energy Surface")
     g.link(surface_color, emission.inputs["Color"])
     g.link(g.value("Emission", prop="strength"), emission.inputs["Strength"])
@@ -390,29 +570,33 @@ def core_shape(root):
             "charge_angle_cos",
             "charge_inner",
             "charge_tongue",
+            "charge_filament",
+            "charge_filament_side",
         )
     }
     # Unequal curved strands leave actual space around a small nucleus.
     # These are authored rest paths; native fields below animate compression.
     for tongue, (phase, turns, reach, rise, breadth) in enumerate(
         (
-            (0.0, 2.15, 1.1, 0.65, 0.20),
+            (0.0, 1.25, 1.1, 0.75, 0.28),
             (1.35, 2.7, 0.88, 0.6, 0.09),
             (2.7, 3.5, 1.0, -0.7, 0.10),
-            (3.65, 1.65, 0.88, -0.5, 0.13),
-            (4.8, 2.9, 0.9, 0.5, 0.08),
-            (5.6, 3.8, 0.8, -0.7, 0.075),
+            (3.65, 1.0, 0.88, -0.62, 0.19),
         )
     ):
         primary = tongue in (0, 3)
         # Spend more path samples on the broad silhouette, keeping the same budget.
-        base, steps, sides = len(vertices), 22 if primary else 10, 6 if primary else 3
+        base, steps, sides = len(vertices), 27 if primary else 10, 6 if primary else 3
 
         def center(t):
             angle = phase + turns * t + 0.12 * math.sin(t * 9 + phase)
             if primary:
-                angle += 0.28 * math.sin(math.tau * t)
+                angle += 0.28 * math.sin(math.tau * t) + 0.08 * math.sin(t * 18 + phase) * math.sin(
+                    math.pi * t
+                )
             radius = reach * (0.06 + 0.94 * (1 - t) ** 0.85)
+            if primary:
+                radius *= 1 + 0.14 * math.sin(t * 13 + phase) * math.sin(math.pi * t)
             return Vector(
                 (
                     radius * math.cos(angle),
@@ -430,17 +614,52 @@ def core_shape(root):
             width = breadth * max(math.sin(math.pi * t), 0) ** 0.65 * (0.45 + 0.65 * t)
             for k in range(sides):
                 a = k * math.tau / sides + 0.18 * math.sin(t * 5 + tongue)
-                depth = 0.5 if primary else 0.28
-                offset = width * (side * math.cos(a) + up * math.sin(a) * depth)
-                vertices.append(tuple(point + offset))
+                filament = k // 3 if primary else 0
+                lane_center = Vector()
+                if primary:
+                    a = (k % 3) * math.tau / 3 + filament * 0.9 + 0.6 * math.sin(t * 12 + filament)
+                    lane_center = width * (
+                        side * (-0.35, 0.5)[filament] + up * (0.35, -0.45)[filament]
+                    )
+                    raw = []
+                    for corner in range(3):
+                        angle = (
+                            corner * math.tau / 3
+                            + filament * 0.9
+                            + 0.6 * math.sin(t * 12 + filament)
+                        )
+                        edge = 1 - 0.17 * math.sin(t * 23 + filament) * (
+                            0.5 + 0.5 * math.cos(angle)
+                        )
+                        raw.append(
+                            width
+                            * (0.72, 0.42)[filament]
+                            * edge
+                            * (side * math.cos(angle) + up * math.sin(angle) * 0.65)
+                        )
+                    offset = raw[k % 3] - sum(raw, Vector()) / 3
+
+                else:
+                    offset = width * (side * math.cos(a) + up * math.sin(a) * 0.28)
+                vertices.append(tuple(point + lane_center + offset))
                 cross_sections.append(tuple(offset))
                 for name, value in zip(
-                    core_attrs, (t, math.sin(a), math.cos(a), 0.0, float(tongue))
+                    core_attrs,
+                    (
+                        t,
+                        math.sin(a),
+                        math.cos(a),
+                        0.0,
+                        float(tongue),
+                        float(filament),
+                        math.cos(a) if primary else 0.0,
+                    ),
                 ):
                     core_attrs[name].append(value)
         for j in range(steps - 1):
             for k in range(sides):
-                a, b = base + j * sides + k, base + j * sides + (k + 1) % sides
+                next_k = (k // 3) * 3 + (k + 1) % 3 if primary else (k + 1) % sides
+                a, b = base + j * sides + k, base + j * sides + next_k
                 faces.append((a, b, b + sides, a + sides))
     base, steps, sides = len(vertices), 9, 6
     for j in range(steps):
@@ -450,7 +669,7 @@ def core_shape(root):
             a = k * math.tau / sides
             vertices.append((radius * math.cos(a), radius * math.sin(a), (t - 0.5) * 0.4))
             cross_sections.append((0, 0, 0))
-            for name, value in zip(core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0)):
+            for name, value in zip(core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0, 0.0, 0.0)):
                 core_attrs[name].append(value)
     for j in range(steps - 1):
         for k in range(sides):
@@ -498,8 +717,15 @@ def core_shape(root):
     twist = g.n(
         "ShaderNodeVectorRotate", "Accelerating Helical Distortion", rotation_type="AXIS_ANGLE"
     )
-    packet, _ = _inward_packet(g, p, g.attr("charge_core_u"), g.attr("charge_tongue"))
-    main_guide = g.value("Main Intake Guide Width", 0.14)
+    packet, _, primary = _inward_packet(
+        g, p, g.attr("charge_core_u"), g.attr("charge_tongue"), g.attr("charge_filament")
+    )
+    main_guide = g.m(
+        "One Continuous Guide Per Bundle",
+        "MULTIPLY",
+        g.value("Main Intake Guide Width", 0.055),
+        g.m("Leading Filament Guide", "LESS_THAN", g.attr("charge_filament"), 0.5),
+    )
     section = g.m(
         "Energy Heads Swell And Tails Thin",
         "MULTIPLY_ADD",
@@ -507,21 +733,6 @@ def core_shape(root):
         g.m("Main Intake Width Range", "SUBTRACT", 1.32, main_guide),
     )
     g.link(main_guide, section.node.inputs[2])
-    primary = g.m(
-        "Broad Intake Paths",
-        "MAXIMUM",
-        g.m("First Main Intake", "LESS_THAN", g.attr("charge_tongue"), 0.5),
-        g.m(
-            "Second Main Intake",
-            "LESS_THAN",
-            g.m(
-                "Second Intake Distance",
-                "ABSOLUTE",
-                g.m("Second Intake Index", "SUBTRACT", g.attr("charge_tongue"), 3),
-            ),
-            0.5,
-        ),
-    )
     auxiliary = g.m("Secondary Intake Paths", "SUBTRACT", 1, primary)
     guide = g.value("Auxiliary Guide Width", 0.0)
     concentrated = g.m(
@@ -852,7 +1063,7 @@ def ribbons(root, *, ground=False):
         "Accelerating Rotation",
         "MULTIPLY",
         g.m("Squared Time", "MULTIPLY", p, p),
-        2 if ground else 10,
+        g.value("Field Rotation", 2 if ground else 3.8),
     )
     angle = g.m("Moving Spiral", "ADD", angle, spin)
     wobble = g.m(
@@ -921,7 +1132,7 @@ def ribbons(root, *, ground=False):
     g.link(shape.outputs[0], store.inputs["Geometry"])
     g.link(u, store.inputs["Value"])
     _finish(g, store.outputs[0])
-    _surface(root)
+    _surface(root, ground=ground)
     root["vfx_parameter_keys"] = "radius,width,expansion,strength,dissolve,noise_scale,fade"
 
 
