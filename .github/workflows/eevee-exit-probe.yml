@@ -4,12 +4,17 @@ permissions:
   contents: read
 jobs:
   probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [legacy, empty-scene, single-thread, no-shader-cache]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
       LIBGL_ALWAYS_SOFTWARE: '1'
       EGL_PLATFORM: surfaceless
       LP_NUM_THREADS: '2'
+      PROBE_MODE: ${{ matrix.mode }}
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-python@v7.1.0
@@ -71,10 +76,17 @@ jobs:
         run: |
           mkdir -p work
           cat > work/exit-probe.py <<'PYTHON'
-          import sys
+          import os, sys
           from pathlib import Path
           sys.path.insert(0, str(Path.cwd()))
           from tools import charge_handoff
+          if os.environ['PROBE_MODE'] == 'legacy':
+              from blender_vfx_studio import slash
+              create = slash.create
+              def legacy(*args, **kwargs):
+                  kwargs['asset_version'] = 4
+                  return create(*args, **kwargs)
+              slash.create = legacy
           charge_handoff.FRAMES = (31, 33)
           charge_handoff.main()
           PYTHON
@@ -82,16 +94,26 @@ jobs:
       - name: Repeat unchanged native checks and preserve every exit status
         run: |
           python - <<'PYTHON'
-          import json, pathlib, shutil, subprocess
+          import json, os, pathlib, shutil, subprocess
           folder = pathlib.Path('work/exit-probe')
           folder.mkdir(exist_ok=True)
           results = []
           command = ['blender', '-b', 'work/charge-handoff/blender_eevee-light/handoff.blend', '--disable-autoexec', '--python-exit-code', '1', '-t', '2', '--python', 'tests/charge_handoff_reopen.py']
+          mode = os.environ['PROBE_MODE']
+          env = dict(os.environ)
+          if mode == 'single-thread':
+              env['LP_NUM_THREADS'] = '1'
+          if mode == 'no-shader-cache':
+              env['MESA_SHADER_CACHE_DISABLE'] = 'true'
+          if mode == 'empty-scene':
+              wrapper = pathlib.Path('work/cleanup-probe.py')
+              wrapper.write_text("import bpy, runpy\nstate = runpy.run_path('tests/charge_handoff_reopen.py')\nbpy.ops.wm.read_factory_settings(use_empty=True)\n")
+              command[-1] = str(wrapper)
           for attempt in range(1, 4):
               crash = pathlib.Path('/tmp/blender.crash.txt')
               crash.unlink(missing_ok=True)
               with (folder / f'native-{attempt}.log').open('w') as log:
-                  result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
+                  result = subprocess.run(command, env=env, stdout=log, stderr=subprocess.STDOUT)
               results.append(result.returncode)
               if crash.is_file():
                   shutil.copy2(crash, folder / f'crash-{attempt}.txt')
@@ -102,7 +124,7 @@ jobs:
       - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
-          name: temporary-eevee-exit-probe
+          name: temporary-eevee-exit-probe-${{ matrix.mode }}
           path: |
             work/exit-probe/
             work/charge-handoff/
