@@ -212,6 +212,50 @@ class StarterTests(unittest.TestCase):
         )
         self.assertLess(auxiliary_area, 1e-6)
 
+    def test_outer_intakes_arrive_at_the_core_from_different_heights(self):
+        charge = create_effect("energy-charge")
+        outer = next(
+            r for r in composition.members(charge) if r.name.startswith("Charge • Converging")
+        )
+        evaluated = mesh(outer, 31)
+        phases = evaluated.attributes["charge_phase"].data
+        along = evaluated.attributes["charge_u"].data
+        ends, starts = {}, {}
+        for vertex, phase, u in zip(evaluated.vertices, phases, along):
+            if u.value == 1:
+                ends.setdefault(phase.value, []).append(vertex.co.copy())
+            elif u.value == 0:
+                starts.setdefault(phase.value, []).append(vertex.co.copy())
+        end_centers = [sum(points, Vector()) / len(points) for points in ends.values()]
+        start_centers = [sum(points, Vector()) / len(points) for points in starts.values()]
+        self.assertEqual(len(end_centers), 3)
+        self.assertLess(max(point.length for point in end_centers), 0.2)
+        self.assertGreater(max(p.z for p in start_centers) - min(p.z for p in start_centers), 1)
+
+    def test_intake_width_changes_section_without_moving_its_path(self):
+        charge = create_effect("energy-charge")
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+        tree = member.children[0].modifiers[0].node_group
+
+        def centers():
+            evaluated = mesh(member, 37)
+            rings = {}
+            for vertex, role, u in zip(
+                evaluated.vertices,
+                evaluated.attributes["charge_tongue"].data,
+                evaluated.attributes["charge_core_u"].data,
+            ):
+                if round(role.value) in (0, 3):
+                    key = (round(role.value), round(u.value, 5))
+                    rings.setdefault(key, []).append(vertex.co.copy())
+            return {key: sum(points, Vector()) / len(points) for key, points in rings.items()}
+
+        before = centers()
+        tree.nodes["Main Intake Guide Width"].outputs[0].default_value = 1.32
+        after = centers()
+        self.assertEqual(before.keys(), after.keys())
+        self.assertLess(max((before[key] - after[key]).length for key in before), 1e-5)
+
     def test_core_intake_shape_and_color_follow_group_speed_together(self):
         charge = create_effect("energy-charge")
         camera()

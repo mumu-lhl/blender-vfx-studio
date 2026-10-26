@@ -558,10 +558,16 @@ def core_shape(root):
     )
     adjusted = g.v("Compress Paths Without Thinning Energy", "ADD", pos.outputs[0], correction)
     g.link(adjusted, twist.inputs["Vector"])
-    # Shape fields must read the adjusted section too. Otherwise a zero-width
-    # strand still separates because each original vertex twists and roils
-    # from a different rest position.
-    g.link(adjusted, axes.inputs[0])
+    # A whole section turns and drifts together. Sampling its individual
+    # vertices shears the tube, especially during late, fast rotation.
+    section_offset = g.v(
+        "Current Cross Section Offset",
+        "SCALE",
+        g.attr("charge_cross", "FLOAT_VECTOR"),
+        g.m("Cross Section Scale", "MULTIPLY", section, radius),
+    )
+    centerline = g.v("Intake Centerline", "SUBTRACT", adjusted, section_offset)
+    g.link(centerline, axes.inputs[0])
     twist.inputs["Axis"].default_value = (0, 0, 1)
     angle = g.m(
         "Twist Along Height",
@@ -668,7 +674,7 @@ def core_shape(root):
     noise = g.n("ShaderNodeTexNoise", "Roiling Flame Contour", noise_dimensions="4D")
     noise.inputs["Scale"].default_value = 3.5
     noise.inputs["Detail"].default_value = 1.0
-    g.link(adjusted, noise.inputs["Vector"])
+    g.link(centerline, noise.inputs["Vector"])
     g.link(
         g.m("Contour Motion Accelerates", "MULTIPLY", g.m("Contour Clock", "MULTIPLY", p, p), 8),
         noise.inputs["W"],
@@ -805,7 +811,7 @@ def ribbons(root, *, ground=False):
     )
     radius = g.m("Asymmetric Reach", "MULTIPLY", radius, weight)
     turns = g.value(
-        "Intake Curvature" if ground else "Spiral Turns", default=0.95 if ground else 7.8
+        "Intake Curvature" if ground else "Spiral Turns", default=0.95 if ground else 2.4
     )
     angle = g.m("Path Curve", "ADD", phase, g.m("Curve Along Stroke", "MULTIPLY", u, turns))
     spin = g.m(
@@ -848,8 +854,20 @@ def ribbons(root, *, ground=False):
     angle = g.m("Ribbon Bank", "ADD", angle, side_offset)
     x = g.m("Spiral X", "MULTIPLY", radius, g.m("Cosine", "COSINE", angle))
     y = g.m("Spiral Y", "MULTIPLY", radius, g.m("Sine", "SINE", angle))
-    z = g.m("Rising Flow", "MULTIPLY", g.m("Path Height", "MULTIPLY", u, u), 0 if ground else 1.1)
-    z = g.m("Flow Origin", "SUBTRACT", z, 0 if ground else 0.65)
+    elevation = g.m(
+        "Unequal Intake Elevation", "SINE", g.m("Intake Elevation Phase", "ADD", phase, 0.7)
+    )
+    z = g.m(
+        "Paths Arrive At The Core",
+        "MULTIPLY",
+        inverse,
+        g.m(
+            "Intake Height",
+            "MULTIPLY",
+            elevation,
+            g.value("Intake Vertical Reach", 0 if ground else 0.9),
+        ),
+    )
     z = g.m(
         "Bank Height",
         "ADD",
