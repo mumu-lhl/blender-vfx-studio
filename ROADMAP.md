@@ -30,7 +30,7 @@
 
 **Impact Burst：主体重做已合并。** [PR #105](https://github.com/mumu-lhl/blender-vfx-studio/pull/105) / [#104](https://github.com/mumu-lhl/blender-vfx-studio/issues/104) 将七条相似喷流重新分为三团卷曲主体、四条细喷射和两条辅助卷流，短闪改为紧凑球核，压力弧改为单个宽波峰；清理完全消散的透明几何，修正实际 Cycles 尾部黑片。Low 最高 824 顶点、四个显示对象、四个材质。四项 CI 成功，10 项局部测试、四种条件的高清原生重开、示例 ZIP 与完整 60 帧连段检查通过，全部 30 张视频隔帧图已读取。侧面仍偏实体，远景细层较弱。见 [主体记录](docs/IMPACT_PRESSURE_REVIEW.md)。
 
-**断裂压力体积已完成分项复核。** [#124 / PR #126](https://github.com/mumu-lhl/blender-vfx-studio/pull/126) 用多瓣截面、贯穿厚度的破口和不同明暗替换实心卷管感，细喷射路径保持不变。Low 最高 860 顶点、四个显示对象。12 项局部检查、原生重开、四种高清条件、旧资产像素与示例 ZIP 通过；本地完整 Cycles 连段的全部 30 张解码图、CI 独立 Impact 视频的全部 13 张解码图已读取。接入 #129 后完整 Eevee 连段、原生重开和离线包通过，全部 30 张解码图已读取，五项 CI 全部通过。[#128 / PR #130](https://github.com/mumu-lhl/blender-vfx-studio/pull/130) 接着处理压力弧的截面、宽窄和破碎连续性，仍为草稿。见 [当前主体记录](docs/IMPACT_SURFACE_REVIEW.md)。
+**断裂压力体积已完成分项复核。** [#124 / PR #126](https://github.com/mumu-lhl/blender-vfx-studio/pull/126) 用多瓣截面、贯穿厚度的破口和不同明暗替换实心卷管感，细喷射路径保持不变。Low 最高 860 顶点、四个显示对象。12 项局部检查、原生重开、四种高清条件、旧资产像素与示例 ZIP 通过；本地完整 Cycles 连段的全部 30 张解码图、CI 独立 Impact 视频的全部 13 张解码图已读取。接入 #129 后完整 Eevee 连段、原生重开和离线包通过，全部 30 张解码图已读取，五项 CI 全部通过。[#128 / PR #130](https://github.com/mumu-lhl/blender-vfx-studio/pull/130) 接着把压力弧改为隆起截面、不同宽窄和较慢的纹理行进，Low 顶点预算不变。14 项局部检查、五种高清原生重开、示例 ZIP、旧资产像素与五项 CI 通过；独立效果、完整连段和三组战斗视频的解码隔帧图均已读取。见 [压力弧记录](docs/IMPACT_WAVE_REVIEW.md)。见 [当前主体记录](docs/IMPACT_SURFACE_REVIEW.md)。
 
 **细喷射改进已合并。** [PR #107](https://github.com/mumu-lhl/blender-vfx-studio/pull/107) / [#106](https://github.com/mumu-lhl/blender-vfx-studio/issues/106) 把细喷射的较宽头部向前移，增加独立原生节点宽度控制、彩色内芯和深色边界，不增加数量、发光强度或顶点预算。11 项局部测试与无插件重开通过，实际 Cycles / Eevee 近白远景对照中峰值主要笔触更清楚，最终四种条件的高清重开、实际示例 ZIP 和完整连段检查已通过，全部 30 张视频隔帧图已读取。详细记录随该 PR 保存。
 

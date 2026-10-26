@@ -110,9 +110,9 @@ def create(context, quality="LOW"):
         duration=18.0,
         radius=0.1,
         expansion=3.0,
-        width=0.18,
+        width=0.30,
         strength=1.2,
-        dissolve=0.42,
+        dissolve=0.28,
         noise_scale=10.0,
         fade=1.0,
     )
