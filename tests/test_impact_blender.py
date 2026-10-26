@@ -157,6 +157,15 @@ class ImpactTests(unittest.TestCase):
         rim_light = sum(v for i, v in enumerate(outlined) if i % 4 != 3)
         self.assertLess(rim_light, plain_light * 0.98)
         self.assertGreater(rim_light, plain_light * 0.55)
+        support = (
+            main.children[0].data.materials[0].node_tree.nodes["Pressure Support Value"].outputs[0]
+        )
+        support.default_value = 1
+        equal_weight = render_pixels(5)
+        support.default_value = 0.25
+        separated = render_pixels(5)
+        self.assertEqual(equal_weight[3::4], separated[3::4])
+        self.assertGreater(sum(equal_weight), sum(separated) + 1)
         update(main, color_0=0.015, color_1=0.65, color_2=0.05)
         green = render_pixels(5)
         self.assertGreater(sum(green[1::4]), sum(green[0::4]) * 1.3)
@@ -292,6 +301,30 @@ class ImpactTests(unittest.TestCase):
         main = next(m for m in composition.members(restored) if m.name.endswith("Main Shards"))
         layer = main.children[0]
         self.assertEqual(parts(), after)
+
+    def test_pressure_unfurl_preserves_fine_and_auxiliary_paths(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        main = next(m for m in composition.members(root) if m.name.endswith("Main Shards"))
+        layer = main.children[0]
+
+        def parts():
+            bpy.context.scene.frame_set(9)
+            mesh = layer.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+            return {
+                role: [
+                    tuple(v.co)
+                    for v, attr in zip(mesh.vertices, mesh.attributes["impact_lobe"].data)
+                    if attr.value == role
+                ]
+                for role in (0, 1, 2)
+            }
+
+        before = parts()
+        layer.modifiers[0].node_group.nodes["Pressure Unfurl"].outputs[0].default_value = 0
+        after = parts()
+        self.assertNotEqual(before[0], after[0])
+        self.assertEqual(before[1], after[1])
+        self.assertEqual(before[2], after[2])
 
     def test_dissipated_pressure_does_not_leave_black_cycles_surfaces(self):
         root = core.create(bpy.context, "IMPACT_BURST", "LOW")
