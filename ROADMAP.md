@@ -30,11 +30,13 @@
 
 **Impact Burst：主体重做已合并。** [PR #105](https://github.com/mumu-lhl/blender-vfx-studio/pull/105) / [#104](https://github.com/mumu-lhl/blender-vfx-studio/issues/104) 将七条相似喷流重新分为三团卷曲主体、四条细喷射和两条辅助卷流，短闪改为紧凑球核，压力弧改为单个宽波峰；清理完全消散的透明几何，修正实际 Cycles 尾部黑片。Low 最高 824 顶点、四个显示对象、四个材质。四项 CI 成功，10 项局部测试、四种条件的高清原生重开、示例 ZIP 与完整 60 帧连段检查通过，全部 30 张视频隔帧图已读取。侧面仍偏实体，远景细层较弱。见 [主体记录](docs/IMPACT_PRESSURE_REVIEW.md)。
 
+**断裂压力体积已完成分项复核。** [#124 / PR #126](https://github.com/mumu-lhl/blender-vfx-studio/pull/126) 用多瓣截面、贯穿厚度的破口和不同明暗替换实心卷管感，细喷射路径保持不变。Low 最高 860 顶点、四个显示对象。12 项局部检查、原生重开、四种高清条件、旧资产像素与示例 ZIP 通过；本地完整 Cycles 连段的全部 30 张解码图、CI 独立 Impact 视频的全部 13 张解码图已读取。接入 #129 后完整 Eevee 连段、原生重开和离线包通过，全部 30 张解码图已读取，五项 CI 全部通过。[#128 / PR #130](https://github.com/mumu-lhl/blender-vfx-studio/pull/130) 接着处理压力弧的截面、宽窄和破碎连续性，仍为草稿。见 [当前主体记录](docs/IMPACT_SURFACE_REVIEW.md)。
+
 **细喷射改进已合并。** [PR #107](https://github.com/mumu-lhl/blender-vfx-studio/pull/107) / [#106](https://github.com/mumu-lhl/blender-vfx-studio/issues/106) 把细喷射的较宽头部向前移，增加独立原生节点宽度控制、彩色内芯和深色边界，不增加数量、发光强度或顶点预算。11 项局部测试与无插件重开通过，实际 Cycles / Eevee 近白远景对照中峰值主要笔触更清楚，最终四种条件的高清重开、实际示例 ZIP 和完整连段检查已通过，全部 30 张视频隔帧图已读取。详细记录随该 PR 保存。
 
 [#69](https://github.com/mumu-lhl/blender-vfx-studio/issues/69) 已按用户授权的隔帧方法完成旧版三个视频检查；其结论不自动适用于新生成器。现在的工具支持生成完整 60 帧、24 fps、960×540 连段，绑定源码、场景与图像校验，并生成视频解码图和无插件离线检查包。见 [连续检查记录](docs/CONTINUOUS_SKILL_REVIEW.md)。没有实时播放、真实角色镜头或低配置视口帧率验收。
 
-软件 Eevee 的完整连段在原生像素检查后退出崩溃，见 [#122](https://github.com/mumu-lhl/blender-vfx-studio/issues/122)。#123 / #127 已合并，失败时保留原始帧与崩溃文件，检查结束后主动释放临时场景。十次对照和五项完整 CI 均通过，仍不宣称覆盖所有驱动退出路径；临时诊断 #125 已关闭，未合并。
+软件 Eevee 的完整连段在原生像素检查后退出崩溃，见 [#122](https://github.com/mumu-lhl/blender-vfx-studio/issues/122)。#123 / #127 已合并，失败时保留原始帧与崩溃文件，检查结束后主动释放临时场景。新压力体积曾在清理后复现崩溃，缓存对照显示默认首轮失败、关闭磁盘缓存十次正常。#129 已限制 CI 原生重开的 Mesa 磁盘缓存，功能提交的五项 CI 及新压力体积完整流程通过；临时诊断 #125 再次关闭且未合并。修正范围见 [退出检查记录](docs/EEVEE_EXIT_REVIEW.md)，不承诺所有驱动路径。
 
 ## 接下来的优先级
 
