@@ -14,7 +14,7 @@
 
 **Impact Burst（24 帧）** 在 0.22.2 中由白色短闪、12 个橙色尖片、冲击波和稍晚出现的余烬组成，共 4 层。开发版本改为紧凑闪核、三团主体、四条细喷射、两条卷流及单波峰压力弧，继续分层退场。它与侧栏直接创建使用同一生成器；Size 调整主层整体，主层 Geometry Nodes 的 Fine Ejection Width 单独调整细喷射宽度。外层仍可分别修改时间与颜色，Ungroup All 一次拆开全部层。形体和远景仍需打磨，见 [主体](IMPACT_PRESSURE_REVIEW.md) 和 [细喷射](IMPACT_FINE_REVIEW.md) 记录。
 
-**Arc Slash（18 帧）** 是单层紫色程序化刀光，不需要角色动画或采样路径。Arc 调整弧度，Width 调整宽度，Spin 调整旋转；Attack、Motion Ease、Core Width、Afterimage、Streaks 和 Breakup 调整展开、减速、锋刃、残影、笔触与侵蚀。0.22.2 包含版本 2 的规则月牙。当前开发分支的版本 4 把体积推向前端，让两条残弧独立揭示和退场，并用较宽的流动笔触减少细丝；Head Bias 控制前端偏重，Contour、Bank、Wake Spread 控制轮廓、深度与残影分离。版本 4 已合并，仍在继续提升艺术品质；实际观看范围见 [分层记录](SLASH_LAYER_REVIEW.md)。它与侧栏直接创建的刀光使用同一生成器，只把时长设为 18 帧；版本 1/2/3 及旧完整文件不自动升级。
+**Arc Slash（18 帧）** 是单层紫色程序化刀光，不需要角色动画或采样路径。Arc 调整弧度，Width 调整宽度，Spin 调整旋转；Attack、Motion Ease、Core Width、Afterimage、Streaks 和 Breakup 调整展开、减速、锋刃、残影、笔触与侵蚀。0.22.2 包含版本 2 的规则月牙。版本 4 把体积推向前端，让两条残弧独立揭示和退场，并用较宽的流动笔触减少细丝；Head Bias 控制前端偏重，Contour、Bank、Wake Spread 控制轮廓、深度与残影分离。当前开发分支的版本 5 保留主刀面，将残影片段两端收尖；Afterimage 调整可见面积，存活部分保留紫色。仍在提升艺术品质，实际观看范围见 [残影记录](SLASH_WAKE_REVIEW.md)。它与侧栏直接创建的刀光使用同一生成器，只把时长设为 18 帧；版本 1/2/3/4 及旧完整文件不自动升级。
 
 全部示例采用 Low 质量，保留原生对象、网格、材质和 Geometry Nodes。使用 VFX Duplicate 创建独立副本，使用 VFX Delete 删除。示例不需要外部贴图、角色或缓存；不加载插件也能播放和渲染，继续使用侧栏创作则需要启用插件。
 
