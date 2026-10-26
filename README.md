@@ -291,6 +291,8 @@ Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使�
 发布附件中的 `blender-vfx-studio-examples-版本.zip` 是独立资产库，不能作为插件安装。解压后，将文件夹添加到 Blender 的 Asset Libraries，再通过 Load VFX with New ID 创建效果。
 目前包含 Energy Charge 蓝色蓄力组合、Impact Burst 橙色冲击爆发、Arc Slash 紫色刀光；全部使用 Low 质量、原生节点和嵌入预览，不需要外部贴图或缓存。
 
+开发版 Energy Charge 会先汇聚、压紧中心，再收束释放。选中 `Charge • Compressed Core` 下的网格，在 Geometry Nodes 用 **Nucleus Compression** 调整积蓄时的压扁程度，0 关闭，默认 0.6。**Nucleus Seed Size / Nucleus Stored Size** 调整初始与蓄满大小，**Release Pinch / Release Stretch** 调整释放形态。修改后用 **Save Complete Effect** 保存；旧完整资产保留原节点。实际观看范围见 [压缩记录](docs/CHARGE_TENSION_REVIEW.md)。
+
 资产保留从第 1 帧开始的播放时间，不自动定位到当前帧。0.22.2 的充能缩略图使用额外 Screen 辉光，当前艺术重设计取消了它；载入均不会改动你的合成链。具体参数、时间和重建方法见 [入门库指南](docs/STARTER_LIBRARY.md)。
 
 ## 从源码构建与验证
