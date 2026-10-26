@@ -110,6 +110,8 @@ class StarterTests(unittest.TestCase):
     def test_charge_streams_ignite_and_follow_group_speed(self):
         charge = create_effect("energy-charge")
         camera()
+        # Sparse early strokes can miss every single-sample ray at 48 pixels.
+        bpy.context.scene.render.resolution_x = bpy.context.scene.render.resolution_y = 96
         bpy.context.scene.render.dither_intensity = 0
         for member in composition.members(charge):
             if member["vfx_module"] != "mesh.ring":
@@ -331,6 +333,38 @@ class StarterTests(unittest.TestCase):
         self.assertGreater(radius(13), early * 1.2)
         tree.nodes["Nucleus Seed Size"].outputs[0].default_value = 0
         self.assertLess(radius(13), 1e-6)
+
+    def test_ground_intake_reaches_the_core_and_lift_follows_group_time(self):
+        charge = create_effect("energy-charge")
+        members = composition.members(charge)
+        ground = next(r for r in members if r.name == "Charge • Ground Intake")
+        nucleus = next(r for r in members if r["vfx_module"] == "shader.shield")
+        layer = ground.children[0]
+        control = layer.modifiers[0].node_group.nodes["Ground Intake Lift"].outputs[0]
+
+        def shape(frame):
+            evaluated = mesh(ground, frame)
+            return [tuple(v.co) for v in evaluated.vertices]
+
+        reference = shape(31)
+        world = [layer.matrix_world @ Vector(p) for p in reference]
+        self.assertAlmostEqual(
+            max(v.z for v in world), nucleus.matrix_world.translation.z, places=5
+        )
+        self.assertLess(min(v.z for v in world), -0.7)
+        core_before = [tuple(v.co) for v in mesh(nucleus, 31).vertices]
+        control.default_value = 0
+        lowered = [layer.matrix_world @ Vector(p) for p in shape(31)]
+        self.assertLess(max(v.z for v in lowered), -0.7)
+        self.assertEqual(core_before, [tuple(v.co) for v in mesh(nucleus, 31).vertices])
+        control.default_value = 0.8
+        charge["speed"] = 2
+        charge.update_tag()
+        accelerated = shape(16)
+        self.assertLess(
+            max((Vector(a) - Vector(b)).length for a, b in zip(reference, accelerated)), 1e-5
+        )
+        self.assertLessEqual(vertex_count(charge, 16), 900)
 
     def test_outer_intakes_arrive_at_the_core_from_different_heights(self):
         charge = create_effect("energy-charge")

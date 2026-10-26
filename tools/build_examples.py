@@ -118,7 +118,7 @@ def create_effect(key):
             core.create(context, "ENERGY_RING", "LOW"),
             color,
             radius=1.55,
-            width=0.14,
+            width=0.09,
             strength=0.45,
             duration=48.0,
             dissolve=0.08,
