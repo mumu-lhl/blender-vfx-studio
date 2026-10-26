@@ -3,8 +3,8 @@
 Build editable VFX for Blender 5.2 LTS using Blender's own objects, nodes and animation. Prioritize Eevee and defaults that work on machines without a dedicated GPU.
 
 - Read DESIGN.md before changing how modules interact or how data is saved. Read CONTEXT.md before changing timing, instance IDs or resource deletion.
-- Prioritize charge → release → hit → dissipation. Inspect actual renders, trace visual defects to geometry/shader/animation nodes, fix the real builder, and compare matching renders. Record viewed frames, engines and viewing limits; tests complement artistic review.
-- Improve silhouette, color hierarchy and timing within explicit geometry/particle budgets. Keep controls editable; emission and preview composition should support the real effect.
+- Judge charge → release → hit → dissipation in complete rigged-character shots, including occlusion, distant views and light/dark Eevee renders. Inspect actual images and animation samples before refining local nodes; fix the real builder when the complete picture reveals a defect. Record viewed frames and viewing limits; tests complement artistic review.
+- Improve silhouette, color hierarchy and timing with editable native controls. Measure scene evaluation and matched renders with/without VFX on available hardware, recording device and settings. Geometry and particle counts guide complexity; they do not prove performance or viewport FPS.
 - Continue high-value unblocked work after each Issue. Ask only for missing permissions, irreversible risks or a key requirement that cannot be resolved reasonably.
 - Finish a usable effect before adding more abstractions. Keep object and node creation in core/builders, and interface code in UI modules. Use native nodes and drivers for playback; avoid Python frame handlers.
 - Preserve user models, animation and edited nodes. Delete only resources owned by the selected effect and unused outside it. Refuse operations when copied instance IDs make ownership unclear.

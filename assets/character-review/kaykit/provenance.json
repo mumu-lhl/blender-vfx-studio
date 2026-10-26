@@ -1,0 +1,17 @@
+{
+  "source_repository": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0",
+  "commit": "672074b73ba276876a19e8816ecdc5241817ab47",
+  "author": "Kay Lousberg",
+  "license": "CC0-1.0",
+  "upstream_directory": "addons/kaykit_character_pack_adventures/Characters/gltf",
+  "files": {
+    "Knight.glb": {
+      "bytes": 3659532,
+      "sha256": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168"
+    },
+    "Rogue.glb": {
+      "bytes": 3616284,
+      "sha256": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d"
+    }
+  }
+}
