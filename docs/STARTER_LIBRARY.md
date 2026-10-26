@@ -6,15 +6,15 @@
 
 所有示例从第 1 帧开始，默认不循环。载入保留原时间和变换，不会自动放到当前帧或 3D Cursor。选择组合控制器可调整整体 Start、Duration、Speed 和 Loop；在组合面板选择某一层，则可修改该层的颜色、尺寸和时间。
 
-**Energy Charge（48 帧）** 在 0.22.2 中包含轨道环、地面环、球壳及向内汇聚的连续粒子，共 4 层。开发版本将它们改为有空隙的核心路径、直接汇入中心的外层短弯流、地面进流和弯曲粒子；外部收紧时，内核由较小的蓝色体积积蓄为亮核。仍为 4 层，不需要外部贴图或缓存。旧完整文件不自动换造型或材质。
+**Energy Charge（48 帧）** 在 0.22.2 中包含轨道环、地面环、球壳及向内汇聚的连续粒子，共 4 层。开发版本使用错开前沿的双束、辅助进流、直接汇入中心的短弯流、地面进流和弯曲粒子；外围收紧时，中心积蓄为有间隙的蓝白束，再收束释放。仍为 4 层，不需要外部贴图或缓存。旧完整文件不自动换造型或材质。
 
 粒子的 Spawn Radius 控制出生距离，正的 Velocity 越大，抵达中心越快；到达后停止，不穿过中心向外散出。粒子在控制器局部空间运动，移动整体也会移动已出生粒子，不保留角色走过的世界轨迹。
 
-开发版核心的 Geometry Nodes 提供 Main Intake Guide Width、Auxiliary Guide Width 和 Auxiliary Packet Width，分别调整主体连接、辅助连接与辅助头部。Nucleus Seed Size / Nucleus Stored Size 调整初始和蓄满的内核尺寸；外层丝带的 Spiral Turns / Intake Vertical Reach 调整绕行角度与起始高度。这些私有造型需用 Complete Effect 保存。具体选择哪个对象、观看范围和限制见 [进流](CHARGE_INTAKE_REVIEW.md)、[外层路径](CHARGE_FLOW_REVIEW.md) 与 [内核积蓄](CHARGE_NUCLEUS_REVIEW.md) 记录。
+开发版核心的 Geometry Nodes 提供 Main Intake Guide Width、Auxiliary Guide Width 和 Auxiliary Packet Width，分别调整主体连接、辅助连接与辅助头部。Nucleus Seed Size / Nucleus Stored Size 调整初始和蓄满尺寸，Release Pinch / Release Stretch 调整释放形变；核心材质的 Nucleus White Threshold 越高，白色区域越小。外层丝带的 Spiral Turns / Intake Vertical Reach 调整绕行角度与起始高度。这些私有造型需用 Complete Effect 保存。具体选择哪个对象、观看范围和限制见 [进流](CHARGE_INTAKE_REVIEW.md)、[外层路径](CHARGE_FLOW_REVIEW.md) 、[束流](CHARGE_STREAM_REVIEW.md) 与 [内核](CHARGE_FOCUS_REVIEW.md) 记录。
 
 **Impact Burst（24 帧）** 在 0.22.2 中由白色短闪、12 个橙色尖片、冲击波和稍晚出现的余烬组成，共 4 层。开发版本改为紧凑闪核、三团主体、四条细喷射、两条卷流及单波峰压力弧，继续分层退场。它与侧栏直接创建使用同一生成器；Size 调整主层整体，主层 Geometry Nodes 的 Fine Ejection Width 单独调整细喷射宽度。外层仍可分别修改时间与颜色，Ungroup All 一次拆开全部层。形体和远景仍需打磨，见 [主体](IMPACT_PRESSURE_REVIEW.md) 和 [细喷射](IMPACT_FINE_REVIEW.md) 记录。
 
-**Arc Slash（18 帧）** 是单层紫色程序化刀光，不需要角色动画或采样路径。Arc 调整弧度，Width 调整宽度，Spin 调整旋转；Attack、Motion Ease、Core Width、Afterimage、Streaks 和 Breakup 调整展开、减速、锋刃、残影、笔触与侵蚀。0.22.2 包含版本 2 的规则月牙。当前开发分支的版本 4 把体积推向前端，让两条残弧独立揭示和退场，并用较宽的流动笔触减少细丝；Head Bias 控制前端偏重，Contour、Bank、Wake Spread 控制轮廓、深度与残影分离。版本 4 已合并，仍在继续提升艺术品质；实际观看范围见 [分层记录](SLASH_LAYER_REVIEW.md)。它与侧栏直接创建的刀光使用同一生成器，只把时长设为 18 帧；版本 1/2/3 及旧完整文件不自动升级。
+**Arc Slash（18 帧）** 是单层紫色程序化刀光，不需要角色动画或采样路径。Arc 调整弧度，Width 调整宽度，Spin 调整旋转；Attack、Motion Ease、Core Width、Afterimage、Streaks 和 Breakup 调整展开、减速、锋刃、残影、笔触与侵蚀。0.22.2 包含版本 2 的规则月牙。版本 4 把体积推向前端，让两条残弧独立揭示和退场，并用较宽的流动笔触减少细丝；Head Bias 控制前端偏重，Contour、Bank、Wake Spread 控制轮廓、深度与残影分离。当前开发分支的版本 5 保留主刀面，将残影片段两端收尖；Afterimage 调整可见面积，存活部分保留紫色。仍在提升艺术品质，实际观看范围见 [残影记录](SLASH_WAKE_REVIEW.md)。它与侧栏直接创建的刀光使用同一生成器，只把时长设为 18 帧；版本 1/2/3/4 及旧完整文件不自动升级。
 
 全部示例采用 Low 质量，保留原生对象、网格、材质和 Geometry Nodes。使用 VFX Duplicate 创建独立副本，使用 VFX Delete 删除。示例不需要外部贴图、角色或缓存；不加载插件也能播放和渲染，继续使用侧栏创作则需要启用插件。
 

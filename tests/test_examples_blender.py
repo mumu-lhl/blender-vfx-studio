@@ -422,6 +422,19 @@ class StarterTests(unittest.TestCase):
         streaked = render_pixels(22)
         self.assertEqual(smooth[3::4], streaked[3::4])
         self.assertGreater(max(abs(a - b) for a, b in zip(smooth, streaked)), 0.01)
+        nucleus_white = (
+            member.children[0]
+            .data.materials[0]
+            .node_tree.nodes["Nucleus White Threshold"]
+            .outputs[0]
+        )
+        nucleus_white.default_value = 0
+        broad_white = render_pixels(37)
+        nucleus_white.default_value = 1.1
+        blue_body = render_pixels(37)
+        self.assertEqual(broad_white[3::4], blue_body[3::4])
+        self.assertGreater(max(abs(a - b) for a, b in zip(broad_white, blue_body)), 0.1)
+        nucleus_white.default_value = 0.72
         for index, value in enumerate((1.0, 0.05, 0.01)):
             member[f"color_{index}"] = value
         member.update_tag()

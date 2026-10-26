@@ -233,6 +233,12 @@ def shader(root, uid):
         packet = mathn("Wake Islands", "SINE", packet)
         packet = mathn("Separate Wake Islands", "GREATER_THAN", packet, -0.25)
         arrived = mathn("Broken Wakes", "MULTIPLY", arrived, packet)
+    if root["vfx_asset_version"] >= 5:
+        # Width carries the amount. Solid surviving areas retain their color
+        # over pale scenery rather than blending toward its background value.
+        wake_weight = mathn(
+            "Wake Area Enabled", "GREATER_THAN", value("Afterimage Area", "afterimage"), 0
+        )
     wake_weight = mathn("Delayed Wake", "MULTIPLY", wake_weight, arrived)
     wake_weight = mathn("Subordinate Wake", "MULTIPLY", wake_weight, wake)
     layer_weight = mathn("Layer Hierarchy", "ADD", primary, wake_weight)
@@ -278,6 +284,10 @@ def shader(root, uid):
         link(body_color, flow.inputs[1])
         link(scale("Saturated Inner Flow", tint.outputs[0], 0.9), flow.inputs[2])
         body_color = flow.outputs[0]
+    if root["vfx_asset_version"] >= 5:
+        wake_value = mathn("Supporting Wake Value", "MULTIPLY", wake, 0.35)
+        wake_value = mathn("Primary Color Unchanged", "SUBTRACT", 1, wake_value)
+        body_color = scale("Colored Wake Hierarchy", body_color, wake_value)
     highlight = make("ShaderNodeCombineXYZ", "Cool Blade White")
     for socket, component in zip(highlight.inputs, (0.8, 0.9, 1.0)):
         socket.default_value = component
