@@ -219,7 +219,7 @@ class StarterTests(unittest.TestCase):
         for member in composition.members(charge):
             member.children[0].hide_render = member["vfx_module"] != "shader.shield"
         original = render_pixels(31)
-        self.assertGreater(sum(original), 1)
+        self.assertGreater(sum(value for i, value in enumerate(original) if i % 4 != 3), 1)
         charge["speed"] = 2.0
         charge.update_tag()
         self.assertEqual(render_pixels(16), original)
