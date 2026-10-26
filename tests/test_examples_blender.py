@@ -232,7 +232,7 @@ class StarterTests(unittest.TestCase):
         self.assertGreater(charged, early * 1.5)
         self.assertLess(charged, early * 3)
         tree = member.children[0].modifiers[0].node_group
-        tree.nodes["Nucleus Seed Size"].outputs[0].default_value = 0.7
+        tree.nodes["Nucleus Seed Size"].outputs[0].default_value *= 1.4
         self.assertGreater(radius(13), early * 1.2)
         tree.nodes["Nucleus Seed Size"].outputs[0].default_value = 0
         self.assertLess(radius(13), 1e-6)
