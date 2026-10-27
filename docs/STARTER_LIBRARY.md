@@ -20,6 +20,8 @@
 
 **Lightning Strike（18 帧）** 由分支电弧、短促接触闪光、飞散火花和地面余波组成。主干先落地，再做两次逐渐减弱的复击；第一峰值在 Start+2 左右。主层 Radius 调整分支横向范围，Width 调整线宽，Strength 调整发光，Noise Scale 调整细扰动，Dissolve 侵蚀电弧。在 Geometry Nodes 用 **Bolt Length** 调整高度，**Branch Reach** 调整分支伸展。普通参数 JSON 会重建原生环形基础，完整造型与手动节点请用 **Save Complete Effect** 保存。已完成高清角色、隔帧动画和无插件检查，范围、实测成本与限制见 [闪电记录](LIGHTNING_REVIEW.md)。未观看实时播放；远景细枝和接触火花较弱。
 
+**Dust Impact（32 帧）** 使用原生 Volume Cube 密度网格形成不等大的烟尘团，配合地面薄尘和短促碎屑，适合落地、踩踏或地面冲击。云团先横向散开，再抬升并变薄；不发光，需要场景灯光。主层 Width 调整团块大小，Expansion 调整铺开距离，Noise Scale 调整密度细节，Fade 调整消散，Dissolve 侵蚀密度。主层 Object Properties → Custom Properties 的 Dust Rise Height、Dust Roll Speed 和 Dust Density 分别控制抬升、内部纹理上卷与光学密度。体积需要 Eevee 的体积渲染或 Cycles，Solid 模式仅显示域边界；这不是流体模拟，不需要缓存。三种质量档改变体积网格分辨率、密度团数量、噪声细节与碎屑数量。已查看高清阶段图、全部隔帧动画样本和明暗背景、远景；无插件重开与像素对照通过。检查范围、三档质量与实测成本见 [烟尘记录](DUST_REVIEW.md)，未观看实时播放。
+
 全部资产保留原生对象、网格、材质和 Geometry Nodes。使用 VFX Duplicate 创建独立副本，使用 VFX Delete 删除。示例不需要外部贴图、角色或缓存；不加载插件也能播放和渲染，继续使用侧栏创作则需要启用插件。
 
 保存手动节点、轨道驱动或整个组合时，使用 **Save Complete Effect**。单层参数预设只保存参数。例如，只保存充能粒子层的参数 JSON，再创建时会得到普通 Emitter；向内运动和尖形等私有节点不会随参数重建。
@@ -34,6 +36,6 @@ Arc Slash 和 Impact Burst 的缩略图均展示第 5 帧，不加辉光；Impac
 blender -b --factory-startup --python-exit-code 1 --python tools/build_examples.py
 ```
 
-脚本只接受未打开项目的全新后台进程，输出四套效果、共六个 `.blend`（含闪电质量文件） 到 `dist/examples/`，并生成带版本号的 examples ZIP；不会删除目录中其他文件。网格、节点、参数和嵌入预览均可重建。每次会产生新的内部编号，因此不保证 Blender 文件跨次构建的二进制完全相同。
+脚本只接受未打开项目的全新后台进程，输出五套效果、共九个 `.blend`（含闪电、烟尘质量文件） 到 `dist/examples/`，并生成带版本号的 examples ZIP；不会删除目录中其他文件。网格、节点、参数和嵌入预览均可重建。每次会产生新的内部编号，因此不保证 Blender 文件跨次构建的二进制完全相同。
 
 0.22.3 尚未发布，整体艺术重设计由 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 跟踪。开发版可从成功 Actions 的 `blender-vfx-studio-extension` 附件取得独立 examples ZIP，或按上面的命令自行生成。当前仍有片状能量段、远景细流偏弱等问题；具体状态见 [Roadmap](../ROADMAP.md)。上述技术检查不代表实时播放、真实角色镜头或商业艺术验收，已下载的 0.22.2 保留旧造型。

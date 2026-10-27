@@ -564,7 +564,11 @@ class StarterTests(unittest.TestCase):
 
     def test_builders_have_native_timing_and_explicit_quality(self):
         for key, layers, duration, quality in zip(
-            EXAMPLES, (4, 4, 1, 4), (48, 24, 18, 18), ("LOW", "LOW", "LOW", "MEDIUM"), strict=True
+            EXAMPLES,
+            (4, 4, 1, 4, 3),
+            (48, 24, 18, 18, 32),
+            ("LOW", "LOW", "LOW", "MEDIUM", "MEDIUM"),
+            strict=True,
         ):
             bpy.ops.wm.read_factory_settings(use_empty=True)
             root = create_effect(key)
