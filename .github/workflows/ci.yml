@@ -353,9 +353,41 @@ jobs:
           path: work/character-combat/
           if-no-files-found: warn
 
+  lightning_review:
+    name: Lightning Strike · native asset and Eevee
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      EGL_PLATFORM: surfaceless
+      LP_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Download official Blender with checksum verification
+        run: python tools/fetch_blender.py --version 5.2.2
+      - *linux_render_dependencies
+      - name: Render actual lightning animation and character comparisons
+        run: |
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/lightning_preview.py -- --sequence
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/lightning_preview.py -- --dark
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/lightning_preview.py -- --far
+          MESA_SHADER_CACHE_DISABLE=true blender -b work/lightning-review/light-near/lightning.blend --disable-autoexec --python-exit-code 1 -t 2 --python tests/lightning_visual_reopen.py
+          MESA_SHADER_CACHE_DISABLE=true blender -b work/lightning-review/light-near/lightning.blend --disable-autoexec --python-exit-code 1 -t 2 --python tools/character_performance.py -- --settings lightning-settings.json --frames 3 8 12
+          python tools/combat_video.py work/lightning-review/light-near --profile lightning
+          python tools/combat_frames.py work/lightning-review/light-near --profile lightning
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: lightning-strike-review
+          path: work/lightning-review/
+          if-no-files-found: warn
+
   release:
     if: github.event_name == 'push' && github.ref_type == 'tag'
-    needs: [blender, combat_review, handoff_review, character_review]
+    needs: [blender, combat_review, handoff_review, character_review, lightning_review]
     runs-on: ubuntu-24.04
     permissions:
       contents: write

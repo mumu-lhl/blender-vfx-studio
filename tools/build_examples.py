@@ -1,4 +1,4 @@
-"""Build three native starter assets and embedded CPU previews in a fresh process."""
+"""Build native starter assets and embedded CPU previews in a fresh process."""
 
 import os
 import sys
@@ -15,11 +15,13 @@ sys.path.insert(0, str(ROOT))
 from blender_vfx_studio import assets, composition, core  # noqa: E402
 from blender_vfx_studio.nodes import drive, node  # noqa: E402
 
-EXAMPLES = ("energy-charge", "impact-burst", "arc-slash")
+EXAMPLES = ("energy-charge", "impact-burst", "arc-slash", "lightning-strike")
+QUALITY_ASSETS = ("lightning-strike",)
 PREVIEWS = {
     "energy-charge": (31, (4, -6, 3.5), (0, 0, 0.1), 4.8),
     "impact-burst": (5, (3, -5, 6), (0, 0, 0), 5.0),
     "arc-slash": (5, (0, 0, 8), (0, 0, 0), 5.4),
+    "lightning-strike": (4, (4, -6, 3.8), (0, 0, 1.6), 5.2),
 }
 
 
@@ -93,9 +95,11 @@ def _shape_charge_motes(particles):
     material.links.new(gradient.outputs[0], material.nodes["Particle Emission"].inputs["Color"])
 
 
-def create_effect(key):
+def create_effect(key, *, quality=None):
     if key not in EXAMPLES:
         raise ValueError("Unknown starter effect")
+    if quality is not None and key not in QUALITY_ASSETS:
+        raise ValueError("This starter asset keeps its original quality")
     context = bpy.context
     context.scene.frame_set(1)
     if key == "energy-charge":
@@ -167,6 +171,10 @@ def create_effect(key):
         shield.children[0].data.materials[0].surface_render_method = "DITHERED"
         root = composition.create(context, [outer, inner, shield, particles])
         root.name = "Energy Charge"
+    elif key == "lightning-strike":
+        from tools.lightning_asset import create
+
+        root = create(context, "MEDIUM" if quality is None else quality)
     elif key == "impact-burst":
         root = core.create(context, "IMPACT_BURST", "LOW")
     else:
@@ -218,15 +226,24 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     previews.mkdir(parents=True, exist_ok=True)
     files = []
-    for key in EXAMPLES:
+    entries = [(key, None, key + ".blend") for key in EXAMPLES]
+    entries += [
+        (key, quality, f"quality/{key}-{quality.lower()}.blend")
+        for key in QUALITY_ASSETS
+        for quality in ("LOW", "HIGH")
+    ]
+    for key, quality, relative in entries:
         bpy.ops.wm.read_factory_settings(use_empty=True)
-        root = create_effect(key)
+        root = create_effect(key, quality=quality)
+        if quality:
+            root.name += " [" + quality + "]"
         preview_scene(key)
-        path = previews / (key + ".png")
+        path = previews / (Path(relative).stem + ".png")
         bpy.context.scene.render.filepath = str(path)
         bpy.ops.render.render(write_still=True)
         image = bpy.data.images.load(str(path), check_existing=False)
-        destination = output / (key + ".blend")
+        destination = output / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
         assets.write(destination, root, preview_image=image)
         files.append(destination)
         print("STARTER_ASSET_BUILT", key, flush=True)
@@ -238,7 +255,7 @@ def main():
             temporary = Path(f.name)
         with zipfile.ZipFile(temporary, "w", zipfile.ZIP_DEFLATED) as archive:
             for path in files:
-                archive.write(path, path.name)
+                archive.write(path, path.relative_to(output).as_posix())
             archive.write(guide, "README.md")
             archive.write(ROOT / "LICENSE", "LICENSE")
         os.replace(temporary, destination)

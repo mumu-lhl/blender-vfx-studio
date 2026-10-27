@@ -22,7 +22,7 @@
 
 ## 当前视觉开发
 
-**真实角色镜头的必要验证已完成。** [#135 / PR #136](https://github.com/mumu-lhl/blender-vfx-studio/pull/136) 使用两名 CC0 KayKit 蒙皮角色与原生挥剑／受击动作，提供 96 帧、24 fps 场景。修正残影方向接入与末段充能衔接后，`d883fc5` 的六项 CI 全部通过；已下载校验最终 Actions 附件，读取全部 48 张视频隔帧图、远景／暗背景／反向机位及高清关键帧。无插件三帧像素一致，恢复阶段清空。软件 Eevee 实测记录了明显的求值和材质渲染成本；这不是视口帧率。充能焦点、刀光权重与命中结构仍未整体艺术验收。当前转向 #138 扩库，闪电 [PR #144](https://github.com/mumu-lhl/blender-vfx-studio/pull/144) 正在验证；#137 保留未验收原型。见 [镜头记录与实测](docs/CHARACTER_COMBAT_REVIEW.md)。
+**真实角色镜头的必要验证已完成。** [#135 / PR #136](https://github.com/mumu-lhl/blender-vfx-studio/pull/136) 使用两名 CC0 KayKit 蒙皮角色与原生挥剑／受击动作，提供 96 帧、24 fps 场景。修正残影方向接入与末段充能衔接后，`d883fc5` 的六项 CI 全部通过；已下载校验最终 Actions 附件，读取全部 48 张视频隔帧图、远景／暗背景／反向机位及高清关键帧。无插件三帧像素一致，恢复阶段清空。软件 Eevee 实测记录了明显的求值和材质渲染成本；这不是视口帧率。充能焦点、刀光权重与命中结构仍未整体艺术验收。当前转向 #138 扩库，第四套闪电 [PR #144](https://github.com/mumu-lhl/blender-vfx-studio/pull/144) 已完成局部与 CI 实图检查，七项 CI 全部通过；#137 保留未验收原型。见 [镜头记录与实测](docs/CHARACTER_COMBAT_REVIEW.md)。
 
 **Energy Charge：束流、材质流动与释放已重做。** [PR #117](https://github.com/mumu-lhl/blender-vfx-studio/pull/117) 将主体改为错开前沿的双束，减少辅助流，材质通道跟随能量团向内移动；内核积蓄后原位收束释放。四层、12 个粒子槽、Low 最高 894 顶点不变，旧完整资产不重建。18 项局部测试、四种高清重开、示例 ZIP 和五项 CI 通过，已实际读取完整连段全部 30 张视频隔帧图。远景主体仍细碎，整体 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 继续开放，见 [束流记录](docs/CHARGE_STREAM_REVIEW.md)。
 
@@ -40,14 +40,14 @@
 
 **细喷射改进已合并。** [PR #107](https://github.com/mumu-lhl/blender-vfx-studio/pull/107) / [#106](https://github.com/mumu-lhl/blender-vfx-studio/issues/106) 把细喷射的较宽头部向前移，增加独立原生节点宽度控制、彩色内芯和深色边界，不增加数量、发光强度或顶点预算。11 项局部测试与无插件重开通过，实际 Cycles / Eevee 近白远景对照中峰值主要笔触更清楚，最终四种条件的高清重开、实际示例 ZIP 和完整连段检查已通过，全部 30 张视频隔帧图已读取。详细记录随该 PR 保存。
 
-[#69](https://github.com/mumu-lhl/blender-vfx-studio/issues/69) 已按用户授权的隔帧方法完成旧版三个视频检查；其结论不自动适用于新生成器。现在的工具支持生成完整 60 帧、24 fps、960×540 连段，绑定源码、场景与图像校验，并生成视频解码图和无插件离线检查包。见 [连续检查记录](docs/CONTINUOUS_SKILL_REVIEW.md)。没有实时播放、真实角色镜头或低配置视口帧率验收。
+[#69](https://github.com/mumu-lhl/blender-vfx-studio/issues/69) 已按用户授权的隔帧方法完成旧版三个视频检查；其结论不自动适用于新生成器。现在的工具支持生成完整 60 帧、24 fps、960×540 连段，绑定源码、场景与图像校验，并生成视频解码图和无插件离线检查包。见 [连续检查记录](docs/CONTINUOUS_SKILL_REVIEW.md)。该旧版检查没有实时播放或低配置视口帧率验收；新的真实角色镜头范围见 #135。
 
 软件 Eevee 的完整连段在原生像素检查后退出崩溃，见 [#122](https://github.com/mumu-lhl/blender-vfx-studio/issues/122)。#123 / #127 已合并，失败时保留原始帧与崩溃文件，检查结束后主动释放临时场景。新压力体积曾在清理后复现崩溃，缓存对照显示默认首轮失败、关闭磁盘缓存十次正常。#129 已限制 CI 原生重开的 Mesa 磁盘缓存，功能提交的五项 CI 及新压力体积完整流程通过；临时诊断 #125 再次关闭且未合并。修正范围见 [退出检查记录](docs/EEVEE_EXIT_REVIEW.md)，不承诺所有驱动路径。
 
 ## 接下来的优先级
 
 1. #135 的必要镜头验证已完成；继续将新资产放入这套角色镜头，保留具体的观看方式与艺术问题。
-2. 推进 [闪电 #139](https://github.com/mumu-lhl/blender-vfx-studio/issues/139)、[烟尘 #142](https://github.com/mumu-lhl/blender-vfx-studio/issues/142)、[火焰 #141](https://github.com/mumu-lhl/blender-vfx-studio/issues/141)、[冲刺残影 #143](https://github.com/mumu-lhl/blender-vfx-studio/issues/143)、[魔法阵 #140](https://github.com/mumu-lhl/blender-vfx-studio/issues/140)。闪电已开始实现，完整库当前仍为三套，不计入未验收原型。
+2. 推进 [闪电 #139](https://github.com/mumu-lhl/blender-vfx-studio/issues/139)、[烟尘 #142](https://github.com/mumu-lhl/blender-vfx-studio/issues/142)、[火焰 #141](https://github.com/mumu-lhl/blender-vfx-studio/issues/141)、[冲刺残影 #143](https://github.com/mumu-lhl/blender-vfx-studio/issues/143)、[魔法阵 #140](https://github.com/mumu-lhl/blender-vfx-studio/issues/140)。闪电 #144 的七项 CI、四种用途共六文件的示例包及实际图像检查已完成，完整库扩至四套。烟尘 #145、火焰 #146 正在实现和视觉验证，尚不计入数量。
 3. 每套交付完整动画、实用参数、合理质量档、原生完整资产和 Asset Browser 预览，实际读取高清阶段图和动画样本。测量有／无特效成本，顶点数不代表性能。
 4. #137 充能原型已保存在功能分支，21 项行为检查及原生重开通过，但造型仍偏平，未艺术验收，暂不合并。后续再按完整镜头决定是否采用其中的方向控制。
 

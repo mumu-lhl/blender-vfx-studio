@@ -15,14 +15,22 @@ import bpy
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--evaluation-only", action="store_true")
+    parser.add_argument("--frames", type=int, nargs="+")
+    parser.add_argument("--settings", default="character-settings.json")
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
     if not bpy.data.filepath or any("blender_vfx_studio" in name for name in sys.modules):
         raise RuntimeError("Open the saved shot in a fresh process without the extension")
     scene = bpy.context.scene
     folder = Path(bpy.data.filepath).parent
-    settings = json.loads((folder / "character-settings.json").read_text())
+    settings = json.loads((folder / args.settings).read_text())
     effects = bpy.data.collections["Combat VFX • toggle for comparison"]
-    frames = [32, settings["contact"]["frame"] + 4, settings["contact"]["frame"] + 12]
+    frames = args.frames or [
+        32,
+        settings["contact"]["frame"] + 4,
+        settings["contact"]["frame"] + 12,
+    ]
+    if any(frame < scene.frame_start or frame > scene.frame_end for frame in frames):
+        raise ValueError("Performance frames must be within the saved shot")
     evaluation = []
     render = []
     for enabled in (False, True):
@@ -105,7 +113,7 @@ def main():
         "renders": render,
         "limits": [
             "Headless scene evaluation and render wall time, not viewport FPS",
-            "Two warmup renders and three matched frame pairs; too few for a render p95",
+            f"Two warmup renders and {len(frames)} matched frame pairs; too few for a render p95",
             "The same saved scene is used; only its VFX collection is excluded",
             "Evaluation excludes the collection from the viewport dependency graph; render comparison only excludes it from rendering",
         ],

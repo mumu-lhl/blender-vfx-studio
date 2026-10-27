@@ -562,8 +562,10 @@ class StarterTests(unittest.TestCase):
         self.assertGreater(vertex_count(root, 48), 0)
         self.assertEqual(vertex_count(root, 49), 0)
 
-    def test_builders_are_low_quality_bounded_and_have_native_timing(self):
-        for key, layers, duration in zip(EXAMPLES, (4, 4, 1), (48, 24, 18)):
+    def test_builders_have_native_timing_and_explicit_quality(self):
+        for key, layers, duration, quality in zip(
+            EXAMPLES, (4, 4, 1, 4), (48, 24, 18, 18), ("LOW", "LOW", "LOW", "MEDIUM"), strict=True
+        ):
             bpy.ops.wm.read_factory_settings(use_empty=True)
             root = create_effect(key)
             self.assertEqual(root["start"], 1)
@@ -573,7 +575,7 @@ class StarterTests(unittest.TestCase):
                 composition.members(root) if root["vfx_module"] == "core.composition" else [root]
             )
             self.assertEqual(len(members), layers)
-            self.assertTrue(all(r["vfx_quality"] == "LOW" for r in members))
+            self.assertTrue(all(r["vfx_quality"] == quality for r in members))
             count = vertex_count(root, 7)
             self.assertGreater(count, 0)
             self.assertLess(count, 10000)

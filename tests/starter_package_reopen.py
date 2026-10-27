@@ -17,6 +17,9 @@ expected = {
     "energy-charge": ("core.composition", 48),
     "impact-burst": ("core.composition", 24),
     "arc-slash": ("mesh.slash", 18),
+    "lightning-strike": ("core.composition", 18),
+    "quality/lightning-strike-low": ("core.composition", 18),
+    "quality/lightning-strike-high": ("core.composition", 18),
 }
 assert not any("blender_vfx_studio" in name for name in sys.modules)
 with tempfile.TemporaryDirectory() as folder, zipfile.ZipFile(package) as archive:
@@ -29,6 +32,7 @@ with tempfile.TemporaryDirectory() as folder, zipfile.ZipFile(package) as archiv
         member = key + ".blend"
         assert 0 < archive.getinfo(member).file_size <= 16 * 1024 * 1024
         path = Path(folder) / member
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(archive.read(member))
         bpy.ops.wm.read_factory_settings(use_empty=True)
         with bpy.data.libraries.load(str(path), link=False) as (available, requested):
