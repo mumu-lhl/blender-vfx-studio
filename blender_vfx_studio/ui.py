@@ -707,11 +707,7 @@ class VFX_PT_main(bpy.types.Panel):
                 "fade",
             )
         elif root["vfx_module"] == "mesh.slash":
-            layout.label(
-                text="Layered arc slash"
-                if root["vfx_asset_version"] >= 2
-                else "Legacy crescent slash"
-            )
+            layout.label(text="Layered arc slash")
             keys = (
                 "radius",
                 "width",
@@ -724,18 +720,16 @@ class VFX_PT_main(bpy.types.Panel):
                 "noise_scale",
                 "fade",
             )
-            if root["vfx_asset_version"] >= 2:
-                keys += (
-                    "attack",
-                    "motion_ease",
-                    "head_bias",
-                    "core_width",
-                    "afterimage",
-                    "streaks",
-                    "breakup",
-                )
-            if root["vfx_asset_version"] >= 3:
-                keys += ("contour", "bank", "wake_spread")
+            keys += (
+                "attack",
+                "motion_ease",
+                "head_bias",
+                "core_width",
+                "afterimage",
+                "streaks",
+                "breakup",
+            )
+            keys += ("contour", "bank", "wake_spread")
         elif root["vfx_module"] == "simulation.cloth":
             from . import simulation
 
@@ -766,7 +760,7 @@ class VFX_PT_main(bpy.types.Panel):
                 row.enabled = bool(root.get("vfx_bone"))
                 row.prop(root, '["vfx_bone_tail"]', text="Use Bone Tail")
             else:
-                layout.label(text="Legacy ribbon · samples bone head")
+                layout.label(text="Ribbon · samples bone head")
             for key in ("vfx_bake_first", "vfx_bake_last", "vfx_bake_step"):
                 layout.prop(root, f'["{key}"]', text=key.removeprefix("vfx_bake_").title())
             layout.label(text=f"{root['vfx_samples']} baked samples; source edits need Rebake")
@@ -813,10 +807,9 @@ class VFX_PT_main(bpy.types.Panel):
                 "fade",
                 "strength",
             )
-            if root["vfx_asset_version"] == 2:
-                if not root.get("vfx_parameter_keys"):
-                    layout.label(text="Shape: 0 Round / 1 Shard")
-                keys += ("shape", "stretch", "planar", "motion_ease")
+            if not root.get("vfx_parameter_keys"):
+                layout.label(text="Shape: 0 Round / 1 Shard")
+            keys += ("shape", "stretch", "planar", "motion_ease")
         elif root["vfx_module"] == "screen.glare":
             layout.label(text="Screen · scene compositor")
             keys = ("strength", "threshold", "glow_size", "flash", "fade")
