@@ -244,7 +244,6 @@ class ArtControlsTests(unittest.TestCase):
         self.assertGreater(max(abs(v[0]) for v in wide), max(abs(v[0]) for v in short))
 
     def test_custom_profile_hides_controls_its_saved_nodes_do_not_read(self):
-
         flame = next(
             m for m in composition.members(create_fire(bpy.context)) if palettes.fire_ramp(m)
         )

@@ -12,6 +12,7 @@ Build editable VFX for Blender 5.2 LTS using Blender's own objects, nodes and an
 - Verify changed behavior in Blender background mode. For timing or saved-data changes, save a .blend file and reopen it in a new process without the extension. State which visual and interface checks were actually performed.
 - Use feature branches and pull requests. Commit and push completed work, and update ROADMAP.md and relevant Issues to match tested behavior.
 - Use RTK for commands it supports. Matt Pocock skills are optional; `caveman` is the only permitted Caveman skill.
+- Use Ruff 0.14.1, matching CI. Run both lint and format checks before pushing; use raw output when a command wrapper obscures failures.
 - Put temporary scripts, test scenes and renders in ignored work/. Build installation ZIPs in ignored dist/ and publish them as release assets. Commit the scripts that generate Blender assets so a fresh clone can rebuild them.
 
 ## Human-readable communication and documentation

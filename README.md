@@ -131,4 +131,12 @@ blender -b --factory-startup --python-exit-code 1 --python tools/build_examples.
 
 构建结果在 `dist/`，`BLENDER_BIN` 可指定 Blender 路径。未发布的构建也可从 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 成功运行的 `blender-vfx-studio-extension` 附件下载。
 
+开发时使用与 CI 相同的 **Ruff 0.14.1** 检查代码；项目配置会拒绝其他版本，避免格式检查结果不一致：
+
+```sh
+python -m pip install ruff==0.14.1
+ruff check blender_vfx_studio tools tests
+ruff format --check blender_vfx_studio tools tests
+```
+
 许可证：**[GPL-3.0-or-later](LICENSE)**。测试角色的来源和独立许可见 [角色资产说明](assets/character-review/README.md)。
