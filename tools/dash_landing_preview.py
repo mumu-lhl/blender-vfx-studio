@@ -131,6 +131,11 @@ def main():
     parser.add_argument("--dark", action="store_true")
     parser.add_argument("--far", action="store_true")
     parser.add_argument("--sequence", action="store_true")
+    parser.add_argument(
+        "--sampled",
+        action="store_true",
+        help="Render actual every-other timeline frames plus the landing frame; no video approximation",
+    )
     parser.add_argument("--frames", nargs="+", type=int)
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
     if not bpy.app.background or "--factory-startup" not in sys.argv or bpy.data.filepath:
@@ -151,7 +156,15 @@ def main():
     saved_frame = scene.frame_current
     scene.render.filepath = "//renders/dash-landing-"
     bpy.ops.wm.save_as_mainfile(filepath=str(folder / "dash-landing.blend"))
-    frames = list(range(1, 85)) if args.sequence else args.frames or list(FRAMES)
+    if sum((args.sequence, args.sampled, bool(args.frames))) > 1:
+        raise ValueError("Choose sequence, sampled or selected frames")
+    frames = (
+        list(range(1, 85))
+        if args.sequence
+        else sorted(set(range(1, 85, 2)) | {contact["frame"]})
+        if args.sampled
+        else args.frames or list(FRAMES)
+    )
     if any(f < 1 or f > 84 for f in frames):
         raise ValueError("Dash landing review frames must be within 1–84")
     timings = []
@@ -184,7 +197,9 @@ def main():
                 saved_frame=saved_frame,
                 render_timings=timings,
                 realtime_playback_reviewed=False,
-                method="Rendered PNG stages; realtime playback unreviewed",
+                sampled=args.sampled,
+                sample_step=2 if args.sampled else None,
+                method="Actual timeline PNG samples; realtime playback unreviewed",
             ),
             indent=2,
         )
