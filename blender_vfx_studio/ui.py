@@ -29,6 +29,8 @@ _ART_GROUPS = (
             "taper",
             "head_bias",
             "contour",
+            "hook",
+            "inner_notches",
             "bank",
             "size",
             "shape",
@@ -983,7 +985,15 @@ class VFX_PT_main(bpy.types.Panel):
                 "streaks",
                 "breakup",
             )
-            keys += ("contour", "bank", "wake_spread", "surface_cuts", "fragment_release")
+            keys += (
+                "contour",
+                "hook",
+                "inner_notches",
+                "bank",
+                "wake_spread",
+                "surface_cuts",
+                "fragment_release",
+            )
         elif root["vfx_module"] == "simulation.cloth":
             from . import simulation
 
@@ -1100,7 +1110,11 @@ class VFX_PT_main(bpy.types.Panel):
         native_values = _native_shape_values(root)
         if native_values:
             box = layout.box()
-            box.label(text="Core Focus" if "Nucleus Stored Size" in native_values else "Bolt Shape")
+            box.label(
+                text="Bolt Shape"
+                if {"Bolt Length", "Branch Reach"} & native_values.keys()
+                else "Core Focus"
+            )
             for label, socket, advanced in native_values.values():
                 if not advanced or context.window_manager.vfx_advanced_controls:
                     box.prop(socket, "default_value", text=label)

@@ -127,6 +127,13 @@ TRAIL_PARAMETERS = {
     "fade": (0.0, 0.0, 1.0, "Width loss over lifetime"),
 }
 SLASH_ART_PARAMETERS = {
+    "hook": (1.0, 0.0, 1.0, "Leading hook within Contour; zero removes the extra hook"),
+    "inner_notches": (
+        1.0,
+        0.0,
+        1.0,
+        "Geometric inner-edge openings within Contour; Surface Cuts controls material cuts separately",
+    ),
     "surface_cuts": (
         1.0,
         0.0,

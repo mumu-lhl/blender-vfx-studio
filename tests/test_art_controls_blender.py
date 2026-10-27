@@ -25,6 +25,16 @@ def points(root, frame):
     ]
 
 
+def freeze_optional_geometry_controls(root, keys):
+    paths = {f'["{key}"]' for key in keys}
+    tree = root.children[0].modifiers[0].node_group
+    for curve in list(tree.animation_data.drivers):
+        if any(
+            t.id == root and t.data_path in paths for v in curve.driver.variables for t in v.targets
+        ):
+            tree.driver_remove(curve.data_path)
+
+
 class ArtControlsTests(unittest.TestCase):
     def setUp(self):
         bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -49,6 +59,44 @@ class ArtControlsTests(unittest.TestCase):
         self.assertIn("Artist Note", material.nodes)
         bpy.ops.vfx_studio.slash_style(style="STYLIZED")
         self.assertEqual(points(root, 5), shaped)
+
+    def test_hook_and_inner_geometry_are_independent_with_contour_as_master(self):
+        root = slash.create(bpy.context, "LOW")
+        root["bank"] = 0.0
+        root.update_tag()
+        before = points(root, 5)
+        edge = [
+            i
+            for i, item in enumerate(root.children[0].data.attributes["vfx_inner"].data)
+            if item.value == 0
+        ]
+        root["inner_notches"] = 0.0
+        root.update_tag()
+        no_notches = points(root, 5)
+        self.assertNotEqual(no_notches, before)
+        self.assertEqual([no_notches[i] for i in edge], [before[i] for i in edge])
+        root["hook"] = 0.0
+        root.update_tag()
+        no_hook = points(root, 5)
+        self.assertNotEqual([no_hook[i] for i in edge], [no_notches[i] for i in edge])
+        root["contour"] = 0.0
+        root.update_tag()
+        plain = points(root, 5)
+        root["hook"], root["inner_notches"] = 1.0, 1.0
+        root.update_tag()
+        self.assertEqual(points(root, 5), plain)
+        self.assertTrue(all(p[2] == 0 for p in plain))
+
+    def test_saved_slash_keeps_styles_without_adding_shape_controls(self):
+        root = slash.create(bpy.context, "LOW")
+        freeze_optional_geometry_controls(root, ("hook", "inner_notches"))
+        del root["hook"], root["inner_notches"]
+        slash.apply_style(root, "CLEAN")
+        self.assertNotIn("hook", root)
+        self.assertNotIn("inner_notches", root)
+        self.assertTrue(all(p[2] == 0 for p in points(root, 5)))
+        slash.apply_style(root, "STYLIZED")
+        self.assertNotIn("hook", root)
 
     def test_color_picker_keys_native_channels(self):
         root = slash.create(bpy.context, "LOW")
@@ -88,6 +136,7 @@ class ArtControlsTests(unittest.TestCase):
         emit.name = "Artist Surface"
         out = material.nodes.new("ShaderNodeOutputMaterial")
         material.links.new(emit.outputs[0], out.inputs["Surface"])
+        freeze_optional_geometry_controls(root, SLASH_ART_PARAMETERS)
         for key in SLASH_ART_PARAMETERS:
             del root[key]
         root.vfx_primary_color = (0.8, 0.3, 0.1)
