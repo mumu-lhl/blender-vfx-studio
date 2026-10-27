@@ -18,7 +18,7 @@
 
 原三套示例保留 Low 质量；Lightning Strike 默认 Medium，quality/ 目录另提供 Low 和 High 两个完整文件。同一效果的质量文件不计作额外种类。
 
-**Lightning Strike（18 帧）** 由分支电弧、短促接触闪光、飞散火花和地面余波组成。主干先落地，再做两次逐渐减弱的复击；第一峰值在 Start+2 左右。主层 Radius 调整分支横向范围，Width 调整线宽，Strength 调整发光，Noise Scale 调整细扰动，Dissolve 侵蚀电弧。在 Geometry Nodes 用 **Bolt Length** 调整高度，**Branch Reach** 调整分支伸展。普通参数 JSON 会重建原生环形基础，完整造型与手动节点请用 **Save Complete Effect** 保存。当前为开发候选，高清角色与完整动画检查正在进行，不能以缩略图代替验收。
+**Lightning Strike（18 帧）** 由分支电弧、短促接触闪光、飞散火花和地面余波组成。主干先落地，再做两次逐渐减弱的复击；第一峰值在 Start+2 左右。主层 Radius 调整分支横向范围，Width 调整线宽，Strength 调整发光，Noise Scale 调整细扰动，Dissolve 侵蚀电弧。在 Geometry Nodes 用 **Bolt Length** 调整高度，**Branch Reach** 调整分支伸展。普通参数 JSON 会重建原生环形基础，完整造型与手动节点请用 **Save Complete Effect** 保存。已完成高清角色、隔帧动画和无插件检查，范围、实测成本与限制见 [闪电记录](LIGHTNING_REVIEW.md)。未观看实时播放；远景细枝和接触火花较弱。
 
 全部资产保留原生对象、网格、材质和 Geometry Nodes。使用 VFX Duplicate 创建独立副本，使用 VFX Delete 删除。示例不需要外部贴图、角色或缓存；不加载插件也能播放和渲染，继续使用侧栏创作则需要启用插件。
 

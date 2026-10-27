@@ -290,10 +290,10 @@ Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使�
 
 ## 入门资产库
 
-当前按 [#138](https://github.com/mumu-lhl/blender-vfx-studio/issues/138) 扩库，计划加入闪电、烟尘、火焰、冲刺残影和魔法阵。闪电候选见 [PR #144](https://github.com/mumu-lhl/blender-vfx-studio/pull/144)，未验收原型不计入当前完整资产数量。
+当前按 [#138](https://github.com/mumu-lhl/blender-vfx-studio/issues/138) 扩库，计划加入闪电、烟尘、火焰、冲刺残影和魔法阵。第四套 Lightning Strike 的高清、隔帧与性能检查见 [记录](docs/LIGHTNING_REVIEW.md)；接下来优先烟尘，未验收原型不计入数量。
 
 发布附件中的 `blender-vfx-studio-examples-版本.zip` 是独立资产库，不能作为插件安装。解压后，将文件夹添加到 Blender 的 Asset Libraries，再通过 Load VFX with New ID 创建效果。
-已发布的 0.22.2 包含 Energy Charge、Impact Burst 和 Arc Slash 三套 Low 资产。当前开发包新增 Lightning Strike 候选：分支电弧、错峰复击、接触闪光、火花与地面余波；默认 Medium，`quality/` 另提供 Low / High 完整文件，质量版本不计作额外效果。全部使用原生节点和嵌入预览，不需要外部贴图或缓存。闪电的高清和完整动画检查正在进行，尚未发布新版本。
+已发布的 0.22.2 包含 Energy Charge、Impact Burst 和 Arc Slash 三套 Low 资产。当前开发包新增第四套 Lightning Strike：分支电弧、错峰复击、接触闪光、火花与地面余波；默认 Medium，`quality/` 另提供 Low / High 完整文件，质量版本不计作额外效果。全部使用原生节点和嵌入预览，不需要外部贴图或缓存。闪电已完成高清阶段图、完整视频隔帧和无插件检查；未观看实时播放，尚未发布新版本。
 
 开发版 Energy Charge 会先汇聚、压紧中心，再收束释放。选中 `Charge • Compressed Core` 下的网格，在 Geometry Nodes 用 **Nucleus Compression** 调整积蓄时的压扁程度，0 关闭，默认 0.6。**Nucleus Seed Size / Nucleus Stored Size** 调整初始与蓄满大小，**Release Pinch / Release Stretch** 调整释放形态。修改后用 **Save Complete Effect** 保存；旧完整资产保留原节点。实际观看范围见 [压缩记录](docs/CHARGE_TENSION_REVIEW.md)。
 
