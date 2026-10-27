@@ -244,11 +244,13 @@ def create(context, quality="MEDIUM"):
         flame.id_properties_ui(name).update(min=0, max=maximum, description=name)
     flame.name = "Fire • Sculpted Tongues"
     _flames(flame, quality)
-    embers = core.create_particle(context, quality)
+    embers = core.create_emitter(context, quality)
     for key, value in dict(
         start=start + 4,
         duration=48,
-        count={"LOW": 12, "MEDIUM": 20, "HIGH": 30}[quality],
+        rate={"LOW": 8.0, "MEDIUM": 13.0, "HIGH": 18.0}[quality],
+        lifetime=0.65,
+        emission_seconds=1.2,
         size=0.035,
         shape=1,
         stretch=3,
