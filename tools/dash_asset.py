@@ -26,13 +26,13 @@ def runner():
 def create(context, quality="MEDIUM", *, keep_character=False):
     if quality not in dash.QUALITY_COUNTS:
         raise ValueError("Unknown dash quality")
-    before = set(bpy.data.objects)
+    initial_ids = set(bpy.data.all_ids)
     character = runner()
+    character_ids = set(bpy.data.all_ids) - initial_ids
     effect = dash.create(context, character["rig"], 6, 18, quality)
     # Complete starter files use a consistent start; the shot keeps actual sample time.
     if not keep_character:
-        for obj in set(bpy.data.objects) - before - set([effect, *effect.children_recursive]):
-            bpy.data.objects.remove(obj, do_unlink=True)
+        bpy.data.batch_remove(ids=character_ids)
         effect["start"] = 1.0
         effect.update_tag()
     for action in list(bpy.data.actions):

@@ -15,6 +15,7 @@ def source():
     bpy.ops.mesh.primitive_cube_add(size=0.5)
     obj = bpy.context.object
     obj.name = "User Animated Mesh"
+    obj.data.materials.append(bpy.data.materials.new("User Material"))
     obj.shape_key_add(name="Basis")
     pose = obj.shape_key_add(name="User Shape")
     pose.data[6].co.z += 0.7
@@ -45,6 +46,7 @@ class DashTests(unittest.TestCase):
         )
         bpy.context.scene.frame_set(17, subframe=0.5)
         expected = obj.matrix_world.copy()
+        material = obj.data.materials[0]
         root = dash.create(bpy.context, obj, 1, 13)
         self.assertEqual(
             (bpy.context.scene.frame_current, bpy.context.scene.frame_subframe), (17, 0.5)
@@ -54,6 +56,7 @@ class DashTests(unittest.TestCase):
             (obj.data, obj.animation_data.action, obj.data.shape_keys.animation_data.action),
             (mesh, action, shape_action),
         )
+        self.assertEqual(obj.data.materials[0], material)
         self.assertIsNone(obj.parent)
         members = composition.members(root)
         self.assertEqual(list(root["vfx_capture_frames"]), [1, 7, 13])
