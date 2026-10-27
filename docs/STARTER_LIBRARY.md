@@ -24,6 +24,10 @@
 
 **Stylized Fire（52 帧，开发候选）** 是三团不等高的外焰、两团较小的热色内焰和持续上升的余烬。主层在 48 帧内完成点燃、维持和断燃，余烬晚四帧结束。主层 Width 调整宽度，Noise Scale 调整流动色带，Strength 控制光量，Dissolve 侵蚀火面；Object Properties → Custom Properties 的 Fire Height、Fire Flow Speed 和 Fire Curl 控制高度、上卷节奏与火舌形变。颜色参数作为红橙黄色带的乘色。Low / Medium / High 改变截面细节和余烬生成率；不是换色变体。局部、原生完整文件、高清阶段图和完整视频隔帧检查已完成，九项 CI 通过；范围、成本与限制见 [火焰记录](FIRE_REVIEW.md)。尚未观看实时播放，待依赖合并后计入 main 数量。
 
+**Character Dash Echoes（30 帧，开发候选）** 保存三个不同位置与姿态的角色残影，依次出现、逐个淡去。Low / Medium / High 分别保留两／三／四姿态，保留角色原始网格形状。选中自己的 Mesh 或 Armature，在侧栏点击 **Capture Dash Echoes**，指定首尾帧即可创建独立残影；默认采样跨度为 12 帧。跨度须能被姿态间隔数整除，例如三姿态用 1、7、13 帧。Echo Tail 决定每个姿态存活的帧数，组合控制器可再调整整体时间和位置。各层可调透明度、颜色、边缘与噪声侵蚀。采样会求值现有修改器和形态键，随后恢复原帧和子帧；不改动源数据，不保留运行时源引用。源动画修改后需重新捕获；参数 JSON 不包含姿态网格，请保存完整效果。此功能不重定向或修改骨架。
+
+内置残影轮廓取自本仓库固定版本的 [KayKit Adventurers CC0 角色](../assets/character-review/README.md)，没有角色贴图或骨架依赖；可用上述按钮捕获自己的角色。代码许可证仍为 GPL-3.0-or-later。完整角色视频隔帧、明暗与远景图、三档预览和原生文件检查已完成，CI 通过；范围、成本与限制见 [残影记录](DASH_REVIEW.md)。待依赖合并后计入 main 数量。
+
 全部资产保留原生对象、网格、材质和 Geometry Nodes。使用 VFX Duplicate 创建独立副本，使用 VFX Delete 删除。示例不需要外部贴图、角色或缓存；不加载插件也能播放和渲染，继续使用侧栏创作则需要启用插件。
 
 保存手动节点、轨道驱动或整个组合时，使用 **Save Complete Effect**。单层参数预设只保存参数。例如，只保存充能粒子层的参数 JSON，再创建时会得到普通 Emitter；向内运动和尖形等私有节点不会随参数重建。
