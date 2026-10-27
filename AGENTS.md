@@ -15,14 +15,14 @@ Build editable VFX for Blender 5.2 LTS using Blender's own objects, nodes and an
 
 ## Human-readable communication and documentation
 
-- Write for humans, not for other AI agents. Prioritize clarity, accuracy, and readability over sounding technical or sophisticated.
-- Use natural, straightforward language. Prefer concrete explanations over abstract descriptions, buzzwords, and unnecessary jargon.
-- Explain what something does, why it exists, and how it works. Name the actual components, operations, and data involved.
-- Assume readers understand basic programming but are unfamiliar with this project's architecture.
-- Explain unfamiliar technical terms briefly on first use. Preserve established technical terms when they are necessary for accuracy.
-- Use descriptive headings, bold key actions, ordered steps, bullets and concise comparison tables where they help readers find information. Keep paragraphs coherent; avoid decorative formatting, deep nesting, repetition and filler.
-- Include concrete examples when they make complex behavior easier to understand.
-- Keep technical details, limitations, and important design decisions intact. Never sacrifice correctness for simplicity.
-- Follow the existing documentation language unless explicitly requested otherwise. For Chinese documentation, use natural Chinese rather than literal translations of English technical prose.
-- Apply these rules to README files, guides, design documents, issue descriptions, PR descriptions, and human-facing progress reports.
-- Before finishing documentation, review it from a newcomer's perspective and rewrite unclear or unnecessarily abstract passages.
+- Write for humans. Use natural, concrete language; explain what the feature does, why it matters and how the reader uses it. Preserve accuracy, limitations and important design decisions.
+- README and user guides address Blender users, including artists with no programming or repository knowledge. Developer documents may assume basic programming, but must explain this project's architecture and unfamiliar terms on first use.
+- Lead user documentation with purpose, available features/release status and a working first-use path. Organize longer guides by the user's task: installation, creation, editing, saving and troubleshooting.
+- Use Markdown as the normal reading structure: descriptive headings for sections, **numbered lists for ordered actions**, bullets for parallel choices, and concise tables for parameters, feature comparisons or version differences. A short document need not use every form.
+- Bold important actions, UI labels and decisions; use code formatting for commands, paths and identifiers, and italics for brief secondary notes when useful. Give formatting a clear reading purpose.
+- Keep paragraphs short and focused on one idea. Split long passages that mix instructions, parameters, limitations and history into appropriate sections, steps or tables. Concision must preserve an easy-to-scan page, not compress it into dense prose.
+- Keep implementation internals, commit hashes, CI details and lengthy validation history in linked developer or review records. User pages retain the practical consequence and relevant limitation, with a link for detail.
+- Include concrete examples and actual screenshots or renders when they clarify the workflow or result. State relevant viewing limits; an image or passing test alone does not prove artistic quality.
+- Follow the existing document language unless asked otherwise. Write Chinese naturally rather than translating English technical prose literally; retain established technical terms where needed.
+- Apply these rules to README files, guides, design documents, Issues, PRs and human-facing reports, scaling structure to their length and purpose.
+- Before finishing, review from a newcomer's perspective: can the intended reader quickly find the next action and its limitations? For README and user guides, check installation, first use, editing and saving are easy to locate, UI labels and links are correct, and technical history does not bury the workflow. Rewrite unclear sections before submitting.
