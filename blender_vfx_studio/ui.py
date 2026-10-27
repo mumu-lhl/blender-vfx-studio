@@ -144,8 +144,8 @@ def _native_shape_values(root):
     return found
 
 
-def _driven_art_properties(root):
-    """Expose known custom art properties only when native drivers actually read them."""
+def _driven_parameters(root):
+    """Read actual native driver references without changing a saved graph."""
     trees = []
     for obj in root.children:
         if obj.type != "MESH":
@@ -156,15 +156,21 @@ def _driven_art_properties(root):
     for tree in trees:
         if tree.animation_data:
             for curve in tree.animation_data.drivers:
+                if curve.mute:
+                    continue
                 for variable in curve.driver.variables:
                     for target in variable.targets:
                         if target.id == root:
                             paths.add(target.data_path)
-    return {key for key in _EXTRA_ART_KEYS if key in root and f'["{key}"]' in paths}
+    return {key for key in root.keys() if f'["{key}"]' in paths}
 
 
 def _draw_art_parameters(layout, context, root, keys):
-    remaining = {key for key in keys if key in root} | _driven_art_properties(root)
+    driven = _driven_parameters(root)
+    remaining = {key for key in keys if key in root}
+    if root.get("vfx_parameter_keys"):
+        remaining.intersection_update(driven)
+    remaining |= driven & _EXTRA_ART_KEYS
     for title, candidates in _ART_GROUPS:
         shown = [key for key in candidates if key in remaining]
         if not shown:
@@ -759,7 +765,7 @@ class VFX_OT_export_preset(bpy.types.Operator, ExportHelper):
     bl_description = (
         "Save current parameter values to JSON; use Save Complete Effect for edited nodes or paths"
     )
-    bl_label = "Save VFX Preset"
+    bl_label = "Save Parameters (JSON)"
     filename_ext = ".json"
     filter_glob: StringProperty(default="*.json", options={"HIDDEN"})
 
@@ -775,7 +781,7 @@ class VFX_OT_export_preset(bpy.types.Operator, ExportHelper):
 class VFX_OT_import_preset(bpy.types.Operator, ImportHelper):
     bl_idname = "vfx_studio.import_preset"
     bl_description = "Create an independent effect from a validated parameter JSON file"
-    bl_label = "Load VFX Preset"
+    bl_label = "Load Parameters (JSON)"
     bl_options = {"REGISTER", "UNDO"}
     filename_ext = ".json"
     filter_glob: StringProperty(default="*.json", options={"HIDDEN"})
@@ -872,7 +878,7 @@ class VFX_PT_main(bpy.types.Panel):
         layout.operator(
             "vfx_studio.compose", text="Compose Selected VFX", icon="OUTLINER_COLLECTION"
         )
-        layout.operator("vfx_studio.import_preset", text="Load Preset", icon="IMPORT")
+        layout.operator("vfx_studio.import_preset", text="Load Parameters (JSON)", icon="IMPORT")
         layout.operator("vfx_studio.import_asset", text="Load Complete Effect", icon="APPEND_BLEND")
         try:
             root = core.resolve(context.object)
@@ -888,7 +894,9 @@ class VFX_PT_main(bpy.types.Panel):
                 "vfx_studio.export_asset", text="Save Complete Effect", icon="FILE_BLEND"
             )
         if root["vfx_module"] not in {"trail.ribbon", "core.composition", "simulation.cloth"}:
-            layout.operator("vfx_studio.export_preset", text="Save Preset", icon="EXPORT")
+            layout.operator(
+                "vfx_studio.export_preset", text="Save Parameters (JSON)", icon="EXPORT"
+            )
         else:
             layout.label(text="Reuse with Duplicate or Save Complete Effect")
         row = layout.row(align=True)

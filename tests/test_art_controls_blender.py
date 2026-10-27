@@ -171,6 +171,36 @@ class ArtControlsTests(unittest.TestCase):
         wide = points(member, 3)
         self.assertGreater(max(abs(v[0]) for v in wide), max(abs(v[0]) for v in short))
 
+    def test_custom_profile_hides_controls_its_saved_nodes_do_not_read(self):
+
+        flame = next(
+            m for m in composition.members(create_fire(bpy.context)) if palettes.fire_ramp(m)
+        )
+        # Keep the artist's static flow value and all graph links; it no longer reads this property.
+        for child in flame.children:
+            for modifier in child.modifiers:
+                if modifier.type == "NODES":
+                    tree = modifier.node_group
+                    for curve in list(tree.animation_data.drivers):
+                        if any(
+                            t.id == flame and t.data_path == '["Fire Flow Speed"]'
+                            for v in curve.driver.variables
+                            for t in v.targets
+                        ):
+                            tree.driver_remove(curve.data_path)
+        drawn = []
+
+        class Layout:
+            def prop(self, owner, path, **kwargs):
+                drawn.append(path)
+
+            def __getattr__(self, name):
+                return lambda *a, **kw: self
+
+        ui._draw_art_parameters(Layout(), bpy.context, flame, ("width", "Fire Flow Speed"))
+        self.assertIn('["width"]', drawn)
+        self.assertNotIn('["Fire Flow Speed"]', drawn)
+
 
 addon.register()
 result = unittest.TextTestRunner(verbosity=2).run(

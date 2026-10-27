@@ -75,7 +75,7 @@ class VFX_OT_library_refresh(bpy.types.Operator):
 
 class VFX_OT_library_save(bpy.types.Operator):
     bl_idname = "vfx_studio.library_save"
-    bl_description = "Save a named parameter preset without overwriting entries with the same name"
+    bl_description = "Save parameter JSON without overwriting entries; use Save Complete Effect for nodes and poses"
     bl_label = "Save New Library Preset"
     name: StringProperty(name="Preset Name", maxlen=80)
 
@@ -173,7 +173,7 @@ class VFX_OT_library_delete(bpy.types.Operator):
 
 
 class VFX_PT_library(bpy.types.Panel):
-    bl_label = "User Preset Library"
+    bl_label = "Parameter Library (JSON)"
     bl_idname = "VFX_PT_library"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -221,7 +221,7 @@ class VFX_PT_library(bpy.types.Panel):
                 icon="ERROR",
             )
         layout.label(text="Parameter snapshots; files are outside .blend")
-        layout.label(text="Use Load Preset for external JSON files")
+        layout.label(text="Load Parameters (JSON) opens external files")
 
 
 CLASSES = (
