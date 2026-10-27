@@ -11,10 +11,13 @@ QUALITY_COUNTS = {"LOW": 2, "MEDIUM": 3, "HIGH": 4}
 MAX_CAPTURE_VERTICES = 1_000_000  # Allocation guard, not a performance promise.
 
 
-def sample(context, source, first, last, quality):
-    count = QUALITY_COUNTS.get(quality)
-    if count is None:
+def sample(context, source, first, last, quality, *, count=None):
+    if quality not in QUALITY_COUNTS:
         raise ValueError("Unknown dash quality")
+    if count is None:
+        count = QUALITY_COUNTS[quality]
+    if type(count) is not int or not 2 <= count <= 32:
+        raise ValueError("Echo count must be an integer between 2 and 32")
     if (
         source is None
         or source.name not in context.scene.objects
@@ -22,13 +25,8 @@ def sample(context, source, first, last, quality):
         or core.resolve(source) is not None
     ):
         raise ValueError("Choose a mesh or armature in this scene outside the VFX hierarchy")
-    if (
-        type(first) is not int
-        or type(last) is not int
-        or not -100000 <= first < last <= 100000
-        or (last - first) % (count - 1)
-    ):
-        raise ValueError(f"Use an increasing frame span divisible by {count - 1} for this quality")
+    if type(first) is not int or type(last) is not int or not -100000 <= first < last <= 100000:
+        raise ValueError("Use increasing integer endpoints between -100000 and 100000")
     scene = context.scene
     if scene.render.frame_map_old != scene.render.frame_map_new:
         raise ValueError("Capture with 1:1 Time Remapping; retime the stored echoes afterwards")
@@ -46,8 +44,9 @@ def sample(context, source, first, last, quality):
         origin = source.evaluated_get(
             context.evaluated_depsgraph_get()
         ).matrix_world.translation.copy()
-        for current in range(first, last + 1, (last - first) // (count - 1)):
-            scene.frame_set(current)
+        for index in range(count):
+            current = first + (last - first) * index / (count - 1)
+            scene.frame_set(math.floor(current), subframe=current % 1)
             graph = context.evaluated_depsgraph_get()
             vertices, faces = [], []
             for obj in candidates:
@@ -59,7 +58,7 @@ def sample(context, source, first, last, quality):
                     allocated += len(mesh.vertices)
                     if allocated > MAX_CAPTURE_VERTICES:
                         raise ValueError(
-                            "Capture exceeds one million stored vertices; use Low or select fewer meshes"
+                            "Capture exceeds one million stored vertices; use fewer echoes or meshes"
                         )
                     offset = len(vertices)
                     for vertex in mesh.vertices:
@@ -135,10 +134,10 @@ def _surface(member):
     tree.links.new(mix.outputs[0], emission.inputs["Color"])
 
 
-def create(context, source, first, last, quality="MEDIUM", *, tail=18.0):
+def create(context, source, first, last, quality="MEDIUM", *, tail=18.0, count=None):
     if type(tail) not in (int, float) or not math.isfinite(tail) or not 1 <= tail <= 100000:
         raise ValueError("Echo tail must be between 1 and 100000 frames")
-    origin, samples = sample(context, source, first, last, quality)
+    origin, samples = sample(context, source, first, last, quality, count=count)
     members = []
     try:
         for index, (frame, vertices, faces) in enumerate(samples):

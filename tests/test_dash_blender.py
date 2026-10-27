@@ -92,13 +92,61 @@ class DashTests(unittest.TestCase):
         self.assertGreater(first.dot(expected), 0.99)
         self.assertEqual(obj.scale.x, -1)
 
+    def test_explicit_count_samples_subframes_without_changing_source_detail(self):
+        obj = source()
+        scene = bpy.context.scene
+        scene.frame_set(5, subframe=0.5)
+        root = dash.create(bpy.context, obj, 1, 12, "LOW", count=5)
+        self.assertEqual(scene.frame_current_final, 5.5)
+        frames = list(root["vfx_capture_frames"])
+        self.assertEqual(frames, [1, 3.75, 6.5, 9.25, 12])
+        members = composition.members(root)
+        self.assertEqual(len(members), 5)
+        for member, frame in zip(members, frames):
+            scene.frame_set(int(frame), subframe=frame % 1)
+            evaluated = obj.evaluated_get(bpy.context.evaluated_depsgraph_get())
+            expected = [evaluated.matrix_world @ v.co for v in evaluated.data.vertices]
+            layer = member.children[0]
+            actual = [layer.matrix_world @ v.co for v in layer.data.vertices]
+            self.assertEqual(len(actual), len(expected))
+            for a, b in zip(actual, expected):
+                self.assertLess((a - b).length, 1e-5)
+        bpy.data.objects.remove(obj, do_unlink=True)
+        self.assertTrue(vertices(members[-1], 12))
+        self.assertFalse(vertices(members[-1], 30))
+
+    def test_capture_operator_uses_count_instead_of_quality(self):
+        import blender_vfx_studio as addon
+
+        addon.register()
+        try:
+            source()
+            bpy.context.scene.frame_set(5, subframe=0.5)
+            self.assertEqual(
+                bpy.ops.vfx_studio.capture_dash(first=1, last=12, count=5, tail=9), {"FINISHED"}
+            )
+            root = bpy.context.object
+            self.assertEqual(root["duration"], 20)
+            self.assertEqual(len(composition.members(root)), 5)
+            self.assertEqual(bpy.context.scene.frame_current_final, 5.5)
+        finally:
+            addon.unregister()
+
+    def test_negative_subframes_use_the_correct_pose_time(self):
+        obj = source()
+        root = dash.create(bpy.context, obj, -1, 2, count=5)
+        self.assertEqual(list(root["vfx_capture_frames"]), [-1, -0.25, 0.5, 1.25, 2])
+
     def test_invalid_capture_has_no_data_mutation(self):
         obj = source()
         bpy.context.scene.frame_set(5, subframe=0.5)
         before = set(bpy.data.all_ids)
-        for first, last, quality in ((1, 1, "MEDIUM"), (1, 12, "HIGH"), (1, 13, "INVALID")):
+        for first, last, quality in ((1, 1, "MEDIUM"), (13, 1, "HIGH"), (1, 13, "INVALID")):
             with self.assertRaises(ValueError):
                 dash.create(bpy.context, obj, first, last, quality)
+        for count in (0, 1, 33, True, 3.5):
+            with self.assertRaises(ValueError):
+                dash.create(bpy.context, obj, 1, 12, count=count)
         self.assertEqual(set(bpy.data.all_ids), before)
         self.assertEqual(bpy.context.scene.frame_current_final, 5.5)
         obj.hide_render = True
@@ -109,7 +157,7 @@ class DashTests(unittest.TestCase):
 
     def test_complete_assets_do_not_need_source_and_delete_is_safe(self):
         obj = source()
-        root = dash.create(bpy.context, obj, 1, 13)
+        root = dash.create(bpy.context, obj, 1, 12, count=5)
         path = ROOT / "work/dash-asset-test.blend"
         assets.write(path, root)
         loaded = assets.load(bpy.context, path)

@@ -50,7 +50,7 @@
 [#161](https://github.com/mumu-lhl/blender-vfx-studio/issues/161) 先处理真实无效、无法关闭造型和换色困难的控制；[审查记录](docs/ART_CONTROLS_REVIEW.md) 列出八套的核对结果与边界。
 
 - [PR #162](https://github.com/mumu-lhl/blender-vfx-studio/pull/162)：Clean / Stylized 刀光、独立锋刃配色、原生颜色选择器与关键帧、蓝／绿火焰色带、现有 Fire / Dust / Magic 控制分组、Ground Veil Fade 修复。多阶段 Eevee 图已实际读取，Clean 与蓝焰无插件高清重开像素一致，完整后台与安装检查通过；CI 仍以 PR 的最终状态为准。
-- [#163](https://github.com/mumu-lhl/blender-vfx-studio/issues/163)：独立 Echo Count 与任意跨度的均匀子帧捕获，保留源网格细节；正在进行真实角色对照，不称为完成验收。
+- [#163](https://github.com/mumu-lhl/blender-vfx-studio/issues/163)：独立 Echo Count 与任意跨度的均匀子帧捕获，保留源网格细节；八项捕获测试与无源重开通过；五姿态角色的三个高清阶段及暗背景已读取，原生重渲染像素一致。浅背景旧影仍淡，详见 [采样记录](docs/DASH_SAMPLING_REVIEW.md)。
 - Energy Charge 核心／外围权重、Impact 主次调节、Lightning 长度与放电控制仍待后续实施；不为已隐藏的无效 Impact 参数重复制造任务。
 
 ## 下一步
