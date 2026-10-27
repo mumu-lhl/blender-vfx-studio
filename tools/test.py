@@ -123,3 +123,8 @@ subprocess.run(base + ["--python", "tests/test_dash_blender.py"], check=True)
 subprocess.run(
     base + [str(ROOT / "work/dash-test.blend"), "--python", "tests/dash_reopen.py"], check=True
 )
+
+subprocess.run(base + ["--python", "tests/test_magic_blender.py"], check=True)
+subprocess.run(
+    base + [str(ROOT / "work/magic-test.blend"), "--python", "tests/magic_reopen.py"], check=True
+)

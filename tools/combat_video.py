@@ -13,6 +13,7 @@ PROFILES = {
     "combat": ("render-settings.json", "rendered_frames", "combat", 36),
     "handoff": ("review-settings.json", "frames", "handoff", 60),
     "character": ("character-settings.json", "frames", "character", 96),
+    "magic": ("magic-settings.json", "frames", "magic", 80),
     "dash": ("dash-settings.json", "frames", "dash", 48),
     "fire": ("fire-settings.json", "frames", "fire", 72),
     "dust": ("dust-settings.json", "frames", "dust", 60),
