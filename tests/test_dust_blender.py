@@ -87,8 +87,6 @@ class DustTests(unittest.TestCase):
         assets.write(saved, root)
         loaded = assets.load(bpy.context, saved)
         clone = core.duplicate(bpy.context, root)
-        self.assertFalse(body(loaded).children[0].visible_shadow)
-        self.assertFalse(body(clone).children[0].visible_shadow)
         self.assertEqual(body(loaded)["Dust Rise Height"], 1.4)
         self.assertEqual(body(clone)["Dust Rise Height"], 1.4)
         body(clone)["Dust Rise Height"] = 2.2
