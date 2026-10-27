@@ -235,6 +235,8 @@ def add_effects(fixture):
     follow.target = midpoint
     scene.frame_set(1)
     charge = create_effect("energy-charge")
+    # Keep the final compression visible until the sword actually accelerates.
+    charge["duration"] = 52.0
     bpy.context.view_layer.update()
     charge.location = socket.evaluated_get(
         bpy.context.evaluated_depsgraph_get()
@@ -244,7 +246,7 @@ def add_effects(fixture):
     hit_frame = contact["frame"]
     slash = create_effect("arc-slash")
     slash.name = "Combat • Arc Slash"
-    slash["start"], slash["duration"], slash["spin"] = float(hit_frame - 2), 10.0, 0.0
+    slash["start"], slash["duration"] = float(hit_frame - 2), 10.0
     # The native effect's radius matches the imported sword's measured world length.
     sample = fixture["trace"][0]
     slash["radius"] = (Vector(sample["tip"]) - Vector(sample["hilt"])).length
@@ -263,7 +265,14 @@ def add_effects(fixture):
         radial = plane.inverted() @ (matrix @ tip - matrix.translation)
         progress = min(max((frame - slash["start"]) / slash["duration"], 0), 1)
         front = min(progress / slash["attack"], 1)
-        angle = math.atan2(radial.y, radial.x) - (front - 0.5) * math.radians(slash["arc"])
+        clock = progress + slash["motion_ease"] * (1 - (1 - progress) ** 3 - progress)
+        # Cancel only the main blade's native rotation. Preserve Spin so its
+        # sign and each wake's independent local clock still produce trailing layers.
+        angle = (
+            math.atan2(radial.y, radial.x)
+            - (front - 0.5) * math.radians(slash["arc"])
+            - math.radians(slash["spin"]) * clock
+        )
         rotation = plane @ Quaternion((0, 0, 1), angle)
         if previous is not None:
             rotation.make_compatible(previous)

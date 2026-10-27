@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import math
 import sys
 from array import array
 from pathlib import Path
@@ -15,6 +16,27 @@ assert settings["contact"]["verified_intersection"]
 assert len([obj for obj in bpy.context.scene.objects if obj.type == "ARMATURE"]) == 2
 assert all(image.packed_file for image in bpy.data.images if image.source == "FILE")
 scene = bpy.context.scene
+scene.frame_set(47)
+core = bpy.data.objects["Charge • Compressed Core"].children[0]
+assert core.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices, (
+    "The charge focus must survive until the slash begins"
+)
+scene.frame_set(53)
+slash = bpy.data.objects["Combat • Arc Slash"].children[0]
+mesh = slash.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+angles = []
+for band in range(3):
+    vertex = next(
+        v
+        for v in mesh.vertices
+        if abs(mesh.attributes["vfx_wake"].data[v.index].value - band) < 0.01
+        and abs(mesh.attributes["vfx_arc"].data[v.index].value - 0.5) < 0.01
+        and mesh.attributes["vfx_inner"].data[v.index].value < 0.001
+    )
+    angles.append(math.atan2(vertex.co.y, vertex.co.x))
+assert all((angles[0] - angle + math.pi) % math.tau - math.pi > 0.05 for angle in angles[1:]), (
+    "Native wakes must trail the main slash rather than stack at the same angle"
+)
 poses = []
 for frame in (53, 16, 32):
     if frame not in settings["frames"]:

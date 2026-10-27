@@ -22,7 +22,7 @@
 
 ## 当前视觉开发
 
-**真实角色镜头正在建立。** [#135](https://github.com/mumu-lhl/blender-vfx-studio/issues/135) 使用两名带蒙皮、骨架和剑击／受击动作的 CC0 KayKit 角色，生成 96 帧原生战斗场景。现有充能绑定剑身，刀光用原生关键帧对齐挥剑，命中在剑刃实际穿过角色变形网格时开始。已读取第一组 960×540 Eevee 实图，发现充能中心被遮挡、主体偏小，以及刀光预备阶段出现过早；正在做动作对齐和正反机位对照。完整视频抽帧、远景、暗背景、无插件重开和有／无特效耗时比较尚待完成，不宣布艺术验收。见 [角色镜头记录](docs/CHARACTER_COMBAT_REVIEW.md)。
+**真实角色镜头已建立，接入修正复核中。** [#135 / PR #136](https://github.com/mumu-lhl/blender-vfx-studio/pull/136) 使用两名 CC0 KayKit 蒙皮角色及原生挥剑／受击动作，生成 96 帧、24 fps 原生场景。首轮六项 CI、无插件三帧高清像素比较通过；实际 Actions 视频全部 48 张隔帧图、远景／暗背景／反向机位及高清关键帧已读取。同镜头测得明显求值与材质渲染开销，不用顶点数代替性能。画面暴露出充能焦点偏小、释放空档及刀光压过命中等问题；已修正镜头的零 Spin 残影接入错误，正在复核衔接。下一项 [#137](https://github.com/mumu-lhl/blender-vfx-studio/issues/137) 重做角色镜头中的充能焦点与释放；整体未艺术验收，实时播放和正式二次元角色仍未检查。见 [镜头记录与实测](docs/CHARACTER_COMBAT_REVIEW.md)。
 
 **Energy Charge：束流、材质流动与释放已重做。** [PR #117](https://github.com/mumu-lhl/blender-vfx-studio/pull/117) 将主体改为错开前沿的双束，减少辅助流，材质通道跟随能量团向内移动；内核积蓄后原位收束释放。四层、12 个粒子槽、Low 最高 894 顶点不变，旧完整资产不重建。18 项局部测试、四种高清重开、示例 ZIP 和五项 CI 通过，已实际读取完整连段全部 30 张视频隔帧图。远景主体仍细碎，整体 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 继续开放，见 [束流记录](docs/CHARGE_STREAM_REVIEW.md)。
 
