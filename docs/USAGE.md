@@ -7,7 +7,7 @@
 - **动画与组合**：[轨迹刀带](#ribbon-trail-轨迹刀带)、[绑定](#对象和骨骼绑定)、[多层组合](#多层组合)。
 - **复用效果**：[保存完整效果](#保存完整效果)、[参数预设](#保存和管理预设)、[完整入门库](STARTER_LIBRARY.md)。
 
-*下文说明当前开发版。已下载的旧资产保留原节点，不会因更新插件自动变成新造型。*
+*本文说明当前开发中的功能。项目尚未正式分发。*
 
 ## 环形与弧形刀光
 
@@ -17,13 +17,13 @@ Radius 是出生时外半径，Width 是环宽，Expansion 是一个周期增加
 
 质量只在创建时选择，分别使用 32、64、128 段。环形依赖网格的 `vfx_inner` 属性来区分内外边缘；删除该属性会破坏宽度计算。发光材质本身不需要灯光，但不会自动产生光晕。需要光晕时添加下文的 Screen VFX，或使用自己的 Glare 合成节点。
 
-当前源码中的 Arc Slash 无需源动画，直接生成带有前端钩形、紫色亮暗分面和两条低亮残影的刀光。主体快速展开，残影逐渐分离；挥斩后拆成短笔触，再被侵蚀。已发布的 0.22.2 保留规则月牙造型。
+当前源码中的 Arc Slash 无需源动画，直接生成带有前端钩形、紫色亮暗分面和两条低亮残影的刀光。主体快速展开，残影逐渐分离；挥斩后拆成短笔触，再被侵蚀。
 这些层次由效果自己的几何、材质和时间参数生成，不依靠预览场景的辉光。Start / Duration / Speed / Loop 仍控制整个播放。
 
 Arc 控制弧度（1–359 度），Spin 控制总旋转角度，正负值改变旋转方向。Attack 是展开所占的生命周期比例，例如 18 帧中 Attack=0.18 约用 3.2 帧展开。
 Motion Ease 控制挥斩后的减速，0 为匀速；Head Bias 将主体宽度偏向前端。Radius / Width / Expansion 控制基本尺寸，Taper 控制收尖。
 
-Core Width 控制窄亮锋刃的相对宽度，Afterimage 在开发版资产版本 5 中控制两条有色残影的面积，设为 0 可关闭残影；版本 1–4 仍控制透明度。
+Core Width 控制窄亮锋刃的相对宽度，Afterimage 控制两条有色残影的面积，设为 0 可关闭残影。
 Streaks 控制主体笔触的对比，Breakup 控制挥斩后的噪声侵蚀；Dissolve=1 会完全隐藏材质。新版 Fade 控制退场时的分段镂空，设为 0 可保留这些段，但不关闭 Breakup。
 Strength 控制整体发光，颜色控制主体；锋刃使用较浅的冷白色，因此仍有亮度和色彩层次。
 
@@ -40,7 +40,7 @@ Contour 控制前端钩形与内侧缺口，Bank 控制刀面的深度弯曲，�
 
 ## Impact Burst 打击爆发
 
-在 **Create Mesh VFX** 中选择 **Impact Burst**，会在 3D Cursor 处创建一个 24 帧的四层组合。已发布的 0.22.2 使用中心白色短闪、橙色尖片、冲击波和延迟余烬。当前 0.22.3 开发版改用断裂的三团压力体积、四条细喷射、两条辅助卷流、压力弧和错峰退场，仍未发布；具体问题与实际检查范围见 [当前主体记录](IMPACT_SURFACE_REVIEW.md)。默认只播放一次，不添加辉光合成。
+在 **Create Mesh VFX** 中选择 **Impact Burst**，会在 3D Cursor 处创建一个 24 帧的四层组合。效果包含断裂的三团压力体积、四条细喷射、两条辅助卷流、压力弧和错峰退场；具体问题与实际检查范围见 [当前主体记录](IMPACT_SURFACE_REVIEW.md)。默认只播放一次，不添加辉光合成。
 
 选中组合调整整体 Start / Duration / Speed；选中成员可以分别调整颜色、强度和时间。需要独立编辑时点击 **Ungroup All**，保留拆分时各层状态。完整效果导出保留这四层及手动节点；单层参数 JSON 只保存该层参数，不保存手动节点。
 
@@ -52,9 +52,7 @@ Impact 候选的短闪和主体采用私有网格，沿用 Burst 控制器保存
 
 选择 `Impact • Shockwave` 下的网格，可在 Geometry Nodes 用 **Pressure Crest Height** 调整波面隆起高度；设为 0 可恢复平面。在材质中，**Pressure Crest Edge Contrast** 调整暗边，**Pressure Flow Travel** 调整噪声在寿命内移动的距离。Width 调整实际宽度，Dissolve 调整破碎程度；当前波面由三段长短、宽窄不同的压力弧组成。观看范围和限制见 [压力弧记录](IMPACT_WAVE_REVIEW.md)。
 
-普通 Burst 新建资产使用版本 2，旧版本 1 资产与参数预设继续按原结构读取。Impact 的短闪和主体使用私有造型，不会随载入自动更新。旧版主尖片的 Side Contrast / Illustrated Light 只适用于仍采用尖片材质的资产；当前主体请使用上面的压力控制。
-
-Actions 的 `combat-shot-visual-review` 附件提供完整视频与原生场景。视频生成不等于已经观看；旧版 #69 已按用户允许的 MP4 隔帧方法检查，新生成器需重新复核。复现命令和限制见 [镜头记录](COMBAT_VISUAL_REVIEW.md) 与 [当前主体记录](IMPACT_SURFACE_REVIEW.md)，实时播放仍未验证。
+Actions 的 `combat-shot-visual-review` 附件提供完整视频与原生场景。视频生成不等于已经观看；具体观看范围以相应检查记录为准。复现命令和限制见 [镜头记录](COMBAT_VISUAL_REVIEW.md) 与 [当前主体记录](IMPACT_SURFACE_REVIEW.md)，实时播放仍未验证。
 
 ## Fresnel 能量护盾
 
@@ -115,14 +113,14 @@ Width 是全宽，Length 是尾带占完整采样时间的比例，Fade 控制�
 移动控制器可整体变换已保存路径。修改源动画后，只有明确点击 **Rebake Ribbon** 才会重新采样：材质、节点、修改器和当前变换保留，手动路径编辑会被替换。Source / Bone / First / Last / Step 决定下一次采样，修改它们不会自动改变回放 Start / Duration。删除源对象后仍能播放已有刀带，但重新采样需要有效源。
 
 为旋转的刀刃、翅膀或指尖创建拖尾时，在 Pose Mode 选择骨骼，创建对话框勾选 **Use Bone Tail**，采样骨骼末端；不勾选则采样起点。例如刀刃绕固定起点旋转，起点不会画出弧线，末端可以留下刀尖扫过的路径。
-侧栏的同名选项决定下一次 Rebake 使用哪一端，不会自动替换已有路径。对象模式仍采样对象原点，忽略此选项。旧文件没有这个选项时，继续按起点重新采样；新建一个 Ribbon 可使用末端。
+侧栏的同名选项决定下一次 Rebake 使用哪一端，不会自动替换已有路径。对象模式仍采样对象原点，忽略此选项。
 采样使用父级动画及约束求值后的世界位置，不修改骨架的动画或约束。`tools/bone_trail_preview.py` 可重建起点与末端的对比预览。
 
 Ribbon 暂不支持 JSON 参数预设。使用 Duplicate 复制，或用下文的 **Save Complete Effect / Load Complete Effect** 复用完整路径。
 
 ## Particle Burst 粒子爆发
 
-点击 **Create Particle Burst**，默认生成 64 个低面数球形粒子。每个效果只有控制器和一个网格对象，不会为每个粒子创建独立对象。Count 最多 2048；Low / Medium / High 在创建时决定球形粒子的细分级别；版本 2 也可切换为固定低面数尖片，参数见上文 Impact Burst。
+点击 **Create Particle Burst**，默认生成 64 个低面数球形粒子。每个效果只有控制器和一个网格对象，不会为每个粒子创建独立对象。Count 最多 2048；Low / Medium / High 在创建时决定球形粒子的细分级别；也可切换为固定低面数尖片，参数见上文 Impact Burst。
 
 Seed 决定可重复的随机方向、速度和尺寸变化。Spread=0 沿控制器局部 +Z 发射，Spread=1 向各方向散射；Randomness 控制变化幅度，Spawn Radius 控制初始径向距离，Size 是出生半径，Fade 控制逐渐缩小。
 
@@ -250,7 +248,7 @@ Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使�
 
 预览读取图片的 RGBA 像素，将直通透明度转换为预乘 RGB 后再缩小，以免透明边缘出现色晕；已经预乘的图片不会再次相乘。Alpha Mode 为 None 或 Channel Packed 时按不透明图处理，不改变源图片设置。预览不应用场景曝光、AgX 或其他视图变换；原生预览保存为 8 位通道，超出 0–1 的值会截断。建议选择已经处理好外观的普通 sRGB PNG。支持已生成的静态图片和已加载/打包的静态文件；序列、视频、UDIM 和 Render Result 不支持，渲染结果请先另存为 PNG 并打开。导出不会自动渲染预览图。
 
-导出的集合使用效果名称，带有 Blender 原生资产标记和 VFX Studio 标签。0.17 及以上版本可读取旧版内部前缀名称的文件；新的可读名称文件需要 0.17 及以上版本载入。
+导出的集合使用效果名称，带有 Blender 原生资产标记和 VFX Studio 标签。
 
 需要在库中浏览时，把这些 `.blend` 放到一个文件夹，在 **Preferences → File Paths → Asset Libraries** 添加该文件夹。打开 **Asset Browser**，选择这个外部库和效果集合，在右侧边栏（N）的 **Blender VFX Studio** 面板点击 **Load VFX with New ID**。按钮会载入选中的集合，每次分配新编号，并保留原来的时间和变换；文件中有多个资产时，也只处理当前选中的集合。
 

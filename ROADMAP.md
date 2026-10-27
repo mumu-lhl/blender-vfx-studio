@@ -1,6 +1,6 @@
 # 开发进度与后续计划
 
-更新：2026-10-27（UTC）。目标 **Blender 5.2 LTS**，优先 Eevee，兼容 Cycles。最新发布版为 **0.22.2**；main 的 0.22.3 仍在开发，尚未发布。
+更新：2026-10-27（UTC）。目标 **Blender 5.2 LTS**，优先 Eevee，兼容 Cycles。**项目尚未正式分发，仅提供开发构建。** 当前实现可以调整，过时生成器和兼容性专用代码无需保留。
 
 ## 当前重点
 
@@ -13,7 +13,7 @@
 | 阶段 | 已能使用 | 当前边界 |
 | --- | --- | --- |
 | M0 开发基础 | 原生侧栏、Extension 构建、安装/卸载、三平台后台 CI | 目标测试版本 5.2.2，后台检查不代替 GUI 检查 |
-| M1 共享控制 | 独立实例、Start / Duration / Speed / Loop、Mesh / Shader、跳帧及无插件播放 | 旧完整文件保留原节点，不自动改造型 |
+| M1 共享控制 | 独立实例、Start / Duration / Speed / Loop、Mesh / Shader、跳帧及无插件播放 | 保留原生可编辑数据与实例资源安全 |
 | M2 基础模块与资产库 | 8 套完整资产、Burst / Emitter、Flipbook、Screen | 粒子在局部空间计算，无碰撞或历史受力；外部序列图不打包 |
 | M3 创作与复用 | Ribbon、对象/骨骼绑定、角色残影捕获、组合、Ungroup All、参数库、完整资产和 Asset Browser | 源动画改变需重新采样；组合不含 Screen 或嵌套组合 |
 | M4 首个模拟 | Cloth Energy Sheet、状态提示、姿态烘焙与无插件回放 | 静态有界源，无碰撞、外部力场或流体；只有已存姿态支持任意帧 |
@@ -38,7 +38,7 @@
 [PR #136](https://github.com/mumu-lhl/blender-vfx-studio/pull/136) 已完成两名 CC0 KayKit 蒙皮角色的必要战斗验证：96 帧、24 fps，全部 48 张视频隔帧图和远景、暗背景、反向机位实际读取，无插件三帧像素一致，恢复阶段清空。见 [角色镜头记录](docs/CHARACTER_COMBAT_REVIEW.md)。
 
 - **Energy Charge**：原生束流、压缩内核和地面进流已重做；远景主体仍小、细碎。见 [束流](docs/CHARGE_STREAM_REVIEW.md)、[内核](docs/CHARGE_FOCUS_REVIEW.md)、[压缩](docs/CHARGE_TENSION_REVIEW.md) 与 [地面进流](docs/CHARGE_GROUND_REVIEW.md)。
-- **Arc Slash**：版本 5 保留有色、两端收尖的独立残弧；硬笔触和远景细尾仍待完整动作判断。见 [残影记录](docs/SLASH_WAKE_REVIEW.md)。
+- **Arc Slash**：主刀面配有色、两端收尖的独立残弧；硬笔触和远景细尾仍待完整动作判断。见 [残影记录](docs/SLASH_WAKE_REVIEW.md)。
 - **Impact Burst**：已分为断裂主体、细喷射、辅助卷流与隆起压力弧；侧面偏实体、远景细层弱。见 [主体](docs/IMPACT_SURFACE_REVIEW.md)、[细喷射](docs/IMPACT_FINE_REVIEW.md) 与 [压力弧](docs/IMPACT_WAVE_REVIEW.md)。
 
 [#69](https://github.com/mumu-lhl/blender-vfx-studio/issues/69) 按用户授权的隔帧方法完成的是旧版检查，不自动适用于后来生成器。[#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 继续跟踪整体艺术品质。[#137](https://github.com/mumu-lhl/blender-vfx-studio/issues/137) 的充能原型已提交保留，但造型未通过，不合并。
@@ -50,6 +50,6 @@
 1. 把新库用于有明确动作目的的完整技能镜头，优先检查冲刺接落地、施法接释放的节奏、遮挡和远景焦点；不把八套同时叠在画面上作为品质证明。
 2. 按完整镜头中最明显的问题改真实生成器与参数，再看修改前后的高清图和动画样本，避免恢复无止境的局部修补。
 3. 保留质量选择，在可用设备测量有／无特效成本；需要更高复杂度时以画面收益判断，不用低顶点数代替性能证据。
-4. 处理发布所需的实际问题并检查安装附件；目前不因技术检查通过自动发布 0.22.3，也不急于新增仅换色的第九套。
+4. 处理发布所需的实际问题并检查安装附件；完成必要视觉与使用验证后再准备首次正式分发，不急于新增仅换色的第九套。
 
 历史提交、发布和详细检查见 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases)、GitHub Issues 与上述记录；使用和结构见 [README](README.md)、[DESIGN](DESIGN.md) 与 [CONTEXT](CONTEXT.md)。
