@@ -159,7 +159,7 @@ class StarterTests(unittest.TestCase):
         for frame in (1, 7, 22, 37, 46, 48):
             self.assertLessEqual(
                 vertex_count(charge, frame), 900
-            )  # Includes the 54-vertex inner kernel.
+            )  # Includes the connected 60-vertex pressure seed.
 
     def test_auxiliary_intake_width_preserves_main_paths_and_survives_assets(self):
         charge = create_effect("energy-charge")

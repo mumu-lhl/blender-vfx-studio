@@ -483,7 +483,7 @@ def _surface(root, *, core=False, ground=False):
         # Stored heat belongs to the shape, not the camera-facing normal. A
         # compressed seed must retain its hot center in ordinary side views.
         heat = g.m(
-            "Nucleus Heat Distance", "ABSOLUTE", g.m("Nucleus Heat Center", "SUBTRACT", u, 0.55)
+            "Nucleus Heat Distance", "ABSOLUTE", g.m("Nucleus Heat Center", "SUBTRACT", u, 0.85)
         )
         heat = g.m("Nucleus Heat Profile", "SUBTRACT", 1, g.m("Heat Falloff", "MULTIPLY", heat, 2))
         kernel_face = g.m(

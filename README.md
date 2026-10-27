@@ -293,7 +293,9 @@ Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使�
 发布附件中的 `blender-vfx-studio-examples-版本.zip` 是独立资产库，不能作为插件安装。解压后，将文件夹添加到 Blender 的 Asset Libraries，再通过 Load VFX with New ID 创建效果。
 目前包含 Energy Charge 蓝色蓄力组合、Impact Burst 橙色冲击爆发、Arc Slash 紫色刀光；全部使用 Low 质量、原生节点和嵌入预览，不需要外部贴图或缓存。
 
-开发版 Energy Charge 会先汇聚、压紧中心，再收束释放。选中 `Charge • Compressed Core` 下的网格，在 Geometry Nodes 用 **Nucleus Compression** 调整积蓄时的压扁程度，0 关闭，默认 0.6。**Nucleus Seed Size / Nucleus Stored Size** 调整初始与蓄满大小，**Release Pinch / Release Stretch** 调整释放形态。修改后用 **Save Complete Effect** 保存；旧完整资产保留原节点。实际观看范围见 [压缩记录](docs/CHARGE_TENSION_REVIEW.md)。
+开发版 Energy Charge 会先汇聚、压紧中心，再收束释放。当前充能焦点正在按角色战斗镜头重做，尚未通过整体艺术验收。选中 `Charge • Compressed Core` 下的网格，在 Geometry Nodes 用 **Nucleus Compression** 调整积蓄时的压扁程度，0 关闭，默认 0.6。**Nucleus Seed Size / Nucleus Stored Size** 调整初始与蓄满大小，**Release Pinch / Release Stretch** 调整释放形态。
+
+新版内核改为连续的压力体。Geometry Nodes 的 **Release Direction** 向量决定释放朝向，使用该层的局部坐标；默认 `(0, 0, 1)`，例如 `(1, 0, 0)` 沿局部 X 轴释放。它只在释放前转动内核，不改变进流路径，也可以插入普通关键帧。材质中的 **Intake Support Value** 调整进流相对内核的明暗，1 恢复相同权重。修改节点与动画后用 **Save Complete Effect** 保存；旧完整资产保留原节点，参数 JSON 不保存这些私有造型与动画。此前的范围见 [压缩记录](docs/CHARGE_TENSION_REVIEW.md)，当前角色镜头与限制见 [角色战斗记录](docs/CHARACTER_COMBAT_REVIEW.md)。
 
 地面层由三条较连贯的进流向核心上行。选中 `Charge • Ground Intake` 下的网格，用 Geometry Nodes 的 **Ground Intake Lift** 调整终点高度，默认 0.8 配合该层初始位置 Z=-0.8；0 回到低位平面。路径随组合移动，单独移动本层时需调整高度。材质的 **Flow Packet Density** 调整分段密度。观看范围与限制见 [地面进流记录](docs/CHARGE_GROUND_REVIEW.md)。
 
