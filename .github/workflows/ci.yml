@@ -122,8 +122,12 @@ jobs:
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE --light --sampled
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --light
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE --pale --far --view-transform AgX
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE --style CLEAN
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE --style CLEAN --light
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python tools/slash_preview.py -- --engine BLENDER_EEVEE --style CLEAN --light --body-color 1 .2 .015 --blade-color 1 .75 .08
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-slash/slash-cycles.blend --python tests/slash_visual_reopen.py
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-slash/slash-blender_eevee-light.blend --python tests/slash_visual_reopen.py
+          MESA_SHADER_CACHE_DISABLE=true blender -b --factory-startup --disable-autoexec --python-exit-code 1 work/visual-slash/slash-blender_eevee-clean.blend --python tests/slash_visual_reopen.py
       - uses: actions/upload-artifact@v7.0.2
         if: runner.os == 'Linux'
         with:
@@ -438,6 +442,10 @@ jobs:
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/fire_preview.py -- --sequence
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/fire_preview.py -- --dark
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/fire_preview.py -- --far
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/fire_preview.py -- --palette BLUE --frames 20 36 60
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/fire_preview.py -- --palette BLUE --dark --frames 20 36 60
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/fire_preview.py -- --palette GREEN --frames 20 36 60
+          MESA_SHADER_CACHE_DISABLE=true blender -b work/fire-review/light-near-blue/fire.blend --disable-autoexec --python-exit-code 1 -t 2 --python tests/fire_visual_reopen.py -- --frames 60 20 36
           MESA_SHADER_CACHE_DISABLE=true blender -b work/fire-review/light-near/fire.blend --disable-autoexec --python-exit-code 1 -t 2 --python tests/fire_visual_reopen.py
           MESA_SHADER_CACHE_DISABLE=true blender -b work/fire-review/light-near/fire.blend --disable-autoexec --python-exit-code 1 -t 2 --python tools/character_performance.py -- --settings fire-settings.json --frames 25 36 60
           python tools/combat_video.py work/fire-review/light-near --profile fire

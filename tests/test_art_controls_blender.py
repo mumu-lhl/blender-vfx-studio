@@ -10,9 +10,10 @@ import bpy
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 import blender_vfx_studio as addon  # noqa: E402
-from blender_vfx_studio import assets, core, presets, slash  # noqa: E402
+from blender_vfx_studio import assets, composition, core, palettes, presets, slash  # noqa: E402
 from blender_vfx_studio.animation import curves  # noqa: E402
 from blender_vfx_studio.parameters import SLASH_ART_PARAMETERS  # noqa: E402
+from tools.fire_asset import create as create_fire  # noqa: E402
 
 
 def points(root, frame):
@@ -100,6 +101,40 @@ class ArtControlsTests(unittest.TestCase):
             slash.apply_style(loaded, "CLEAN")
         self.assertIn("Artist Surface", loaded.children[0].data.materials[0].node_tree.nodes)
 
+    def test_fire_palette_edits_colors_and_preserves_artist_nodes(self):
+        flame = next(
+            m for m in composition.members(create_fire(bpy.context)) if palettes.fire_ramp(m)
+        )
+        core.select(bpy.context, flame)
+        ramp = palettes.fire_ramp(flame)
+        tree = ramp.id_data
+        tree.nodes.new("ShaderNodeValue").name = "Artist Heat Detail"
+        ramp.color_ramp.elements[1].position = 0.42
+        positions = [e.position for e in ramp.color_ramp.elements]
+        links = len(tree.links)
+        geometry = points(flame, 12)
+        for name in palettes.FIRE_PALETTES:
+            self.assertEqual(bpy.ops.vfx_studio.fire_palette(palette=name), {"FINISHED"})
+            for actual, expected in zip(ramp.color_ramp.elements, palettes.FIRE_PALETTES[name]):
+                for a, b in zip(actual.color, expected):
+                    self.assertAlmostEqual(a, b, places=6)
+            self.assertEqual([e.position for e in ramp.color_ramp.elements], positions)
+            self.assertEqual(len(tree.links), links)
+            self.assertIn("Artist Heat Detail", tree.nodes)
+            self.assertEqual(points(flame, 12), geometry)
+            self.assertEqual([flame[f"color_{i}"] for i in range(3)], [1, 1, 1])
+
+    def test_custom_fire_ramp_is_not_replaced_by_palette(self):
+        flame = next(
+            m for m in composition.members(create_fire(bpy.context)) if palettes.fire_ramp(m)
+        )
+        ramp = palettes.fire_ramp(flame)
+        ramp.color_ramp.elements.new(0.1).color = (0.2, 0.3, 0.4, 1)
+        before = [tuple(e.color) for e in ramp.color_ramp.elements]
+        with self.assertRaises(ValueError):
+            palettes.apply_fire(flame, "BLUE")
+        self.assertEqual([tuple(e.color) for e in ramp.color_ramp.elements], before)
+
 
 addon.register()
 result = unittest.TextTestRunner(verbosity=2).run(
@@ -120,6 +155,15 @@ for frame, color in ((1, (0.2, 0.1, 0.05)), (8, (1, 0.3, 0.03))):
 for frame in (2, 5, 11):
     root[f"expected_shape_{frame}"] = [c for p in points(root, frame) for c in p]
     root[f"expected_color_{frame}"] = [root[f"color_{i}"] for i in range(3)]
+fire = create_fire(bpy.context, "LOW")
+fire.name = "Persisted Blue Fire"
+flame = next(m for m in composition.members(fire) if palettes.fire_ramp(m))
+palettes.apply_fire(flame, "BLUE")
+fire["expected_heat_colors"] = [
+    c for e in palettes.fire_ramp(flame).color_ramp.elements for c in e.color
+]
+for frame in (8, 20, 44):
+    fire[f"expected_shape_{frame}"] = [c for p in points(flame, frame) for c in p]
 addon.unregister()
 assert not hasattr(bpy.types.Object, "vfx_primary_color")
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "work/art-controls.blend"))

@@ -4,7 +4,7 @@ import bpy
 from bpy.props import BoolProperty, EnumProperty, FloatVectorProperty, IntProperty, StringProperty
 from bpy_extras.io_utils import ExportHelper, ImportHelper
 
-from . import core, presets
+from . import core, palettes, presets
 from .registry import PRESETS
 
 
@@ -34,7 +34,6 @@ _ART_GROUPS = (
             "shape",
             "stretch",
             "planar",
-            "core_width",
             "columns",
             "rows",
             "Fire Height",
@@ -78,7 +77,9 @@ _ART_GROUPS = (
             "opacity",
             "ior",
             "rim_power",
+            "core_width",
             "streaks",
+            "surface_cuts",
             "noise_scale",
             "threshold",
             "glow_size",
@@ -86,7 +87,7 @@ _ART_GROUPS = (
             "Dust Density",
         ),
     ),
-    ("Dissolve", ("dissolve", "fade", "breakup")),
+    ("Dissolve", ("dissolve", "fade", "breakup", "fragment_release")),
 )
 _ART_LABELS = {
     "bank": "Depth Bend (0 = Flat)",
@@ -164,6 +165,30 @@ class VFX_OT_key_color(bpy.types.Operator):
             return {"CANCELLED"}
         for i in range(3):
             root.keyframe_insert(data_path=f'["{prefix}_{i}"]')
+        return {"FINISHED"}
+
+
+class VFX_OT_fire_palette(bpy.types.Operator):
+    bl_idname = "vfx_studio.fire_palette"
+    bl_label = "Set Fire Palette"
+    bl_description = (
+        "Set native heat-ramp colors and neutral tint, keeping nodes, positions and animation"
+    )
+    bl_options = {"REGISTER", "UNDO"}
+    palette: EnumProperty(
+        items=(("ORANGE", "Orange", ""), ("BLUE", "Blue", ""), ("GREEN", "Green", "")),
+        default="ORANGE",
+    )
+
+    def execute(self, context):
+        root = core.resolve(context.object)
+        try:
+            if root is None:
+                raise ValueError("Select a fire layer")
+            palettes.apply_fire(root, self.palette)
+        except ValueError as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
         return {"FINISHED"}
 
 
@@ -1036,13 +1061,30 @@ class VFX_PT_main(bpy.types.Panel):
         row.prop(
             root,
             "vfx_primary_color",
-            text="Body" if root["vfx_module"] == "mesh.slash" else "Color",
+            text="Body"
+            if root["vfx_module"] == "mesh.slash"
+            else "Heat Tint"
+            if palettes.fire_ramp(root)
+            else "Color",
         )
         row.operator("vfx_studio.key_color", text="", icon="KEY_HLT").palette = "BODY"
         if all(f"blade_color_{i}" in root for i in range(3)):
             row = color_box.row(align=True)
             row.prop(root, "vfx_blade_color", text="Blade")
             row.operator("vfx_studio.key_color", text="", icon="KEY_HLT").palette = "BLADE"
+        heat_ramp = palettes.fire_ramp(root)
+        if heat_ramp is not None:
+            palette_box = layout.box()
+            palette_box.label(text="Heat Palette")
+            if len(heat_ramp.color_ramp.elements) == 5:
+                row = palette_box.row(align=True)
+                for choice in ("ORANGE", "BLUE", "GREEN"):
+                    row.operator("vfx_studio.fire_palette", text=choice.title()).palette = choice
+            palette_box.prop(context.window_manager, "vfx_advanced_controls", text="Edit Heat Ramp")
+            if context.window_manager.vfx_advanced_controls:
+                palette_box.template_color_ramp(heat_ramp, "color_ramp")
+        if root.get("vfx_parameter_keys"):
+            layout.label(text="Custom shape: save Complete Effect (.blend)", icon="INFO")
         layout.label(text="Diamonds key colors; right-click other controls")
         layout.label(text="Material Preview / Rendered shows shader")
 
@@ -1050,6 +1092,7 @@ class VFX_PT_main(bpy.types.Panel):
 CLASSES = (
     VFX_OT_key_color,
     VFX_OT_slash_style,
+    VFX_OT_fire_palette,
     VFX_OT_create,
     VFX_OT_create_flipbook,
     VFX_OT_create_sequence,

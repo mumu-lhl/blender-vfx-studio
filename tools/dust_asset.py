@@ -198,7 +198,7 @@ def _volume(root, quality):
     g.link(joined.outputs[0], hide.inputs["False"])
     output = g.n("NodeGroupOutput", "Output")
     g.link(hide.outputs[0], output.inputs["Geometry"])
-    root["vfx_parameter_keys"] = "radius,width,expansion,noise_scale,dissolve,fade"
+    root["vfx_parameter_keys"] = "radius,width,expansion,noise_scale,fade"
     material = layer.data.materials[0]
     material.name = "VFX • Rolling Dust Volume"
     material.node_tree.animation_data_clear()
