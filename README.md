@@ -70,8 +70,14 @@ GitHub 的源码 ZIP 用于开发；安装请使用发布页中的插件安装�
 | Arc Slash | 弧形挥砍与残影 | 0.22.2 已包含；main 有新的造型与残影 |
 | Impact Burst | 命中爆发与冲击扩散 | 0.22.2 已包含；main 有新的分层造型 |
 | Lightning Strike | 分支落雷、短闪和逐次减弱的复击 | 已进入 main，尚未发布 |
+| Dust Impact | 落地、踩踏的体积烟尘与碎屑 | 已进入 main，尚未发布 |
+| Stylized Fire | 点燃、持续燃烧与断燃余烬 | 已进入 main，尚未发布 |
+| Character Dash Echoes | 捕获角色姿态，制作冲刺残影 | 已进入 main，尚未发布 |
+| Calligraphic Magic Circle | 逐笔形成、转动与立体符记释放 | 已进入 main，尚未发布 |
 
-下一阶段将完整库扩至约 **8–10 种不同用途的效果**。烟尘、火焰、角色冲刺残影和魔法阵正在功能分支中验证，未完成验收的候选不计入上表。Low / Medium / High 是同一种效果的质量选择，不作为额外种类。
+main 现有 **8 种完整效果、18 个资产文件**。原三套保留 Low，新五套各提供 Low / Medium / High；质量文件不作为额外种类。**0.22.2 不包含新五套**，尝试它们请自行构建，或下载成功 Actions 的开发附件。
+
+新增效果的真实 Eevee 图像见 **[角色镜头图集](docs/LIBRARY_GALLERY.md)**。图集保留实际画面，包括远景弱细节等问题；不代表全部效果已达到商业成片品质。
 
 参数、各层作用与实际观看范围见 [入门库指南](docs/STARTER_LIBRARY.md)。原生角色测试镜头、渲染图和检查限制见 [角色战斗记录](docs/CHARACTER_COMBAT_REVIEW.md)。生成视频和测试通过，不等同于已经完成艺术验收。
 
