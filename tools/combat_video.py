@@ -13,6 +13,7 @@ PROFILES = {
     "combat": ("render-settings.json", "rendered_frames", "combat", 36),
     "handoff": ("review-settings.json", "frames", "handoff", 60),
     "character": ("character-settings.json", "frames", "character", 96),
+    "lightning": ("lightning-settings.json", "frames", "lightning", 28),
 }
 
 

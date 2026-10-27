@@ -17,6 +17,7 @@ expected = {
     "energy-charge": ("core.composition", 48),
     "impact-burst": ("core.composition", 24),
     "arc-slash": ("mesh.slash", 18),
+    "lightning-strike": ("core.composition", 18),
 }
 assert not any("blender_vfx_studio" in name for name in sys.modules)
 with tempfile.TemporaryDirectory() as folder, zipfile.ZipFile(package) as archive:

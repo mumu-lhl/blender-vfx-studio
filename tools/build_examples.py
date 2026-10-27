@@ -1,4 +1,4 @@
-"""Build three native starter assets and embedded CPU previews in a fresh process."""
+"""Build native starter assets and embedded CPU previews in a fresh process."""
 
 import os
 import sys
@@ -15,11 +15,12 @@ sys.path.insert(0, str(ROOT))
 from blender_vfx_studio import assets, composition, core  # noqa: E402
 from blender_vfx_studio.nodes import drive, node  # noqa: E402
 
-EXAMPLES = ("energy-charge", "impact-burst", "arc-slash")
+EXAMPLES = ("energy-charge", "impact-burst", "arc-slash", "lightning-strike")
 PREVIEWS = {
     "energy-charge": (31, (4, -6, 3.5), (0, 0, 0.1), 4.8),
     "impact-burst": (5, (3, -5, 6), (0, 0, 0), 5.0),
     "arc-slash": (5, (0, 0, 8), (0, 0, 0), 5.4),
+    "lightning-strike": (4, (4, -6, 3.8), (0, 0, 1.6), 5.2),
 }
 
 
@@ -167,6 +168,10 @@ def create_effect(key):
         shield.children[0].data.materials[0].surface_render_method = "DITHERED"
         root = composition.create(context, [outer, inner, shield, particles])
         root.name = "Energy Charge"
+    elif key == "lightning-strike":
+        from tools.lightning_asset import create
+
+        root = create(context)
     elif key == "impact-burst":
         root = core.create(context, "IMPACT_BURST", "LOW")
     else:
