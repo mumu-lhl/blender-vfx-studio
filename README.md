@@ -290,6 +290,8 @@ Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使�
 
 ## 入门资产库
 
+当前按 [#138](https://github.com/mumu-lhl/blender-vfx-studio/issues/138) 扩库，计划加入闪电、烟尘、火焰、冲刺残影和魔法阵。闪电候选见 [PR #144](https://github.com/mumu-lhl/blender-vfx-studio/pull/144)，未验收原型不计入当前完整资产数量。
+
 发布附件中的 `blender-vfx-studio-examples-版本.zip` 是独立资产库，不能作为插件安装。解压后，将文件夹添加到 Blender 的 Asset Libraries，再通过 Load VFX with New ID 创建效果。
 已发布的 0.22.2 包含 Energy Charge、Impact Burst 和 Arc Slash 三套 Low 资产。当前开发包新增 Lightning Strike 候选：分支电弧、错峰复击、接触闪光、火花与地面余波；默认 Medium，`quality/` 另提供 Low / High 完整文件，质量版本不计作额外效果。全部使用原生节点和嵌入预览，不需要外部贴图或缓存。闪电的高清和完整动画检查正在进行，尚未发布新版本。
 
