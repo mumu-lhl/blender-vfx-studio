@@ -49,7 +49,7 @@ elapsed = (frame - start) * max(speed, 0.001) / max(duration, 1)
 
 Arc Slash 的 Arc 是开口弧线覆盖的度数，居中朝向局部 +X；Spin 是一周期绕局部 Z 旋转的度数。
 Taper 控制两端宽度收窄，中段宽度为 Width，内半径至少为 0.001。它使用参数生成形状，和保存武器采样路径的 Trail 是两种不同创作方式。
-版本 3 的 Contour 在基本半径上添加钩形与缺口；Bank 按半径缩放刀面的深度弯曲，0 为平面；Wake Spread 控制残影的动态角度分离。Fade 控制退场时的分段镂空，Breakup 仍独立控制噪声侵蚀。版本 1/2 保留原参数和节点行为。版本 4 进一步让 Head Bias 将宽度峰值移向前端，给残弧独立的局部年龄，并降低细碎噪声频率；版本 3 的已有参数预设继续重建版本 3。版本 5 的 Afterimage 控制有色残影的面积，两端随片段收尖；版本 4 及更早的 Afterimage 仍控制透明度。
+Contour 在基本半径上添加钩形与缺口；Bank 按半径缩放刀面的深度弯曲，0 为平面；Wake Spread 控制残影的动态角度分离。Head Bias 将宽度峰值移向前端，各条残弧使用独立的局部年龄。Afterimage 控制有色残影的面积，片段两端收尖；Fade 控制退场时的分段镂空，Breakup 控制噪声侵蚀。
 
 护盾的 IOR 是 Fresnel 节点使用的折射率，Rim Power 是输出的幂次，越大则亮边越窄。
 Opacity 和 Fade 控制透明度，Dissolve 为噪声阈值。Flow 是一个周期内四维噪声 W 坐标的变化量，不是运动速度或帧率。
@@ -63,7 +63,7 @@ Opacity 和 Fade 控制透明度，Dissolve 为噪声阈值。Flow 是一个周�
 例如首文件编号 10，First=1 表示使用编号 11 的文件。图片序列与图集共用选帧容差、透明度和生命周期规则。
 序列文件不打包到完整效果资产中，JSON 记录第一张图片路径及数量；分享时需要迁移全部文件。
 
-Burst 粒子整组在 Start 出生，以原生点 Index 作为编号，Seed 决定可重复的随机变化，Count 不超过 2048。版本 1 的 Motion Time = Progress × Motion Seconds；版本 2 可用 Motion Ease 将 Progress 混合为快出慢停的时钟，再乘 Motion Seconds；位置由初速度、初始径向距离和重力公式直接计算。Motion Seconds 表示轨迹中的秒数，Duration 表示播放帧数，修改场景帧率不会自动改变二者。Fade 在粒子模块表示尺寸缩减，不是透明度。一个周期结束后全体消失，循环从出生状态重新开始；不处理碰撞或历史受力。
+Burst 粒子整组在 Start 出生，以原生点 Index 作为编号，Seed 决定可重复的随机变化，Count 不超过 2048。Motion Ease 将 Progress 混合为快出慢停的时钟，再乘 Motion Seconds；位置由初速度、初始径向距离和重力公式直接计算。Motion Seconds 表示轨迹中的秒数，Duration 表示播放帧数，修改场景帧率不会自动改变二者。Fade 在粒子模块表示尺寸缩减，不是透明度。一个周期结束后全体消失，循环从出生状态重新开始；不处理碰撞或历史受力。
 
 连续发射模块 `particle.emitter` 使用每个粒子的独立出生时间和寿命，不使用 Burst 的 Count / Motion Seconds。
 运动时钟为 `Progress × (Emission Seconds + Lifetime)`，出生编号 n 的时间为 `n / Effective Rate`，只接受出生时间小于 Emission Seconds 的粒子；年龄达到 Lifetime 即消失。
