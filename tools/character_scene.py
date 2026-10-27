@@ -161,47 +161,7 @@ def setup_base(*, light=True, far=False, view="front", engine="BLENDER_EEVEE"):
     for image in bpy.data.images:
         if image.source == "FILE" and not image.packed_file:
             image.pack()
-    bpy.ops.mesh.primitive_plane_add(size=200)
-    floor = bpy.context.object
-    floor.name = "Stage • Ground"
-    floor.data.materials.append(
-        material("Stage floor", (0.62, 0.66, 0.72) if light else (0.035, 0.045, 0.06))
-    )
-    scene.world = bpy.data.worlds.new("Character review world")
-    scene.world.use_nodes = True
-    scene.world.node_tree.nodes["Background"].inputs["Color"].default_value = (
-        (0.62, 0.66, 0.72, 1) if light else (0.018, 0.023, 0.035, 1)
-    )
-    scene.world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.4
-    for name, location, energy, size in (("Key", (0, -4, 6), 900, 5), ("Rim", (-2, 3, 4), 600, 4)):
-        lamp = bpy.data.objects.new(name, bpy.data.lights.new(name, "AREA"))
-        scene.collection.objects.link(lamp)
-        lamp.location = location
-        lamp.rotation_euler = (
-            (Vector((0, 0, 1)) - lamp.location).to_track_quat("-Z", "Y").to_euler()
-        )
-        lamp.data.energy, lamp.data.shape, lamp.data.size = energy, "DISK", size
-    focus = Vector((0, 0, 0.95))
-    camera = bpy.data.objects.new(
-        "Character combat camera", bpy.data.cameras.new("Character combat camera")
-    )
-    scene.collection.objects.link(camera)
-    camera.location = focus + Vector((0, 7, 3.2) if view == "front" else (0, -7, 3.2))
-    camera.rotation_euler = (focus - camera.location).to_track_quat("-Z", "Y").to_euler()
-    camera.data.type, camera.data.lens = "PERSP", 50
-    if far:
-        camera.location = focus + (camera.location - focus) * 2
-    camera.data.ortho_scale = 12.8 if far else 6.4
-    scene.camera = camera
-    scene.render.engine = engine
-    scene.eevee.taa_render_samples = 16
-    scene.cycles.device, scene.cycles.samples = "CPU", 24
-    scene.cycles.use_denoising = False
-    scene.render.resolution_x, scene.render.resolution_y = 960, 540
-    scene.render.resolution_percentage = 100
-    scene.view_settings.view_transform, scene.view_settings.look = "AgX", "None"
-    scene.render.image_settings.file_format = "PNG"
-    scene.render.film_transparent = False
+    setup_stage(light=light, far=far, view=view, engine=engine)
     scene.frame_set(contact["frame"])
     return {
         "caster": caster,
@@ -308,3 +268,51 @@ def add_effects(fixture):
     scene.frame_set(hit_frame)
     fixture.update(effects=(charge, slash, impact), effects_collection=collection)
     return fixture
+
+
+def setup_stage(
+    *, light=True, far=False, view="front", engine="BLENDER_EEVEE", focus=(0, 0, 0.95), lens=50
+):
+    """Shared neutral stage for actual character/effect comparisons."""
+    scene = bpy.context.scene
+    bpy.ops.mesh.primitive_plane_add(size=200)
+    floor = bpy.context.object
+    floor.name = "Stage • Ground"
+    floor.data.materials.append(
+        material("Stage floor", (0.62, 0.66, 0.72) if light else (0.035, 0.045, 0.06))
+    )
+    scene.world = bpy.data.worlds.new("Character review world")
+    scene.world.use_nodes = True
+    scene.world.node_tree.nodes["Background"].inputs["Color"].default_value = (
+        (0.62, 0.66, 0.72, 1) if light else (0.018, 0.023, 0.035, 1)
+    )
+    scene.world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.4
+    for name, location, energy, size in (("Key", (0, -4, 6), 900, 5), ("Rim", (-2, 3, 4), 600, 4)):
+        lamp = bpy.data.objects.new(name, bpy.data.lights.new(name, "AREA"))
+        scene.collection.objects.link(lamp)
+        lamp.location = location
+        lamp.rotation_euler = (
+            (Vector((0, 0, 1)) - lamp.location).to_track_quat("-Z", "Y").to_euler()
+        )
+        lamp.data.energy, lamp.data.shape, lamp.data.size = energy, "DISK", size
+    focus = Vector(focus)
+    camera = bpy.data.objects.new(
+        "Character combat camera", bpy.data.cameras.new("Character combat camera")
+    )
+    scene.collection.objects.link(camera)
+    camera.location = focus + Vector((0, 7, 3.2) if view == "front" else (0, -7, 3.2))
+    camera.rotation_euler = (focus - camera.location).to_track_quat("-Z", "Y").to_euler()
+    camera.data.type, camera.data.lens = "PERSP", lens
+    if far:
+        camera.location = focus + (camera.location - focus) * 2
+    camera.data.ortho_scale = 12.8 if far else 6.4
+    scene.camera = camera
+    scene.render.engine = engine
+    scene.eevee.taa_render_samples = 16
+    scene.cycles.device, scene.cycles.samples = "CPU", 24
+    scene.cycles.use_denoising = False
+    scene.render.resolution_x, scene.render.resolution_y = 960, 540
+    scene.render.resolution_percentage = 100
+    scene.view_settings.view_transform, scene.view_settings.look = "AgX", "None"
+    scene.render.image_settings.file_format = "PNG"
+    scene.render.film_transparent = False
