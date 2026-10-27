@@ -11,7 +11,7 @@ from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from blender_vfx_studio import core  # noqa: E402
+from blender_vfx_studio import core, slash  # noqa: E402
 
 
 def setup(
@@ -80,13 +80,19 @@ def main():
     parser.add_argument("--frames", type=int, nargs="+")
     parser.add_argument("--angled", action="store_true", help="Review the native blade depth")
     parser.add_argument("--far", action="store_true")
+    parser.add_argument("--style", choices=("DEFAULT", "CLEAN", "STYLIZED"), default="DEFAULT")
+    parser.add_argument("--body-color", type=float, nargs=3, metavar=("R", "G", "B"))
+    parser.add_argument("--blade-color", type=float, nargs=3, metavar=("R", "G", "B"))
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
     if not bpy.app.background or "--factory-startup" not in sys.argv or bpy.data.filepath:
         raise RuntimeError("Use a fresh background process with --factory-startup and no project")
     if args.sampled and args.frames:
-        parser.error("Choose one frame selection and one asset version")
+        parser.error("Choose either sampled playback or explicit frames")
     if args.frames and min(args.frames) < 1:
         parser.error("Frames must be positive")
+    for color in (args.body_color, args.blade_color):
+        if color is not None and any(not 0 <= c <= 1 for c in color):
+            parser.error("Color channels must be within 0–1")
     sources = [
         "blender_vfx_studio/" + name + ".py"
         for name in ("slash", "slash_shape", "slash_shader", "parameters", "registry")
@@ -105,6 +111,13 @@ def main():
         pale=args.pale,
         view_transform=args.view_transform,
     )
+    if args.style != "DEFAULT":
+        slash.apply_style(root, args.style)
+    for prefix, color in (("color", args.body_color), ("blade_color", args.blade_color)):
+        if color is not None:
+            for i, channel in enumerate(color):
+                root[f"{prefix}_{i}"] = channel
+    root.update_tag()
     folder = ROOT / "work/visual-slash"
     folder.mkdir(parents=True, exist_ok=True)
     prefix = args.engine.lower()
@@ -113,6 +126,10 @@ def main():
     prefix += "-far" if args.far else ""
     prefix += "-pale" if args.pale else ""
     prefix += "-agx" if args.view_transform == "AgX" else ""
+    prefix += "" if args.style == "DEFAULT" else "-" + args.style.lower()
+    for label, color in (("body", args.body_color), ("blade", args.blade_color)):
+        if color is not None:
+            prefix += "-" + label + "-" + "-".join(f"{c:g}" for c in color)
     stages = [("appear", 2), ("peak", 5), ("decay", 11)]
     if args.sampled or args.frames:
         frames = sorted(set(range(1, 20, 2)) | {2, 5}) if args.sampled else sorted(set(args.frames))
@@ -130,6 +147,9 @@ def main():
         json.dumps(
             {
                 "asset_version": root["vfx_asset_version"],
+                "style": args.style,
+                "body_color": [root[f"color_{i}"] for i in range(3)],
+                "blade_color": [root[f"blade_color_{i}"] for i in range(3)],
                 "engine": args.engine,
                 "light_background": args.light or args.pale,
                 "background_color": list(

@@ -55,7 +55,17 @@ def _diffuse(root, *, haze=False, grit=False):
                 "Veil Lifetime",
                 "MULTIPLY",
                 g.stage("Veil Ignites", p, 0, 0.12),
-                g.m("Veil Dissipates", "SUBTRACT", 1, g.stage("Veil Fades", p, 0.45, 1)),
+                g.m(
+                    "Veil Dissipates",
+                    "SUBTRACT",
+                    1,
+                    g.m(
+                        "Editable Veil Fade",
+                        "MULTIPLY",
+                        g.stage("Veil Fades", p, 0.45, 1),
+                        g.value("Veil Fade Amount", prop="fade"),
+                    ),
+                ),
             ),
         )
         inner = g.n("ShaderNodeAttribute", "Soft Outside Edge", attribute_name="vfx_inner")
@@ -188,7 +198,7 @@ def _volume(root, quality):
     g.link(joined.outputs[0], hide.inputs["False"])
     output = g.n("NodeGroupOutput", "Output")
     g.link(hide.outputs[0], output.inputs["Geometry"])
-    root["vfx_parameter_keys"] = "radius,width,expansion,noise_scale,dissolve,fade"
+    root["vfx_parameter_keys"] = "radius,width,expansion,noise_scale,fade"
     material = layer.data.materials[0]
     material.name = "VFX • Rolling Dust Volume"
     material.node_tree.animation_data_clear()

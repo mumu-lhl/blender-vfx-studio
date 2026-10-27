@@ -195,6 +195,16 @@ def geometry(obj, root):
     profile = math_node("Wake Fragment Ends", "ADD", profile, 0.25, -900, -3600)
     profile = math_node("Nonnegative Wake Width", "MAXIMUM", profile, 0, -700, -3600)
     profile = math_node("Wake Width Normalized", "DIVIDE", profile, 1.25, -500, -3600)
+    cut_mix = value("Wake Surface Cuts", "surface_cuts", -900, -4200)
+    profile = math_node("Editable Wake Segments", "MULTIPLY", profile, cut_mix, -500, -4200)
+    profile = math_node(
+        "Continuous Or Cut Wakes",
+        "ADD",
+        profile,
+        math_node("Continuous Wake Weight", "SUBTRACT", 1, cut_mix, -700, -4200),
+        -300,
+        -4200,
+    )
     area = value("Afterimage Area", "afterimage", -1700, -4000)
     area = math_node("Wake Area Width", "SQRT", area, 0, -1500, -4000)
     profile = math_node("Editable Fragment Width", "MULTIPLY", profile, area, -300, -3600)
@@ -243,3 +253,46 @@ def geometry(obj, root):
     link(inactive, hide.inputs["Selection"])
     link(hide.outputs[0], out.inputs["Geometry"])
     obj.modifiers.new("VFX • Procedural Slash", "NODES").node_group = tree
+
+
+STYLE_KEYS = (
+    "contour",
+    "bank",
+    "head_bias",
+    "afterimage",
+    "streaks",
+    "breakup",
+    "dissolve",
+    "fade",
+    "surface_cuts",
+    "fragment_release",
+)
+STYLE_VALUES = {
+    "STYLIZED": {key: SLASH_PARAMETERS[key][0] for key in STYLE_KEYS},
+    "CLEAN": {
+        "contour": 0.0,
+        "bank": 0.0,
+        "head_bias": 0.3,
+        "afterimage": 0.0,
+        "streaks": 0.0,
+        "breakup": 0.0,
+        "dissolve": 0.0,
+        "fade": 1.0,
+        "surface_cuts": 0.0,
+        "fragment_release": 0.0,
+    },
+}
+
+
+def apply_style(root, style):
+    """Change artistic values on the same editable nodes, preserving palette and timing."""
+    root = core.resolve(root)
+    if root is None or root["vfx_module"] != "mesh.slash" or style not in STYLE_VALUES:
+        raise ValueError("Select an Arc Slash and a supported style")
+    if not all(key in root for key in STYLE_KEYS):
+        raise ValueError("This custom shader keeps its saved controls; edit its native nodes")
+    for key, value in STYLE_VALUES[style].items():
+        root[key] = value
+    root.update_tag()
+    bpy.context.view_layer.update()
+    return root

@@ -50,14 +50,14 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 ## Arc Slash
 
-这是单层紫色程序化刀光，不需要角色动画或采样路径。它与侧栏创建使用同一生成器，资产时长设为 18 帧。
+这是单层程序化刀光，与侧栏创建使用同一生成器，资产时长为 18 帧。
 
-- **Arc / Width / Spin**：弧度、宽度和旋转。
-- **Attack / Motion Ease**：展开与减速节奏。
-- **Core Width / Afterimage / Streaks / Breakup**：锋刃、残影、笔触与侵蚀。
-- **Head Bias / Contour / Bank / Wake Spread**：前端偏重、轮廓、深度与残影分离。
+1. 选择 **Clean** 获得平整连续的基础刀光，或 **Stylized** 使用钩形、分面与破碎残弧。
+2. 在 **Shape / Motion** 调整弧度、宽度、展开速度和残弧。**Depth Bend=0** 关闭深度弯折，**Contour=0** 关闭额外轮廓扰动。
+3. 用 **Body / Blade** 原生颜色选择器编辑主体和锋刃；主体颜色也用于残弧。右侧菱形可给颜色插入关键帧。
+4. 要手动保持连续轮廓，关闭 **Surface Cuts、Noise Erosion、Dissolve**，并将 **Fragment Release** 设为 0；此时 **Fade** 控制连续淡出。
 
-主刀面与两端收尖的残弧分别展开和退场，残影保留紫色；**Afterimage** 控制残弧的可见面积。硬笔触和远景细尾仍待改善，见 [实际残影检查](SLASH_WAKE_REVIEW.md)。
+风格按钮只改参数，不重建节点；尺寸、配色和整体时间保持不变。各控制的区别见 [刀光编辑](USAGE.md#编辑刀光)。实际图像和检查限制见 [艺术控制审查](ART_CONTROLS_REVIEW.md)。
 
 ## Impact Burst
 
@@ -79,7 +79,7 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 不等大的云团先横向铺开，再抬升并变薄。**它不发光，需要场景灯光。** 原生 Volume Cube 把空间分成小格，几何节点直接计算每格当前帧的密度；这不是流体模拟，不需要历史缓存或外部 VDB 文件。Solid 模式只显示编辑域边界。
 
-**Width / Expansion** 调整云团大小与铺开距离，**Noise Scale / Dissolve / Fade** 调整细节、密度侵蚀与消散。主层 **Object Properties → Custom Properties** 的 **Dust Rise Height / Dust Roll Speed / Dust Density** 控制抬升、纹理上卷与光学密度。
+**Width / Expansion** 调整云团大小与铺开距离，**Noise Scale / Dissolve / Fade** 调整细节、密度侵蚀与消散。选择主层，在侧栏 **Shape / Motion / Material** 中使用 **Dust Rise Height / Dust Roll Speed / Dust Density** 调整抬升、纹理上卷与光学密度。地面薄雾层的 **Fade** 单独控制它的透明消散；它是较弱的辅助层，不替代主体体积。
 
 三档改变密度网格分辨率、密度团和碎屑数量，体积计算有明显 CPU 成本。已实际查看高清图、全部隔帧样本、三档比较及 Cycles 预览；修复后的矩形伪影未再出现。检查范围、代价和限制见 [烟尘记录](DUST_REVIEW.md)。
 
@@ -87,7 +87,7 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 三团不等高的外焰围绕较小的热芯，持续产生上升余烬。主焰在 48 帧内点燃、维持并断燃，余烬晚四帧结束，完整资产为 52 帧。
 
-**Width / Noise Scale / Strength / Dissolve / Fade** 控制宽度、流动色带、光量和退场。主层自定义属性 **Fire Height / Fire Flow Speed / Fire Curl** 调整高度、上卷节奏与火舌形变。颜色参数乘到红橙黄色带上；编辑材质的 **Painted Red Orange Yellow** 色带可改变热色顺序。
+**Width / Noise Scale / Strength / Dissolve / Fade** 控制宽度、流动色带、光量和退场。选择主焰层，在侧栏 **Shape / Motion** 使用 **Fire Height / Fire Flow Speed / Fire Curl** 调整高度、上卷节奏与火舌形变。**Heat Palette → Orange / Blue / Green** 直接替换主焰原生色带的五种颜色，并把 **Heat Tint** 归为白色；不会重建节点或改变几何。**Heat Tint** 用于在现有色带上乘色，不适合单独把橙火变为蓝火。需要自定热芯和边缘颜色时展开 **Edit Heat Ramp**；余烬是独立层，可用其颜色选择器调整。色带和手动节点请用 **Save Complete Effect** 保存，参数 JSON 不包含色带。
 
 三档改变截面细节和余烬生成率。已实际查看高清、明暗与远景、全部隔帧样本和三档预览；中段大火面与远景细余烬仍需改善。见 [火焰记录](FIRE_REVIEW.md)。
 
@@ -109,7 +109,7 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 主印逐笔形成，符文带反向转动；释放时立体符记升起，地面图案先退去。笔画由本项目生成，不依赖字体、贴图或缓存。
 
-**Radius / Width** 调整尺寸和笔画，颜色与 **Strength** 可分层编辑，**Noise Scale / Dissolve / Fade** 调整侵蚀和消散。各层自定义属性 **Sigil Spin** 控制周期转角，释放层的 **Sigil Lift** 调整升起高度。三档改变曲线采样密度，保持同一图案和时序。
+**Radius / Width** 调整尺寸和笔画，颜色与 **Strength** 可分层编辑，**Noise Scale / Dissolve / Fade** 调整侵蚀和消散。侧栏 **Motion → Sigil Spin** 控制各层周期转角；释放层还可用 **Sigil Lift** 调整升起高度。三档改变曲线采样密度，保持同一图案和时序。
 
 已查看高清、明暗与远景、全部隔帧样本和三档实际嵌入预览。细符文远景偏弱，画面仍偏干净的线描风格，见 [魔法阵记录](MAGIC_REVIEW.md)。
 

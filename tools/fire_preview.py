@@ -12,6 +12,7 @@ import bpy
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+from blender_vfx_studio import composition, palettes  # noqa: E402
 from tools.character_scene import actor, clip, setup_stage  # noqa: E402
 from tools.fire_asset import create  # noqa: E402
 
@@ -32,7 +33,7 @@ def hashes():
     }
 
 
-def setup(*, light=True, far=False):
+def setup(*, light=True, far=False, palette="ORANGE"):
     scene = bpy.context.scene
     scene.render.fps = 24
     scene.frame_start, scene.frame_end = 1, 72
@@ -43,6 +44,9 @@ def setup(*, light=True, far=False):
     before = set(scene.objects)
     scene.frame_set(18)
     root = create(bpy.context)
+    if palette != "ORANGE":
+        flame = next(m for m in composition.members(root) if palettes.fire_ramp(m))
+        palettes.apply_fire(flame, palette)
     root.location = (0.65, 0, 0.03)
     root.update_tag()
     fx = bpy.data.collections.new("Combat VFX • toggle for comparison")
@@ -66,6 +70,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dark", action="store_true")
     parser.add_argument("--far", action="store_true")
+    parser.add_argument("--palette", choices=tuple(palettes.FIRE_PALETTES), default="ORANGE")
     parser.add_argument("--sequence", action="store_true")
     parser.add_argument("--frames", nargs="+", type=int)
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
@@ -73,11 +78,15 @@ def main():
         raise RuntimeError("Use a fresh factory background process")
     frozen = hashes()
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    contact = setup(light=not args.dark, far=args.far)
+    contact = setup(light=not args.dark, far=args.far, palette=args.palette)
     folder = (
         ROOT
         / "work/fire-review"
-        / (("dark" if args.dark else "light") + ("-far" if args.far else "-near"))
+        / (
+            ("dark" if args.dark else "light")
+            + ("-far" if args.far else "-near")
+            + ("" if args.palette == "ORANGE" else "-" + args.palette.lower())
+        )
     )
     folder.mkdir(parents=True, exist_ok=True)
     record = folder / "fire-settings.json"
@@ -115,6 +124,7 @@ def main():
                 bloom=False,
                 dark=args.dark,
                 far=args.far,
+                heat_palette=args.palette,
                 contact=contact,
                 source_sha256=frozen,
                 saved_frame=saved_frame,
