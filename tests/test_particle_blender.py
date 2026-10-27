@@ -194,13 +194,7 @@ class ParticleTests(unittest.TestCase):
         update(root, count=3000)
         self.assertLessEqual(len(mesh(root, 4).vertices), 2048 * 20)
 
-    def test_legacy_and_shard_presets_keep_their_versions_and_private_data(self):
-        legacy = core.create_particle(bpy.context, asset_version=1)
-        snapshot = core.preset_snapshot(legacy)
-        self.assertEqual(snapshot["asset_version"], 1)
-        restored = core.create_from_preset(bpy.context, snapshot)
-        self.assertNotIn("shape", restored)
-        self.assertEqual(points(legacy, 7), points(restored, 7))
+    def test_shard_presets_and_duplicates_keep_independent_data(self):
         bpy.context.scene.frame_set(1)
         root = core.create_particle(bpy.context)
         update(root, shape=1, stretch=8.0, planar=0.8, motion_ease=0.7)
@@ -216,7 +210,7 @@ class ParticleTests(unittest.TestCase):
         self.assertTrue(mesh(clone, 5).vertices)
         counts = len(bpy.data.objects)
         with self.assertRaises(ValueError):
-            core.create_particle(bpy.context, asset_version=99)
+            core.create_particle(bpy.context, quality="INVALID")
         self.assertEqual(len(bpy.data.objects), counts)
 
 

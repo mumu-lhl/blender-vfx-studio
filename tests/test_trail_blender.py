@@ -115,7 +115,7 @@ class TrailTests(unittest.TestCase):
             self.assertLess((Vector(tail[i]) - tip).length, 1e-5)
             self.assertLess((Vector(head[i]) - origin).length, 1e-5)
 
-    def test_bone_tail_rebake_clone_asset_and_legacy_head(self):
+    def test_bone_endpoints_rebake_clone_and_complete_asset(self):
         rig, _, _ = animated_rig()
         root = trail.create(bpy.context, rig, "Blade", 1, 21, 5, bone_tail=True)
         self.assertTrue(root["vfx_bone_tail"])
@@ -128,7 +128,7 @@ class TrailTests(unittest.TestCase):
         self.assertTrue(imported["vfx_bone_tail"])
         self.assertIsNone(imported.get("vfx_source"))
         original = [tuple(v.co) for v in trail.layer_for(root).data.vertices]
-        del root["vfx_bone_tail"]  # Pre-feature assets have no authoring switch.
+        root["vfx_bone_tail"] = False
         trail.rebake(bpy.context, root)
         self.assertNotEqual([tuple(v.co) for v in trail.layer_for(root).data.vertices], original)
         head = trail.sample(bpy.context, rig, "Blade", 1, 21, 5)

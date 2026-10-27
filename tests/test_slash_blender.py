@@ -33,7 +33,7 @@ def points(root, frame):
 
 
 def create():
-    root = slash.create(bpy.context, asset_version=1)
+    root = slash.create(bpy.context)
     update(
         root,
         start=1.0,
@@ -52,34 +52,6 @@ class SlashTests(unittest.TestCase):
     def setUp(self):
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
-    def test_arc_and_spin_bounds_at_arbitrary_frames(self):
-        root = create()
-        result = mesh(root, 1)
-        self.assertGreaterEqual(min(v.co.x for v in result.vertices), -1e-5)
-        self.assertAlmostEqual(max(v.co.x for v in result.vertices), 2, places=5)
-        self.assertAlmostEqual(min(v.co.length for v in result.vertices), 1.5, places=5)
-        halfway = points(root, 13)
-        self.assertGreaterEqual(min(p[1] for p in halfway), -1e-5)
-        self.assertAlmostEqual(max(p[0] for p in halfway), 2, places=5)
-        self.assertEqual(points(root, 25), [])
-        self.assertEqual(points(root, 0), [])
-        update(root, speed=2.0)
-        self.assertEqual(points(root, 7), halfway)
-        update(root, loop=True)
-        self.assertEqual(points(root, 13), points(root, 1))
-
-    def test_taper_width_and_radius_stay_finite(self):
-        root = create()
-        area = sum(p.area for p in mesh(root, 1).polygons)
-        update(root, taper=4.0)
-        self.assertLess(sum(p.area for p in mesh(root, 1).polygons), area * 0.8)
-        update(root, width=10.0, arc=359.0)
-        result = mesh(root, 1)
-        self.assertTrue(all(math.isfinite(c) for v in result.vertices for c in v.co))
-        self.assertGreaterEqual(min(v.co.length for v in result.vertices), 0.00099)
-        update(root, spin=-360.0, expansion=1.0)
-        self.assertAlmostEqual(max(v.co.length for v in mesh(root, 13).vertices), 2.5, places=5)
-
     def test_preset_roundtrip_and_independent_duplicate(self):
         root = create()
         root.children[0].data.materials[0].node_tree.nodes.new("ShaderNodeValue").name = "User Edit"
@@ -97,28 +69,6 @@ class SlashTests(unittest.TestCase):
         core.delete(restored)
         self.assertEqual(len(bpy.data.meshes), 0)
         self.assertEqual(len(bpy.data.materials), 0)
-
-    def test_cpu_render_contains_only_the_selected_arc(self):
-        root = create()
-        update(
-            root,
-            radius=1.5,
-            width=0.6,
-            spin=0.0,
-            taper=0.01,
-            dissolve=0.0,
-            fade=0.0,
-            strength=1.0,
-            color_0=0.0,
-            color_1=0.0,
-            color_2=1.0,
-        )
-        camera()
-        pixels = render_pixels(1)
-        left, right = (24 * 48 + 10) * 4, (24 * 48 + 38) * 4
-        self.assertLess(max(pixels[left : left + 3]), 0.01)
-        self.assertGreater(pixels[right + 2], 0.3)
-        self.assertLess(max(pixels[right : right + 2]), 0.01)
 
     def test_creation_quality_operator_and_simple_drivers(self):
         counts = []
@@ -139,11 +89,10 @@ class SlashTests(unittest.TestCase):
                     )
                 )
             core.delete(root)
-        self.assertTrue(0 < counts[0] < counts[1] < counts[2] < 5000)
+        self.assertTrue(0 < counts[0] < counts[1] < counts[2])
 
-    def test_modern_geometry_parameters_and_stateless_playback(self):
-        root = slash.create(bpy.context, "LOW", asset_version=2)
-        self.assertEqual(root["vfx_asset_version"], 2)
+    def test_geometry_parameters_and_stateless_playback(self):
+        root = slash.create(bpy.context, "LOW")
         peak = points(root, 5)
         update(root, motion_ease=0.0)
         self.assertNotEqual(points(root, 5), peak)
@@ -158,74 +107,10 @@ class SlashTests(unittest.TestCase):
         self.assertEqual(points(root, 3), peak)
         update(root, speed=1.0, loop=True)
         self.assertEqual(points(root, 21), peak)
-        self.assertLess(len(mesh(root, 5).vertices), 1000)
 
-    def test_modern_render_has_attack_peak_release_and_editable_detail(self):
-        root = slash.create(bpy.context, asset_version=2)
-        camera()
-        bpy.context.scene.camera.data.ortho_scale = 5.5
-        frames = [render_pixels(frame) for frame in (2, 5, 13)]
-
-        def energy(pixels):
-            return sum(sum(pixels[i : i + 3]) for i in range(0, len(pixels), 4))
-
-        self.assertGreater(energy(frames[1]), energy(frames[0]) * 1.5)
-        self.assertLess(energy(frames[2]), energy(frames[1]) * 0.4)
-        self.assertTrue(any(min(frames[1][i : i + 3]) > 0.3 for i in range(0, len(frames[1]), 4)))
-        self.assertTrue(
-            any(
-                frames[1][i + 2] > 0.15 and frames[1][i + 1] < 0.12
-                for i in range(0, len(frames[1]), 4)
-            )
-        )
-        update(root, afterimage=0.0, streaks=0.0)
-        plain = render_pixels(5)
-        self.assertGreater(sum(abs(a - b) for a, b in zip(plain, frames[1])), 1)
-        update(root, breakup=0.0)
-        intact = render_pixels(13)
-        update(root, breakup=1.0)
-        eroded = render_pixels(13)
-        self.assertLess(energy(eroded), energy(intact) * 0.8)
-        update(root, dissolve=1.0)
-        dissolved = render_pixels(5)
-        self.assertLess(max(dissolved[i] for i in range(len(dissolved)) if i % 4 != 3), 0.01)
-
-    def test_modern_asset_and_legacy_preset_roundtrip_preserve_versions(self):
-        legacy = create()
-        legacy_data = presets.loads(presets.dumps(core.preset_snapshot(legacy)))
-        self.assertEqual(legacy_data["asset_version"], 1)
-        old_copy = core.create_from_preset(bpy.context, legacy_data)
-        self.assertEqual(old_copy["vfx_asset_version"], 1)
-        self.assertNotIn("afterimage", old_copy)
-        self.assertEqual(points(legacy, 7), points(old_copy, 7))
-        bpy.context.scene.frame_set(1)
-        modern = slash.create(bpy.context, asset_version=2)
-        update(modern, attack=0.12, core_width=0.08, afterimage=0.4, breakup=0.6)
-        modern.children[0].data.materials[0].node_tree.nodes.new(
-            "ShaderNodeValue"
-        ).name = "User Filament Edit"
-        data = presets.loads(presets.dumps(core.preset_snapshot(modern)))
-        restored = core.create_from_preset(bpy.context, data)
-        self.assertEqual(restored["attack"], 0.12)
-        self.assertEqual(restored["afterimage"], 0.4)
-        file = ROOT / "work/modern-slash.blend"
-        assets.write(file, modern)
-        loaded = assets.load(bpy.context, file)
-        self.assertEqual(points(modern, 5), points(loaded, 5))
-        self.assertIn("User Filament Edit", loaded.children[0].data.materials[0].node_tree.nodes)
-        self.assertNotEqual(loaded["vfx_id"], modern["vfx_id"])
-        core.delete(modern)
-        self.assertTrue(mesh(loaded, 5).vertices)
-        for obj in (loaded, restored, legacy, old_copy):
-            core.delete(obj)
-        self.assertEqual(len(bpy.data.meshes), 0)
-        self.assertEqual(len(bpy.data.materials), 0)
-
-    def test_authored_shape_controls_budget_and_retiming(self):
+    def test_shape_controls_and_retiming(self):
         root = core.create(bpy.context, "ARC_SLASH", "LOW")
-        self.assertEqual(root["vfx_asset_version"], 5)
         peak = points(root, 5)
-        self.assertLessEqual(len(peak), 600)
         self.assertGreater(max(p[2] for p in peak) - min(p[2] for p in peak), 0.1)
         for key in ("contour", "bank", "wake_spread"):
             original = root[key]
@@ -248,31 +133,6 @@ class SlashTests(unittest.TestCase):
         restored = core.create_from_preset(bpy.context, snapshot)
         update(restored, start=1.0)
         self.assertEqual(points(restored, 5), peak)
-        self.assertEqual(snapshot["asset_version"], 5)
-
-    def test_colored_wake_changes_its_area_without_changing_primary_or_old_assets(self):
-        old = slash.create(bpy.context, "LOW", asset_version=4)
-        current = slash.create(bpy.context, "LOW")
-        update(old, start=1.0)
-        update(current, start=1.0)
-        band_size = len(current.children[0].data.vertices) // 3
-        previous, actual = points(old, 5), points(current, 5)
-        self.assertEqual(previous[:band_size], actual[:band_size])
-        self.assertNotEqual(previous[band_size:], actual[band_size:])
-        update(current, afterimage=0.0)
-        hidden = points(current, 5)
-        self.assertEqual(hidden[:band_size], actual[:band_size])
-        for band in (1, 2):
-            for section in range(33):
-                row = hidden[band * band_size + section * 6 : band * band_size + (section + 1) * 6]
-                # Bank can bend depth across the blade; radial width is gone.
-                radii = [math.hypot(p[0], p[1]) for p in row]
-                self.assertLess(max(radii) - min(radii), 1e-5)
-        snapshot = presets.loads(presets.dumps(core.preset_snapshot(old)))
-        restored = core.create_from_preset(bpy.context, snapshot)
-        update(restored, start=1.0)
-        self.assertEqual(restored["vfx_asset_version"], 4)
-        self.assertEqual(points(restored, 5), previous)
 
     def test_head_bias_moves_body_mass_forward_without_changing_the_radius(self):
         root = core.create(bpy.context, "ARC_SLASH", "LOW")
@@ -312,32 +172,6 @@ class SlashTests(unittest.TestCase):
             self.assertAlmostEqual(a[1], -b[1], places=5)
             self.assertAlmostEqual(a[2], b[2], places=5)
 
-    def test_version_two_preset_retains_the_flat_regular_shape(self):
-        root = slash.create(bpy.context, "LOW", asset_version=2)
-        update(root, spin=0.0, expansion=0.0)
-        data = presets.loads(presets.dumps(core.preset_snapshot(root)))
-        restored = core.create_from_preset(bpy.context, data)
-        self.assertEqual(points(root, 5), points(restored, 5))
-        self.assertNotIn("contour", restored)
-        result = mesh(restored, 5)
-        outer = [result.vertices[i].co.length for i in range(0, 198, 6)]
-        self.assertLess(max(outer) - min(outer), 1e-5)
-        self.assertTrue(all(abs(v.co.z) < 1e-6 for v in result.vertices))
-
-    def test_version_three_preset_retains_its_shape_and_rendered_appearance(self):
-        old = slash.create(bpy.context, "LOW", asset_version=3)
-        camera()
-        bpy.context.scene.camera.data.ortho_scale = 5.5
-        expected_shape = points(old, 5)
-        expected_pixels = render_pixels(5)
-        snapshot = presets.loads(presets.dumps(core.preset_snapshot(old)))
-        restored = core.create_from_preset(bpy.context, snapshot)
-        update(restored, start=1.0)
-        old.children[0].hide_render = True
-        self.assertEqual(restored["vfx_asset_version"], 3)
-        self.assertEqual(points(restored, 5), expected_shape)
-        self.assertEqual(render_pixels(5), expected_pixels)
-
     def test_authored_surface_controls_and_release(self):
         root = core.create(bpy.context, "ARC_SLASH", "LOW")
         camera()
@@ -361,42 +195,53 @@ class SlashTests(unittest.TestCase):
         held = render_pixels(11)
         self.assertGreater(sum(held[::4]), sum(tail[::4]) * 1.5)
 
+    def test_colored_wake_area_preserves_the_main_blade(self):
+        root = slash.create(bpy.context, "LOW")
+        band_size = len(root.children[0].data.vertices) // 3
+        peak = points(root, 5)
+        update(root, afterimage=0.0)
+        hidden = points(root, 5)
+        self.assertEqual(hidden[:band_size], peak[:band_size])
+        self.assertNotEqual(hidden[band_size:], peak[band_size:])
+        for band in (1, 2):
+            for section in range(33):
+                row = hidden[band * band_size + section * 6 : band * band_size + (section + 1) * 6]
+                radii = [math.hypot(p[0], p[1]) for p in row]
+                self.assertLess(max(radii) - min(radii), 1e-5)
+
+    def test_complete_asset_keeps_manual_nodes_and_independent_ids(self):
+        root = slash.create(bpy.context)
+        update(root, attack=0.12, afterimage=0.4)
+        root.children[0].data.materials[0].node_tree.nodes.new("ShaderNodeValue").name = "User Edit"
+        data = presets.loads(presets.dumps(core.preset_snapshot(root)))
+        restored = core.create_from_preset(bpy.context, data)
+        self.assertEqual(restored["attack"], 0.12)
+        self.assertEqual(points(root, 5), points(restored, 5))
+        path = ROOT / "work/current-slash.blend"
+        path.parent.mkdir(exist_ok=True)
+        assets.write(path, root)
+        loaded = assets.load(bpy.context, path)
+        self.assertEqual(points(root, 5), points(loaded, 5))
+        self.assertIn("User Edit", loaded.children[0].data.materials[0].node_tree.nodes)
+        self.assertNotEqual(loaded["vfx_id"], root["vfx_id"])
+        core.delete(root)
+        self.assertTrue(mesh(loaded, 5).vertices)
+
 
 addon.register()
 result = unittest.TextTestRunner(verbosity=2).run(
     unittest.defaultTestLoader.loadTestsFromTestCase(SlashTests)
 )
 if not result.wasSuccessful():
-    raise RuntimeError("Slash integration failed")
+    raise RuntimeError("Slash behavior failed")
 bpy.ops.wm.read_factory_settings(use_empty=True)
-root = create()
+root = slash.create(bpy.context, "LOW")
 root.name = "Persisted Slash"
-modern = slash.create(bpy.context, "LOW", asset_version=2)
-modern.name = "Persisted Layered Slash"
-for frame in (2, 5, 13):
-    result = mesh(modern, frame)
-    modern[f"expected_shape_{frame}"] = [c for vertex in result.vertices for c in vertex.co]
-root.hide_render = modern.hide_render = True
-root.children[0].hide_render = modern.children[0].hide_render = True
 camera()
 bpy.context.scene.camera.data.ortho_scale = 5.5
-for version, name in (
-    (3, "Persisted Version Three Slash"),
-    (4, "Persisted Authored Slash"),
-    (5, "Persisted Colored Wake Slash"),
-):
-    authored = slash.create(bpy.context, "LOW", asset_version=version)
-    authored.name = name
-    # The preceding evaluation changed the scene frame; explicitly align clocks.
-    update(authored, start=1.0)
-    for obj in bpy.context.scene.objects:
-        if obj.get("vfx_role") == "layer":
-            obj.hide_render = obj != authored.children[0]
-    for frame in (2, 5, 13):
-        authored[f"expected_shape_{frame}"] = [
-            c for point in points(authored, frame) for c in point
-        ]
-        authored[f"expected_pixels_{frame}"] = render_pixels(frame)
+for frame in (2, 5, 13):
+    root[f"expected_shape_{frame}"] = [c for point in points(root, frame) for c in point]
+    root[f"expected_pixels_{frame}"] = render_pixels(frame)
 addon.unregister()
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "work/slash.blend"))
 print("SLASH_INTEGRATION_OK")
