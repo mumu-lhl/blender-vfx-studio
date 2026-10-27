@@ -165,7 +165,12 @@ SLASH_PARAMETERS = {
     "afterimage": (0.42, 0.0, 1.0, "Visible area of two tapered colored wake ribbons"),
     "streaks": (0.65, 0.0, 1.0, "Anisotropic filament contrast in the body"),
     "breakup": (0.75, 0.0, 1.0, "Directional noise erosion after the strike"),
-    "fade": (1.0, 0.0, 1.0, "Release amount; smooth fading or separate pieces according to the style"),
+    "fade": (
+        1.0,
+        0.0,
+        1.0,
+        "Release amount; smooth fading or separate pieces according to the style",
+    ),
     "contour": (0.65, 0.0, 1.0, "Uneven leading hook and torn inner silhouette"),
     "bank": (0.22, -1.0, 1.0, "Depth bend relative to radius; zero flattens the blade"),
     "wake_spread": (0.7, 0.0, 1.0, "Wake separation during the sweep and release"),
