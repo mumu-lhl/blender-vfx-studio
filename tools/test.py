@@ -15,6 +15,7 @@ for pattern in (
     "test_fetch_blender.py",
     "test_combat_video.py",
     "test_handoff_bundle.py",
+    "test_preview_bundle.py",
 ):
     subprocess.run(
         [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", pattern],

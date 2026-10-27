@@ -4,9 +4,9 @@
 
 目标版本为 **Blender 5.2 LTS**，优先 Eevee，同时兼容 Cycles。效果使用 Blender 原生网格、材质、几何节点和动画，保存后即使没有安装插件，也能继续播放、渲染和编辑。
 
-> 项目仍在开发。当前发布版是 **0.22.2**；main 中的新造型和资产尚未发布，不会自动替换旧文件里的效果。
+> **项目正在开发，尚未正式分发。** 当前功能请使用源码构建，或下载成功的开发构建包。
 
-[下载发布版](https://github.com/mumu-lhl/blender-vfx-studio/releases/latest) · [完整入门库](docs/STARTER_LIBRARY.md) · [详细使用指南](docs/USAGE.md) · [开发进度](ROADMAP.md)
+[下载开发包](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) · [完整入门库](docs/STARTER_LIBRARY.md) · [详细使用指南](docs/USAGE.md) · [开发进度](ROADMAP.md)
 
 ## 可以做什么
 
@@ -24,19 +24,20 @@
 
 ## 下载与安装
 
-发布页有两种 ZIP，作用不同：
+开发包的 ZIP 按用途区分：
 
 | 文件 | 用途 |
 | --- | --- |
 | `blender-vfx-studio-版本.zip` | 安装插件 |
 | `blender-vfx-studio-examples-版本.zip` | 完整效果资产库，解压后使用 |
+| `blender-vfx-studio-previews-版本.zip` | 预览图片，解压后浏览，不用于安装 |
 
-1. 从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases/latest) 下载插件安装包。
+1. 在 [开发构建页面](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 打开最近成功的 main 构建，下载 `blender-vfx-studio-extension` 附件，解压外层 ZIP 后取出插件安装包。
 2. 在 Blender 打开 **Edit → Preferences → Get Extensions**。
 3. 在右上角菜单选择 **Install from Disk**，选中安装包并启用。
 4. 回到 3D 视图，按 **N**，打开 **VFX** 标签页。
 
-GitHub 的源码 ZIP 用于开发；安装请使用发布页中的插件安装包。
+**安装请选择插件 ZIP 本体。** GitHub 的源码 ZIP 和 Actions 附件外层 ZIP 均不能直接作为插件安装。
 
 ## 第一个效果
 
@@ -64,18 +65,18 @@ GitHub 的源码 ZIP 用于开发；安装请使用发布页中的插件安装�
 
 ## 完整资产库
 
-| 效果 | 主要用途 | 当前状态 |
+| 效果 | 主要用途 | 编辑特点 |
 | --- | --- | --- |
-| Energy Charge | 汇聚、蓄力与释放 | 0.22.2 已包含；main 有新的造型与运动 |
-| Arc Slash | 弧形挥砍与残影 | 0.22.2 已包含；main 有新的造型与残影 |
-| Impact Burst | 命中爆发与冲击扩散 | 0.22.2 已包含；main 有新的分层造型 |
-| Lightning Strike | 分支落雷、短闪和逐次减弱的复击 | 已进入 main，尚未发布 |
-| Dust Impact | 落地、踩踏的体积烟尘与碎屑 | 已进入 main，尚未发布 |
-| Stylized Fire | 点燃、持续燃烧与断燃余烬 | 已进入 main，尚未发布 |
-| Character Dash Echoes | 捕获角色姿态，制作冲刺残影 | 已进入 main，尚未发布 |
-| Calligraphic Magic Circle | 逐笔形成、转动与立体符记释放 | 已进入 main，尚未发布 |
+| Energy Charge | 汇聚、蓄力与释放 | 主体、进流、粒子分层控制 |
+| Arc Slash | 弧形挥砍与残影 | 弧度、宽头尖尾与独立残弧 |
+| Impact Burst | 命中爆发与冲击扩散 | 短闪、压力体积、喷射与余烬分层 |
+| Lightning Strike | 分支落雷、短闪和逐次减弱的复击 | 分支形状、复击时序与线宽 |
+| Dust Impact | 落地、踩踏的体积烟尘与碎屑 | 原生密度场、抬升与扩散 |
+| Stylized Fire | 点燃、持续燃烧与断燃余烬 | 火舌、热色色带与上卷运动 |
+| Character Dash Echoes | 捕获角色姿态，制作冲刺残影 | 捕获自己的角色姿态 |
+| Calligraphic Magic Circle | 逐笔形成、转动与立体符记释放 | 笔画形成、反向转动与符记升起 |
 
-main 现有 **8 种完整效果、18 个资产文件**。原三套保留 Low，新五套各提供 Low / Medium / High；质量文件不作为额外种类。**0.22.2 不包含新五套**，尝试它们请自行构建，或下载成功 Actions 的开发附件。
+main 现有 **8 种完整效果、18 个资产文件**。原三套保留 Low，新五套各提供 Low / Medium / High；质量文件不作为额外种类。当前源码和开发构建包含这些资产。
 
 新增效果的真实 Eevee 图像见 **[角色镜头图集](docs/LIBRARY_GALLERY.md)**。图集保留实际画面，包括远景弱细节等问题；不代表全部效果已达到商业成片品质。
 

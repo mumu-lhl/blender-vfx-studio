@@ -1,0 +1,23 @@
+{
+  "format_version": 2,
+  "module": "mesh.ring",
+  "asset_version": 1,
+  "name": "Historical v0.2 Ring",
+  "quality": "MEDIUM",
+  "parameters": {
+    "duration": 24.0,
+    "speed": 1.0,
+    "loop": false,
+    "radius": 0.2,
+    "width": 0.18,
+    "expansion": 3.0,
+    "strength": 8.0,
+    "dissolve": 0.25,
+    "noise_scale": 8.0,
+    "fade": 1.0,
+    "color_0": 0.08,
+    "color_1": 0.5,
+    "color_2": 1.0
+  },
+  "assets": {}
+}

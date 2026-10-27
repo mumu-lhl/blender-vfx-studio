@@ -1,0 +1,27 @@
+name: Repack existing Release previews
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag, for example v0.22.2
+        required: true
+        type: string
+permissions:
+  contents: write
+concurrency:
+  group: release-preview-maintenance-${{ inputs.tag }}
+  cancel-in-progress: false
+jobs:
+  repack:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Verify, upload and consolidate existing previews
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: python tools/repack_release_previews.py --repo "$GITHUB_REPOSITORY" --tag "$RELEASE_TAG"

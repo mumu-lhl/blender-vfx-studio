@@ -6,7 +6,7 @@ from pathlib import Path
 
 from blender_vfx_studio import library, presets
 
-FIXTURE = Path(__file__).parent / "fixtures/ring-preset-v1.json"
+FIXTURE = Path(__file__).parent / "fixtures/ring-preset.json"
 
 
 class LibraryTests(unittest.TestCase):

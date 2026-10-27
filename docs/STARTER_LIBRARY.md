@@ -2,7 +2,7 @@
 
 **main 包含 8 种完整效果、18 个资产文件。** 原三套使用 Low；新增五套默认 Medium，`quality/` 目录另提供各自的 Low 和 High。质量文件属于同一种效果。
 
-发布版 **0.22.2 只包含原三套**，而且保留旧造型。尝试 main 的新资产，请下载成功 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 的 `blender-vfx-studio-extension` 附件，或从源码构建。实际画面见 [角色镜头图集](LIBRARY_GALLERY.md)。
+项目尚未正式分发。使用成功 [开发构建](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 的 `blender-vfx-studio-extension` 附件，或从源码构建。实际画面见 [角色镜头图集](LIBRARY_GALLERY.md)。
 
 ## 载入和开始编辑
 
@@ -30,7 +30,7 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 ## Energy Charge
 
-main 使用错开前沿的双束、辅助进流、汇入中心的短弯流和弯曲粒子。外围逐步收紧，中心积蓄为有间隙的蓝白束，再原位收束释放，仍为四层。0.22.2 的轨道环、球壳等旧完整文件不会自动换造型。
+主体使用错开前沿的双束、辅助进流、汇入中心的短弯流和弯曲粒子。外围逐步收紧，中心积蓄为有间隙的蓝白束，再原位收束释放，由四层构成。
 
 粒子层的 **Spawn Radius** 控制出生距离，正的 **Velocity** 越大，抵达中心越快；抵达后停止，不穿过中心向外飞。粒子在控制器局部空间运动，移动整体也会移动已出生粒子，不保留角色走过的世界轨迹。
 
@@ -57,15 +57,15 @@ main 使用错开前沿的双束、辅助进流、汇入中心的短弯流和弯
 - **Core Width / Afterimage / Streaks / Breakup**：锋刃、残影、笔触与侵蚀。
 - **Head Bias / Contour / Bank / Wake Spread**：前端偏重、轮廓、深度与残影分离。
 
-main 的版本 5 保留主刀面，让独立残弧两端收尖、存活部分保留紫色；Afterimage 控制其可见面积。0.22.2 是版本 2 的规则月牙；版本 1–4 及旧完整文件不会自动升级。硬笔触和远景细尾仍待改善，见 [实际残影检查](SLASH_WAKE_REVIEW.md)。
+主刀面与两端收尖的残弧分别展开和退场，残影保留紫色；**Afterimage** 控制残弧的可见面积。硬笔触和远景细尾仍待改善，见 [实际残影检查](SLASH_WAKE_REVIEW.md)。
 
 ## Impact Burst
 
-main 使用紧凑闪核、三团明暗不同的断裂主体、四条细喷射、两条卷流及三段隆起压力弧，依次退场。它与侧栏创建使用同一生成器。
+主体使用紧凑闪核、三团明暗不同的断裂主体、四条细喷射、两条卷流及三段隆起压力弧，依次退场。它与侧栏创建使用同一生成器。
 
 **Size** 调整主层整体尺寸；主层 Geometry Nodes 的 **Fine Ejection Width** 单独调整细喷射宽度。各层时间与颜色可分开编辑，**Ungroup All** 一次拆开全部层。
 
-0.22.2 的规则尖片等旧造型保留。当前侧面仍偏实体，远景细层较弱，见 [主体](IMPACT_SURFACE_REVIEW.md)、[细喷射](IMPACT_FINE_REVIEW.md) 与 [压力弧](IMPACT_WAVE_REVIEW.md)。
+当前侧面仍偏实体，远景细层较弱，见 [主体](IMPACT_SURFACE_REVIEW.md)、[细喷射](IMPACT_FINE_REVIEW.md) 与 [压力弧](IMPACT_WAVE_REVIEW.md)。
 
 ## Lightning Strike
 
@@ -119,7 +119,7 @@ main 使用紧凑闪核、三团明暗不同的断裂主体、四条细喷射、
 
 场景中的副本使用 **VFX Duplicate**，删除使用 **VFX Delete**。八套资产均保留原生可编辑数据，不需要外部贴图、角色或模拟缓存。质量选择服务于镜头效果：可以为更好的轮廓、细节或轨迹增加复杂度，不要求统一低成本，也不用顶点数代表性能。
 
-Asset Browser 缩略图是 **256×256 的 Cycles CPU 渲染**，相机、背景、合成和预览图片不进入效果资产。0.22.2 的充能预览曾额外使用辉光，main 已取消；刀光和命中均展示第 5 帧，不加辉光。需要光晕时可以主动添加 Screen VFX；载入资产不改场景合成链。
+Asset Browser 缩略图是 **256×256 的 Cycles CPU 渲染**，相机、背景、合成和预览图片不进入效果资产。刀光和命中均展示第 5 帧，不加辉光。需要光晕时可以主动添加 Screen VFX；载入资产不改场景合成链。
 
 **缩略图、测试通过和视频生成均不等于艺术验收。** 各记录区分实际读取的高清图、隔帧动画与技术检查；当前未观看实时播放，不承诺商业成片品质或设备视口帧率。整体艺术工作由 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 跟踪，当前问题见 [路线图](../ROADMAP.md)。
 

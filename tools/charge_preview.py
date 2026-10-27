@@ -11,15 +11,12 @@ from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from blender_vfx_studio import assets, composition  # noqa: E402
+from blender_vfx_studio import assets  # noqa: E402
 from tools.build_examples import create_effect  # noqa: E402
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--legacy", action="store_true", help="Restore the old starter's Fade values"
-    )
     parser.add_argument("--light", action="store_true")
     parser.add_argument(
         "--sampled", action="store_true", help="Render every other frame plus key review frames"
@@ -47,20 +44,10 @@ def main():
     source_hashes = {
         name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in sources
     }
-    root = (
+    if args.baseline_asset:
         assets.load(bpy.context, args.baseline_asset)
-        if args.baseline_asset
-        else create_effect("energy-charge")
-    )
-    if args.legacy:
-        for member in composition.members(root):
-            if member["vfx_module"] == "mesh.ring":
-                member["fade"] = 0.35
-            elif member["vfx_module"] == "shader.shield":
-                member["fade"] = 0.0
-            if member["vfx_module"] in {"mesh.ring", "shader.shield"}:
-                member.children[0].data.materials[0].surface_render_method = "DITHERED"
-            member.update_tag()
+    else:
+        create_effect("energy-charge")
     scene = bpy.context.scene
     scene.render.fps = 24
     camera = bpy.data.objects.new(
@@ -79,26 +66,23 @@ def main():
     camera.rotation_euler = (
         (Vector((0, 0, 0.1)) - camera.location).to_track_quat("-Z", "Y").to_euler()
     )
-    # The original square thumbnail framing crops the ground rings at 16:9.
-    camera.data.type, camera.data.ortho_scale = "ORTHO", scale
+    camera.data.type, camera.data.ortho_scale = ("ORTHO", scale)
     scene.camera = camera
     scene.world = bpy.data.worlds.new("Charge Review Background")
     scene.world.use_nodes = True
     scene.world.node_tree.nodes["Background"].inputs["Color"].default_value = (
-        (0.55, 0.60, 0.68, 1) if args.light else (0.008, 0.012, 0.02, 1)
+        (0.55, 0.6, 0.68, 1) if args.light else (0.008, 0.012, 0.02, 1)
     )
     scene.render.engine = args.engine
-    scene.cycles.device, scene.cycles.samples = "CPU", 24
+    scene.cycles.device, scene.cycles.samples = ("CPU", 24)
     scene.cycles.use_denoising = False
     scene.eevee.taa_render_samples = 16
-    scene.render.resolution_x, scene.render.resolution_y = 960, 540
+    scene.render.resolution_x, scene.render.resolution_y = (960, 540)
     scene.render.resolution_percentage = 100
     scene.view_settings.view_transform = args.view_transform
     scene.view_settings.look = "None"
     scene.render.image_settings.file_format = "PNG"
-    prefix = (
-        "baseline-" if args.baseline_asset else "legacy-" if args.legacy else ""
-    ) + args.engine.lower()
+    prefix = ("baseline-" if args.baseline_asset else "") + args.engine.lower()
     prefix += "-light" if args.light else ""
     prefix += f"-{args.view}" if args.view != "default" else ""
     prefix += "-agx" if args.view_transform == "AgX" else ""
