@@ -94,6 +94,7 @@ def _surface(member):
     material = member.children[0].data.materials[0]
     material.name = "VFX • Spectral Dash Echo"
     material.surface_render_method = "BLENDED"
+    material.use_backface_culling = True  # The saved shader already makes back faces transparent.
     tree = material.node_tree
     body = node(tree, "ShaderNodeMath", "Body Beneath The Rim", -650, 650, operation="MULTIPLY_ADD")
     edge = node(tree, "ShaderNodeMapRange", "Defined Spectral Edge", -900, 650)
