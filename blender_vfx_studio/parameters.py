@@ -126,8 +126,26 @@ TRAIL_PARAMETERS = {
     "length": (0.35, 0.001, 1.0, "Visible trailing fraction of the sampled timeline"),
     "fade": (0.0, 0.0, 1.0, "Width loss over lifetime"),
 }
+SLASH_ART_PARAMETERS = {
+    "surface_cuts": (
+        1.0,
+        0.0,
+        1.0,
+        "Open illustrated cuts in the blade and wakes; zero keeps continuous surfaces",
+    ),
+    "fragment_release": (
+        1.0,
+        0.0,
+        1.0,
+        "Release as separate fragments; zero uses smooth opacity fading",
+    ),
+    "blade_color_0": (0.8, 0.0, 1.0, "Linear blade highlight red"),
+    "blade_color_1": (0.9, 0.0, 1.0, "Linear blade highlight green"),
+    "blade_color_2": (1.0, 0.0, 1.0, "Linear blade highlight blue"),
+}
 SLASH_PARAMETERS = {
     **PARAMETERS,
+    **SLASH_ART_PARAMETERS,
     "radius": (1.8, 0.001, 10000.0, "Outer radius at birth"),
     "width": (0.62, 0.001, 10000.0, "Maximum body width"),
     "expansion": (0.2, 0.0, 10000.0, "Added radius over lifetime"),
@@ -147,7 +165,7 @@ SLASH_PARAMETERS = {
     "afterimage": (0.42, 0.0, 1.0, "Visible area of two tapered colored wake ribbons"),
     "streaks": (0.65, 0.0, 1.0, "Anisotropic filament contrast in the body"),
     "breakup": (0.75, 0.0, 1.0, "Directional noise erosion after the strike"),
-    "fade": (1.0, 0.0, 1.0, "Release into separate pieces; noise breakup remains independent"),
+    "fade": (1.0, 0.0, 1.0, "Release amount; smooth fading or separate pieces according to the style"),
     "contour": (0.65, 0.0, 1.0, "Uneven leading hook and torn inner silhouette"),
     "bank": (0.22, -1.0, 1.0, "Depth bend relative to radius; zero flattens the blade"),
     "wake_spread": (0.7, 0.0, 1.0, "Wake separation during the sweep and release"),
