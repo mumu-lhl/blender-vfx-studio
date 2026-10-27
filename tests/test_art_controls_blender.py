@@ -36,16 +36,17 @@ def freeze_optional_geometry_controls(root, keys):
 
 
 def wrap_geometry(tree):
-    wrapper = bpy.data.node_groups.new("Artist Geometry Wrapper", "GeometryNodeTree")
-    for direction in ("INPUT", "OUTPUT"):
-        wrapper.interface.new_socket(
-            name="Geometry", in_out=direction, socket_type="NodeSocketGeometry"
-        )
+    # Like grouping nodes inside the existing tree, retain modifier socket identifiers.
+    wrapper = tree.copy()
+    wrapper.name = "Artist Geometry Wrapper"
+    wrapper.animation_data_clear()
+    wrapper.nodes.clear()
     inp = wrapper.nodes.new("NodeGroupInput")
     out = wrapper.nodes.new("NodeGroupOutput")
     group = wrapper.nodes.new("GeometryNodeGroup")
     group.node_tree = tree
-    wrapper.links.new(inp.outputs["Geometry"], group.inputs["Geometry"])
+    for socket in group.inputs:
+        wrapper.links.new(inp.outputs[socket.name], socket)
     wrapper.links.new(group.outputs["Geometry"], out.inputs["Geometry"])
     return wrapper
 
@@ -216,6 +217,11 @@ class ArtControlsTests(unittest.TestCase):
             before = points(member, frame)
             socket.default_value = b
             self.assertNotEqual(points(member, frame), before, name)
+        path = ROOT / "work/artist-grouped-charge.blend"
+        assets.write(path, group)
+        loaded = assets.load(bpy.context, path)
+        loaded_core = next(m for m in composition.members(loaded) if "Compressed Core" in m.name)
+        self.assertEqual(points(loaded_core, 44), points(member, 44))
         # A hand-written driver owns this value; do not offer a misleading editable field.
         socket = values["Nucleus Stored Size"][1]
         socket.driver_add("default_value").driver.expression = "2.8"
@@ -319,6 +325,8 @@ for key, saved_name, changes, frames in (
         m for m in composition.members(group) if set(changes) <= ui._native_shape_values(m).keys()
     )
     group["expected_member_name"] = member.name
+    modifier = member.children[0].modifiers[0]
+    modifier.node_group = wrap_geometry(modifier.node_group)
     values = ui._native_shape_values(member)
     for name, value in changes.items():
         values[name][1].default_value = value

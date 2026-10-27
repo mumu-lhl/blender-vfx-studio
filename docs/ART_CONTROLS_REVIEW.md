@@ -12,7 +12,7 @@
 | Lightning Strike | 侧栏 Bolt Shape 提供已有长度与分支伸展。放电时序保留原演出，远景细枝与接触火花仍偏弱。 |
 | Stylized Fire | RGB 是暖色色带的乘色，不能方便变成蓝火。提供原生五色配色与直接色带编辑；集中 Height / Flow / Curl。持续阶段大火面仍未解决。 |
 | Dust Impact | 主体体积保留；集中 Rise / Roll / Density。辅助 Ground Veil 的 Fade 原先没有驱动材质，现接入透明消散；隐藏该层仅作终点开关的 Dissolve，避免把它呈现为连续侵蚀。 |
-| Character Dash Echoes | 捕获数量仍由质量决定，跨度存在整除限制。应独立控制数量与时间采样；本批不改捕获行为。 |
+| Character Dash Echoes | Echo Count 直接控制数量，任意首尾跨度均匀采样，必要时求值子帧；见 [采样检查](DASH_SAMPLING_REVIEW.md)。浅背景旧影偏淡、重新捕获和统一尾部编辑仍有改进空间。 |
 | Magic Circle | 集中实际生效的 Spin / Lift；Seal / Runes 上未驱动的 Lift 不显示。图案变体不是当前阻塞。 |
 
 ## 本批真实行为
