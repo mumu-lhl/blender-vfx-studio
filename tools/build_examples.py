@@ -229,6 +229,17 @@ def preview_scene(key):
     scene.cycles.device, scene.cycles.samples = "CPU", 32
     scene.render.compositor_device = "CPU"
     scene.view_settings.view_transform = "Standard"
+    if key == "dust-impact":
+        # Diffuse volumes need lit, unclipped previews; HD review uses this same view transform.
+        scene.view_settings.view_transform, scene.view_settings.look = "AgX", "None"
+        scene.world.node_tree.nodes["Background"].inputs["Color"].default_value = (
+            0.62,
+            0.66,
+            0.72,
+            1,
+        )
+        scene.world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.4
+        scene.cycles.samples, scene.cycles.use_denoising = 64, True
     scene.render.resolution_x = scene.render.resolution_y = 256
     scene.render.resolution_percentage = 100
     scene.frame_set(frame)

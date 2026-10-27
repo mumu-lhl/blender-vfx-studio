@@ -153,15 +153,39 @@ def _volume(root, quality):
     domain = g.n("GeometryNodeTransform", "Density Domain Follows Editable Parameters")
     g.link(geometry, domain.inputs["Geometry"])
     g.link(g.xyz("Density Domain Size", extent_x, extent_y, height), domain.inputs["Scale"])
-    hide = g.n("GeometryNodeDeleteGeometry", "Skip Invisible Density Domains", domain="POINT")
+    bounds = g.n("GeometryNodeBoundBox", "Density Grid Bounds")
+    g.link(domain.outputs[0], bounds.inputs["Geometry"])
+    position = g.n("GeometryNodeInputPosition", "Density Voxel Position")
+    density = _density(g, position.outputs[0], quality)
+    grid = g.n("GeometryNodeVolumeCube", "Native Procedural Dust Grid")
+    for axis, resolution in zip(
+        "XYZ", {"LOW": (20, 20, 14), "MEDIUM": (32, 32, 24), "HIGH": (48, 48, 36)}[quality]
+    ):
+        grid.inputs["Resolution " + axis].default_value = resolution
+    g.link(density, grid.inputs["Density"])
+    g.link(bounds.outputs["Min"], grid.inputs["Min"])
+    g.link(bounds.outputs["Max"], grid.inputs["Max"])
+    # Loose edges keep the editable domain visible in Solid mode; they do not render faces.
+    wire = g.n(
+        "GeometryNodeDeleteGeometry", "Editable Wire Domain", domain="FACE", mode="ONLY_FACE"
+    )
+    wire.inputs["Selection"].default_value = True
+    g.link(domain.outputs[0], wire.inputs["Geometry"])
+    joined = g.n("GeometryNodeJoinGeometry", "Density And Native Domain Handles")
+    assign = g.n("GeometryNodeSetMaterial", "Dust Grid Material")
+    assign.inputs["Material"].default_value = layer.data.materials[0]
+    g.link(grid.outputs[0], assign.inputs["Geometry"])
+    g.link(assign.outputs[0], joined.inputs[0])
+    g.link(wire.outputs[0], joined.inputs[0])
     inactive = g.m("Outside Lifetime", "LESS_THAN", g.value("Active", expression=ACTIVE), 0.5)
     invisible = g.m("Fully Dissolved", "GREATER_THAN", g.value("Dissolve", prop="dissolve"), 0.9999)
     zero = g.m("Density Is Off", "LESS_THAN", g.value("Density", prop="Dust Density"), 1e-6)
-    g.link(domain.outputs[0], hide.inputs["Geometry"])
+    hide = g.n("GeometryNodeSwitch", "Skip Invisible Density Grids", input_type="GEOMETRY")
     g.link(
         g.m("Hidden Density", "MAXIMUM", inactive, g.m("No Dust", "MAXIMUM", invisible, zero)),
-        hide.inputs["Selection"],
+        hide.inputs["Switch"],
     )
+    g.link(joined.outputs[0], hide.inputs["False"])
     output = g.n("NodeGroupOutput", "Output")
     g.link(hide.outputs[0], output.inputs["Geometry"])
     root["vfx_parameter_keys"] = "radius,width,expansion,noise_scale,dissolve,fade"
@@ -170,8 +194,17 @@ def _volume(root, quality):
     material.node_tree.animation_data_clear()
     material.node_tree.nodes.clear()
     g = _Fields(material.node_tree, root)
+    volume = g.n("ShaderNodeVolumePrincipled", "Nonemissive Dust Volume")
+    # The generated native grid supplies the density attribute; no mesh-boundary medium.
+    volume.inputs["Density"].default_value = 1.0
+    volume.inputs["Anisotropy"].default_value = 0.1
+    g.link(_color(g, root), volume.inputs["Color"])
+    out = g.n("ShaderNodeOutputMaterial", "Output")
+    g.link(volume.outputs["Volume"], out.inputs["Volume"])
+
+
+def _density(g, position, quality):
     p = g.value("Dust Clock", expression=PROGRESS)
-    coordinates = g.n("ShaderNodeTexCoord", "Local Density Coordinates")
     noise = g.n("ShaderNodeTexNoise", "Advected Cloud Folds", noise_dimensions="4D")
     shift = g.m(
         "Upward Rolling Pattern", "MULTIPLY", p, g.value("Roll Speed", prop="Dust Roll Speed")
@@ -179,7 +212,7 @@ def _volume(root, quality):
     sample = g.v(
         "Noise Rises Through The Cloud",
         "SUBTRACT",
-        coordinates.outputs["Object"],
+        position,
         g.xyz("Rising Pattern", 0, 0, shift),
     )
     g.link(sample, noise.inputs["Vector"])
@@ -189,7 +222,7 @@ def _volume(root, quality):
     warped = g.v(
         "Broad Density Folds",
         "ADD",
-        coordinates.outputs["Object"],
+        position,
         g.v(
             "Curl The Density Surface",
             "SCALE",
@@ -312,12 +345,7 @@ def _volume(root, quality):
     density = g.m(
         "Dust Optical Density", "MULTIPLY", density, g.value("Density", prop="Dust Density")
     )
-    volume = g.n("ShaderNodeVolumePrincipled", "Nonemissive Dust Volume")
-    g.link(density, volume.inputs["Density"])
-    g.link(_color(g, root), volume.inputs["Color"])
-    volume.inputs["Anisotropy"].default_value = 0.1
-    out = g.n("ShaderNodeOutputMaterial", "Output")
-    g.link(volume.outputs["Volume"], out.inputs["Volume"])
+    return density
 
 
 def create(context, quality="MEDIUM"):
