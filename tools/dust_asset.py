@@ -3,8 +3,6 @@
 import math
 import random
 
-from mathutils import Vector
-
 from blender_vfx_studio import composition, core
 from blender_vfx_studio.nodes import ACTIVE, PROGRESS, drive
 from tools.charge_design import _Fields, _geometry, _mesh
@@ -109,199 +107,217 @@ def _diffuse(root, *, haze=False, grit=False):
     g.link(mix.outputs[0], out.inputs["Surface"])
 
 
-def _billows(root, quality):
-    layer, g, geometry = _geometry(root, "Unequal Rolling Dust Banks")
-    count, sides, rings = {"LOW": (9, 8, 6), "MEDIUM": (14, 12, 8), "HIGH": (20, 16, 10)}[quality]
-    randomizer = random.Random(73)
-    vertices, faces = [], []
-    fields = {
-        name: [] for name in ("dust_delay", "dust_seed", "dust_scale", "dust_lift", "dust_travel")
-    }
-    centers, directions, axes = [], [], []
-    for index in range(count):
-        cluster = index if index < 3 else (index - 3) % 3
-        angle = (1.45, 0.12, 2.95)[cluster] + (0 if index < 3 else randomizer.uniform(-0.35, 0.35))
-        direction = Vector((math.cos(angle), math.sin(angle) * 0.7, 0))
-        travel = (0.22, 0.92, 1.0)[cluster] if index < 3 else randomizer.uniform(0.22, 0.82)
-        scale = (1.15, 0.9, 0.8)[index] if index < 3 else randomizer.uniform(0.35, 0.7)
-        delay = 0.015 * index if index < 3 else randomizer.uniform(0.02, 0.14)
-        lift = (0.75, 0.45, 0.6)[index] if index < 3 else randomizer.uniform(0.2, 0.65)
-        center = direction * 0.12 * travel + Vector((0, 0, 0.1))
-        base = len(vertices)
-        for j in range(rings + 1):
-            theta = j * math.pi / rings
-            for k in range(sides):
-                phi = k * math.tau / sides
-                local = (
-                    Vector(
-                        (
-                            math.sin(theta) * math.cos(phi),
-                            math.sin(theta) * math.sin(phi),
-                            math.cos(theta),
-                        )
-                    )
-                    * scale
-                )
-                vertices.append(tuple(center + local))
-                centers.append(center)
-                directions.append(direction)
-                axes.append(Vector((-direction.y, direction.x, 0)).normalized())
-                for name, value in zip(fields, (delay, index * 0.71, scale, lift, travel)):
-                    fields[name].append(value)
-        for j in range(rings):
-            for k in range(sides):
-                a, b = base + j * sides + k, base + j * sides + (k + 1) % sides
-                faces.append((a, a + sides, b + sides, b))
-    _mesh(layer, vertices, faces, fields)
-    for polygon in layer.data.polygons:
-        polygon.use_smooth = True
-    for name, values in (
-        ("dust_center", centers),
-        ("dust_direction", directions),
-        ("dust_roll_axis", axes),
-    ):
-        attribute = layer.data.attributes.new(name, "FLOAT_VECTOR", "POINT")
-        for item, value in zip(attribute.data, values):
-            item.vector = value
-    p = g.value("Dust Clock", expression=PROGRESS)
-    delay = g.attr("dust_delay")
-    age = g.m(
-        "Delayed Billow Age",
-        "DIVIDE",
-        g.m("Time Since Birth", "SUBTRACT", p, delay),
-        g.m("Remaining Span", "SUBTRACT", 1, delay),
-    )
-    age = g.m("Nonnegative Age", "MAXIMUM", age, 0)
-    age = g.m("Bounded Age", "MINIMUM", age, 1)
-    ignite = g.stage("Volume Rolls Up", age, 0, 0.23)
-    loss = g.m(
-        "Volume Dissipation",
-        "MULTIPLY",
-        g.stage("Volume Thins", age, 0.58, 1),
-        g.value("Fade", prop="fade"),
-    )
-    size = g.m(
-        "Growing Then Dissipating Volume",
-        "MULTIPLY",
-        ignite,
-        g.m("Remaining Volume", "SUBTRACT", 1, loss),
-    )
-    position = g.n("GeometryNodeInputPosition", "Editable Billow Rest Shape")
-    local = g.v(
-        "Local Billow Surface",
-        "SUBTRACT",
-        position.outputs[0],
-        g.attr("dust_center", "FLOAT_VECTOR"),
-    )
-    noise = g.n("ShaderNodeTexNoise", "Broad Rolling Lobes", noise_dimensions="4D")
-    g.link(local, noise.inputs["Vector"])
-    g.link(g.value("Billow Detail", prop="noise_scale"), noise.inputs["Scale"])
-    noise.inputs["Detail"].default_value = 1.0
-    g.link(
-        g.m(
-            "Lobes Evolve",
-            "ADD",
-            g.attr("dust_seed"),
-            g.m("Slow Cloud Evolution", "MULTIPLY", age, 0.7),
-        ),
-        noise.inputs["W"],
-    )
-    bulge = g.m("Uneven Billow Silhouette", "MULTIPLY_ADD", noise.outputs["Fac"], 0.6)
-    bulge.node.inputs[2].default_value = 0.72
-    local = g.v("Sculpted Dust Volume", "SCALE", local, bulge)
-    roll = g.n("ShaderNodeVectorRotate", "Billows Curl As They Spread", rotation_type="AXIS_ANGLE")
-    g.link(local, roll.inputs["Vector"])
-    g.link(g.attr("dust_roll_axis", "FLOAT_VECTOR"), roll.inputs["Axis"])
-    g.link(g.m("Billow Roll", "MULTIPLY", age, g.value("Roll Speed", 1.7)), roll.inputs["Angle"])
-    local = g.v(
-        "Billow Width Over Life",
-        "SCALE",
-        roll.outputs[0],
-        g.m(
-            "Local Volume Scale",
-            "MULTIPLY",
-            size,
-            g.m("Half Cloud Width", "MULTIPLY", g.value("Width", prop="width"), 0.5),
-        ),
-    )
-    ease = g.m(
-        "Horizontal Motion Slows",
-        "SUBTRACT",
-        1,
-        g.m("Remaining Motion", "POWER", g.m("Remaining Life", "SUBTRACT", 1, age), 3),
-    )
-    distance = g.m(
-        "Distance From Impact",
+def _volume(root, quality):
+    """One bounded density field avoids stacks of translucent spherical shells."""
+    layer, g, geometry = _geometry(root, "Procedural Dust Density Bounds")
+    vertices = [
+        (-1, -1, 0),
+        (1, -1, 0),
+        (1, 1, 0),
+        (-1, 1, 0),
+        (-1, -1, 1),
+        (1, -1, 1),
+        (1, 1, 1),
+        (-1, 1, 1),
+    ]
+    faces = [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]
+    _mesh(layer, vertices, faces)
+    layer.display_type = "WIRE"
+    radius, width, expansion = [
+        g.value(name, prop=prop)
+        for name, prop in (
+            ("Initial Radius", "radius"),
+            ("Billow Width", "width"),
+            ("Expansion", "expansion"),
+        )
+    ]
+    extent_x = g.m(
+        "Horizontal Density Bounds",
         "ADD",
-        g.value("Initial Radius", prop="radius"),
-        g.m("Outward Expansion", "MULTIPLY", ease, g.value("Expansion", prop="expansion")),
+        g.m("Spread Bounds", "ADD", radius, expansion),
+        g.m("Billow Padding", "MULTIPLY", width, 0.85),
     )
-    distance = g.m("Different Travel Distances", "MULTIPLY", distance, g.attr("dust_travel"))
-    center = g.v(
-        "Unequal Spreading Banks", "SCALE", g.attr("dust_direction", "FLOAT_VECTOR"), distance
-    )
-    lift = g.m(
-        "Billows Rise",
-        "MULTIPLY",
-        g.m("Rising Motion", "POWER", age, 1.3),
-        g.m("Independent Rise", "MULTIPLY", g.attr("dust_lift"), g.value("Rise Height", 0.85)),
-    )
-    lift = g.m(
-        "Ground Clearance",
+    extent_y = g.m(
+        "Depth Density Bounds",
         "ADD",
-        lift,
-        g.m(
-            "Billow Ground Height",
-            "MULTIPLY",
-            ignite,
-            g.m("Rest Height", "MULTIPLY", g.attr("dust_scale"), 0.12),
-        ),
+        g.m("Depth Spread", "ADD", radius, g.m("Depth Expansion", "MULTIPLY", expansion, 0.7)),
+        g.m("Depth Padding", "MULTIPLY", width, 0.85),
     )
-    center = g.v("Rising Dust Centers", "ADD", center, g.xyz("Rise Above Ground", 0, 0, lift))
-    deform = g.n("GeometryNodeSetPosition", "Native Rolling Dust")
-    g.link(geometry, deform.inputs["Geometry"])
-    g.link(g.v("Rolling Billows", "ADD", center, local), deform.inputs["Position"])
-    store = g.n(
-        "GeometryNodeStoreNamedAttribute",
-        "Each Billow Keeps Its Age",
-        data_type="FLOAT",
-        domain="POINT",
-    )
-    store.inputs["Name"].default_value = "dust_age"
-    g.link(deform.outputs[0], store.inputs["Geometry"])
-    g.link(age, store.inputs["Value"])
-    cut = g.n("GeometryNodeDeleteGeometry", "Frayed Dissipation", domain="FACE")
-    erosion = g.m(
-        "Erosion Threshold",
+    height = g.m(
+        "Vertical Density Bounds",
         "ADD",
-        g.value("Dissolve", prop="dissolve"),
-        g.m("Late Cloud Fraying", "MULTIPLY", loss, 0.65),
+        g.value("Rise Height", prop="Dust Rise Height"),
+        g.m("Top Padding", "MULTIPLY_ADD", width, 0.7),
     )
-    g.link(store.outputs[0], cut.inputs["Geometry"])
-    g.link(
-        g.m("Lost Smoke Surface", "LESS_THAN", noise.outputs["Fac"], erosion),
-        cut.inputs["Selection"],
-    )
-    hide = g.n("GeometryNodeDeleteGeometry", "Only Living Billows", domain="POINT")
+    g.tree.nodes["Top Padding"].inputs[2].default_value = 0.15
+    domain = g.n("GeometryNodeTransform", "Density Domain Follows Editable Parameters")
+    g.link(geometry, domain.inputs["Geometry"])
+    g.link(g.xyz("Density Domain Size", extent_x, extent_y, height), domain.inputs["Scale"])
+    hide = g.n("GeometryNodeDeleteGeometry", "Skip Invisible Density Domains", domain="POINT")
     inactive = g.m("Outside Lifetime", "LESS_THAN", g.value("Active", expression=ACTIVE), 0.5)
-    empty = g.m("Volume Is Gone", "LESS_THAN", size, 0.015)
-    invisible = g.m(
-        "Fully Dissolved", "GREATER_THAN", g.value("Visibility Dissolve", prop="dissolve"), 0.9999
-    )
-    g.link(cut.outputs[0], hide.inputs["Geometry"])
+    invisible = g.m("Fully Dissolved", "GREATER_THAN", g.value("Dissolve", prop="dissolve"), 0.9999)
+    zero = g.m("Density Is Off", "LESS_THAN", g.value("Density", prop="Dust Density"), 1e-6)
+    g.link(domain.outputs[0], hide.inputs["Geometry"])
     g.link(
-        g.m(
-            "Invisible Billows",
-            "MAXIMUM",
-            inactive,
-            g.m("Spent Or Dissolved", "MAXIMUM", empty, invisible),
-        ),
+        g.m("Hidden Density", "MAXIMUM", inactive, g.m("No Dust", "MAXIMUM", invisible, zero)),
         hide.inputs["Selection"],
     )
-    out = g.n("NodeGroupOutput", "Output")
-    g.link(hide.outputs[0], out.inputs["Geometry"])
+    output = g.n("NodeGroupOutput", "Output")
+    g.link(hide.outputs[0], output.inputs["Geometry"])
     root["vfx_parameter_keys"] = "radius,width,expansion,noise_scale,dissolve,fade"
-    _diffuse(root)
+    material = layer.data.materials[0]
+    material.name = "VFX • Rolling Dust Volume"
+    material.node_tree.animation_data_clear()
+    material.node_tree.nodes.clear()
+    g = _Fields(material.node_tree, root)
+    p = g.value("Dust Clock", expression=PROGRESS)
+    coordinates = g.n("ShaderNodeTexCoord", "Local Density Coordinates")
+    noise = g.n("ShaderNodeTexNoise", "Advected Cloud Folds", noise_dimensions="4D")
+    shift = g.m(
+        "Upward Rolling Pattern", "MULTIPLY", p, g.value("Roll Speed", prop="Dust Roll Speed")
+    )
+    sample = g.v(
+        "Noise Rises Through The Cloud",
+        "SUBTRACT",
+        coordinates.outputs["Object"],
+        g.xyz("Rising Pattern", 0, 0, shift),
+    )
+    g.link(sample, noise.inputs["Vector"])
+    g.link(g.value("Noise Detail", prop="noise_scale"), noise.inputs["Scale"])
+    noise.inputs["Detail"].default_value = {"LOW": 0.5, "MEDIUM": 1.2, "HIGH": 2.0}[quality]
+    g.link(g.m("Slow Cloud Evolution", "MULTIPLY", p, 0.4), noise.inputs["W"])
+    warped = g.v(
+        "Broad Density Folds",
+        "ADD",
+        coordinates.outputs["Object"],
+        g.v(
+            "Curl The Density Surface",
+            "SCALE",
+            g.v("Signed Cloud Noise", "SUBTRACT", noise.outputs["Color"], (0.5, 0.5, 0.5)),
+            g.m("Fold Size", "MULTIPLY", g.value("Width", prop="width"), 0.4),
+        ),
+    )
+    count = {"LOW": 5, "MEDIUM": 7, "HIGH": 10}[quality]
+    randomizer = random.Random(73)
+    density = 0
+    for index in range(count):
+        prefix = f"Billow {index + 1}"
+        cluster = index if index < 3 else (index - 3) % 3
+        angle = (1.45, 0.12, 2.95)[cluster] + (0 if index < 3 else randomizer.uniform(-0.35, 0.35))
+        travel = (0.22, 0.92, 1.0)[cluster] if index < 3 else randomizer.uniform(0.22, 0.82)
+        scale = (1.15, 0.9, 0.8)[index] if index < 3 else randomizer.uniform(0.38, 0.7)
+        delay = index * 0.015 if index < 3 else randomizer.uniform(0.02, 0.14)
+        lift = (0.75, 0.45, 0.6)[index] if index < 3 else randomizer.uniform(0.2, 0.65)
+        age = g.m(
+            prefix + " Age", "DIVIDE", g.m(prefix + " Since Birth", "SUBTRACT", p, delay), 1 - delay
+        )
+        age = g.m(prefix + " Nonnegative Age", "MAXIMUM", age, 0)
+        age = g.m(prefix + " Bounded Age", "MINIMUM", age, 1)
+        grow = g.stage(prefix + " Rolls Up", age, 0, 0.23)
+        loss = g.m(
+            prefix + " Density Loss",
+            "MULTIPLY",
+            g.stage(prefix + " Releases", age, 0.58, 1),
+            g.value(prefix + " Fade", prop="fade"),
+        )
+        size = g.m(
+            prefix + " Size",
+            "MULTIPLY",
+            grow,
+            g.m(prefix + " Remaining Volume", "SUBTRACT", 1, loss),
+        )
+        ease = g.m(
+            prefix + " Slowing Spread",
+            "SUBTRACT",
+            1,
+            g.m(
+                prefix + " Motion Cube",
+                "POWER",
+                g.m(prefix + " Remaining Time", "SUBTRACT", 1, age),
+                3,
+            ),
+        )
+        distance = g.m(
+            prefix + " Travel",
+            "MULTIPLY",
+            travel,
+            g.m(
+                prefix + " Radius",
+                "ADD",
+                g.value(prefix + " Initial Radius", prop="radius"),
+                g.m(
+                    prefix + " Expansion",
+                    "MULTIPLY",
+                    ease,
+                    g.value(prefix + " Outward Travel", prop="expansion"),
+                ),
+            ),
+        )
+        height = g.m(
+            prefix + " Rise",
+            "MULTIPLY",
+            g.m(prefix + " Rising Age", "POWER", age, 1.3),
+            g.m(
+                prefix + " Rise Height",
+                "MULTIPLY",
+                lift,
+                g.value(prefix + " Editable Rise", prop="Dust Rise Height"),
+            ),
+        )
+        height = g.m(prefix + " Above Ground", "ADD", height, 0.12 * scale)
+        center = g.xyz(
+            prefix + " Center",
+            g.m(prefix + " X", "MULTIPLY", distance, math.cos(angle)),
+            g.m(prefix + " Y", "MULTIPLY", distance, math.sin(angle) * 0.7),
+            height,
+        )
+        radius = g.m(
+            prefix + " Width",
+            "MULTIPLY",
+            g.value(prefix + " Cloud Width", prop="width"),
+            scale * 0.55,
+        )
+        radius = g.m(prefix + " Growing Radius", "MULTIPLY", radius, size)
+        radius = g.m(prefix + " Safe Radius", "MAXIMUM", radius, 0.0001)
+        dist = g.n("ShaderNodeVectorMath", prefix + " Distance", operation="DISTANCE")
+        g.link(warped, dist.inputs[0])
+        g.link(center, dist.inputs[1])
+        relative = g.m(prefix + " Relative Distance", "DIVIDE", dist.outputs["Value"], radius)
+        soft = g.m(
+            prefix + " Soft Density",
+            "MAXIMUM",
+            g.m(
+                prefix + " Feathered Shape",
+                "SUBTRACT",
+                1,
+                g.m(prefix + " Squared Radius", "MULTIPLY", relative, relative),
+            ),
+            0,
+        )
+        soft = g.m(prefix + " Soft Interior", "MULTIPLY", soft, soft)
+        soft = g.m(
+            prefix + " Dissipating Density",
+            "MULTIPLY",
+            soft,
+            g.m(prefix + " Remaining Density", "SUBTRACT", 1, loss),
+        )
+        density = g.m(prefix + " Joins Cloud", "ADD", density, soft)
+    variation = g.m("Cloud Density Variation", "MULTIPLY_ADD", noise.outputs["Fac"], 0.7)
+    variation.node.inputs[2].default_value = 0.3
+    density = g.m("Turbulent Density", "MULTIPLY", density, variation)
+    dissolve = g.value("Dissolve", prop="dissolve")
+    density = g.m(
+        "Eroding Density", "MAXIMUM", g.m("Dust Dissolves", "SUBTRACT", density, dissolve), 0
+    )
+    density = g.m(
+        "Dust Optical Density", "MULTIPLY", density, g.value("Density", prop="Dust Density")
+    )
+    volume = g.n("ShaderNodeVolumePrincipled", "Nonemissive Dust Volume")
+    g.link(density, volume.inputs["Density"])
+    g.link(_color(g, root), volume.inputs["Color"])
+    volume.inputs["Anisotropy"].default_value = 0.1
+    out = g.n("ShaderNodeOutputMaterial", "Output")
+    g.link(volume.outputs["Volume"], out.inputs["Volume"])
 
 
 def create(context, quality="MEDIUM"):
@@ -311,8 +327,8 @@ def create(context, quality="MEDIUM"):
     start = float(body["start"])
     for key, value in dict(
         radius=0.06,
-        width=1.15,
-        expansion=1.6,
+        width=1.7,
+        expansion=1.3,
         noise_scale=3.5,
         duration=32.0,
         dissolve=0.0,
@@ -320,10 +336,17 @@ def create(context, quality="MEDIUM"):
         loop=False,
     ).items():
         body[key] = value
-    for i, value in enumerate((0.32, 0.25, 0.18)):
+    for i, value in enumerate((0.56, 0.46, 0.34)):
         body[f"color_{i}"] = value
     body.name = "Dust • Rolling Banks"
-    _billows(body, quality)
+    for name, value, maximum in (
+        ("Dust Rise Height", 0.85, 10.0),
+        ("Dust Roll Speed", 1.7, 10.0),
+        ("Dust Density", 8.0, 40.0),
+    ):
+        body[name] = value
+        body.id_properties_ui(name).update(min=0.0, max=maximum, description=name)
+    _volume(body, quality)
     haze = core.create(context, "SHOCKWAVE", quality)
     for key, value in dict(
         start=start,
