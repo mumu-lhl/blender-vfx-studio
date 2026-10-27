@@ -89,8 +89,12 @@ def _surface(member):
     material.surface_render_method = "BLENDED"
     tree = material.node_tree
     body = node(tree, "ShaderNodeMath", "Body Beneath The Rim", -650, 650, operation="MULTIPLY_ADD")
-    tree.links.new(tree.nodes["Rim Falloff"].outputs[0], body.inputs[0])
-    body.inputs[1].default_value, body.inputs[2].default_value = 0.7, 0.3
+    edge = node(tree, "ShaderNodeMapRange", "Defined Spectral Edge", -900, 650)
+    edge.interpolation_type, edge.clamp = "SMOOTHSTEP", True
+    edge.inputs["From Min"].default_value, edge.inputs["From Max"].default_value = 0.025, 0.3
+    tree.links.new(tree.nodes["Rim Falloff"].outputs[0], edge.inputs["Value"])
+    tree.links.new(edge.outputs[0], body.inputs[0])
+    body.inputs[1].default_value, body.inputs[2].default_value = 0.85, 0.15
     tree.links.new(body.outputs[0], tree.nodes["Rim × Noise"].inputs[0])
     fade = tree.nodes["Lifetime Opacity"].outputs[0]
     fade.driver_remove("default_value")
@@ -98,9 +102,29 @@ def _surface(member):
         fade,
         "default_value",
         member,
-        f"o*pow(max(1-({PROGRESS}),0),1.6*f)",
+        f"o*pow(max(1-({PROGRESS}),0),0.85*f)",
         dict(TIME_PROPS, o="opacity", f="fade"),
     )
+
+    color = node(tree, "ShaderNodeCombineXYZ", "Editable Spectral Tint", -900, -450)
+    emission = tree.nodes["Shield Emission"]
+    for index in range(3):
+        emission.inputs["Color"].driver_remove("default_value", index)
+        drive(color.inputs[index], "default_value", member, "c", {"c": f"color_{index}"})
+    border = node(tree, "ShaderNodeMapRange", "Dark Outer Contour", -650, -450)
+    border.interpolation_type, border.clamp = "SMOOTHSTEP", True
+    border.inputs["From Min"].default_value, border.inputs["From Max"].default_value = 0.45, 0.8
+    tree.links.new(tree.nodes["Fresnel Edge"].outputs[0], border.inputs["Value"])
+    dark = node(
+        tree, "ShaderNodeVectorMath", "Deep Spectral Outline", -400, -650, operation="SCALE"
+    )
+    tree.links.new(color.outputs[0], dark.inputs[0])
+    dark.inputs["Scale"].default_value = 0.18
+    mix = node(tree, "ShaderNodeMixRGB", "Cyan Edge With Dark Border", -150, -450)
+    tree.links.new(border.outputs[0], mix.inputs[0])
+    tree.links.new(color.outputs[0], mix.inputs[1])
+    tree.links.new(dark.outputs[0], mix.inputs[2])
+    tree.links.new(mix.outputs[0], emission.inputs["Color"])
 
 
 def create(context, source, first, last, quality="MEDIUM", *, tail=18.0):
@@ -118,7 +142,7 @@ def create(context, source, first, last, quality="MEDIUM", *, tail=18.0):
             for key, value in dict(
                 radius=1.0,
                 expansion=0.0,
-                opacity=0.62,
+                opacity=0.82,
                 strength=1.0,
                 ior=1.3,
                 rim_power=1.0,
