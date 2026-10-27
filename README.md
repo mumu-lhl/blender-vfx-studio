@@ -290,6 +290,8 @@ Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使�
 
 ## 入门资产库
 
+当前按 [#138](https://github.com/mumu-lhl/blender-vfx-studio/issues/138) 扩库，计划加入闪电、烟尘、火焰、冲刺残影和魔法阵。闪电候选见 [PR #144](https://github.com/mumu-lhl/blender-vfx-studio/pull/144)，未验收原型不计入当前完整资产数量。
+
 发布附件中的 `blender-vfx-studio-examples-版本.zip` 是独立资产库，不能作为插件安装。解压后，将文件夹添加到 Blender 的 Asset Libraries，再通过 Load VFX with New ID 创建效果。
 目前包含 Energy Charge 蓝色蓄力组合、Impact Burst 橙色冲击爆发、Arc Slash 紫色刀光；全部使用 Low 质量、原生节点和嵌入预览，不需要外部贴图或缓存。
 
