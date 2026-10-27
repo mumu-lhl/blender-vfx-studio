@@ -77,6 +77,16 @@ class SpellSceneTests(unittest.TestCase):
                 f"Character returned to bind pose at frame {frame}",
             )
 
+    def test_recovery_does_not_restart_idle_phase(self):
+        rig = next(o for o in bpy.context.scene.objects if o.type == "ARMATURE")
+        poses = []
+        for frame in (94, 95, 96, 97, 98, 99):
+            bpy.context.scene.frame_set(frame)
+            posed = rig.evaluated_get(bpy.context.evaluated_depsgraph_get())
+            poses.append([c for p in posed.pose.bones for row in p.matrix for c in row])
+        changes = [max(abs(x - y) for x, y in zip(a, b)) for a, b in zip(poses, poses[1:])]
+        self.assertLess(changes[2], 3 * max(changes[1], changes[3]))
+
 
 if __name__ == "__main__":
     result = unittest.TextTestRunner(verbosity=2).run(

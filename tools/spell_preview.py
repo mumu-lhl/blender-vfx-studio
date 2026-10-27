@@ -48,8 +48,9 @@ def setup(*, light=True, far=False):
     clip(character["rig"], character["actions"]["Spellcast_Long"], 24, 52)
     release = clip(character["rig"], character["actions"]["Spellcast_Shoot"], 52, 74)
     release.blend_out = 6
-    # actor() provides the old 96-frame fixture baseline; keep recovery posed here.
-    clip(character["rig"], character["actions"]["2H_Melee_Idle"], 97, 109, loop=True)
+    # Extend the existing loop so recovery keeps its original animation phase.
+    idle = character["rig"].animation_data.nla_tracks[0].strips[0]
+    idle.repeat = (109 - idle.frame_start) / (idle.action_frame_end - idle.action_frame_start)
     setup_stage(light=light, far=far, focus=(0, 0, 1.05), lens=36)
     before = set(scene.objects)
     scene.frame_set(1)
