@@ -1,0 +1,42 @@
+[
+  {
+    "effect": "lightning-strike",
+    "frame": 4,
+    "file": "images/lightning-strike.png",
+    "sha256": "878b8296b96c2a765277908f12ed2a0d5c31817c5043126ff60c5e569e143a0d",
+    "generator": "tools/lightning_preview.py",
+    "workflow_run": 40454784154
+  },
+  {
+    "effect": "dust-impact",
+    "frame": 39,
+    "file": "images/dust-impact.png",
+    "sha256": "ea9de6f93c7c189d36fecf15743ac448eaf3f1dd56d969ffd724b3f1f873d6be",
+    "generator": "tools/dust_preview.py",
+    "workflow_run": 40519038623
+  },
+  {
+    "effect": "stylized-fire",
+    "frame": 36,
+    "file": "images/stylized-fire.png",
+    "sha256": "f5b89cc738bcb41aae28c5bb376936d1dee1fb0fd904ccedcba0ca5f3055aba1",
+    "generator": "tools/fire_preview.py",
+    "workflow_run": 40461231445
+  },
+  {
+    "effect": "dash-echoes",
+    "frame": 19,
+    "file": "images/dash-echoes.png",
+    "sha256": "20dc19684ffd48ebabb6987edbc881545d1214916858a3bf9e9ae7b52edf1baa",
+    "generator": "tools/dash_preview.py",
+    "workflow_run": 40465954679
+  },
+  {
+    "effect": "magic-circle",
+    "frame": 40,
+    "file": "images/magic-circle.png",
+    "sha256": "242d9dd7ed25ea17b8447cb0b834b7c43bc6d3cc841f7dee5004f504eeaee6c6",
+    "generator": "tools/magic_preview.py",
+    "workflow_run": 40466594123
+  }
+]
