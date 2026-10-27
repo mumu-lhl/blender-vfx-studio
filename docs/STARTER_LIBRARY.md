@@ -26,7 +26,7 @@
 
 **Character Dash Echoes（30 帧，开发候选）** 保存三个不同位置与姿态的角色残影，依次出现、逐个淡去。Low / Medium / High 分别保留两／三／四姿态，保留角色原始网格形状。选中自己的 Mesh 或 Armature，在侧栏点击 **Capture Dash Echoes**，指定首尾帧即可创建独立残影；默认采样跨度为 12 帧。跨度须能被姿态间隔数整除，例如三姿态用 1、7、13 帧。Echo Tail 决定每个姿态存活的帧数，组合控制器可再调整整体时间和位置。各层可调透明度、颜色、边缘与噪声侵蚀。采样会求值现有修改器和形态键，随后恢复原帧和子帧；不改动源数据，不保留运行时源引用。源动画修改后需重新捕获；参数 JSON 不包含姿态网格，请保存完整效果。此功能不重定向或修改骨架。
 
-内置残影轮廓取自本仓库固定版本的 [KayKit Adventurers CC0 角色](../assets/character-review/README.md)，没有角色贴图或骨架依赖；可用上述按钮捕获自己的角色。代码许可证仍为 GPL-3.0-or-later。当前完成行为检查，实际角色镜头与资产预览尚在检查，不计入已验收数量。
+内置残影轮廓取自本仓库固定版本的 [KayKit Adventurers CC0 角色](../assets/character-review/README.md)，没有角色贴图或骨架依赖；可用上述按钮捕获自己的角色。代码许可证仍为 GPL-3.0-or-later。完整角色视频隔帧、明暗与远景图、三档预览和原生文件检查已完成，CI 通过；范围、成本与限制见 [残影记录](DASH_REVIEW.md)。待依赖合并后计入 main 数量。
 
 **Calligraphic Magic Circle（72 帧，开发候选）** 分为花瓣主印、反向转动的符文带和释放时升起的立体符记。前段逐笔形成图案，中段保持，后段符记升起，地面印记先退去。Radius 和 Width 调整尺寸与笔画，颜色与 Strength 可分层编辑，Noise Scale / Dissolve 调整墨迹侵蚀，Fade 调整消散。各层 Object Properties → Custom Properties 的 Sigil Spin 控制一个周期的转角，释放层的 Sigil Lift 控制升起高度。图案是本项目生成的原生网格笔画，不依赖字体、图片或缓存；可直接编辑网格与节点，完整造型请用 Save Complete Effect 保存。三档质量改变曲线采样密度，保持同一图案与时序。已完成高清阶段图、明暗与远景、完整视频隔帧及原生文件检查，CI 通过；范围和限制见 [魔法阵记录](MAGIC_REVIEW.md)。三档实际嵌入预览已读取，待依赖合并后计入 main 数量。
 
