@@ -41,7 +41,7 @@
 - **Arc Slash**：主刀面配有色、两端收尖的独立残弧；硬笔触和远景细尾仍待完整动作判断。见 [残影记录](docs/SLASH_WAKE_REVIEW.md)。
 - **Impact Burst**：已分为断裂主体、细喷射、辅助卷流与隆起压力弧；侧面偏实体、远景细层弱。见 [主体](docs/IMPACT_SURFACE_REVIEW.md)、[细喷射](docs/IMPACT_FINE_REVIEW.md) 与 [压力弧](docs/IMPACT_WAVE_REVIEW.md)。
 
-[#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 跟踪整体艺术品质。当前推进完整施法镜头 [#151](https://github.com/mumu-lhl/blender-vfx-studio/issues/151) 与冲刺接落地烟尘 [#156](https://github.com/mumu-lhl/blender-vfx-studio/issues/156)，分别检查准备／释放和位移／接触／恢复的完整节奏。
+[#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 跟踪整体艺术品质。完整施法镜头的准备／释放／退场已完成必要检查，实际读取 54 张解码隔帧图及明暗、远景对照；范围与成本见 [施法记录](docs/SPELL_SEQUENCE_REVIEW.md)。冲刺接落地烟尘 [#156](https://github.com/mumu-lhl/blender-vfx-studio/issues/156) 继续检查位移／接触／恢复。当前参数与艺术可编辑性审查由 [#161](https://github.com/mumu-lhl/blender-vfx-studio/issues/161) 跟踪。
 
 软件 Eevee 曾在完成像素检查后退出崩溃；CI 的原生重开采用局部 Mesa 磁盘缓存设置并要求正常退出，不忽略失败。具体范围和对照见 [退出记录](docs/EEVEE_EXIT_REVIEW.md)。
 
