@@ -23,8 +23,9 @@ EXAMPLES = (
     "dust-impact",
     "stylized-fire",
     "dash-echoes",
+    "magic-circle",
 )
-QUALITY_ASSETS = ("lightning-strike", "dust-impact", "stylized-fire", "dash-echoes")
+QUALITY_ASSETS = ("lightning-strike", "dust-impact", "stylized-fire", "dash-echoes", "magic-circle")
 PREVIEWS = {
     "energy-charge": (31, (4, -6, 3.5), (0, 0, 0.1), 4.8),
     "impact-burst": (5, (3, -5, 6), (0, 0, 0), 5.0),
@@ -32,6 +33,7 @@ PREVIEWS = {
     "lightning-strike": (4, (4, -6, 3.8), (0, 0, 1.6), 5.2),
     "stylized-fire": (16, (4, -6, 3.5), (0, 0, 1), 4.2),
     "dash-echoes": (14, (4, -7, 3.4), (0, 0, 0.9), 5.2),
+    "magic-circle": (40, (4, -6, 6), (0, 0, 0.5), 5.2),
     "dust-impact": (13, (4, -6, 3.5), (0, 0, 0.5), 5.0),
 }
 
@@ -182,6 +184,10 @@ def create_effect(key, *, quality=None):
         shield.children[0].data.materials[0].surface_render_method = "DITHERED"
         root = composition.create(context, [outer, inner, shield, particles])
         root.name = "Energy Charge"
+    elif key == "magic-circle":
+        from tools.magic_asset import create
+
+        root = create(context, "MEDIUM" if quality is None else quality)
     elif key == "dash-echoes":
         from tools.dash_asset import create
 

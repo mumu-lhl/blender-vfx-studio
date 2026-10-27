@@ -28,6 +28,8 @@
 
 内置残影轮廓取自本仓库固定版本的 [KayKit Adventurers CC0 角色](../assets/character-review/README.md)，没有角色贴图或骨架依赖；可用上述按钮捕获自己的角色。代码许可证仍为 MIT。当前完成行为检查，实际角色镜头与资产预览尚在检查，不计入已验收数量。
 
+**Calligraphic Magic Circle（72 帧，开发候选）** 分为花瓣主印、反向转动的符文带和释放时升起的立体符记。前段逐笔形成图案，中段保持，后段符记升起，地面印记先退去。Radius 和 Width 调整尺寸与笔画，颜色与 Strength 可分层编辑，Noise Scale / Dissolve 调整墨迹侵蚀，Fade 调整消散。各层 Object Properties → Custom Properties 的 Sigil Spin 控制一个周期的转角，释放层的 Sigil Lift 控制升起高度。图案是本项目生成的原生网格笔画，不依赖字体、图片或缓存；可直接编辑网格与节点，完整造型请用 Save Complete Effect 保存。三档质量改变曲线采样密度，保持同一图案与时序。目前尚未读取实际魔法阵渲染，不计入已验收数量。
+
 全部资产保留原生对象、网格、材质和 Geometry Nodes。使用 VFX Duplicate 创建独立副本，使用 VFX Delete 删除。示例不需要外部贴图、角色或缓存；不加载插件也能播放和渲染，继续使用侧栏创作则需要启用插件。
 
 保存手动节点、轨道驱动或整个组合时，使用 **Save Complete Effect**。单层参数预设只保存参数。例如，只保存充能粒子层的参数 JSON，再创建时会得到普通 Emitter；向内运动和尖形等私有节点不会随参数重建。

@@ -6,8 +6,8 @@ import bpy
 
 assert not any("blender_vfx_studio" in name for name in sys.modules)
 roots = [obj for obj in bpy.data.objects if obj.name.startswith("Persisted Starter ")]
-assert len(roots) == 7
-for frame in (16, 0, 7, 61, 16):
+assert len(roots) == 8
+for frame in (16, 0, 7, 81, 16):
     bpy.context.scene.frame_set(frame)
     graph = bpy.context.evaluated_depsgraph_get()
     for root in roots:
