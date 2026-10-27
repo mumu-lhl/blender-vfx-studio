@@ -446,14 +446,12 @@ class VFX_OT_capture_dash(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
     first: IntProperty(name="First Frame", default=1, min=-100000, max=100000)
     last: IntProperty(name="Last Frame", default=13, min=-100000, max=100000)
-    quality: EnumProperty(
-        name="Quality",
-        items=[
-            ("LOW", "Low · 2 poses", ""),
-            ("MEDIUM", "Medium · 3 poses", ""),
-            ("HIGH", "High · 4 poses", ""),
-        ],
-        default="MEDIUM",
+    count: IntProperty(
+        name="Echo Count",
+        description="Evenly sample this many poses, including both endpoints; keeps source mesh detail",
+        default=3,
+        min=2,
+        max=32,
     )
     tail: IntProperty(name="Echo Tail (Frames)", default=18, min=1, max=100000)
 
@@ -462,12 +460,23 @@ class VFX_OT_capture_dash(bpy.types.Operator):
 
         try:
             dash.create(
-                context, context.object, self.first, self.last, self.quality, tail=self.tail
+                context, context.object, self.first, self.last, tail=self.tail, count=self.count
             )
         except (ValueError, RuntimeError) as error:
             self.report({"ERROR"}, str(error))
             return {"CANCELLED"}
         return {"FINISHED"}
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "first")
+        layout.prop(self, "last")
+        layout.prop(self, "count")
+        layout.prop(self, "tail")
+        if self.last > self.first:
+            spacing = (self.last - self.first) / (self.count - 1)
+            layout.label(text=f"Pose spacing: {spacing:g} frames (subframes supported)")
+        layout.label(text="Keeps source mesh detail; more echoes increase render cost", icon="INFO")
 
     def invoke(self, context, event):
         self.last = context.scene.frame_current
