@@ -1,0 +1,293 @@
+{
+  "source_commit": "b648921bfe4f2a03dfae4c17e48b8d257023b888",
+  "engine": "BLENDER_EEVEE",
+  "resolution": [
+    960,
+    540
+  ],
+  "samples": 16,
+  "bloom": false,
+  "realtime_playback_reviewed": false,
+  "source_sha256": {
+    "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+    "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+    "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+    "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+    "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+    "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+    "blender_vfx_studio/composition.py": "47116f337bbb6803ba24876b338218bd82506c67f4541447f12d686624f43e0a",
+    "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+    "blender_vfx_studio/dash.py": "63d042a37da3b44ffb804698129b60507ce581ed12379c8fb346b62c493951ee",
+    "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+    "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+    "blender_vfx_studio/impact.py": "60ce4db7744b121b84115a8984350cb7c49d71dac3643748127a82dcf9689d23",
+    "blender_vfx_studio/impact_shape.py": "69abd036beba788fd0a8042710d888ba644a156fc6be62a70eb17fb13b7fa176",
+    "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+    "blender_vfx_studio/library_ui.py": "cd6f8b5bb4f47e905a62dddc6fa7f6d249e4b8864a568ad066dc4115677d56b4",
+    "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+    "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+    "blender_vfx_studio/parameters.py": "39f0a239186f9f59c5e481eb6c1b9b61111c1065aac6d5347282908cca1e4eff",
+    "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+    "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+    "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+    "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+    "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+    "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+    "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+    "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+    "blender_vfx_studio/slash.py": "58ee9b0513df12efc6caa5bdde08ccfaea7cf05080c13d993638ff0d5f987904",
+    "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+    "blender_vfx_studio/slash_shape.py": "51bb4a0a23673c6b5213cb73403936ced0dd2ddddf862e4374dd0b46de8ca7b0",
+    "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+    "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+    "blender_vfx_studio/ui.py": "7e382809d07b38ba0d9f98649175645e020125993f85b79d7cbd230992b85eaf",
+    "tools/native_shape_preview.py": "89fd69c8ad125bcb428c9c9b61e77fc41f872c16f83231fabdc65def2c2c9015",
+    "tools/build_examples.py": "73c111f4df74e5e4db67b52161c7eec5bab0fceea2e6ebcdab57d90bfe01188d",
+    "tools/charge_design.py": "bb90aa6a6fef7e20c221aa480b9235d24f971277a07605b3677ffd29f7949860",
+    "tools/character_scene.py": "d0a9227d917f79ccdd092498b5b1f85bc1f9b1d4146adc45a7b01f4e8aac855b",
+    "tools/lightning_asset.py": "a154931c4cf84fe9d57164a4478782a2be1d23f98ee88f8adf246dfb7e18e1bb",
+    "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+    "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+    "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+    "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+  },
+  "sets": {
+    "charge/dark-near": {
+      "frames": [
+        36
+      ],
+      "results": [
+        {
+          "case": "baseline",
+          "frame": 36,
+          "values": {
+            "Nucleus Stored Size": 1.899999976158142,
+            "Nucleus Compression": 0.6000000238418579,
+            "Release Stretch": 1.399999976158142
+          },
+          "seconds": 25.971518452992314
+        },
+        {
+          "case": "edited",
+          "frame": 36,
+          "values": {
+            "Nucleus Stored Size": 2.799999952316284,
+            "Nucleus Compression": 0.800000011920929,
+            "Release Stretch": 2.0
+          },
+          "seconds": 29.22221281399834
+        }
+      ],
+      "images": {
+        "baseline-0036.png": "07684080bc92d8b8b50676ecd2d958487f1c8e22365275903202e7278c76ec05",
+        "edited-0036.png": "83c09c7eb52b175e7a21280936b78b1755e10b4e5ce0b22c833a68ca676058f5"
+      }
+    },
+    "charge/light-near": {
+      "frames": [
+        18,
+        36,
+        46
+      ],
+      "results": [
+        {
+          "case": "baseline",
+          "frame": 18,
+          "values": {
+            "Nucleus Stored Size": 1.899999976158142,
+            "Nucleus Compression": 0.6000000238418579,
+            "Release Stretch": 1.399999976158142
+          },
+          "seconds": 27.026990886006388
+        },
+        {
+          "case": "baseline",
+          "frame": 36,
+          "values": {
+            "Nucleus Stored Size": 1.899999976158142,
+            "Nucleus Compression": 0.6000000238418579,
+            "Release Stretch": 1.399999976158142
+          },
+          "seconds": 27.399296279996634
+        },
+        {
+          "case": "baseline",
+          "frame": 46,
+          "values": {
+            "Nucleus Stored Size": 1.899999976158142,
+            "Nucleus Compression": 0.6000000238418579,
+            "Release Stretch": 1.399999976158142
+          },
+          "seconds": 28.335606047010515
+        },
+        {
+          "case": "edited",
+          "frame": 18,
+          "values": {
+            "Nucleus Stored Size": 2.799999952316284,
+            "Nucleus Compression": 0.800000011920929,
+            "Release Stretch": 2.0
+          },
+          "seconds": 28.843866631010314
+        },
+        {
+          "case": "edited",
+          "frame": 36,
+          "values": {
+            "Nucleus Stored Size": 2.799999952316284,
+            "Nucleus Compression": 0.800000011920929,
+            "Release Stretch": 2.0
+          },
+          "seconds": 28.133271693004644
+        },
+        {
+          "case": "edited",
+          "frame": 46,
+          "values": {
+            "Nucleus Stored Size": 2.799999952316284,
+            "Nucleus Compression": 0.800000011920929,
+            "Release Stretch": 2.0
+          },
+          "seconds": 28.365740701992763
+        }
+      ],
+      "images": {
+        "baseline-0018.png": "1acf1d7b59728c541d3f405e74fed3ffe3f17a6ba1c660192807a220d7ff9757",
+        "baseline-0036.png": "a3b49c363851b73893204f2f0adeb882c1ad45408dcb0ca327ea489eb99f7493",
+        "baseline-0046.png": "6db7e45b6dcb46c730fac3709cb7079a1bdb5ba1cfa0e095e22ee6ce123e1ad8",
+        "edited-0018.png": "298d10d17baf6c6cf2cab6683da69bf4f6dc65673e3a51d8a914c5cbea7df58d",
+        "edited-0036.png": "a9ff2ab9ef3b8e8baac4a7c0399eef5903801c4b33d338040774d77792c0cb80",
+        "edited-0046.png": "2f0f73f45208165b83fc81af9cde9bb2747c117944767d030262c236663f8e3e"
+      }
+    },
+    "lightning/dark-near": {
+      "frames": [
+        3
+      ],
+      "results": [
+        {
+          "case": "baseline",
+          "frame": 3,
+          "values": {
+            "Bolt Length": 3.5999999046325684,
+            "Branch Reach": 1.0
+          },
+          "seconds": 12.899178209991078
+        },
+        {
+          "case": "edited",
+          "frame": 3,
+          "values": {
+            "Bolt Length": 4.800000190734863,
+            "Branch Reach": 1.399999976158142
+          },
+          "seconds": 14.394399470998906
+        }
+      ],
+      "images": {
+        "baseline-0003.png": "7d4f9d7628a447482fb44777d31a2a06bcef076e4ac2cdc2096ed24cb173ccb5",
+        "edited-0003.png": "8e190b3665feda62dbfba6347234841e4adf4c3a1d81b39060f555c9f6c6cdb8"
+      }
+    },
+    "lightning/light-far": {
+      "frames": [
+        3
+      ],
+      "results": [
+        {
+          "case": "baseline",
+          "frame": 3,
+          "values": {
+            "Bolt Length": 3.5999999046325684,
+            "Branch Reach": 1.0
+          },
+          "seconds": 13.06321138299245
+        },
+        {
+          "case": "edited",
+          "frame": 3,
+          "values": {
+            "Bolt Length": 4.800000190734863,
+            "Branch Reach": 1.399999976158142
+          },
+          "seconds": 12.825868330008234
+        }
+      ],
+      "images": {
+        "baseline-0003.png": "7c3be71a0bbfaac8d727e369eb336cfff694378002503891603218303f44c8dc",
+        "edited-0003.png": "dcdf8ee956d271242efe068bf94a32b56a8ac851211ed7a8cd852f4bb7891df6"
+      }
+    },
+    "lightning/light-near": {
+      "frames": [
+        2,
+        3,
+        12
+      ],
+      "results": [
+        {
+          "case": "baseline",
+          "frame": 2,
+          "values": {
+            "Bolt Length": 3.5999999046325684,
+            "Branch Reach": 1.0
+          },
+          "seconds": 13.027246566009126
+        },
+        {
+          "case": "baseline",
+          "frame": 3,
+          "values": {
+            "Bolt Length": 3.5999999046325684,
+            "Branch Reach": 1.0
+          },
+          "seconds": 14.502699724005652
+        },
+        {
+          "case": "baseline",
+          "frame": 12,
+          "values": {
+            "Bolt Length": 3.5999999046325684,
+            "Branch Reach": 1.0
+          },
+          "seconds": 15.067821433010977
+        },
+        {
+          "case": "edited",
+          "frame": 2,
+          "values": {
+            "Bolt Length": 4.800000190734863,
+            "Branch Reach": 1.399999976158142
+          },
+          "seconds": 13.770949123994797
+        },
+        {
+          "case": "edited",
+          "frame": 3,
+          "values": {
+            "Bolt Length": 4.800000190734863,
+            "Branch Reach": 1.399999976158142
+          },
+          "seconds": 14.01988737800275
+        },
+        {
+          "case": "edited",
+          "frame": 12,
+          "values": {
+            "Bolt Length": 4.800000190734863,
+            "Branch Reach": 1.399999976158142
+          },
+          "seconds": 16.03778398699069
+        }
+      ],
+      "images": {
+        "baseline-0002.png": "ef38e0aea1e7362fc64285781c577b570d86b95d2fafd92d9d848dffa45b2be8",
+        "baseline-0003.png": "ec4309c77254281e93a47e48ffd1b475bf770f4e4be65bc1b97bed87a4e4cd92",
+        "baseline-0012.png": "c893ae2eef0f7ad6c26cfc6eb221e634312de8431e2f407a115ac3b58b0f9527",
+        "edited-0002.png": "6251c85277ce0ed3d6c6dde0d1fff94d78004d528900da87d6e00469fad80c34",
+        "edited-0003.png": "3a9c9003ad3fd2c3b7d450e06cdb5a8ab1fb0ce4f13056d31f2750d658b2ddc1",
+        "edited-0012.png": "fdb57e6526c37bb5a5710303368982d27e59bd09829df0cde5c9e54c8d4f5477"
+      }
+    }
+  }
+}

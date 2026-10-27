@@ -178,7 +178,12 @@ SLASH_PARAMETERS = {
         1.0,
         "Release amount; smooth fading or separate pieces according to the style",
     ),
-    "contour": (0.65, 0.0, 1.0, "Uneven leading hook and torn inner silhouette"),
+    "contour": (
+        0.65,
+        0.0,
+        1.0,
+        "Master extra geometric silhouette strength; zero removes contour shaping",
+    ),
     "bank": (0.22, -1.0, 1.0, "Depth bend relative to radius; zero flattens the blade"),
     "wake_spread": (0.7, 0.0, 1.0, "Wake separation during the sweep and release"),
 }
