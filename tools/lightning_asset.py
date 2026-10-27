@@ -197,9 +197,7 @@ def _bolt(root, quality):
     center = g.v("Discharging Centerline", "ADD", scaled, jitter)
     width = g.m("Bolt Full Width", "MULTIPLY", g.value("Width", prop="width"), 0.5)
     width = g.m("Main And Fine Branch Width", "MULTIPLY", width, g.attr("bolt_width"))
-    thickness = g.m("Pulse Thickness", "MULTIPLY_ADD", pulse, 0.75)
-    thickness.node.inputs[2].default_value = 0.25
-    width = g.m("Discharge Thickness", "MULTIPLY", width, thickness)
+    width = g.m("Discharge Thickness", "MULTIPLY", width, pulse)
     shaped = g.n("GeometryNodeSetPosition", "Native Bolt Shape")
     g.link(geometry, shaped.inputs["Geometry"])
     g.link(
@@ -209,7 +207,7 @@ def _bolt(root, quality):
     reveal = g.stage("Strike Travels To Ground", p, 0, 0.12)
     not_yet = g.m("Not Reached By Strike", "GREATER_THAN", g.attr("bolt_along"), reveal)
     inactive = g.m("Outside Lifetime", "LESS_THAN", g.value("Active", expression=ACTIVE), 0.5)
-    off = g.m("Between Discharges", "LESS_THAN", pulse, 0.015)
+    off = g.m("Between Discharges", "LESS_THAN", pulse, 0.06)
     dissolve = g.value("Dissolve", prop="dissolve")
     erosion = g.m(
         "Weaker Branches Erode First",
@@ -301,8 +299,10 @@ def _material(root):
         g.v("Main And Supporting Discharges", "SCALE", border.outputs[0], hierarchy),
         emission.inputs["Color"],
     )
+    radiance = g.m("Narrowing Arcs Stay Luminous", "MULTIPLY_ADD", pulse, 0.75)
+    radiance.node.inputs[2].default_value = 0.25
     g.link(
-        g.m("Pulse Energy", "MULTIPLY", pulse, g.value("Emission", prop="strength")),
+        g.m("Pulse Energy", "MULTIPLY", radiance, g.value("Emission", prop="strength")),
         emission.inputs["Strength"],
     )
     out = g.n("ShaderNodeOutputMaterial", "Output")
@@ -310,6 +310,8 @@ def _material(root):
 
 
 def create(context, quality="MEDIUM"):
+    if quality not in {"LOW", "MEDIUM", "HIGH"}:
+        raise ValueError("Unknown lightning quality")
     bolt = core.create(context, "ENERGY_RING", quality)
     start = float(bolt["start"])
     for key, value in dict(

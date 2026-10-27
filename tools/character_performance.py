@@ -113,7 +113,7 @@ def main():
         "renders": render,
         "limits": [
             "Headless scene evaluation and render wall time, not viewport FPS",
-            "Two warmup renders and three matched frame pairs; too few for a render p95",
+            f"Two warmup renders and {len(frames)} matched frame pairs; too few for a render p95",
             "The same saved scene is used; only its VFX collection is excluded",
             "Evaluation excludes the collection from the viewport dependency graph; render comparison only excludes it from rendering",
         ],

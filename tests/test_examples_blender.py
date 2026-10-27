@@ -562,7 +562,7 @@ class StarterTests(unittest.TestCase):
         self.assertGreater(vertex_count(root, 48), 0)
         self.assertEqual(vertex_count(root, 49), 0)
 
-    def test_builders_are_low_quality_bounded_and_have_native_timing(self):
+    def test_builders_have_native_timing_and_explicit_quality(self):
         for key, layers, duration, quality in zip(
             EXAMPLES, (4, 4, 1, 4), (48, 24, 18, 18), ("LOW", "LOW", "LOW", "MEDIUM"), strict=True
         ):

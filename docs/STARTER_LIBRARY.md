@@ -16,7 +16,11 @@
 
 **Arc Slash（18 帧）** 是单层紫色程序化刀光，不需要角色动画或采样路径。Arc 调整弧度，Width 调整宽度，Spin 调整旋转；Attack、Motion Ease、Core Width、Afterimage、Streaks 和 Breakup 调整展开、减速、锋刃、残影、笔触与侵蚀。0.22.2 包含版本 2 的规则月牙。版本 4 把体积推向前端，让两条残弧独立揭示和退场，并用较宽的流动笔触减少细丝；Head Bias 控制前端偏重，Contour、Bank、Wake Spread 控制轮廓、深度与残影分离。当前开发分支的版本 5 保留主刀面，将残影片段两端收尖；Afterimage 调整可见面积，存活部分保留紫色。仍在提升艺术品质，实际观看范围见 [残影记录](SLASH_WAKE_REVIEW.md)。它与侧栏直接创建的刀光使用同一生成器，只把时长设为 18 帧；版本 1/2/3/4 及旧完整文件不自动升级。
 
-全部示例采用 Low 质量，保留原生对象、网格、材质和 Geometry Nodes。使用 VFX Duplicate 创建独立副本，使用 VFX Delete 删除。示例不需要外部贴图、角色或缓存；不加载插件也能播放和渲染，继续使用侧栏创作则需要启用插件。
+原三套示例保留 Low 质量；Lightning Strike 默认 Medium，quality/ 目录另提供 Low 和 High 两个完整文件。同一效果的质量文件不计作额外种类。
+
+**Lightning Strike（18 帧）** 由分支电弧、短促接触闪光、飞散火花和地面余波组成。主干先落地，再做两次逐渐减弱的复击；第一峰值在 Start+2 左右。主层 Radius 调整分支横向范围，Width 调整线宽，Strength 调整发光，Noise Scale 调整细扰动，Dissolve 侵蚀电弧。在 Geometry Nodes 用 **Bolt Length** 调整高度，**Branch Reach** 调整分支伸展。普通参数 JSON 会重建原生环形基础，完整造型与手动节点请用 **Save Complete Effect** 保存。当前为开发候选，高清角色与完整动画检查正在进行，不能以缩略图代替验收。
+
+全部资产保留原生对象、网格、材质和 Geometry Nodes。使用 VFX Duplicate 创建独立副本，使用 VFX Delete 删除。示例不需要外部贴图、角色或缓存；不加载插件也能播放和渲染，继续使用侧栏创作则需要启用插件。
 
 保存手动节点、轨道驱动或整个组合时，使用 **Save Complete Effect**。单层参数预设只保存参数。例如，只保存充能粒子层的参数 JSON，再创建时会得到普通 Emitter；向内运动和尖形等私有节点不会随参数重建。
 
@@ -30,6 +34,6 @@ Arc Slash 和 Impact Burst 的缩略图均展示第 5 帧，不加辉光；Impac
 blender -b --factory-startup --python-exit-code 1 --python tools/build_examples.py
 ```
 
-脚本只接受未打开项目的全新后台进程，输出 3 个 `.blend` 到 `dist/examples/`，并生成带版本号的 examples ZIP；不会删除目录中其他文件。网格、节点、参数和嵌入预览均可重建。每次会产生新的内部编号，因此不保证 Blender 文件跨次构建的二进制完全相同。
+脚本只接受未打开项目的全新后台进程，输出四套效果、共六个 `.blend`（含闪电质量文件） 到 `dist/examples/`，并生成带版本号的 examples ZIP；不会删除目录中其他文件。网格、节点、参数和嵌入预览均可重建。每次会产生新的内部编号，因此不保证 Blender 文件跨次构建的二进制完全相同。
 
 0.22.3 尚未发布，整体艺术重设计由 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 跟踪。开发版可从成功 Actions 的 `blender-vfx-studio-extension` 附件取得独立 examples ZIP，或按上面的命令自行生成。当前仍有片状能量段、远景细流偏弱等问题；具体状态见 [Roadmap](../ROADMAP.md)。上述技术检查不代表实时播放、真实角色镜头或商业艺术验收，已下载的 0.22.2 保留旧造型。

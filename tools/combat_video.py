@@ -123,7 +123,7 @@ def encode(folder, profile="combat"):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "folder", type=Path, help="Folder containing combat-0001.png through combat-0036.png"
+        "folder", type=Path, help="Folder containing the selected profile’s complete PNG sequence"
     )
     parser.add_argument("--profile", choices=PROFILES, default="combat")
     args = parser.parse_args()

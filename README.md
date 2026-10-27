@@ -291,7 +291,7 @@ Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使�
 ## 入门资产库
 
 发布附件中的 `blender-vfx-studio-examples-版本.zip` 是独立资产库，不能作为插件安装。解压后，将文件夹添加到 Blender 的 Asset Libraries，再通过 Load VFX with New ID 创建效果。
-目前包含 Energy Charge 蓝色蓄力组合、Impact Burst 橙色冲击爆发、Arc Slash 紫色刀光；全部使用 Low 质量、原生节点和嵌入预览，不需要外部贴图或缓存。
+已发布的 0.22.2 包含 Energy Charge、Impact Burst 和 Arc Slash 三套 Low 资产。当前开发包新增 Lightning Strike 候选：分支电弧、错峰复击、接触闪光、火花与地面余波；默认 Medium，`quality/` 另提供 Low / High 完整文件，质量版本不计作额外效果。全部使用原生节点和嵌入预览，不需要外部贴图或缓存。闪电的高清和完整动画检查正在进行，尚未发布新版本。
 
 开发版 Energy Charge 会先汇聚、压紧中心，再收束释放。选中 `Charge • Compressed Core` 下的网格，在 Geometry Nodes 用 **Nucleus Compression** 调整积蓄时的压扁程度，0 关闭，默认 0.6。**Nucleus Seed Size / Nucleus Stored Size** 调整初始与蓄满大小，**Release Pinch / Release Stretch** 调整释放形态。修改后用 **Save Complete Effect** 保存；旧完整资产保留原节点。实际观看范围见 [压缩记录](docs/CHARGE_TENSION_REVIEW.md)。
 
