@@ -24,12 +24,13 @@
 
 ## 下载与安装
 
-发布页有两种 ZIP，作用不同：
+发布页的 ZIP 按用途区分：
 
 | 文件 | 用途 |
 | --- | --- |
 | `blender-vfx-studio-版本.zip` | 安装插件 |
 | `blender-vfx-studio-examples-版本.zip` | 完整效果资产库，解压后使用 |
+| `blender-vfx-studio-previews-版本.zip` | 预览图片，解压后浏览，不用于安装 |
 
 1. 从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases/latest) 下载插件安装包。
 2. 在 Blender 打开 **Edit → Preferences → Get Extensions**。
