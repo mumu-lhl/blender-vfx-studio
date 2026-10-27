@@ -170,7 +170,7 @@ class FlipbookTests(unittest.TestCase):
         self.assertEqual(self.image.size[:], (8, 8))
         self.assertEqual(self.image.users, 0)
 
-    def test_file_operators_preset_relative_reference_and_legacy_import(self):
+    def test_file_operators_preset_relative_reference(self):
         self.assertEqual(
             bpy.ops.vfx_studio.create_flipbook(filepath=self.image.filepath, columns=2, rows=2),
             {"FINISHED"},
@@ -187,10 +187,6 @@ class FlipbookTests(unittest.TestCase):
         self.assertNotEqual(clone["vfx_id"], root["vfx_id"])
         self.assertEqual(clone["start"], 50)
         self.assertEqual(core.atlas_node(clone).image, core.atlas_node(root).image)
-        legacy = presets.read(ROOT / "tests/fixtures/ring-preset-v1.json")
-        old = core.create_from_preset(bpy.context, legacy)
-        self.assertEqual(old["vfx_module"], "mesh.ring")
-        self.assertEqual(old["radius"], 0.2)
 
     def test_invalid_assets_and_settings_do_not_mutate_scene(self):
         count = len(bpy.data.objects)

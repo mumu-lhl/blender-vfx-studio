@@ -138,7 +138,7 @@ class AssetTests(unittest.TestCase):
             assets.write(FILE, root)
         self.assertEqual(FILE.read_bytes(), previous)
 
-    def test_readable_asset_names_and_legacy_prefix_files(self):
+    def test_asset_identity_survives_collection_renaming(self):
         root = ring()
         root.name = "Blue Shockwave"
         assets.write(FILE, root)
@@ -147,12 +147,12 @@ class AssetTests(unittest.TestCase):
         imported = assets.load(bpy.context, FILE)
         bundle = next(c for c in imported.users_collection if c.get("vfx_bundle_version"))
         self.assertIn("VFX Studio", bundle.asset_data.tags)
-        bundle.name = assets.PREFIX
-        legacy = ROOT / "work/legacy-asset.blend"
-        bpy.data.libraries.write(str(legacy), {bundle})
-        old = assets.load(bpy.context, legacy)
-        self.assertNotEqual(imported["vfx_id"], old["vfx_id"])
-        self.assertEqual(core.resolve(old), old)
+        bundle.name = "Artist Renamed Collection"
+        renamed = ROOT / "work/renamed-asset.blend"
+        bpy.data.libraries.write(str(renamed), {bundle})
+        loaded = assets.load(bpy.context, renamed)
+        self.assertNotEqual(imported["vfx_id"], loaded["vfx_id"])
+        self.assertEqual(core.resolve(loaded), loaded)
 
     def test_exact_selected_collection_and_foreign_asset_rollback(self):
         bundles = []

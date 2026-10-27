@@ -11,15 +11,13 @@ from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from blender_vfx_studio import core, slash  # noqa: E402
+from blender_vfx_studio import core  # noqa: E402
 
 
 def setup(
     *,
-    legacy=False,
     engine="CYCLES",
     light=False,
-    asset_version=None,
     angled=False,
     far=False,
     pale=False,
@@ -27,11 +25,7 @@ def setup(
 ):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
-    root = (
-        slash.create(bpy.context, asset_version=1 if legacy else asset_version)
-        if legacy or asset_version is not None
-        else core.create(bpy.context, "ARC_SLASH")
-    )
+    root = core.create(bpy.context, "ARC_SLASH")
     root["duration"], root["loop"] = 18.0, False
     root.update_tag()
     camera = bpy.data.objects.new("Acceptance Camera", bpy.data.cameras.new("Acceptance Camera"))
@@ -78,12 +72,10 @@ def setup(
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--legacy", action="store_true")
     parser.add_argument("--light", action="store_true")
     parser.add_argument("--pale", action="store_true", help="Near-white background instead of gray")
     parser.add_argument("--view-transform", choices=("Standard", "AgX"), default="Standard")
     parser.add_argument("--engine", choices=("CYCLES", "BLENDER_EEVEE"), default="CYCLES")
-    parser.add_argument("--asset-version", type=int, choices=(1, 2, 3, 4, 5))
     parser.add_argument("--sampled", action="store_true", help="Render every other frame plus peak")
     parser.add_argument("--frames", type=int, nargs="+")
     parser.add_argument("--angled", action="store_true", help="Review the native blade depth")
@@ -91,7 +83,7 @@ def main():
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
     if not bpy.app.background or "--factory-startup" not in sys.argv or bpy.data.filepath:
         raise RuntimeError("Use a fresh background process with --factory-startup and no project")
-    if (args.sampled and args.frames) or (args.legacy and args.asset_version):
+    if args.sampled and args.frames:
         parser.error("Choose one frame selection and one asset version")
     if args.frames and min(args.frames) < 1:
         parser.error("Frames must be positive")
@@ -106,10 +98,8 @@ def main():
 
     source_hashes = hashes()
     root = setup(
-        legacy=args.legacy,
         engine=args.engine,
         light=args.light,
-        asset_version=args.asset_version,
         angled=args.angled,
         far=args.far,
         pale=args.pale,
@@ -117,9 +107,8 @@ def main():
     )
     folder = ROOT / "work/visual-slash"
     folder.mkdir(parents=True, exist_ok=True)
-    prefix = "legacy" if args.legacy else args.engine.lower()
+    prefix = args.engine.lower()
     prefix += "-light" if args.light else ""
-    prefix += f"-v{args.asset_version}" if args.asset_version else ""
     prefix += "-angled" if args.angled else ""
     prefix += "-far" if args.far else ""
     prefix += "-pale" if args.pale else ""

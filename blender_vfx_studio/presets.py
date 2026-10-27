@@ -14,20 +14,10 @@ MAX_BYTES = 65536
 QUALITY = {"LOW", "MEDIUM", "HIGH"}
 # Birth frame is deliberately local to the destination scene.
 PRESET_PARAMETERS = preset_parameters_for("mesh.ring")
-LEGACY_FIELDS = {"format_version", "module", "asset_version", "name", "quality", "parameters"}
-FIELDS = LEGACY_FIELDS | {"assets"}
+FIELDS = {"format_version", "module", "asset_version", "name", "quality", "parameters", "assets"}
 
 
 def validate(data):
-    # Format 1 shipped only ring parameter snapshots. Keep a fixed fixture in tests.
-    if (
-        isinstance(data, dict)
-        and type(data.get("format_version")) is int
-        and data["format_version"] == 1
-    ):
-        if data.keys() != LEGACY_FIELDS or data.get("module") != "mesh.ring":
-            raise ValueError("Invalid legacy ring preset")
-        data = dict(data, format_version=2, assets={})
     if not isinstance(data, dict) or data.keys() != FIELDS:
         raise ValueError("Invalid preset fields")
     if type(data["format_version"]) is not int or data["format_version"] != FORMAT_VERSION:
@@ -65,7 +55,7 @@ def validate(data):
             or any(ord(c) < 32 for c in path)
         ):
             raise ValueError("Atlas image must be a local file path")
-    specs = preset_parameters_for(module, data["asset_version"])
+    specs = preset_parameters_for(module)
     parameters = data["parameters"]
     if not isinstance(parameters, dict) or parameters.keys() != specs.keys():
         raise ValueError("Preset parameters are missing or unknown")

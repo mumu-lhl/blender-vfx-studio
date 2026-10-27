@@ -10,43 +10,11 @@ import bpy
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from blender_vfx_studio import assets, composition, core  # noqa: E402
-
-
-def legacy_effect():
-    ring = core.create(bpy.context, "SHOCKWAVE", "LOW")
-    particles = core.create_particle(bpy.context, asset_version=1)
-    for root, values in (
-        (ring, dict(radius=0.15, expansion=3.2, width=0.2, dissolve=0.15)),
-        (
-            particles,
-            dict(
-                count=40,
-                velocity=3.0,
-                gravity=1.8,
-                motion_seconds=0.75,
-                size=0.07,
-                spawn_radius=0.08,
-                spread=0.85,
-                randomness=0.7,
-                seed=17,
-            ),
-        ),
-    ):
-        for key, value in dict(
-            values, duration=24.0, strength=4.0, fade=1.0, color_0=1.0, color_1=0.15, color_2=0.015
-        ).items():
-            root[key] = value
-        root.update_tag()
-    group = composition.create(bpy.context, [ring, particles])
-    group["loop"] = False
-    group.update_tag()
-    return group
+from blender_vfx_studio import assets, core  # noqa: E402
 
 
 def setup(
     *,
-    legacy=False,
     engine="CYCLES",
     light=False,
     baseline_asset=None,
@@ -59,8 +27,6 @@ def setup(
     root = (
         assets.load(bpy.context, baseline_asset)
         if baseline_asset
-        else legacy_effect()
-        if legacy
         else core.create(bpy.context, "IMPACT_BURST", "LOW")
     )
     scene = bpy.context.scene
@@ -99,7 +65,6 @@ def setup(
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--legacy", action="store_true")
     parser.add_argument("--light", action="store_true")
     parser.add_argument("--pale", action="store_true")
     parser.add_argument("--far", action="store_true")
@@ -113,9 +78,7 @@ def main():
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
     if not bpy.app.background or "--factory-startup" not in sys.argv or bpy.data.filepath:
         raise RuntimeError("Use a fresh background process with --factory-startup and no project")
-    if (args.legacy and args.baseline_asset) or sum(
-        (args.sampled, args.sequence, bool(args.frames))
-    ) > 1:
+    if sum((args.sampled, args.sequence, bool(args.frames))) > 1:
         parser.error("Choose one effect source and one frame selection")
     if args.frames and min(args.frames) < 1:
         parser.error("Frames must be positive")
@@ -130,7 +93,6 @@ def main():
 
     source_hashes = hashes()
     setup(
-        legacy=args.legacy,
         engine=args.engine,
         light=args.light,
         baseline_asset=args.baseline_asset,
@@ -141,7 +103,7 @@ def main():
     )
     folder = ROOT / "work/visual-impact"
     folder.mkdir(parents=True, exist_ok=True)
-    prefix = "legacy" if args.legacy else args.engine.lower()
+    prefix = args.engine.lower()
     prefix += "-light" if args.light else ""
     prefix += "-baseline" if args.baseline_asset else ""
     prefix += "-pale" if args.pale else ""
