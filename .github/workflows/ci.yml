@@ -320,9 +320,42 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  character_review:
+    name: Rigged character combat · software Eevee
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      EGL_PLATFORM: surfaceless
+      LP_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Download official Blender with checksum verification
+        run: python tools/fetch_blender.py --version 5.2.2
+      - *linux_render_dependencies
+      - name: Render the complete rigged shot and contextual comparisons
+        run: |
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/character_combat.py -- --sequence
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/character_combat.py -- --far --frames 16 32 48 49 53 61 80
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/character_combat.py -- --dark --frames 16 32 48 49 53 61 80
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/character_combat.py -- --reverse --frames 16 32 48 49 53 61 80
+          MESA_SHADER_CACHE_DISABLE=true blender -b work/character-combat/light-near/character.blend --disable-autoexec --python-exit-code 1 -t 2 --python tests/character_visual_reopen.py
+          MESA_SHADER_CACHE_DISABLE=true blender -b work/character-combat/light-near/character.blend --disable-autoexec --python-exit-code 1 -t 2 --python tools/character_performance.py
+          python tools/character_review.py work/character-combat
+      - name: Preserve character shot, images and measured costs
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: character-combat-review
+          path: work/character-combat/
+          if-no-files-found: warn
+
   release:
     if: github.event_name == 'push' && github.ref_type == 'tag'
-    needs: [blender, combat_review, handoff_review]
+    needs: [blender, combat_review, handoff_review, character_review]
     runs-on: ubuntu-24.04
     permissions:
       contents: write

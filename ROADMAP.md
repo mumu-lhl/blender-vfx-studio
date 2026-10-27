@@ -2,7 +2,7 @@
 
 更新：2026-10-26（UTC）。目标 Blender 5.2 LTS，优先 Eevee。最新发布版为 0.22.2；0.22.3 仍在开发，不发布标签。七类效果已有可用入口，但功能范围与艺术品质都还需要完善。
 
-当前重点是适合二次元角色战斗动画的视觉品质。先做好充能、释放、命中与消散，再扩充效果库。复杂骨架、跨平台 GUI 和新的模拟类型暂缓。[艺术评估](docs/ART_DIRECTION_REVIEW.md) 记录当前差距，[参考笔记](docs/REFERENCE_VISUAL_STUDY.md) 记录四组作品的实际观图与拆解。
+下一阶段先完成角色镜头的必要验证，再按 [#138](https://github.com/mumu-lhl/blender-vfx-studio/issues/138) 将完整库由三套扩充至八套。优先闪电、烟尘、风格化火焰、冲刺残影和魔法阵；保留高品质和可编辑性，暂停围绕旧三套效果的连续局部微调。复杂骨架、跨平台 GUI 和新的模拟类型继续暂缓。
 
 ## 已有的功能与边界
 
@@ -21,6 +21,8 @@
 **M5：兼容性与稳定性持续推进。** 三平台后台功能、无插件重开和安装/卸载已有自动检查。Linux 实际窗口检查包括侧栏、文件选择器、Pose Mode、用户库、Cloth 状态、Undo/Redo 和 Ungroup All；Windows/macOS 的真实窗口交互、更多 UI 缩放仍未检查。具体范围见 [GUI 记录](docs/GUI_CHECKS.md)，不把后台检查当作窗口交互验收。
 
 ## 当前视觉开发
+
+**真实角色镜头的必要验证已完成。** [#135 / PR #136](https://github.com/mumu-lhl/blender-vfx-studio/pull/136) 使用两名 CC0 KayKit 蒙皮角色与原生挥剑／受击动作，提供 96 帧、24 fps 场景。修正残影方向接入与末段充能衔接后，`d883fc5` 的六项 CI 全部通过；已下载校验最终 Actions 附件，读取全部 48 张视频隔帧图、远景／暗背景／反向机位及高清关键帧。无插件三帧像素一致，恢复阶段清空。软件 Eevee 实测记录了明显的求值和材质渲染成本；这不是视口帧率。充能焦点、刀光权重与命中结构仍未整体艺术验收。当前转向 #138 扩库，闪电 [PR #144](https://github.com/mumu-lhl/blender-vfx-studio/pull/144) 正在验证；#137 保留未验收原型。见 [镜头记录与实测](docs/CHARACTER_COMBAT_REVIEW.md)。
 
 **Energy Charge：束流、材质流动与释放已重做。** [PR #117](https://github.com/mumu-lhl/blender-vfx-studio/pull/117) 将主体改为错开前沿的双束，减少辅助流，材质通道跟随能量团向内移动；内核积蓄后原位收束释放。四层、12 个粒子槽、Low 最高 894 顶点不变，旧完整资产不重建。18 项局部测试、四种高清重开、示例 ZIP 和五项 CI 通过，已实际读取完整连段全部 30 张视频隔帧图。远景主体仍细碎，整体 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 继续开放，见 [束流记录](docs/CHARGE_STREAM_REVIEW.md)。
 
@@ -44,9 +46,10 @@
 
 ## 接下来的优先级
 
-1. 继续改善 Energy Charge 主进流的连贯轮廓、尾段碎片和远景焦点，保留已验证的压缩与释放变化。单纯加厚截面的试验增加了实体叶片感，已撤回；后续保留当前汇聚与积蓄节奏，从实际造型处理问题。
-2. 继续打磨刀光残影薄片感和命中主体实体感，强化不同视角下的释放与命中关系。每轮修改真实生成器，比较同镜头多阶段实图，不能以测试或发光代替艺术判断。
-3. 在已有绑定能力上验证真实角色、遮挡和镜头变化；实际设备的视口性能另行测量。保持三平台后台、安全删除、独立实例、无插件播放与安装检查。
-4. 当前视觉问题解决后再扩展高级模拟、资产迁移和非必要交互功能。
+1. #135 的必要镜头验证已完成；继续将新资产放入这套角色镜头，保留具体的观看方式与艺术问题。
+2. 推进 [闪电 #139](https://github.com/mumu-lhl/blender-vfx-studio/issues/139)、[烟尘 #142](https://github.com/mumu-lhl/blender-vfx-studio/issues/142)、[火焰 #141](https://github.com/mumu-lhl/blender-vfx-studio/issues/141)、[冲刺残影 #143](https://github.com/mumu-lhl/blender-vfx-studio/issues/143)、[魔法阵 #140](https://github.com/mumu-lhl/blender-vfx-studio/issues/140)。闪电已开始实现，完整库当前仍为三套，不计入未验收原型。
+3. 每套交付完整动画、实用参数、合理质量档、原生完整资产和 Asset Browser 预览，实际读取高清阶段图和动画样本。测量有／无特效成本，顶点数不代表性能。
+4. #137 充能原型已保存在功能分支，21 项行为检查及原生重开通过，但造型仍偏平，未艺术验收，暂不合并。后续再按完整镜头决定是否采用其中的方向控制。
+
 
 0.22.2 已通过发布后的 ZIP 校验、全新克隆构建和实际示例包检查。新版本需保留必要测试，并如实记录视觉范围与未解决问题；当前不因技术检查成功发布 0.22.3。历史发布、已关闭任务和详细验证记录分别见 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases)、GitHub Issues 及各效果检查文档；使用和架构见 [README](README.md)、[DESIGN](DESIGN.md) 与 [CONTEXT](CONTEXT.md)。

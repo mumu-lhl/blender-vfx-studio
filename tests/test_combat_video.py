@@ -10,6 +10,18 @@ from tools.combat_video import encode, sequence_digest
 
 
 class VideoPreflightTests(unittest.TestCase):
+    def test_character_requires_the_full_four_second_sequence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            movie = folder / "character.mp4"
+            movie.write_bytes(b"previous character movie")
+            (folder / "character-settings.json").write_text(
+                json.dumps({"frames": [16, 32, 49, 53, 61], "fps": 24, "resolution": [960, 540]})
+            )
+            with self.assertRaisesRegex(ValueError, "complete 96-frame"):
+                encode(folder, "character")
+            self.assertEqual(movie.read_bytes(), b"previous character movie")
+
     def test_handoff_requires_all_sixty_frames(self):
         with tempfile.TemporaryDirectory() as directory:
             folder = Path(directory)

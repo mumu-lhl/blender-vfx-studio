@@ -3,8 +3,8 @@
 Build editable VFX for Blender 5.2 LTS using Blender's own objects, nodes and animation. Prioritize Eevee and defaults that work on machines without a dedicated GPU.
 
 - Read DESIGN.md before changing how modules interact or how data is saved. Read CONTEXT.md before changing timing, instance IDs or resource deletion.
-- Prioritize charge → release → hit → dissipation. Inspect actual renders, trace visual defects to geometry/shader/animation nodes, fix the real builder, and compare matching renders. Record viewed frames, engines and viewing limits; tests complement artistic review.
-- Improve silhouette, color hierarchy and timing within explicit geometry/particle budgets. Keep controls editable; emission and preview composition should support the real effect.
+- After necessary character-shot validation, expand the complete editable library toward 8–10 effects with distinct shapes and animation uses. Prioritize lightning, dust/smoke, stylized fire, character dash echoes and magic circles; avoid repeated local polish of the same three assets. Judge each asset in actual character shots and HD light/dark Eevee renders, recording viewed animation samples and viewing limits. Tests complement artistic review.
+- Improve silhouette, color hierarchy and timing with editable native controls. Measure scene evaluation and matched renders with/without VFX on available hardware, recording device and settings. Geometry and particle counts guide complexity; they do not prove performance or viewport FPS.
 - Continue high-value unblocked work after each Issue. Ask only for missing permissions, irreversible risks or a key requirement that cannot be resolved reasonably.
 - Finish a usable effect before adding more abstractions. Keep object and node creation in core/builders, and interface code in UI modules. Use native nodes and drivers for playback; avoid Python frame handlers.
 - Preserve user models, animation and edited nodes. Delete only resources owned by the selected effect and unused outside it. Refuse operations when copied instance IDs make ownership unclear.

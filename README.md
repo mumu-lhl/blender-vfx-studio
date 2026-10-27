@@ -49,6 +49,8 @@ Contour 控制前端钩形与内侧缺口，Bank 控制刀面的深度弯曲，�
 
 刀光与打击爆发在同一镜头的原生预览场景、复现方法及检查限制见 [镜头衔接记录](docs/COMBAT_VISUAL_REVIEW.md)。
 
+角色动作、正反遮挡、远景和同场景耗时的检查正在转向真实蒙皮角色，见 [角色战斗镜头](docs/CHARACTER_COMBAT_REVIEW.md)。完整场景与原生节点可从源码重建；这些技术检查不等于整体艺术验收。
+
 ## Impact Burst 打击爆发
 
 在 **Create Mesh VFX** 中选择 **Impact Burst**，会在 3D Cursor 处创建一个 24 帧的四层组合。已发布的 0.22.2 使用中心白色短闪、橙色尖片、冲击波和延迟余烬。当前 0.22.3 开发版改用断裂的三团压力体积、四条细喷射、两条辅助卷流、压力弧和错峰退场，仍未发布；具体问题与实际检查范围见 [当前主体记录](docs/IMPACT_SURFACE_REVIEW.md)。默认只播放一次，不添加辉光合成。
@@ -287,6 +289,8 @@ Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使�
 后台 Undo/Redo 已覆盖复制删除、组合、Cloth 和合成。Linux 已完成基本侧栏创建、快捷键撤销/重做、用户库保存和 Cloth 状态检查；完整交互检查尚未完成，详见 [GUI 检查记录](docs/GUI_CHECKS.md)。
 
 ## 入门资产库
+
+当前按 [#138](https://github.com/mumu-lhl/blender-vfx-studio/issues/138) 扩库，计划加入闪电、烟尘、火焰、冲刺残影和魔法阵。闪电候选见 [PR #144](https://github.com/mumu-lhl/blender-vfx-studio/pull/144)，未验收原型不计入当前完整资产数量。
 
 发布附件中的 `blender-vfx-studio-examples-版本.zip` 是独立资产库，不能作为插件安装。解压后，将文件夹添加到 Blender 的 Asset Libraries，再通过 Load VFX with New ID 创建效果。
 目前包含 Energy Charge 蓝色蓄力组合、Impact Burst 橙色冲击爆发、Arc Slash 紫色刀光；全部使用 Low 质量、原生节点和嵌入预览，不需要外部贴图或缓存。
