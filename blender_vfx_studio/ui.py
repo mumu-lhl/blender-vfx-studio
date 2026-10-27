@@ -187,6 +187,44 @@ class VFX_OT_create_trail(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self)
 
 
+class VFX_OT_capture_dash(bpy.types.Operator):
+    bl_idname = "vfx_studio.capture_dash"
+    bl_label = "Capture Dash Echoes"
+    bl_description = (
+        "Store a few evaluated poses from the active mesh or armature; preserve its animation"
+    )
+    bl_options = {"REGISTER", "UNDO"}
+    first: IntProperty(name="First Frame", default=1, min=-100000, max=100000)
+    last: IntProperty(name="Last Frame", default=13, min=-100000, max=100000)
+    quality: EnumProperty(
+        name="Quality",
+        items=[
+            ("LOW", "Low · 2 poses", ""),
+            ("MEDIUM", "Medium · 3 poses", ""),
+            ("HIGH", "High · 4 poses", ""),
+        ],
+        default="MEDIUM",
+    )
+    tail: IntProperty(name="Echo Tail (Frames)", default=18, min=1, max=100000)
+
+    def execute(self, context):
+        from . import dash
+
+        try:
+            dash.create(
+                context, context.object, self.first, self.last, self.quality, tail=self.tail
+            )
+        except (ValueError, RuntimeError) as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        self.last = context.scene.frame_current
+        self.first = self.last - 12
+        return context.window_manager.invoke_props_dialog(self)
+
+
 class VFX_OT_rebake_trail(bpy.types.Operator):
     bl_idname = "vfx_studio.rebake_trail"
     bl_description = (
@@ -588,6 +626,7 @@ class VFX_PT_main(bpy.types.Panel):
             "vfx_studio.create_simulation", text="Create Cloth Simulation", icon="MOD_CLOTH"
         )
         layout.operator("vfx_studio.create_trail", text="Bake Ribbon Trail", icon="CURVE_PATH")
+        layout.operator("vfx_studio.capture_dash", text="Capture Dash Echoes", icon="MOD_TIME")
         layout.operator(
             "vfx_studio.compose", text="Compose Selected VFX", icon="OUTLINER_COLLECTION"
         )
@@ -827,6 +866,7 @@ CLASSES = (
     VFX_OT_create_emitter,
     VFX_OT_create_shield,
     VFX_OT_create_trail,
+    VFX_OT_capture_dash,
     VFX_OT_rebake_trail,
     VFX_OT_bind,
     VFX_OT_unbind,
