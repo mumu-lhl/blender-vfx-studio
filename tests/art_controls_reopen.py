@@ -24,6 +24,16 @@ for frame in (44, 8, 20, 44):
     bpy.context.scene.frame_set(frame)
     mesh = flame.children[0].evaluated_get(bpy.context.evaluated_depsgraph_get()).data
     assert [c for v in mesh.vertices for c in v.co] == list(fire[f"expected_shape_{frame}"])
+for name, frames in (
+    ("Persisted Adjustable Charge", (44, 18, 36)),
+    ("Persisted Adjustable Lightning", (12, 3, 8)),
+):
+    group = bpy.data.objects[name]
+    member = bpy.data.objects[group["expected_member_name"]]
+    for frame in frames:
+        bpy.context.scene.frame_set(frame)
+        mesh = member.children[0].evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+        assert [c for v in mesh.vertices for c in v.co] == list(group[f"expected_shape_{frame}"])
 assert not bpy.app.handlers.frame_change_pre
 assert not bpy.app.handlers.frame_change_post
 print("ART_CONTROLS_NATIVE_REPLAY_OK")

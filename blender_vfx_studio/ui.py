@@ -109,6 +109,40 @@ _EXTRA_ART_KEYS = {
     "Sigil Lift",
 }
 
+# These existing constant nodes already author the complete assets. Edit their
+# native sockets directly instead of adding a second controller value/driver.
+_NATIVE_SHAPE_VALUES = (
+    ("Nucleus Stored Size", "Stored Core Size", False),
+    ("Nucleus Compression", "Compression (0–0.85)", False),
+    ("Release Stretch", "Release Stretch", False),
+    ("Bolt Length", "Bolt Length", False),
+    ("Branch Reach", "Branch Reach", False),
+    ("Nucleus Seed Size", "Initial Core Size", True),
+    ("Release Pinch", "Release Pinch (0–1)", True),
+)
+
+
+def _native_shape_values(root):
+    found = {}
+    for child in root.children:
+        if child.get("vfx_role") != "layer" or child.get("vfx_id") != root["vfx_id"]:
+            continue
+        for modifier in child.modifiers:
+            if modifier.type != "NODES" or modifier.node_group is None:
+                continue
+            tree = modifier.node_group
+            driven = (
+                {c.data_path for c in tree.animation_data.drivers} if tree.animation_data else set()
+            )
+            for name, label, advanced in _NATIVE_SHAPE_VALUES:
+                node = tree.nodes.get(name)
+                if node is None or node.type != "VALUE" or not node.outputs[0].is_linked:
+                    continue
+                socket = node.outputs[0]
+                if socket.path_from_id("default_value") not in driven:
+                    found.setdefault(name, (label, socket, advanced))
+    return found
+
 
 def _driven_art_properties(root):
     """Expose known custom art properties only when native drivers actually read them."""
@@ -1055,6 +1089,15 @@ class VFX_PT_main(bpy.types.Panel):
             visible = {key.strip() for key in profile.split(",")}
             keys = tuple(key for key in keys if key in visible)
         _draw_art_parameters(layout, context, root, keys)
+        native_values = _native_shape_values(root)
+        if native_values:
+            box = layout.box()
+            box.label(text="Native Shape · saved in Complete Effect")
+            for label, socket, advanced in native_values.values():
+                if not advanced or context.window_manager.vfx_advanced_controls:
+                    box.prop(socket, "default_value", text=label)
+            if any(v[2] for v in native_values.values()):
+                box.prop(context.window_manager, "vfx_advanced_controls", text="Advanced Shape")
         color_box = layout.box()
         color_box.label(text="Color")
         row = color_box.row(align=True)
