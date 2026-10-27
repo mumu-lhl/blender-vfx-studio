@@ -1,5 +1,6 @@
 """Starter assets remain independent of preview-scene helpers and authoring code."""
 
+import math
 import sys
 import unittest
 from pathlib import Path
@@ -333,6 +334,42 @@ class StarterTests(unittest.TestCase):
         self.assertGreater(radius(13), early * 1.2)
         tree.nodes["Nucleus Seed Size"].outputs[0].default_value = 0
         self.assertLess(radius(13), 1e-6)
+
+    def test_discharge_direction_turns_the_focus_without_moving_intake_paths(self):
+        charge = create_effect("energy-charge")
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+        control = member.children[0].modifiers[0].node_group.nodes["Release Direction"].inputs[0]
+
+        def points(frame):
+            evaluated = mesh(member, frame)
+            return [
+                (v.co.copy(), inner.value > 0.5)
+                for v, inner in zip(evaluated.vertices, evaluated.attributes["charge_inner"].data)
+            ]
+
+        early, vertical = points(13), points(43)
+        control.default_value = (1, 0, 0)
+        self.assertEqual(points(13), early)
+        horizontal = points(43)
+        self.assertEqual(
+            [p for p, inner in vertical if not inner], [p for p, inner in horizontal if not inner]
+        )
+
+        def extent(values, axis):
+            coords = [point[axis] for point, inner in values if inner]
+            return max(coords) - min(coords)
+
+        self.assertGreater(extent(vertical, 2), extent(vertical, 0) * 1.5)
+        self.assertGreater(extent(horizontal, 0), extent(horizontal, 2) * 1.5)
+        path = WORK / "charge-direction.blend"
+        assets.write(path, charge)
+        core.delete(charge)
+        loaded = assets.load(bpy.context, path)
+        member = next(r for r in composition.members(loaded) if r["vfx_module"] == "shader.shield")
+        self.assertEqual(points(43), horizontal)
+        control = member.children[0].modifiers[0].node_group.nodes["Release Direction"].inputs[0]
+        control.default_value = (0, 0, 0)
+        self.assertTrue(all(math.isfinite(value) for point, _ in points(43) for value in point))
 
     def test_ground_intake_reaches_the_core_and_lift_follows_group_time(self):
         charge = create_effect("energy-charge")

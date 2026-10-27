@@ -480,11 +480,16 @@ def _surface(root, *, core=False, ground=False):
             ),
             kernel_color.inputs[0],
         )
-        # Broad colored pressure faces surround a restricted white heart.
+        # Stored heat belongs to the shape, not the camera-facing normal. A
+        # compressed seed must retain its hot center in ordinary side views.
+        heat = g.m(
+            "Nucleus Heat Distance", "ABSOLUTE", g.m("Nucleus Heat Center", "SUBTRACT", u, 0.55)
+        )
+        heat = g.m("Nucleus Heat Profile", "SUBTRACT", 1, g.m("Heat Falloff", "MULTIPLY", heat, 2))
         kernel_face = g.m(
             "Nucleus White Face",
             "GREATER_THAN",
-            g.m("Nucleus Facing Magnitude", "ABSOLUTE", facing.outputs["Value"]),
+            heat,
             g.value("Nucleus White Threshold", 0.72),
         )
         kernel_height = g.m("Nucleus Light Toward Tip", "GREATER_THAN", u, 0.3)
@@ -558,6 +563,17 @@ def _surface(root, *, core=False, ground=False):
             g.m("Only Filament Ink", "MULTIPLY", border, primary),
         )
         edge = g.m("Editable Core Edge", "MULTIPLY", edge, g.value("Core Edge Contrast", 0.85))
+        edge = g.m(
+            "Nucleus Keeps Its Stored Light",
+            "MULTIPLY",
+            edge,
+            g.m(
+                "Lighter Nucleus Contour",
+                "SUBTRACT",
+                1,
+                g.m("Nucleus Ink Reduction", "MULTIPLY", inner, 0.65),
+            ),
+        )
         edge_mix = g.n("ShaderNodeMixRGB", "Dark Contour Around Luminous Paths")
         g.link(edge, edge_mix.inputs[0])
         g.link(surface_color, edge_mix.inputs[1])
@@ -568,8 +584,19 @@ def _surface(root, *, core=False, ground=False):
             1,
             g.m("Secondary Filament Value", "MULTIPLY", lane, 0.3),
         )
+        support = g.value("Intake Support Value", 0.6)
+        focus_weight = g.m(
+            "Nucleus And Intake Hierarchy",
+            "MULTIPLY_ADD",
+            inner,
+            g.m("Focus Above Intakes", "SUBTRACT", 1, support),
+        )
+        g.link(support, focus_weight.node.inputs[2])
         surface_color = g.v(
-            "Primary And Supporting Filament Color", "SCALE", edge_mix.outputs[0], hierarchy
+            "Primary And Supporting Filament Color",
+            "SCALE",
+            edge_mix.outputs[0],
+            g.m("Stored Energy Is The Focus", "MULTIPLY", hierarchy, focus_weight),
         )
     emission = g.n("ShaderNodeEmission", "Native Energy Surface")
     g.link(surface_color, emission.inputs["Color"])
@@ -602,10 +629,10 @@ def core_shape(root):
     # These are authored rest paths; native fields below animate compression.
     for tongue, (phase, turns, reach, rise, breadth) in enumerate(
         (
-            (0.0, 1.25, 1.1, 0.75, 0.28),
+            (0.0, 1.25, 1.1, 0.75, 0.17),
             (1.35, 2.7, 0.88, 0.6, 0.09),
             (2.7, 3.5, 1.0, -0.7, 0.10),
-            (3.65, 1.0, 0.88, -0.62, 0.19),
+            (3.65, 1.0, 0.88, -0.62, 0.13),
         )
     ):
         primary = tongue in (0, 3)
@@ -685,34 +712,30 @@ def core_shape(root):
                 next_k = (k // 3) * 3 + (k + 1) % 3 if primary else (k + 1) % sides
                 a, b = base + j * sides + k, base + j * sides + next_k
                 faces.append((a, b, b + sides, a + sides))
-    # Three unequal closed flame sections preserve gaps through the nucleus.
-    # Each uses 18 vertices: the original 54-vertex kernel budget is unchanged.
-    for lobe in range(3):
-        base, steps, sides = len(vertices), 6, 3
-        phase = lobe * math.tau / 3
-        for j in range(steps):
-            t = j / (steps - 1)
-            profile = max(math.sin(math.pi * t), 0) ** 0.8
-            angle = phase + t * 0.9
-            reach = profile * (0.065 + lobe * 0.01)
-            center = Vector(
-                (math.cos(angle) * reach, math.sin(angle) * reach, (t - 0.5) * (0.5 - lobe * 0.05))
-            )
-            radius = profile * (0.105 - lobe * 0.012)
-            for k in range(sides):
-                a = k * math.tau / sides + phase + t * 0.5
-                vertices.append(
-                    tuple(center + Vector((radius * math.cos(a), radius * math.sin(a), 0)))
+    # A single connected, uneven pressure seed gives the incoming paths a
+    # destination. Broad faces survive distant views; creases carry the detail.
+    base, steps, sides = len(vertices), 10, 6
+    for j in range(steps):
+        t = j / (steps - 1)
+        profile = max(math.sin(math.pi * t), 0) ** 0.62
+        center = Vector((0.035 * math.sin(t * 5), 0.025 * math.sin(t * 8), (t - 0.5) * 0.48))
+        radius = profile * 0.24 * (1 + 0.13 * math.sin(t * 9))
+        for k in range(sides):
+            a = k * math.tau / sides + t * 0.35
+            crease = (0.84, 1.0, 0.76, 1.08, 0.88, 1.0)[k]
+            vertices.append(
+                tuple(
+                    center
+                    + Vector((radius * math.cos(a) * crease, radius * math.sin(a) * crease, 0))
                 )
-                cross_sections.append((0, 0, 0))
-                for name, value in zip(
-                    core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0, 0.0, 0.0)
-                ):
-                    core_attrs[name].append(value)
-        for j in range(steps - 1):
-            for k in range(sides):
-                a, b = base + j * sides + k, base + j * sides + (k + 1) % sides
-                faces.append((a, b, b + sides, a + sides))
+            )
+            cross_sections.append((0, 0, 0))
+            for name, value in zip(core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0, 0.0, 0.0)):
+                core_attrs[name].append(value)
+    for j in range(steps - 1):
+        for k in range(sides):
+            a, b = base + j * sides + k, base + j * sides + (k + 1) % sides
+            faces.append((a, b, b + sides, a + sides))
     _mesh(layer, vertices, faces, core_attrs)
     cross = layer.data.attributes.new("charge_cross", "FLOAT_VECTOR", "POINT")
     for slot, value in zip(cross.data, cross_sections):
@@ -1048,6 +1071,30 @@ def core_shape(root):
         deform.inputs["Offset"],
     )
 
+    # Only the nucleus turns toward its authored discharge direction. Intake
+    # paths keep converging in place; the saved vector can be edited or keyed.
+    direction = g.n("ShaderNodeVectorMath", "Release Direction", operation="NORMALIZE")
+    direction.inputs[0].default_value = (0, 0, 1)
+    aim = g.n("FunctionNodeAlignEulerToVector", "Aim Stored Energy", axis="Z")
+    g.link(direction.outputs[0], aim.inputs["Vector"])
+    g.link(
+        g.m(
+            "Only The Releasing Nucleus Turns",
+            "MULTIPLY",
+            g.attr("charge_inner"),
+            g.stage("Prepare Directional Discharge", p, 0.80, 0.88),
+        ),
+        aim.inputs["Factor"],
+    )
+    aimed_position = g.n(
+        "ShaderNodeVectorRotate", "Directional Pressure Seed", rotation_type="EULER_XYZ"
+    )
+    g.link(pos.outputs[0], aimed_position.inputs["Vector"])
+    g.link(aim.outputs["Rotation"], aimed_position.inputs["Rotation"])
+    aimed = g.n("GeometryNodeSetPosition", "Release Along The Authored Direction")
+    g.link(deform.outputs[0], aimed.inputs["Geometry"])
+    g.link(aimed_position.outputs[0], aimed.inputs["Position"])
+
     breakup = g.n("ShaderNodeTexNoise", "Native Core Breakup", noise_dimensions="4D")
     g.link(pos.outputs[0], breakup.inputs["Vector"])
     g.link(g.value("Breakup Scale", prop="noise_scale"), breakup.inputs["Scale"])
@@ -1087,7 +1134,7 @@ def core_shape(root):
         ),
     )
     cut = g.n("GeometryNodeDeleteGeometry", "Erode Core Faces", domain="FACE")
-    g.link(deform.outputs[0], cut.inputs["Geometry"])
+    g.link(aimed.outputs[0], cut.inputs["Geometry"])
     g.link(
         g.m("Spent Core Faces", "LESS_THAN", breakup.outputs["Fac"], threshold),
         cut.inputs["Selection"],

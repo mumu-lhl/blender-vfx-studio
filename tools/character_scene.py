@@ -242,6 +242,21 @@ def add_effects(fixture):
         bpy.context.evaluated_depsgraph_get()
     ).matrix_world.translation
     binding.bind(bpy.context, charge, socket)
+    core = next(member for member in charge.children if member.get("vfx_module") == "shader.shield")
+    tree = core.children[0].modifiers[0].node_group
+    direction = tree.nodes["Release Direction"].inputs[0]
+    for frame in range(38, 54):
+        scene.frame_set(frame)
+        graph = bpy.context.evaluated_depsgraph_get()
+        matrix = weapon.evaluated_get(graph).matrix_world
+        world_direction = matrix @ tip - matrix.translation
+        direction.default_value = (
+            core.evaluated_get(graph).matrix_world.to_3x3().inverted() @ world_direction
+        ).normalized()
+        direction.keyframe_insert(data_path="default_value", frame=frame)
+    for curve in curves(tree):
+        for key in curve.keyframe_points:
+            key.interpolation = "LINEAR"
 
     hit_frame = contact["frame"]
     slash = create_effect("arc-slash")
