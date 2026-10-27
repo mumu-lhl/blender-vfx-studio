@@ -1092,7 +1092,7 @@ class VFX_PT_main(bpy.types.Panel):
         native_values = _native_shape_values(root)
         if native_values:
             box = layout.box()
-            box.label(text="Native Shape · saved in Complete Effect")
+            box.label(text="Core Focus" if "Nucleus Stored Size" in native_values else "Bolt Shape")
             for label, socket, advanced in native_values.values():
                 if not advanced or context.window_manager.vfx_advanced_controls:
                     box.prop(socket, "default_value", text=label)
