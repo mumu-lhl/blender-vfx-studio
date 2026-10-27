@@ -124,6 +124,17 @@ _NATIVE_SHAPE_VALUES = (
 )
 
 
+def _nested_trees(trees):
+    pending, seen = list(trees), set()
+    while pending:
+        tree = pending.pop()
+        if tree is None or tree in seen:
+            continue
+        seen.add(tree)
+        yield tree
+        pending.extend(n.node_tree for n in tree.nodes if getattr(n, "node_tree", None))
+
+
 def _native_shape_values(root):
     found = {}
     for child in root.children:
@@ -132,32 +143,39 @@ def _native_shape_values(root):
         for modifier in child.modifiers:
             if modifier.type != "NODES" or modifier.node_group is None:
                 continue
-            tree = modifier.node_group
-            driven = (
-                {c.data_path for c in tree.animation_data.drivers} if tree.animation_data else set()
-            )
-            for name, label, advanced in _NATIVE_SHAPE_VALUES:
-                node = tree.nodes.get(name)
-                if node is None or node.type != "VALUE" or not node.outputs[0].is_linked:
-                    continue
-                socket = node.outputs[0]
-                if socket.path_from_id("default_value") not in driven:
-                    found.setdefault(name, (label, socket, advanced))
+            for tree in _nested_trees([modifier.node_group]):
+                driven = (
+                    {c.data_path for c in tree.animation_data.drivers}
+                    if tree.animation_data
+                    else set()
+                )
+                for name, label, advanced in _NATIVE_SHAPE_VALUES:
+                    node = tree.nodes.get(name)
+                    if node is None or node.type != "VALUE" or not node.outputs[0].is_linked:
+                        continue
+                    socket = node.outputs[0]
+                    if socket.path_from_id("default_value") not in driven:
+                        found.setdefault(name, (label, socket, advanced))
     return found
 
 
 def _driven_parameters(root):
     """Read actual native driver references without changing a saved graph."""
     trees = []
+    owners = [root]
     for obj in root.children:
+        owners.append(obj)
         if obj.type != "MESH":
             continue
+        owners.extend([obj.data, obj.data.shape_keys])
         trees += [m.node_group for m in obj.modifiers if m.type == "NODES" and m.node_group]
         trees += [m.node_tree for m in obj.data.materials if m and m.node_tree]
     paths = set()
-    for tree in trees:
-        if tree.animation_data:
-            for curve in tree.animation_data.drivers:
+    owners.extend(_nested_trees(trees))
+    for owner in owners:
+        animation = getattr(owner, "animation_data", None)
+        if animation:
+            for curve in animation.drivers:
                 if curve.mute:
                     continue
                 for variable in curve.driver.variables:

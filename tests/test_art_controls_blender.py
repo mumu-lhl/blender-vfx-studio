@@ -35,6 +35,21 @@ def freeze_optional_geometry_controls(root, keys):
             tree.driver_remove(curve.data_path)
 
 
+def wrap_geometry(tree):
+    wrapper = bpy.data.node_groups.new("Artist Geometry Wrapper", "GeometryNodeTree")
+    for direction in ("INPUT", "OUTPUT"):
+        wrapper.interface.new_socket(
+            name="Geometry", in_out=direction, socket_type="NodeSocketGeometry"
+        )
+    inp = wrapper.nodes.new("NodeGroupInput")
+    out = wrapper.nodes.new("NodeGroupOutput")
+    group = wrapper.nodes.new("GeometryNodeGroup")
+    group.node_tree = tree
+    wrapper.links.new(inp.outputs["Geometry"], group.inputs["Geometry"])
+    wrapper.links.new(group.outputs["Geometry"], out.inputs["Geometry"])
+    return wrapper
+
+
 class ArtControlsTests(unittest.TestCase):
     def setUp(self):
         bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -188,6 +203,8 @@ class ArtControlsTests(unittest.TestCase):
     def test_existing_core_focus_values_change_native_geometry(self):
         group = create_effect("energy-charge")
         member = next(m for m in composition.members(group) if "Compressed Core" in m.name)
+        modifier = member.children[0].modifiers[0]
+        modifier.node_group = wrap_geometry(modifier.node_group)
         values = ui._native_shape_values(member)
         for name, frame, a, b in (
             ("Nucleus Stored Size", 36, 1.9, 2.8),
@@ -238,6 +255,8 @@ class ArtControlsTests(unittest.TestCase):
                         ):
                             tree.driver_remove(curve.data_path)
         drawn = []
+        modifier = flame.children[0].modifiers[0]
+        modifier.node_group = wrap_geometry(modifier.node_group)
 
         class Layout:
             def prop(self, owner, path, **kwargs):
