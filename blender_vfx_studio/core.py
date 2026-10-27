@@ -364,7 +364,9 @@ def preset_snapshot(root):
             "asset_version": root["vfx_asset_version"],
             "name": root.name[:80],
             "quality": root["vfx_quality"],
-            "parameters": {key: root[key] for key in preset_parameters_for(root["vfx_module"])},
+            "parameters": {
+                key: root[key] for key in preset_parameters_for(root["vfx_module"]) if key in root
+            },
         }
     )
 

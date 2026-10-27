@@ -119,7 +119,9 @@ def shader(root, uid):
     tail = mathn("Tail Breakup Weight", "MULTIPLY", tail, 0.35)
     late = mathn("Tail First Release", "ADD", late, tail)
     cutoff = mathn("Dissolve Over Life", "ADD", value("Dissolve", "dissolve"), late)
+    surface_cuts = value("Surface Cuts", "surface_cuts")
     inward = mathn("Inner Edge Erosion", "MULTIPLY", v, 0.22)
+    inward = mathn("Editable Edge Cuts", "MULTIPLY", inward, surface_cuts)
     cutoff = mathn("Directional Cutoff", "ADD", cutoff, inward)
     protection = mathn("Blade Erodes Last", "MULTIPLY", blade, 0.3)
     protection = mathn("Blade Protection Fades", "MULTIPLY", protection, remaining)
@@ -129,6 +131,16 @@ def shader(root, uid):
     visible = mathn("Not Fully Dissolved", "LESS_THAN", value("Dissolve Limit", "dissolve"), 1)
     erode = mathn("Dissolve Mask", "MULTIPLY", erode, visible)
     erode = mathn("Illustrated Cutout", "GREATER_THAN", erode, 0.22)
+    erosion_enabled = mathn(
+        "Any Erosion",
+        "MAXIMUM",
+        value("Dissolve Switch", "dissolve"),
+        value("Breakup Switch", "breakup"),
+    )
+    erosion_enabled = mathn("Erosion Enabled", "GREATER_THAN", erosion_enabled, 0.000001)
+    erode = mathn("Erosion Difference", "SUBTRACT", erode, 1)
+    erode = mathn("Optional Erosion", "MULTIPLY", erode, erosion_enabled)
+    erode = mathn("Clean Or Eroded Surface", "ADD", erode, 1)
     filament = mathn("Filament Phase", "MULTIPLY", v, 22)
     distortion = mathn("Noise Distortion", "MULTIPLY", noise.outputs["Fac"], 5)
     filament = mathn("Distorted Filaments", "ADD", filament, distortion)
@@ -159,6 +171,7 @@ def shader(root, uid):
     cuts = mathn("Open Tears", "GREATER_THAN", cuts, 0.78)
     cuts = mathn("Protect Edge", "MULTIPLY", cuts, mathn("Body Only", "GREATER_THAN", v, 0.24))
     cuts = mathn("Trailing Tears Only", "MULTIPLY", cuts, mathn("Tail Region", "LESS_THAN", u, 0.7))
+    cuts = mathn("Editable Surface Cuts", "MULTIPLY", cuts, surface_cuts)
     alpha = mathn("Broken Tail", "MULTIPLY", alpha, mathn("Intact Regions", "SUBTRACT", 1, cuts))
     release_phase = mathn("Release Fragment Phase", "MULTIPLY", u, 11)
     release_phase = mathn(
@@ -179,7 +192,12 @@ def shader(root, uid):
     threshold = mathn("After Peak", "SUBTRACT", progress, 0.3, clamp=True)
     threshold = mathn("Fragment Release", "MULTIPLY", threshold, 3, clamp=True)
     threshold = mathn("Editable Fragment Fade", "MULTIPLY", threshold, fade)
+    fragments = value("Fragment Release", "fragment_release")
+    threshold = mathn("Optional Fragment Threshold", "MULTIPLY", threshold, fragments)
     islands = mathn("Surviving Pieces", "GREATER_THAN", islands, threshold)
+    islands = mathn("Fragment Difference", "SUBTRACT", islands, 1)
+    islands = mathn("Optional Fragments", "MULTIPLY", islands, fragments)
+    islands = mathn("Continuous Or Fragmented Release", "ADD", islands, 1)
     alpha = mathn("Separated Release Pieces", "MULTIPLY", alpha, islands)
     wake_distance = mathn("Wake Layer Distance", "MULTIPLY", band, 0.35)
     wake_weight = mathn("Wake Distance", "ADD", wake_distance, 0.75)
@@ -193,6 +211,9 @@ def shader(root, uid):
     )
     packet = mathn("Wake Islands", "SINE", packet)
     packet = mathn("Separate Wake Islands", "GREATER_THAN", packet, -0.25)
+    packet = mathn("Wake Cut Difference", "SUBTRACT", packet, 1)
+    packet = mathn("Optional Wake Cuts", "MULTIPLY", packet, surface_cuts)
+    packet = mathn("Continuous Or Cut Wake", "ADD", packet, 1)
     arrived = mathn("Broken Wakes", "MULTIPLY", arrived, packet)
     wake_weight = mathn(
         "Wake Area Enabled", "GREATER_THAN", value("Afterimage Area", "afterimage"), 0
@@ -201,6 +222,15 @@ def shader(root, uid):
     wake_weight = mathn("Subordinate Wake", "MULTIPLY", wake_weight, wake)
     layer_weight = mathn("Layer Hierarchy", "ADD", primary, wake_weight)
     alpha = mathn("Final Opacity", "MULTIPLY", alpha, layer_weight)
+    smooth_fade = mathn("Smooth Fade Difference", "SUBTRACT", envelope, 1)
+    smooth_fade = mathn(
+        "Smooth Release Choice",
+        "MULTIPLY",
+        smooth_fade,
+        mathn("Smooth Release Weight", "SUBTRACT", 1, fragments),
+    )
+    smooth_fade = mathn("Smooth Release Envelope", "ADD", smooth_fade, 1)
+    alpha = mathn("Native Release Opacity", "MULTIPLY", alpha, smooth_fade)
     tint = make("ShaderNodeCombineXYZ", "Editable Body Color")
     for index in range(3):
         drive(tint.inputs[index], "default_value", root, "c", {"c": f"color_{index}"})
@@ -240,9 +270,9 @@ def shader(root, uid):
     wake_value = mathn("Supporting Wake Value", "MULTIPLY", wake, 0.35)
     wake_value = mathn("Primary Color Unchanged", "SUBTRACT", 1, wake_value)
     body_color = scale("Colored Wake Hierarchy", body_color, wake_value)
-    highlight = make("ShaderNodeCombineXYZ", "Cool Blade White")
-    for socket, component in zip(highlight.inputs, (0.8, 0.9, 1.0)):
-        socket.default_value = component
+    highlight = make("ShaderNodeCombineXYZ", "Editable Blade Color")
+    for index in range(3):
+        drive(highlight.inputs[index], "default_value", root, "c", {"c": f"blade_color_{index}"})
     highlight_color = scale("Blade Highlight", highlight.outputs[0], white)
     color = make("ShaderNodeVectorMath", "Blade Plus Body", operation="ADD")
     link(body_color, color.inputs[0])

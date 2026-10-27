@@ -17,19 +17,26 @@ Radius 是出生时外半径，Width 是环宽，Expansion 是一个周期增加
 
 质量只在创建时选择，分别使用 32、64、128 段。环形依赖网格的 `vfx_inner` 属性来区分内外边缘；删除该属性会破坏宽度计算。发光材质本身不需要灯光，但不会自动产生光晕。需要光晕时添加下文的 Screen VFX，或使用自己的 Glare 合成节点。
 
-当前源码中的 Arc Slash 无需源动画，直接生成带有前端钩形、紫色亮暗分面和两条低亮残影的刀光。主体快速展开，残影逐渐分离；挥斩后拆成短笔触，再被侵蚀。
-这些层次由效果自己的几何、材质和时间参数生成，不依靠预览场景的辉光。Start / Duration / Speed / Loop 仍控制整个播放。
+### 编辑刀光
 
-Arc 控制弧度（1–359 度），Spin 控制总旋转角度，正负值改变旋转方向。Attack 是展开所占的生命周期比例，例如 18 帧中 Attack=0.18 约用 3.2 帧展开。
-Motion Ease 控制挥斩后的减速，0 为匀速；Head Bias 将主体宽度偏向前端。Radius / Width / Expansion 控制基本尺寸，Taper 控制收尖。
+Arc Slash 无需角色或采样路径，直接生成可编辑刀面与两条残弧。选择 **Clean** 可得到平整、连续的基础刀光；选择 **Stylized** 可使用带钩形、分面和破碎残影的造型。两个按钮只调整同一生成器的造型与材质参数，保留尺寸、配色、时间和手动节点。重新选择风格会覆盖下表中相关造型设置，请先复制需要保留的方案。
 
-Core Width 控制窄亮锋刃的相对宽度，Afterimage 控制两条有色残影的面积，设为 0 可关闭残影。
-Streaks 控制主体笔触的对比，Breakup 控制挥斩后的噪声侵蚀；Dissolve=1 会完全隐藏材质。新版 Fade 控制退场时的分段镂空，设为 0 可保留这些段，但不关闭 Breakup。
-Strength 控制整体发光，颜色控制主体；锋刃使用较浅的冷白色，因此仍有亮度和色彩层次。
+| 设置 | 直接影响什么 |
+| --- | --- |
+| **Shape → Arc / Width / Taper** | 弧度、刀面宽度和收尖；Leading Weight 将宽度偏向前端 |
+| **Shape → Contour / Depth Bend** | 额外钩形与轮廓扰动、三维弯折；分别设为 0 可关闭，Depth Bend=0 时所有刀面位于局部 XY 平面 |
+| **Motion → Attack / Spin / Motion Ease** | 展开所占时间、总转角和减速；Spin 的正负值改变挥斩方向 |
+| **Motion → Wake Amount / Wake Spread** | 残弧面积与角度分离；Wake Amount=0 关闭残弧 |
+| **Color → Body / Blade** | 主体与残弧共用主体颜色，锋刃可独立换色；右侧菱形给实际 RGB 通道插入关键帧 |
+| **Material → Blade Width / Brush Detail / Surface Cuts** | 锋刃宽度、笔触对比和固定缺口；Surface Cuts=0 关闭固定裁切与残弧分段 |
+| **Dissolve → Noise Erosion / Dissolve** | 挥斩后的噪声侵蚀与整体溶解；两项均为 0 时关闭噪声侵蚀 |
+| **Dissolve → Fade / Fragment Release** | 淡出量与退场方式；Fragment Release=0 使用连续透明淡出，1 使用分段退场 |
 
-Contour 控制前端钩形与内侧缺口，Bank 控制刀面的深度弯曲，设为 0 可恢复平面；Wake Spread 控制挥斩过程中残影的角度分离。新版以局部 XY 为主平面；旋转控制器即可改变斩击方向。Low / Medium / High 使用 32 / 64 / 128 个沿弧分段，新版 Low 仍为 594 顶点、480 个四边面。
-保留 `vfx_arc`、`vfx_inner` 和新版的 `vfx_wake` 属性，它们控制沿弧位置、横向宽度和残影编号。需要雕改最终形状时，可先复制，再应用 Geometry Nodes 修改器。
-支持参数 JSON、用户库、完整效果文件和无插件播放；跟随武器动画的真实采样路径仍使用 Ribbon Trail。
+例如，先选 **Clean**，再把 **Body** 设为橙色、**Blade** 设为浅黄色，可以制作暖色连续刀光。需要有色残弧时再增加 **Wake Amount**，不必同时开启轮廓扰动或材质破碎。
+
+侧栏按 **Shape / Motion / Color / Material / Dissolve** 组织参数，其余控制收在 **Advanced**。颜色选择器编辑的是保存于控制器的 RGB 数值；用旁边的菱形制作颜色动画，保存后无需插件也能播放。普通数值仍可右键插入关键帧。
+
+旋转控制器即可改变挥斩方向；Start / Duration / Speed / Loop 控制整体播放。Low / Medium / High 分别使用 32 / 64 / 128 个沿弧分段。保留网格的 `vfx_arc`、`vfx_inner` 和 `vfx_wake` 属性，它们记录沿弧位置、横向宽度和残影编号。需要雕改最终网格时，先复制，再应用 Geometry Nodes 修改器。跟随武器路径的采样刀带请使用 **Ribbon Trail**。
 
 高清三阶段渲染、复现命令和实际检查范围见 [刀光视觉验收](VISUAL_REVIEW.md)。
 
@@ -45,7 +52,7 @@ Contour 控制前端钩形与内侧缺口，Bank 控制刀面的深度弯曲，�
 
 普通 **Particle Burst** 提供 Shape（0 圆粒、1 尖片）、Stretch（尖片半长相对 Size 的倍数）、Planar（1 将随机散射压到局部 XY 平面）和 Motion Ease（0 匀速运动时钟、1 快出慢停）。例如 Shape=1、Stretch=6 可生成细长尖片。尖片沿轨迹方向转动，前端偏白、尾部较暗；Fade 仍控制尺寸缩减。Motion Ease 改变直接计算的位置与重力时钟，不是物理模拟；修改它会重新计算当前帧。
 
-Impact 候选的短闪和主体采用私有网格，沿用 Burst 控制器保存时间、尺寸、运动等参数，侧栏只显示实际使用的项。Count、Shape、Gravity、Spread 不驱动这两个造型，普通 Burst 不受影响。主体的 Size、Stretch、Planar、运动参数与 Fade 可以编辑；材质中的 Rim Contrast / Rim Width 控制浅背景下的深色边界，设 Rim Contrast=0 可关闭；完整编排请用 Save Complete Effect 保存，单层参数 JSON 会重新创建普通 Burst。
+Impact 的短闪和主体采用私有网格，沿用 Burst 控制器保存时间、尺寸、运动等参数，侧栏只显示实际使用的项。Count、Shape、Gravity、Spread 不驱动这两个造型，普通 Burst 不受影响。主体的 Size、Stretch、Planar、运动参数与 Fade 可以编辑；材质中的 Rim Contrast / Rim Width 控制浅背景下的深色边界，设 Rim Contrast=0 可关闭；完整编排请用 Save Complete Effect 保存，单层参数 JSON 会重新创建普通 Burst。
 
 要调整主体的细节，选择 `Impact • Main Shards` 下的网格：Geometry Nodes 的 **Pressure Unfurl** 调整截面翻卷，**Fine Ejection Width** 调整细喷射宽度。Shader Editor 的 **Pressure Fracture** 调整早期破口，**Pressure Support Value** 调整辅助压力块明暗；1 关闭这项明暗差异。已有资产保留原节点；这些控制需要用 **Save Complete Effect** 保存。
 

@@ -4,6 +4,7 @@ import math
 
 from blender_vfx_studio import composition, core
 from blender_vfx_studio.nodes import ACTIVE, PROGRESS, drive
+from blender_vfx_studio.palettes import FIRE_PALETTES, FIRE_STOPS
 from tools.charge_design import _Fields, _geometry, _mesh
 
 
@@ -185,13 +186,7 @@ def _material(root):
         g.m("Edge Contrast", "MULTIPLY", normal.outputs["Facing"], 0.32),
     )
     ramp = g.n("ShaderNodeValToRGB", "Painted Red Orange Yellow")
-    colors = (
-        (0.22, (0.075, 0.008, 0.002, 1)),
-        (0.48, (0.42, 0.025, 0.002, 1)),
-        (0.73, (1, 0.16, 0.008, 1)),
-        (0.95, (1, 0.55, 0.035, 1)),
-        (1, (1, 0.92, 0.34, 1)),
-    )
+    colors = tuple(zip(FIRE_STOPS, FIRE_PALETTES["ORANGE"]))
     ramp.color_ramp.elements.remove(ramp.color_ramp.elements[1])
     ramp.color_ramp.elements[0].position, ramp.color_ramp.elements[0].color = colors[0]
     for at, color in colors[1:]:

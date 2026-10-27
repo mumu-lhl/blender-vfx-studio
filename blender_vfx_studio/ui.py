@@ -1,11 +1,219 @@
 """Blender UI delegates lifecycle operations to core."""
 
 import bpy
-from bpy.props import BoolProperty, EnumProperty, IntProperty, StringProperty
+from bpy.props import BoolProperty, EnumProperty, FloatVectorProperty, IntProperty, StringProperty
 from bpy_extras.io_utils import ExportHelper, ImportHelper
 
-from . import core, presets
+from . import core, palettes, presets
 from .registry import PRESETS
+
+
+def _read_color(owner, prefix, fallback):
+    return tuple(float(owner.get(f"{prefix}_{i}", fallback[i])) for i in range(3))
+
+
+def _write_color(owner, values, prefix):
+    for i, value in enumerate(values):
+        owner[f"{prefix}_{i}"] = float(value)
+    owner.update_tag()
+
+
+_ART_GROUPS = (
+    (
+        "Shape",
+        (
+            "radius",
+            "width",
+            "height",
+            "arc",
+            "taper",
+            "head_bias",
+            "contour",
+            "bank",
+            "size",
+            "shape",
+            "stretch",
+            "planar",
+            "columns",
+            "rows",
+            "Fire Height",
+            "Fire Curl",
+            "Dust Rise Height",
+        ),
+    ),
+    (
+        "Motion",
+        (
+            "attack",
+            "spin",
+            "expansion",
+            "motion_seconds",
+            "velocity",
+            "gravity",
+            "spread",
+            "randomness",
+            "spawn_radius",
+            "rate",
+            "emission_seconds",
+            "lifetime",
+            "count",
+            "motion_ease",
+            "afterimage",
+            "wake_spread",
+            "flow",
+            "first_frame",
+            "last_frame",
+            "length",
+            "Fire Flow Speed",
+            "Dust Roll Speed",
+            "Sigil Spin",
+            "Sigil Lift",
+        ),
+    ),
+    (
+        "Material",
+        (
+            "strength",
+            "opacity",
+            "ior",
+            "rim_power",
+            "core_width",
+            "streaks",
+            "surface_cuts",
+            "noise_scale",
+            "threshold",
+            "glow_size",
+            "flash",
+            "Dust Density",
+        ),
+    ),
+    ("Dissolve", ("dissolve", "fade", "breakup", "fragment_release")),
+)
+_ART_LABELS = {
+    "bank": "Depth Bend (0 = Flat)",
+    "head_bias": "Leading Weight",
+    "core_width": "Blade Width",
+    "afterimage": "Wake Amount",
+    "streaks": "Brush Detail",
+    "breakup": "Noise Erosion",
+    "motion_ease": "Deceleration",
+}
+_EXTRA_ART_KEYS = {
+    "Fire Height",
+    "Fire Flow Speed",
+    "Fire Curl",
+    "Dust Rise Height",
+    "Dust Roll Speed",
+    "Dust Density",
+    "Sigil Spin",
+    "Sigil Lift",
+}
+
+
+def _driven_art_properties(root):
+    """Expose known custom art properties only when native drivers actually read them."""
+    trees = []
+    for obj in root.children:
+        if obj.type != "MESH":
+            continue
+        trees += [m.node_group for m in obj.modifiers if m.type == "NODES" and m.node_group]
+        trees += [m.node_tree for m in obj.data.materials if m and m.node_tree]
+    paths = set()
+    for tree in trees:
+        if tree.animation_data:
+            for curve in tree.animation_data.drivers:
+                for variable in curve.driver.variables:
+                    for target in variable.targets:
+                        if target.id == root:
+                            paths.add(target.data_path)
+    return {key for key in _EXTRA_ART_KEYS if key in root and f'["{key}"]' in paths}
+
+
+def _draw_art_parameters(layout, context, root, keys):
+    remaining = {key for key in keys if key in root} | _driven_art_properties(root)
+    for title, candidates in _ART_GROUPS:
+        shown = [key for key in candidates if key in remaining]
+        if not shown:
+            continue
+        box = layout.box()
+        box.label(text=title)
+        for key in shown:
+            box.prop(root, f'["{key}"]', text=_ART_LABELS.get(key, key.replace("_", " ").title()))
+        remaining.difference_update(shown)
+    if remaining:
+        layout.prop(context.window_manager, "vfx_advanced_controls", text="Advanced")
+        if context.window_manager.vfx_advanced_controls:
+            box = layout.box()
+            for key in sorted(remaining):
+                box.prop(root, f'["{key}"]', text=key.replace("_", " ").title())
+
+
+class VFX_OT_key_color(bpy.types.Operator):
+    bl_idname = "vfx_studio.key_color"
+    bl_label = "Keyframe Color"
+    bl_description = (
+        "Insert native keyframes on the stored RGB channels; playback needs no extension"
+    )
+    bl_options = {"REGISTER", "UNDO"}
+    palette: EnumProperty(items=(("BODY", "Color", ""), ("BLADE", "Blade", "")), default="BODY")
+
+    def execute(self, context):
+        root = core.resolve(context.object)
+        prefix = "blade_color" if self.palette == "BLADE" else "color"
+        if root is None or not all(f"{prefix}_{i}" in root for i in range(3)):
+            self.report({"ERROR"}, "Select an effect with these color controls")
+            return {"CANCELLED"}
+        for i in range(3):
+            root.keyframe_insert(data_path=f'["{prefix}_{i}"]')
+        return {"FINISHED"}
+
+
+class VFX_OT_fire_palette(bpy.types.Operator):
+    bl_idname = "vfx_studio.fire_palette"
+    bl_label = "Set Fire Palette"
+    bl_description = (
+        "Set native heat-ramp colors and neutral tint, keeping nodes, positions and animation"
+    )
+    bl_options = {"REGISTER", "UNDO"}
+    palette: EnumProperty(
+        items=(("ORANGE", "Orange", ""), ("BLUE", "Blue", ""), ("GREEN", "Green", "")),
+        default="ORANGE",
+    )
+
+    def execute(self, context):
+        root = core.resolve(context.object)
+        try:
+            if root is None:
+                raise ValueError("Select a fire layer")
+            palettes.apply_fire(root, self.palette)
+        except ValueError as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+
+class VFX_OT_slash_style(bpy.types.Operator):
+    bl_idname = "vfx_studio.slash_style"
+    bl_label = "Apply Slash Style"
+    bl_description = "Set shape and surface controls while keeping palette, timing and edited nodes"
+    bl_options = {"REGISTER", "UNDO"}
+    style: EnumProperty(
+        items=(
+            ("CLEAN", "Clean", "Planar, continuous blade"),
+            ("STYLIZED", "Stylized", "Sculpted silhouette and separate colored wakes"),
+        ),
+        default="STYLIZED",
+    )
+
+    def execute(self, context):
+        from . import slash
+
+        try:
+            slash.apply_style(context.object, self.style)
+        except ValueError as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
 
 
 class VFX_OT_create(bpy.types.Operator):
@@ -716,7 +924,11 @@ class VFX_PT_main(bpy.types.Panel):
                 "fade",
             )
         elif root["vfx_module"] == "mesh.slash":
-            layout.label(text="Layered arc slash")
+            layout.label(text="Arc Slash")
+            if "surface_cuts" in root and "fragment_release" in root:
+                row = layout.row(align=True)
+                row.operator("vfx_studio.slash_style", text="Clean").style = "CLEAN"
+                row.operator("vfx_studio.slash_style", text="Stylized").style = "STYLIZED"
             keys = (
                 "radius",
                 "width",
@@ -738,7 +950,7 @@ class VFX_PT_main(bpy.types.Panel):
                 "streaks",
                 "breakup",
             )
-            keys += ("contour", "bank", "wake_spread")
+            keys += ("contour", "bank", "wake_spread", "surface_cuts", "fragment_release")
         elif root["vfx_module"] == "simulation.cloth":
             from . import simulation
 
@@ -851,15 +1063,45 @@ class VFX_PT_main(bpy.types.Panel):
         if isinstance(profile, str):
             visible = {key.strip() for key in profile.split(",")}
             keys = tuple(key for key in keys if key in visible)
-        for key in keys:
-            layout.prop(root, f'["{key}"]', text=key.replace("_", " ").title())
-        for i, color in enumerate(("Red", "Green", "Blue")):
-            layout.prop(root, f'["color_{i}"]', text=color)
-        layout.label(text="Right-click controls to insert keyframes")
+        _draw_art_parameters(layout, context, root, keys)
+        color_box = layout.box()
+        color_box.label(text="Color")
+        row = color_box.row(align=True)
+        row.prop(
+            root,
+            "vfx_primary_color",
+            text="Body"
+            if root["vfx_module"] == "mesh.slash"
+            else "Heat Tint"
+            if palettes.fire_ramp(root)
+            else "Color",
+        )
+        row.operator("vfx_studio.key_color", text="", icon="KEY_HLT").palette = "BODY"
+        if all(f"blade_color_{i}" in root for i in range(3)):
+            row = color_box.row(align=True)
+            row.prop(root, "vfx_blade_color", text="Blade")
+            row.operator("vfx_studio.key_color", text="", icon="KEY_HLT").palette = "BLADE"
+        heat_ramp = palettes.fire_ramp(root)
+        if heat_ramp is not None:
+            palette_box = layout.box()
+            palette_box.label(text="Heat Palette")
+            if len(heat_ramp.color_ramp.elements) == 5:
+                row = palette_box.row(align=True)
+                for choice in ("ORANGE", "BLUE", "GREEN"):
+                    row.operator("vfx_studio.fire_palette", text=choice.title()).palette = choice
+            palette_box.prop(context.window_manager, "vfx_advanced_controls", text="Edit Heat Ramp")
+            if context.window_manager.vfx_advanced_controls:
+                palette_box.template_color_ramp(heat_ramp, "color_ramp")
+        if root.get("vfx_parameter_keys"):
+            layout.label(text="Custom shape: save Complete Effect (.blend)", icon="INFO")
+        layout.label(text="Diamonds key colors; right-click other controls")
         layout.label(text="Material Preview / Rendered shows shader")
 
 
 CLASSES = (
+    VFX_OT_key_color,
+    VFX_OT_slash_style,
+    VFX_OT_fire_palette,
     VFX_OT_create,
     VFX_OT_create_flipbook,
     VFX_OT_create_sequence,
@@ -891,10 +1133,37 @@ CLASSES = (
 
 
 def register():
+    bpy.types.WindowManager.vfx_advanced_controls = BoolProperty(
+        name="Advanced", default=False, options={"SKIP_SAVE"}
+    )
+    # These editing proxies never store animation; the key button targets native RGB ID properties.
+    bpy.types.Object.vfx_primary_color = FloatVectorProperty(
+        name="Color",
+        subtype="COLOR",
+        size=3,
+        min=0,
+        max=1,
+        options=set(),
+        get=lambda o: _read_color(o, "color", (0.08, 0.5, 1)),
+        set=lambda o, v: _write_color(o, v, "color"),
+    )
+    bpy.types.Object.vfx_blade_color = FloatVectorProperty(
+        name="Blade Color",
+        subtype="COLOR",
+        size=3,
+        min=0,
+        max=1,
+        options=set(),
+        get=lambda o: _read_color(o, "blade_color", (0.8, 0.9, 1)),
+        set=lambda o, v: _write_color(o, v, "blade_color"),
+    )
     for cls in CLASSES:
         bpy.utils.register_class(cls)
 
 
 def unregister():
+    del bpy.types.WindowManager.vfx_advanced_controls
+    del bpy.types.Object.vfx_primary_color
+    del bpy.types.Object.vfx_blade_color
     for cls in reversed(CLASSES):
         bpy.utils.unregister_class(cls)

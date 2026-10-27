@@ -6,7 +6,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from .parameters import preset_parameters_for
+from .parameters import SLASH_ART_PARAMETERS, preset_parameters_for
 from .registry import MODULES
 
 FORMAT_VERSION = 2
@@ -57,6 +57,9 @@ def validate(data):
             raise ValueError("Atlas image must be a local file path")
     specs = preset_parameters_for(module)
     parameters = data["parameters"]
+    if module == "mesh.slash" and isinstance(parameters, dict):
+        # Optional art controls preserve accepted current-format parameter snapshots.
+        parameters = {**{k: v[0] for k, v in SLASH_ART_PARAMETERS.items()}, **parameters}
     if not isinstance(parameters, dict) or parameters.keys() != specs.keys():
         raise ValueError("Preset parameters are missing or unknown")
     result = {}
