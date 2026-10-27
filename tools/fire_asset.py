@@ -18,14 +18,16 @@ def _flames(root, quality):
             (0, 0.03, 1, 0.58, -0.22, 0),
             (-0.38, 0, 0.71, 0.4, -0.5, 0),
             (0.34, 0.04, 0.58, 0.35, 0.48, 0),
-            (0, -0.25, 0.64, 0.32, 0.17, 1),
-            (0.06, 0.26, 0.58, 0.3, -0.14, 1),
+            (0, -0.25, 0.52, 0.24, 0.17, 1),
+            (0.06, 0.26, 0.44, 0.22, -0.14, 1),
         )
     ):
         base = len(vertices)
         for row in range(rows + 1):
             u = row / rows
-            radius = max(0.002, math.sin(math.pi * u) ** 0.8 * (1 - u) ** 0.25 * breadth)
+            radius = max(
+                0.002, (0.36 + 0.64 * math.sin(math.pi * u)) ** 0.8 * (1 - u) ** 0.6 * breadth
+            )
             cx = x * (1 - u) + bend * math.sin(math.pi * u) + 0.22 * math.sin(u * 5) * u
             cy = y * (1 - u * 0.5) + 0.13 * math.sin(u * 4 + index) * u
             for side in range(sides):
@@ -40,6 +42,7 @@ def _flames(root, quality):
                 )
                 for key, value in zip(attributes, (u, index, inner)):
                     attributes[key].append(value)
+        faces.append(tuple(base + side for side in reversed(range(sides))))
         for row in range(rows):
             for side in range(sides):
                 a = base + row * sides + side
@@ -173,7 +176,7 @@ def _material(root):
         heat,
         g.m("Broad Heat Variation", "MULTIPLY", noise.outputs["Fac"], 0.32),
     )
-    heat = g.m("Inner Core Heat", "ADD", heat, g.m("Core Accent", "MULTIPLY", inner, 0.25))
+    heat = g.m("Inner Core Heat", "ADD", heat, g.m("Core Accent", "MULTIPLY", inner, 0.12))
     normal = g.n("ShaderNodeLayerWeight", "Dark Flame Boundary")
     heat = g.m(
         "Cool Edge",
