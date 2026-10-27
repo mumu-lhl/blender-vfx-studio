@@ -22,6 +22,8 @@
 
 **Dust Impact（32 帧）** 使用原生 Volume Cube 密度网格形成不等大的烟尘团，配合地面薄尘和短促碎屑，适合落地、踩踏或地面冲击。云团先横向散开，再抬升并变薄；不发光，需要场景灯光。主层 Width 调整团块大小，Expansion 调整铺开距离，Noise Scale 调整密度细节，Fade 调整消散，Dissolve 侵蚀密度。主层 Object Properties → Custom Properties 的 Dust Rise Height、Dust Roll Speed 和 Dust Density 分别控制抬升、内部纹理上卷与光学密度。体积需要 Eevee 的体积渲染或 Cycles，Solid 模式仅显示域边界；这不是流体模拟，不需要缓存。三种质量档改变体积网格分辨率、密度团数量、噪声细节与碎屑数量。已查看高清阶段图、全部隔帧动画样本和明暗背景、远景；无插件重开与像素对照通过。检查范围、三档质量与实测成本见 [烟尘记录](DUST_REVIEW.md)，未观看实时播放。
 
+**Stylized Fire（52 帧，开发候选）** 是三团不等高的外焰、两团较小的热色内焰和持续上升的余烬。主层在 48 帧内完成点燃、维持和断燃，余烬晚四帧结束。主层 Width 调整宽度，Noise Scale 调整流动色带，Strength 控制光量，Dissolve 侵蚀火面；Object Properties → Custom Properties 的 Fire Height、Fire Flow Speed 和 Fire Curl 控制高度、上卷节奏与火舌形变。颜色参数作为红橙黄色带的乘色。Low / Medium / High 改变截面细节和余烬生成率；不是换色变体。局部、原生完整文件、高清阶段图和完整视频隔帧检查已完成，九项 CI 通过；范围、成本与限制见 [火焰记录](FIRE_REVIEW.md)。尚未观看实时播放，待依赖合并后计入 main 数量。
+
 全部资产保留原生对象、网格、材质和 Geometry Nodes。使用 VFX Duplicate 创建独立副本，使用 VFX Delete 删除。示例不需要外部贴图、角色或缓存；不加载插件也能播放和渲染，继续使用侧栏创作则需要启用插件。
 
 保存手动节点、轨道驱动或整个组合时，使用 **Save Complete Effect**。单层参数预设只保存参数。例如，只保存充能粒子层的参数 JSON，再创建时会得到普通 Emitter；向内运动和尖形等私有节点不会随参数重建。

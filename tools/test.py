@@ -113,3 +113,8 @@ subprocess.run(base + ["--python", "tests/test_dust_blender.py"], check=True)
 subprocess.run(
     base + [str(ROOT / "work/dust-test.blend"), "--python", "tests/dust_reopen.py"], check=True
 )
+
+subprocess.run(base + ["--python", "tests/test_fire_blender.py"], check=True)
+subprocess.run(
+    base + [str(ROOT / "work/fire-test.blend"), "--python", "tests/fire_reopen.py"], check=True
+)
