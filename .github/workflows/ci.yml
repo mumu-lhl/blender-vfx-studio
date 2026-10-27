@@ -385,9 +385,41 @@ jobs:
           path: work/lightning-review/
           if-no-files-found: warn
 
+  dust_review:
+    name: Dust Impact · native asset and Eevee
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      EGL_PLATFORM: surfaceless
+      LP_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Download official Blender with checksum verification
+        run: python tools/fetch_blender.py --version 5.2.2
+      - *linux_render_dependencies
+      - name: Render actual dust animation and character comparisons
+        run: |
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/dust_preview.py -- --sequence
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/dust_preview.py -- --dark
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/dust_preview.py -- --far
+          MESA_SHADER_CACHE_DISABLE=true blender -b work/dust-review/light-near/dust.blend --disable-autoexec --python-exit-code 1 -t 2 --python tests/dust_visual_reopen.py
+          MESA_SHADER_CACHE_DISABLE=true blender -b work/dust-review/light-near/dust.blend --disable-autoexec --python-exit-code 1 -t 2 --python tools/character_performance.py -- --settings dust-settings.json --frames 33 39 47
+          python tools/combat_video.py work/dust-review/light-near --profile dust
+          python tools/combat_frames.py work/dust-review/light-near --profile dust
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: dust-strike-review
+          path: work/dust-review/
+          if-no-files-found: warn
+
   release:
     if: github.event_name == 'push' && github.ref_type == 'tag'
-    needs: [blender, combat_review, handoff_review, character_review, lightning_review]
+    needs: [blender, combat_review, handoff_review, character_review, lightning_review, dust_review]
     runs-on: ubuntu-24.04
     permissions:
       contents: write

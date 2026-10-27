@@ -106,3 +106,13 @@ if __name__ == "__main__":
     )
     if not result.wasSuccessful():
         raise SystemExit(1)
+
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    root = create(bpy.context)
+    root.name = "Persisted Dust Impact"
+    for frame in (7, 16):
+        root[f"expected_bounds_{frame}"] = [
+            coordinate for vertex in bounds(body(root), frame) for coordinate in vertex
+        ]
+    bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "work/dust-test.blend"))
+    print("DUST_NATIVE_BEHAVIOR_OK")

@@ -47,6 +47,8 @@ def setup(*, light=True, far=False):
         rig.location.z = ground + 4 * 0.75 * t * (1 - t)
         rig.keyframe_insert(data_path="location", index=2, frame=frame)
     for curve in curves(rig):
+        if curve.data_path != "location" or curve.array_index != 2:
+            continue
         for key in curve.keyframe_points:
             key.interpolation = "LINEAR"
     feet = [o for o in rig.children if o.type == "MESH" and "leg" in o.name.lower()]

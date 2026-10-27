@@ -15,13 +15,14 @@ sys.path.insert(0, str(ROOT))
 from blender_vfx_studio import assets, composition, core  # noqa: E402
 from blender_vfx_studio.nodes import drive, node  # noqa: E402
 
-EXAMPLES = ("energy-charge", "impact-burst", "arc-slash", "lightning-strike")
-QUALITY_ASSETS = ("lightning-strike",)
+EXAMPLES = ("energy-charge", "impact-burst", "arc-slash", "lightning-strike", "dust-impact")
+QUALITY_ASSETS = ("lightning-strike", "dust-impact")
 PREVIEWS = {
     "energy-charge": (31, (4, -6, 3.5), (0, 0, 0.1), 4.8),
     "impact-burst": (5, (3, -5, 6), (0, 0, 0), 5.0),
     "arc-slash": (5, (0, 0, 8), (0, 0, 0), 5.4),
     "lightning-strike": (4, (4, -6, 3.8), (0, 0, 1.6), 5.2),
+    "dust-impact": (13, (4, -6, 3.5), (0, 0, 0.5), 5.0),
 }
 
 
@@ -171,6 +172,10 @@ def create_effect(key, *, quality=None):
         shield.children[0].data.materials[0].surface_render_method = "DITHERED"
         root = composition.create(context, [outer, inner, shield, particles])
         root.name = "Energy Charge"
+    elif key == "dust-impact":
+        from tools.dust_asset import create
+
+        root = create(context, "MEDIUM" if quality is None else quality)
     elif key == "lightning-strike":
         from tools.lightning_asset import create
 
@@ -191,6 +196,10 @@ def preview_scene(key):
     """Preview-only helpers are deliberately outside the exported effect hierarchy."""
     scene = bpy.context.scene
     frame, location, target, scale = PREVIEWS[key]
+    if key == "dust-impact":
+        from tools.character_scene import setup_stage
+
+        setup_stage(focus=(0, 0, 0.5))
     bpy.ops.object.camera_add(location=location)
     camera = bpy.context.object
     camera.rotation_euler = (Vector(target) - camera.location).to_track_quat("-Z", "Y").to_euler()
