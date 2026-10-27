@@ -80,6 +80,18 @@ class DashTests(unittest.TestCase):
             self.assertEqual(vertices(member, 2), expected)
             core.delete(root)
 
+    def test_negative_source_scale_keeps_outward_faces(self):
+        obj = source()
+        obj.scale.x = -1
+        bpy.context.scene.frame_set(1)
+        expected = (
+            obj.matrix_world.to_3x3().inverted().transposed() @ obj.data.polygons[0].normal
+        ).normalized()
+        root = dash.create(bpy.context, obj, 1, 13)
+        first = composition.members(root)[0].children[0].data.polygons[0].normal
+        self.assertGreater(first.dot(expected), 0.99)
+        self.assertEqual(obj.scale.x, -1)
+
     def test_invalid_capture_has_no_data_mutation(self):
         obj = source()
         bpy.context.scene.frame_set(5, subframe=0.5)

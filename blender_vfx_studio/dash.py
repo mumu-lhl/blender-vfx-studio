@@ -69,7 +69,14 @@ def sample(context, source, first, last, quality):
                                 "Source contains invalid or excessively large positions"
                             )
                         vertices.append(tuple(position))
-                    faces.extend(tuple(offset + i for i in face.vertices) for face in mesh.polygons)
+                    mirrored = evaluated.matrix_world.determinant() < 0
+                    faces.extend(
+                        tuple(
+                            offset + i
+                            for i in (reversed(face.vertices) if mirrored else face.vertices)
+                        )
+                        for face in mesh.polygons
+                    )
                 finally:
                     evaluated.to_mesh_clear()
             if not vertices or not faces:
