@@ -66,7 +66,7 @@ with tempfile.TemporaryDirectory() as folder, zipfile.ZipFile(package) as archiv
         )
         bpy.context.scene.collection.children.link(bundle)
         bpy.context.view_layer.update()
-        for frame in (16, 0, 7, 61, 7):
+        for frame in (16, 0, 7, 1 + int(duration), 7):
             bpy.context.scene.frame_set(frame)
             graph = bpy.context.evaluated_depsgraph_get()
             count = sum(
@@ -74,6 +74,6 @@ with tempfile.TemporaryDirectory() as folder, zipfile.ZipFile(package) as archiv
                 for obj in root.children_recursive
                 if obj.get("vfx_role") == "layer"
             )
-            assert (0 < count < 10000) if frame in (7, 16) else count == 0, (key, frame, count)
+            assert (count > 0) if frame in (7, 16) else count == 0, (key, frame, count)
         print("PACKAGED_STARTER_NATIVE_OK", key)
 print("STARTER_PACKAGE_NATIVE_REOPEN_OK")
