@@ -20,7 +20,7 @@
 
 **Lightning Strike（18 帧）** 由分支电弧、短促接触闪光、飞散火花和地面余波组成。主干先落地，再做两次逐渐减弱的复击；第一峰值在 Start+2 左右。主层 Radius 调整分支横向范围，Width 调整线宽，Strength 调整发光，Noise Scale 调整细扰动，Dissolve 侵蚀电弧。在 Geometry Nodes 用 **Bolt Length** 调整高度，**Branch Reach** 调整分支伸展。普通参数 JSON 会重建原生环形基础，完整造型与手动节点请用 **Save Complete Effect** 保存。已完成高清角色、隔帧动画和无插件检查，范围、实测成本与限制见 [闪电记录](LIGHTNING_REVIEW.md)。未观看实时播放；远景细枝和接触火花较弱。
 
-**Dust Impact（32 帧，开发候选）** 使用一个原生程序化体积域形成不等大的烟尘团，配合地面薄尘和短促碎屑，适合落地、踩踏或地面冲击。云团先横向散开，再抬升并变薄；不发光，需要场景灯光。主层 Width 调整团块大小，Expansion 调整铺开距离，Noise Scale 调整密度细节，Fade 调整消散，Dissolve 侵蚀密度。主层 Object Properties → Custom Properties 的 Dust Rise Height、Dust Roll Speed 和 Dust Density 分别控制抬升、内部纹理上卷与光学密度。体积需要 Eevee 的体积渲染或 Cycles，Solid 模式仅显示域边界；这不是流体模拟，不需要缓存。三种质量档改变密度团数量、噪声细节与碎屑数量。完整动画、明暗背景和实测成本还在检查，暂不计入已验收数量。
+**Dust Impact（32 帧，开发候选）** 使用原生 Volume Cube 密度网格形成不等大的烟尘团，配合地面薄尘和短促碎屑，适合落地、踩踏或地面冲击。云团先横向散开，再抬升并变薄；不发光，需要场景灯光。主层 Width 调整团块大小，Expansion 调整铺开距离，Noise Scale 调整密度细节，Fade 调整消散，Dissolve 侵蚀密度。主层 Object Properties → Custom Properties 的 Dust Rise Height、Dust Roll Speed 和 Dust Density 分别控制抬升、内部纹理上卷与光学密度。体积需要 Eevee 的体积渲染或 Cycles，Solid 模式仅显示域边界；这不是流体模拟，不需要缓存。三种质量档改变体积网格分辨率、密度团数量、噪声细节与碎屑数量。完整动画、明暗背景和实测成本还在检查，暂不计入已验收数量。
 
 **Stylized Fire（52 帧，开发候选）** 是三团不等高的外焰、两团较小的热色内焰和持续上升的余烬。主层在 48 帧内完成点燃、维持和断燃，余烬晚四帧结束。主层 Width 调整宽度，Noise Scale 调整流动色带，Strength 控制光量，Dissolve 侵蚀火面；Object Properties → Custom Properties 的 Fire Height、Fire Flow Speed 和 Fire Curl 控制高度、上卷节奏与火舌形变。颜色参数作为红橙黄色带的乘色。Low / Medium / High 改变截面细节和余烬生成率；不是换色变体。当前只通过行为与原生重开检查，尚未查看实际火焰渲染，不计入已验收数量。
 
