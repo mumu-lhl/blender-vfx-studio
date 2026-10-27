@@ -8,6 +8,7 @@ import zipfile
 from pathlib import Path
 
 from tools.build_preview_bundle import build
+from tools.repack_release_previews import verify
 
 
 class PreviewBundleTests(unittest.TestCase):
@@ -40,6 +41,23 @@ class PreviewBundleTests(unittest.TestCase):
                 for name, data in expected.items():
                     self.assertEqual(archive.read(prefix + name), data)
                 self.assertIn("不是插件安装包", archive.read(prefix + "README.md").decode())
+
+    def test_uploaded_replacement_must_preserve_every_original_image(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder = Path(temporary)
+            source = folder / "preview"
+            source.mkdir()
+            image = source / "effect.png"
+            image.write_bytes(b"original image")
+            package = build(source, folder / "dist", "0.22.2")
+            verify(package, [image])
+            image.write_bytes(b"different image")
+            with self.assertRaisesRegex(ValueError, "does not preserve"):
+                verify(package, [image])
+            missing = source / "missing.png"
+            missing.write_bytes(b"not in archive")
+            with self.assertRaisesRegex(ValueError, "does not preserve"):
+                verify(package, [missing])
 
     def test_build_is_reproducible_despite_file_timestamps(self):
         with tempfile.TemporaryDirectory() as temporary:
