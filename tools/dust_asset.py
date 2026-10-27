@@ -172,7 +172,10 @@ def _volume(root, quality):
     wire.inputs["Selection"].default_value = True
     g.link(domain.outputs[0], wire.inputs["Geometry"])
     joined = g.n("GeometryNodeJoinGeometry", "Density And Native Domain Handles")
-    g.link(grid.outputs[0], joined.inputs[0])
+    assign = g.n("GeometryNodeSetMaterial", "Dust Grid Material")
+    assign.inputs["Material"].default_value = layer.data.materials[0]
+    g.link(grid.outputs[0], assign.inputs["Geometry"])
+    g.link(assign.outputs[0], joined.inputs[0])
     g.link(wire.outputs[0], joined.inputs[0])
     inactive = g.m("Outside Lifetime", "LESS_THAN", g.value("Active", expression=ACTIVE), 0.5)
     invisible = g.m("Fully Dissolved", "GREATER_THAN", g.value("Dissolve", prop="dissolve"), 0.9999)
