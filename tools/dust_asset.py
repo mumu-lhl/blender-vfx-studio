@@ -123,6 +123,8 @@ def _volume(root, quality):
     faces = [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]
     _mesh(layer, vertices, faces)
     layer.display_type = "WIRE"
+    # Cycles casts a hard shadow from this procedural domain; keep the dust shadowless, as in Eevee.
+    layer.visible_shadow = False
     radius, width, expansion = [
         g.value(name, prop=prop)
         for name, prop in (
