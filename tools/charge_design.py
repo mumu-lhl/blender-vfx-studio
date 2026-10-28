@@ -899,6 +899,17 @@ def core_shape(root):
         1,
         g.m("Nonnegative Intake Width Weight", "MAXIMUM", g.value("Intake Weight", 0.6), 0),
     )
+    intake_weight = g.m(
+        "Intake Gives Way To Stored Energy",
+        "MULTIPLY",
+        intake_weight,
+        g.m(
+            "Quieter Intake Under Pressure",
+            "SUBTRACT",
+            1,
+            g.m("Stored Focus", "MULTIPLY", gather, 0.45),
+        ),
+    )
     section = g.m("Weight Supporting Intake Sections", "MULTIPLY", section, intake_weight)
     # The nucleus has its own pulse; the moving packet only affects intake paths.
     section = g.m(
@@ -1040,7 +1051,7 @@ def core_shape(root):
         g.xyz("Nucleus Pressure Balance", counter_x, counter_x, counter_z),
     )
     seed_size = g.value("Nucleus Seed Size", 0.65)
-    stored_size = g.value("Nucleus Stored Size", 1.9)
+    stored_size = g.value("Nucleus Stored Size", 2.3)
     growth = g.m(
         "Nucleus Stores Incoming Energy",
         "MULTIPLY_ADD",
@@ -1135,6 +1146,24 @@ def core_shape(root):
     stretch.node.inputs[2].default_value = 1
     discharge_axes = g.xyz("Nucleus Discharge Proportions", pinch, pinch, stretch)
     position = g.v("Stored Energy Becomes A Short Needle", "MULTIPLY", position, discharge_axes)
+    # Discharge travels toward local +Z rather than stretching equally into
+    # both ends. Orient the controller toward the receiving weapon or spell.
+    position = g.v(
+        "Stored Energy Travels Into The Release",
+        "ADD",
+        position,
+        g.xyz(
+            "Forward Discharge",
+            0,
+            0,
+            g.m(
+                "Release Travel",
+                "MULTIPLY",
+                pulse,
+                g.m("Radius Relative Travel", "MULTIPLY", radius, 0.8),
+            ),
+        ),
+    )
     g.link(position, deform.inputs["Position"])
     noise = g.n("ShaderNodeTexNoise", "Roiling Flame Contour", noise_dimensions="4D")
     noise.inputs["Scale"].default_value = 3.5

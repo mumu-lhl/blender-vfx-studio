@@ -117,7 +117,7 @@ def main():
                 "limits": [
                     "Stylized CC0 low-poly characters, not a production anime rig",
                     "Headless render wall time is not interactive viewport FPS",
-                    "Timing and transforms are shot-specific; starter effect builders are unchanged",
+                    "Timing, transforms and existing artistic values are fitted to this sword stroke",
                 ],
             },
             indent=2,

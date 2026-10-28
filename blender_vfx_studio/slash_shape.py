@@ -3,7 +3,7 @@
 from .nodes import drive, node
 
 
-def shape(tree, root, u, across, band, progress, radius, offset):
+def shape(tree, root, u, across, band, progress, radius, offset, width_profile):
     link = tree.links.new
     count = 0
 
@@ -86,6 +86,9 @@ def shape(tree, root, u, across, band, progress, radius, offset):
     depth_phase = mathn("Depth Curve", "SINE", depth_phase)
     across = mathn("Blade Fold Line", "SUBTRACT", across, 0.18)
     depth = mathn("Fold Across Body", "MULTIPLY", depth_phase, across)
+    # A zero-width tip must also close in depth. This includes the moving
+    # reveal front and the individually narrowed/fractured wake sections.
+    depth = mathn("Fold Follows Ribbon Width", "MULTIPLY", depth, width_profile)
     wake = mathn("Wake Depth Separation", "MULTIPLY", band, 0.32)
     wake = mathn("Wake Depth Over Life", "MULTIPLY", wake, progress)
     depth = mathn("Layer Depth", "ADD", depth, wake)

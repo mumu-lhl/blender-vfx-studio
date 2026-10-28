@@ -232,6 +232,7 @@ def geometry(obj, root):
         progress,
         radius,
         offset,
+        amount,
     )
     radius = math_node("Inner Radius", "SUBTRACT", radius, offset, 550, 100)
     radius = math_node("Positive Radius", "MAXIMUM", radius, 0.001, 800, 100)

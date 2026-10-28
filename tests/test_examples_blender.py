@@ -249,6 +249,32 @@ class StarterTests(unittest.TestCase):
             max((Vector(a) - Vector(b)).length for a, b in zip(reference, accelerated)), 1e-5
         )
 
+    def test_native_discharge_moves_only_the_nucleus_toward_local_positive_z(self):
+        charge = create_effect("energy-charge")
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+        tree = member.children[0].modifiers[0].node_group
+
+        def positions():
+            evaluated = mesh(member, 43)
+            return {
+                role: [
+                    v.co.copy()
+                    for v, part in zip(
+                        evaluated.vertices, evaluated.attributes["charge_inner"].data
+                    )
+                    if (part.value > 0.5) == role
+                ]
+                for role in (False, True)
+            }
+
+        forward = positions()
+        tree.nodes["Radius Relative Travel"].inputs[1].default_value = 0
+        centered = positions()
+        self.assertEqual(forward[False], centered[False])
+        deltas = [a - b for a, b in zip(forward[True], centered[True])]
+        self.assertGreater(min(v.z for v in deltas), 0.02)
+        self.assertLess(max(abs(v.x) + abs(v.y) for v in deltas), 1e-6)
+
     def test_stored_compression_changes_only_nucleus_and_follows_group_time(self):
         charge = create_effect("energy-charge")
         member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
