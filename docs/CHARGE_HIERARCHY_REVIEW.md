@@ -66,6 +66,6 @@ LP_NUM_THREADS=2 blender -b -t 2 --factory-startup --python-exit-code 1 --python
 LP_NUM_THREADS=2 blender -b -t 2 --factory-startup work/charge-review/light/character.blend --python-expr 'import bpy; bpy.context.scene.render.resolution_percentage = 50' -o /absolute/output/motion-#### -s 1 -e 53 -j 2 -a
 ```
 
-功能提交 `e43402bfbcb32033cac69a88831611c50c4c27f9` 的 [CI 40693445113](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40693445113) 已完成三平台功能／安装检查，以及 Charge Handoff、Combat、Lightning、Fire 等视觉任务；其余长镜头仍在运行。此前 PR #165 的全部 12 项检查已成功。本轮不发布新版本。
+功能提交 `e43402bfbcb32033cac69a88831611c50c4c27f9` 的 [CI 40693445113](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40693445113) 已完成全部 12 项检查，三平台功能／安装和全部视觉任务均成功。此前 PR #165 的全部 12 项检查已成功。本轮不发布新版本。
 
 CI 的实际 `blender-vfx-studio-extension` 附件（artifact 12820016523）已下载检查：包含插件与 18 个示例的两个 ZIP。打包 UI 与功能提交源码一致；原生打开导出的 Energy Charge，确认 256×256 自定义缩略图、726 顶点核心以及 0.6 进流权重、0.35 白色阈值均已保存。资产 SHA256 为 `44a9450f2539041bfdb596af92126ce18799783c5941d1bf7eaac85bfeeef3f8`。这不是发布新版本。

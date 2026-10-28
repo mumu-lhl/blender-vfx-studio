@@ -34,3 +34,5 @@ MESA_SHADER_CACHE_DISABLE=true LP_NUM_THREADS=2 blender -b -t 2 --factory-startu
 ```
 
 生成时加 `--dark`、`--far` 或 `--reverse` 分别检查这些机位。只对无插件重开使用局部 Mesa 缓存设置，不忽略退出失败。
+
+功能提交 `bcdfaf50d5e74062ae9171cfb9c4eb7b6d137b03` 的 [CI 40700723464](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40700723464) 全部 12 项成功。

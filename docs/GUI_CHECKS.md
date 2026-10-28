@@ -67,3 +67,5 @@ blender --factory-startup --python tools/gui_session.py
 
 脚本只用于新的未保存场景，会启用侧栏，并将预设隔离到 `work/gui/presets/`。`work/gui/state.json` 每秒记录当前效果和 Cloth 状态，方便对照操作结果；它不替用户点击按钮，也不是插件播放逻辑。
 创建 `work/gui/stop` 可结束这次临时会话。此脚本不保存 Blender 用户偏好，也不会把测试预设写入真实用户库。
+
+2026-10-28，同一 Linux 1600×1000、默认缩放的实际窗口检查 **Set Echo Tail**。在 VFX 侧栏点击按钮后，360 像素宽弹窗显示 Tail (Frames) 以及组／层 Speed 的含义，文字未截断。输入 30 后取消，组仍为 Duration=30、Tail=18；重新输入并确认，Duration=42、Tail=30，三姿态进场约为 1／7／13，原 User Pose Source 保留。窗口和 Xorg 均正常退出。只检查这组入口与取消／确认，不声称做了其他平台、缩放、Undo 或动画艺术验收。

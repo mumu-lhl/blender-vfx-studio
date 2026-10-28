@@ -19,3 +19,33 @@ blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python to
 加 `--dark` 或 `--far` 检查相应背景和距离。输出目录带数量与首尾帧，保留源文件摘要，不覆盖默认三姿态的比较。CI 在原有 dash-review 附件中保存这组比较与原生重开记录。软件 Eevee 两线程实测生成这组图需要较长时间；这里没有匹配的三姿态成本对照，不能据此报告加速比或视口帧率。当前跑步示例末段切回站姿仍硬；完整冲刺接落地镜头由 [#156](https://github.com/mumu-lhl/blender-vfx-studio/issues/156) 另行验证，本次采样改动不宣称解决该衔接。
 
 捕获不保存运行时源引用。源动画改变需重新捕获；新捕获不会覆盖已有特效，确认后可删除旧组。想保留手改节点请使用 **Save Complete Effect**，参数 JSON 不包含姿态网格。
+
+## 捕获后的尾部编辑
+
+[#172](https://github.com/mumu-lhl/blender-vfx-studio/issues/172)／[PR #173](https://github.com/mumu-lhl/blender-vfx-studio/pull/173) 在捕获组合上提供 **Set Echo Tail**。它修改已有原生时间比例，保留当前进场间隔、Local Speed、姿态网格、材质、节点和变换动画，不需要原角色或再次捕获。组 Duration 随尾部和 Local Speed 重新计算，以容纳各层结束；循环按新周期立即求值。
+
+Tail 的数值是乘速前的每层 Duration。组 Speed 和各层 Local Speed 继续影响实际播放时长。已经动画化的组 Duration、层时间比例或 Local Speed，以及改写过的原生时间驱动，会在修改前拒绝，避免覆盖用户编排。捕获混入其他效果后也不批量修改。普通姿态变换动画和手工节点继续保留。
+
+13 项残影检查与 14 项组合回归通过，覆盖尾部延长／缩短、保持进场间隔、局部／整体倍速及循环、手改节点和变换动画、无效输入不修改数据、独立载入。删除源角色后保存，再在无插件进程跳帧核对新尾部几何与结束帧，通过；CI 使用 `tests/dash_tail_reopen.py` 检查这项行为。
+
+### 实际画面与窗口
+
+已实际读取 **8 张 960×540 Eevee 图**：同样在 6–19 帧捕获五姿态，尾部 18／30 各看浅背景 19／31／45；另看尾部 30 的第 31 帧暗背景与远景。延长后 19 帧旧影更明显、31 帧保留更多姿态、45 帧仍有末段淡出。远景细边继续偏弱，延长寿命不等于整体艺术品质升级；更多时段存在透明叠层，默认仍为 18，没有把画质或数量强制降低。
+
+原 18 帧尾部，第 31 帧：
+
+![18 帧尾部](images/echo-tail-18.png)
+
+只在捕获后设置 30 帧尾部，其余设置相同：
+
+![30 帧尾部](images/echo-tail-30.png)
+
+修改场景无插件按 45／19／31 高清重渲染，解码像素一致，新结束帧清空且正常退出。源文件与图片摘要见 [样本记录](images/echo-tail-samples.json)。这些是阶段对照，没有实时播放验收。
+
+Linux 实际窗口还检查了侧栏按钮与 360 像素宽弹窗：取消保持 18；确认 30 后，1–13 帧三姿态组的 Duration 从 30 变为 42，进场仍约为 1／7／13，原对象保留。标签可读，其他平台／缩放未检查，见 [GUI 记录](GUI_CHECKS.md)。
+
+```sh
+LP_NUM_THREADS=2 blender -b -t 2 --factory-startup --python-exit-code 1 --python tools/dash_preview.py -- --echo-count 5 --capture-first 6 --capture-last 19 --tail 30 --frames 19 31 45
+```
+
+`--tail` 在捕获完成后调用同一编辑接口；不传时保留默认值。输出目录带尾部值，原生重开检查读取实际结束帧。完整效果保存时长与私有节点，参数 JSON 不保存捕获姿态。
