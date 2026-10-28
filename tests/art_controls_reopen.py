@@ -27,6 +27,7 @@ for frame in (44, 8, 20, 44):
 for name, frames in (
     ("Persisted Adjustable Charge", (44, 18, 36)),
     ("Persisted Adjustable Lightning", (12, 3, 8)),
+    ("Persisted Adjustable Impact", (12, 3, 5)),
 ):
     group = bpy.data.objects[name]
     member = bpy.data.objects[group["expected_member_name"]]
@@ -34,6 +35,11 @@ for name, frames in (
         bpy.context.scene.frame_set(frame)
         mesh = member.children[0].evaluated_get(bpy.context.evaluated_depsgraph_get()).data
         assert [c for v in mesh.vertices for c in v.co] == list(group[f"expected_shape_{frame}"])
+impact = bpy.data.objects["Persisted Adjustable Impact"]
+member = bpy.data.objects[impact["expected_member_name"]]
+material = member.children[0].data.materials[0].node_tree
+for name in ("Pressure Fracture", "Pressure Support Value"):
+    assert material.nodes[name].outputs[0].default_value == impact[f"expected_native_{name}"]
 assert not bpy.app.handlers.frame_change_pre
 assert not bpy.app.handlers.frame_change_post
 print("ART_CONTROLS_NATIVE_REPLAY_OK")
