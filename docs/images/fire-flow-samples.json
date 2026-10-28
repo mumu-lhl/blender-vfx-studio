@@ -275,6 +275,38 @@
     {
       "file": "images/fire-flow-motion-after.png",
       "sha256": "998b27330e8c4debebb0707daadee0a55675168e0cf014d28bc477da548de132"
+    },
+    {
+      "file": "images/fire-flow-motion-before.png",
+      "sha256": "e5c3bcc77c85823da08a9b81cf2aa50e816cbd9fc5808629609d3c4cb95c9b47"
+    },
+    {
+      "file": "images/fire-spell-release.png",
+      "sha256": "e6e60cd5eb6b740eea0c16dcf18aacb0c05e575608cfb6929cef0342cf539f32"
+    },
+    {
+      "file": "images/fire-spell-sequence-01.png",
+      "sha256": "29bb4423c2a5404d556d87b4f8016bc6eea9db8c644f16dbc1809e3637a2ea71"
+    },
+    {
+      "file": "images/fire-spell-sequence-02.png",
+      "sha256": "288112c81fc91bb5239ca0aa2ca0d403cba4f540de97405bf30bbcf2b015e677"
+    },
+    {
+      "file": "images/fire-spell-sequence-03.png",
+      "sha256": "1836b4a67193286130cc5172faccb46efc3b019f46c1eaf273cf5746852e5e5f"
+    },
+    {
+      "file": "images/fire-spell-sequence-04.png",
+      "sha256": "c463ce59cc7ddf4f1737db31bdbe9f8e8f5794af74d71e425c65d8ae746298a5"
+    },
+    {
+      "file": "images/fire-spell-sequence-05.png",
+      "sha256": "750364264ad59cb5559bfef82d92f2f5f8dcc4638aa93f9cd519d9195c019ff9"
+    },
+    {
+      "file": "images/fire-spell-sequence-06.png",
+      "sha256": "a9dbb2a9bf2f4e2591fed29a3f01015eea11452220ce31b35ee95980a649b46a"
     }
   ],
   "native": {
@@ -537,5 +569,354 @@
       "The same saved scene is used; only its VFX collection is excluded",
       "Evaluation excludes the collection from the viewport dependency graph; render comparison only excludes it from rendering"
     ]
+  },
+  "viewed_baseline_motion_frames": [
+    28,
+    30,
+    32,
+    34,
+    36,
+    38,
+    40,
+    42,
+    44,
+    46,
+    48
+  ],
+  "export_checks": [
+    {
+      "quality": "LOW",
+      "vertices": 600,
+      "preview": [
+        256,
+        256
+      ]
+    },
+    {
+      "quality": "MEDIUM",
+      "vertices": 1380,
+      "preview": [
+        256,
+        256
+      ]
+    },
+    {
+      "quality": "HIGH",
+      "vertices": 2480,
+      "preview": [
+        256,
+        256
+      ]
+    }
+  ],
+  "local_spell_frames_viewed": [
+    40,
+    64,
+    96
+  ],
+  "blue_frame_viewed": 36,
+  "ci_spell": {
+    "workflow_run": 40729568694,
+    "artifact_id": 12836833658,
+    "archive_sha256": "0b7d245e8110e2a4b3ab1e91ab425b785bd5c0f41039eab9a349673844ec4a7a",
+    "fire_generator_sha256": "e54a7539c7b7ec8a54d4a835013f66ae71999c7306b5387304102a04cd877747",
+    "video": {
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "24/1",
+      "duration": "4.500000",
+      "nb_frames": "108",
+      "source_sha256": "7e643cc220ca1c13affb7d227a7a43d1517ccd229dfae8d1ba0ddf6ebad125fe",
+      "video_sha256": "351138589db43db10a8274d38b00c84c090dc25d39c329a57077054ab4b8f865",
+      "profile": "spell",
+      "realtime_playback_reviewed": false
+    },
+    "sample_record": {
+      "movie_sha256": "351138589db43db10a8274d38b00c84c090dc25d39c329a57077054ab4b8f865",
+      "step": 2,
+      "samples": [
+        {
+          "file": "frame-01.png",
+          "source_frame": 1,
+          "seconds": 0.0
+        },
+        {
+          "file": "frame-02.png",
+          "source_frame": 3,
+          "seconds": 0.08333333333333333
+        },
+        {
+          "file": "frame-03.png",
+          "source_frame": 5,
+          "seconds": 0.16666666666666666
+        },
+        {
+          "file": "frame-04.png",
+          "source_frame": 7,
+          "seconds": 0.25
+        },
+        {
+          "file": "frame-05.png",
+          "source_frame": 9,
+          "seconds": 0.3333333333333333
+        },
+        {
+          "file": "frame-06.png",
+          "source_frame": 11,
+          "seconds": 0.4166666666666667
+        },
+        {
+          "file": "frame-07.png",
+          "source_frame": 13,
+          "seconds": 0.5
+        },
+        {
+          "file": "frame-08.png",
+          "source_frame": 15,
+          "seconds": 0.5833333333333334
+        },
+        {
+          "file": "frame-09.png",
+          "source_frame": 17,
+          "seconds": 0.6666666666666666
+        },
+        {
+          "file": "frame-10.png",
+          "source_frame": 19,
+          "seconds": 0.75
+        },
+        {
+          "file": "frame-11.png",
+          "source_frame": 21,
+          "seconds": 0.8333333333333334
+        },
+        {
+          "file": "frame-12.png",
+          "source_frame": 23,
+          "seconds": 0.9166666666666666
+        },
+        {
+          "file": "frame-13.png",
+          "source_frame": 25,
+          "seconds": 1.0
+        },
+        {
+          "file": "frame-14.png",
+          "source_frame": 27,
+          "seconds": 1.0833333333333333
+        },
+        {
+          "file": "frame-15.png",
+          "source_frame": 29,
+          "seconds": 1.1666666666666667
+        },
+        {
+          "file": "frame-16.png",
+          "source_frame": 31,
+          "seconds": 1.25
+        },
+        {
+          "file": "frame-17.png",
+          "source_frame": 33,
+          "seconds": 1.3333333333333333
+        },
+        {
+          "file": "frame-18.png",
+          "source_frame": 35,
+          "seconds": 1.4166666666666667
+        },
+        {
+          "file": "frame-19.png",
+          "source_frame": 37,
+          "seconds": 1.5
+        },
+        {
+          "file": "frame-20.png",
+          "source_frame": 39,
+          "seconds": 1.5833333333333333
+        },
+        {
+          "file": "frame-21.png",
+          "source_frame": 41,
+          "seconds": 1.6666666666666667
+        },
+        {
+          "file": "frame-22.png",
+          "source_frame": 43,
+          "seconds": 1.75
+        },
+        {
+          "file": "frame-23.png",
+          "source_frame": 45,
+          "seconds": 1.8333333333333333
+        },
+        {
+          "file": "frame-24.png",
+          "source_frame": 47,
+          "seconds": 1.9166666666666667
+        },
+        {
+          "file": "frame-25.png",
+          "source_frame": 49,
+          "seconds": 2.0
+        },
+        {
+          "file": "frame-26.png",
+          "source_frame": 51,
+          "seconds": 2.0833333333333335
+        },
+        {
+          "file": "frame-27.png",
+          "source_frame": 53,
+          "seconds": 2.1666666666666665
+        },
+        {
+          "file": "frame-28.png",
+          "source_frame": 55,
+          "seconds": 2.25
+        },
+        {
+          "file": "frame-29.png",
+          "source_frame": 57,
+          "seconds": 2.3333333333333335
+        },
+        {
+          "file": "frame-30.png",
+          "source_frame": 59,
+          "seconds": 2.4166666666666665
+        },
+        {
+          "file": "frame-31.png",
+          "source_frame": 61,
+          "seconds": 2.5
+        },
+        {
+          "file": "frame-32.png",
+          "source_frame": 63,
+          "seconds": 2.5833333333333335
+        },
+        {
+          "file": "frame-33.png",
+          "source_frame": 65,
+          "seconds": 2.6666666666666665
+        },
+        {
+          "file": "frame-34.png",
+          "source_frame": 67,
+          "seconds": 2.75
+        },
+        {
+          "file": "frame-35.png",
+          "source_frame": 69,
+          "seconds": 2.8333333333333335
+        },
+        {
+          "file": "frame-36.png",
+          "source_frame": 71,
+          "seconds": 2.9166666666666665
+        },
+        {
+          "file": "frame-37.png",
+          "source_frame": 73,
+          "seconds": 3.0
+        },
+        {
+          "file": "frame-38.png",
+          "source_frame": 75,
+          "seconds": 3.0833333333333335
+        },
+        {
+          "file": "frame-39.png",
+          "source_frame": 77,
+          "seconds": 3.1666666666666665
+        },
+        {
+          "file": "frame-40.png",
+          "source_frame": 79,
+          "seconds": 3.25
+        },
+        {
+          "file": "frame-41.png",
+          "source_frame": 81,
+          "seconds": 3.3333333333333335
+        },
+        {
+          "file": "frame-42.png",
+          "source_frame": 83,
+          "seconds": 3.4166666666666665
+        },
+        {
+          "file": "frame-43.png",
+          "source_frame": 85,
+          "seconds": 3.5
+        },
+        {
+          "file": "frame-44.png",
+          "source_frame": 87,
+          "seconds": 3.5833333333333335
+        },
+        {
+          "file": "frame-45.png",
+          "source_frame": 89,
+          "seconds": 3.6666666666666665
+        },
+        {
+          "file": "frame-46.png",
+          "source_frame": 91,
+          "seconds": 3.75
+        },
+        {
+          "file": "frame-47.png",
+          "source_frame": 93,
+          "seconds": 3.8333333333333335
+        },
+        {
+          "file": "frame-48.png",
+          "source_frame": 95,
+          "seconds": 3.9166666666666665
+        },
+        {
+          "file": "frame-49.png",
+          "source_frame": 97,
+          "seconds": 4.0
+        },
+        {
+          "file": "frame-50.png",
+          "source_frame": 99,
+          "seconds": 4.083333333333333
+        },
+        {
+          "file": "frame-51.png",
+          "source_frame": 101,
+          "seconds": 4.166666666666667
+        },
+        {
+          "file": "frame-52.png",
+          "source_frame": 103,
+          "seconds": 4.25
+        },
+        {
+          "file": "frame-53.png",
+          "source_frame": 105,
+          "seconds": 4.333333333333333
+        },
+        {
+          "file": "frame-54.png",
+          "source_frame": 107,
+          "seconds": 4.416666666666667
+        }
+      ]
+    },
+    "all_54_decoded_samples_viewed": true,
+    "native": {
+      "native_render_verified": true,
+      "frames": [
+        96,
+        16,
+        64
+      ],
+      "clear_frame": 104,
+      "scene_sha256": "bfdd4a64c06f6744eeca5c5a721d8d416cfebd49527975b7c4d3d1bfff930f1d"
+    }
   }
 }
