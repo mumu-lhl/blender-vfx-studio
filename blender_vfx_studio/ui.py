@@ -1175,7 +1175,6 @@ class VFX_PT_main(bpy.types.Panel):
             palette_box.prop(context.window_manager, "vfx_advanced_controls", text="Edit Heat Ramp")
             if context.window_manager.vfx_advanced_controls:
                 palette_box.template_color_ramp(heat_ramp, "color_ramp")
-        _draw_art_parameters(layout, context, root, keys)
         native_values = _native_shape_values(root)
         if native_values:
             box = layout.box()
@@ -1189,6 +1188,7 @@ class VFX_PT_main(bpy.types.Panel):
                     box.prop(socket, "default_value", text=label)
             if any(v[2] for v in native_values.values()):
                 box.prop(context.window_manager, "vfx_advanced_controls", text="Advanced Shape")
+        _draw_art_parameters(layout, context, root, keys)
         if root.get("vfx_parameter_keys"):
             layout.label(text="Nodes need Complete Effect", icon="INFO")
             layout.label(text="JSON saves parameters only")
