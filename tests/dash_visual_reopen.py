@@ -29,7 +29,8 @@ for frame in args.frames:
     assert array("f", expected.pixels[:]).tobytes() == array("f", actual.pixels[:]).tobytes()
     bpy.data.images.remove(expected)
     bpy.data.images.remove(actual)
-scene.frame_set(37)
+clear_frame = record["contact"].get("clear_frame", scene.frame_end + 1)
+scene.frame_set(clear_frame)
 assert not any(
     obj.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices
     for obj in scene.objects
@@ -40,7 +41,7 @@ assert not any(
         {
             "native_render_verified": True,
             "frames": args.frames,
-            "clear_frame": 37,
+            "clear_frame": clear_frame,
             "scene_sha256": hashlib.sha256(Path(bpy.data.filepath).read_bytes()).hexdigest(),
         },
         indent=2,

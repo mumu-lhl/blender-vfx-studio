@@ -33,6 +33,12 @@ def vertices(member, frame):
     return [tuple(v.co) for v in mesh.vertices]
 
 
+def timing_values(member):
+    bpy.context.view_layer.update()
+    evaluated = member.evaluated_get(bpy.context.evaluated_depsgraph_get())
+    return {key: float(evaluated[key]) for key in ("start", "duration", "speed")}
+
+
 class DashTests(unittest.TestCase):
     def setUp(self):
         bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -155,6 +161,121 @@ class DashTests(unittest.TestCase):
         self.assertEqual(set(bpy.data.all_ids), before)
         self.assertEqual(bpy.context.scene.frame_current_final, 5.5)
 
+    def test_edit_tail_keeps_pose_entries_and_native_data_without_source(self):
+        obj = source()
+        root = dash.create(bpy.context, obj, 1, 13)
+        members = sorted(composition.members(root), key=lambda m: m["vfx_capture_frame"])
+        bpy.context.scene.frame_set(17, subframe=0.5)
+        ids = [
+            (
+                m.children[0].data,
+                m.children[0].data.materials[0],
+                m.children[0].modifiers[0].node_group,
+            )
+            for m in members
+        ]
+        geometry = [[tuple(v.co) for v in mesh.vertices] for mesh, _, _ in ids]
+        ids[0][2].nodes.new("ShaderNodeValue").name = "Artist Detail"
+        bpy.data.objects.remove(obj, do_unlink=True)
+        dash.set_tail(bpy.context, root, 30)
+        self.assertEqual(bpy.context.scene.frame_current_final, 17.5)
+        self.assertEqual(root["duration"], 42)
+        self.assertAlmostEqual(dash.tail_frames(root), 30)
+        for m, expected, points in zip(members, ids, geometry):
+            layer = m.children[0]
+            self.assertEqual(
+                (layer.data, layer.data.materials[0], layer.modifiers[0].node_group), expected
+            )
+            self.assertEqual([tuple(v.co) for v in layer.data.vertices], points)
+            evaluated = timing_values(m)
+            self.assertAlmostEqual(evaluated["start"], m["vfx_capture_frame"], places=5)
+            self.assertAlmostEqual(evaluated["duration"], 30, places=5)
+        self.assertIn("Artist Detail", ids[0][2].nodes)
+        self.assertTrue(vertices(members[0], 25))
+        dash.set_tail(bpy.context, root, 3)
+        self.assertFalse(vertices(members[0], 5))
+        self.assertTrue(vertices(members[-1], 14))
+        self.assertFalse(vertices(members[-1], 16))
+
+    def test_edit_tail_preserves_current_retimed_spacing_and_local_speeds(self):
+        root = dash.create(bpy.context, source(), 1, 13)
+        members = sorted(composition.members(root), key=lambda m: m["vfx_capture_frame"])
+        root["start"], root["duration"], root["speed"] = 11.0, 60.0, 2.0
+        members[1]["vfx_local_speed"], members[2]["vfx_local_speed"] = 0.5, 2.0
+        for member in members:
+            member.update_tag()
+        root.update_tag()
+        bpy.context.view_layer.update()
+        starts = [timing_values(m)["start"] for m in members]
+        dash.set_tail(bpy.context, root, 12)
+        self.assertAlmostEqual(root["duration"], 36)
+        self.assertEqual([timing_values(m)["start"] for m in members], starts)
+        self.assertEqual([timing_values(m)["speed"] for m in members], [2, 1, 4])
+        self.assertTrue(all(abs(timing_values(m)["duration"] - 12) < 1e-5 for m in members))
+        root["loop"] = True
+        root.update_tag()
+        self.assertEqual(vertices(members[1], 18), vertices(members[1], 36))
+
+    def test_edit_tail_keeps_transform_animation(self):
+        root = dash.create(bpy.context, source(), 1, 13)
+        member = composition.members(root)[0]
+        member.location.x = 1
+        member.keyframe_insert(data_path="location", frame=1)
+        member.location.x = 4
+        member.keyframe_insert(data_path="location", frame=20)
+        action = member.animation_data.action
+        dash.set_tail(bpy.context, root, 24)
+        self.assertEqual(member.animation_data.action, action)
+        bpy.context.scene.frame_set(20)
+        self.assertEqual(member.location.x, 4)
+
+    def test_edit_tail_rejects_invalid_and_authored_timing_without_changes(self):
+        root = dash.create(bpy.context, source(), 1, 13)
+        members = composition.members(root)
+
+        def timing():
+            return root["duration"], [
+                (m["vfx_offset_ratio"], m["vfx_duration_ratio"]) for m in members
+            ]
+
+        before = timing()
+        for value in (0, -1, True, float("nan"), float("inf"), 100000):
+            with self.assertRaises(ValueError):
+                dash.set_tail(bpy.context, root, value)
+            self.assertEqual(timing(), before)
+        root.keyframe_insert(data_path='["duration"]', frame=1)
+        with self.assertRaisesRegex(ValueError, "Duration is animated"):
+            dash.set_tail(bpy.context, root, 12)
+        self.assertEqual(timing(), before)
+        root.animation_data_clear()
+        member = members[0]
+        member.keyframe_insert(data_path='["vfx_offset_ratio"]', frame=1)
+        with self.assertRaisesRegex(ValueError, "ratios or Local Speed are animated"):
+            dash.set_tail(bpy.context, root, 12)
+        self.assertEqual(timing(), before)
+        member.animation_data.action = None
+        curve = next(c for c in member.animation_data.drivers if c.data_path == '["duration"]')
+        curve.driver.expression = "7"
+        with self.assertRaisesRegex(ValueError, "timing drivers were edited"):
+            dash.set_tail(bpy.context, root, 12)
+        self.assertEqual(timing(), before)
+
+    def test_edit_tail_operator_and_complete_assets_stay_independent(self):
+        import blender_vfx_studio as addon
+
+        root = dash.create(bpy.context, source(), 1, 13)
+        addon.register()
+        try:
+            self.assertEqual(bpy.ops.vfx_studio.set_echo_tail(tail=24), {"FINISHED"})
+        finally:
+            addon.unregister()
+        path = ROOT / "work/edited-tail.blend"
+        assets.write(path, root)
+        loaded = assets.load(bpy.context, path)
+        dash.set_tail(bpy.context, loaded, 9)
+        self.assertAlmostEqual(dash.tail_frames(loaded), 9)
+        self.assertAlmostEqual(dash.tail_frames(root), 24)
+
     def test_complete_assets_do_not_need_source_and_delete_is_safe(self):
         obj = source()
         root = dash.create(bpy.context, obj, 1, 12, count=5)
@@ -181,3 +302,17 @@ if __name__ == "__main__":
     )
     if not result.wasSuccessful():
         raise RuntimeError("Dash capture behavior failed")
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    obj = source()
+    root = dash.create(bpy.context, obj, 1, 12, count=5)
+    root.name = "Persisted Edited Echo Tail"
+    dash.set_tail(bpy.context, root, 24)
+    bpy.data.objects.remove(obj, do_unlink=True)
+    for frame in (7, 19, 35, 36):
+        root[f"expected_tail_points_{frame}"] = [
+            component
+            for member in composition.members(root)
+            for point in vertices(member, frame)
+            for component in point
+        ] or [0.0]
+    bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "work/dash-tail-native.blend"))

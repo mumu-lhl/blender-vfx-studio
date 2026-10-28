@@ -5,7 +5,9 @@ import math
 import bpy
 
 from . import composition, core
+from .animation import curves
 from .nodes import PROGRESS, TIME_PROPS, drive, node
+from .parameters import GROUP_PARAMETERS
 
 QUALITY_COUNTS = {"LOW": 2, "MEDIUM": 3, "HIGH": 4}
 MAX_CAPTURE_VERTICES = 1_000_000  # Allocation guard, not a performance promise.
@@ -197,3 +199,84 @@ def create(context, source, first, last, quality="MEDIUM", *, tail=18.0, count=N
             if member.name in bpy.data.objects:
                 core.delete(member)
         raise
+
+
+def _echoes(group):
+    group = core.resolve(group)
+    if group is None or group["vfx_module"] != "core.composition":
+        raise ValueError("Select a captured echo composition")
+    try:
+        frames = list(group.get("vfx_capture_frames", ()))
+    except TypeError:
+        raise ValueError("Repair invalid capture frame metadata") from None
+    children = composition.members(group)
+    if not 2 <= len(frames) == len(children) <= 32 or any(
+        child["vfx_module"] != "shader.shield" or "vfx_capture_frame" not in child
+        for child in children
+    ):
+        raise ValueError("Select an intact captured echo composition; edit mixed layers separately")
+    captured = [child["vfx_capture_frame"] for child in children]
+    if any(type(f) not in (int, float) or not math.isfinite(f) for f in frames + captured):
+        raise ValueError("Repair invalid capture frame metadata")
+    if sorted(frames) != sorted(captured) or len(set(frames)) != len(frames):
+        raise ValueError("Capture frame metadata does not match the pose layers")
+    return group, sorted(children, key=lambda child: child["vfx_capture_frame"])
+
+
+def tail_frames(group):
+    """Current first-pose lifetime before group and layer Speed, for the dialog."""
+    group, children = _echoes(group)
+    return max(1.0, float(group["duration"]) * float(children[0]["vfx_duration_ratio"]))
+
+
+def set_tail(context, group, tail):
+    """Adjust owned timing coefficients, retaining entry spacing and captured data."""
+    if type(tail) not in (int, float) or not math.isfinite(tail) or not 1 <= tail <= 100000:
+        raise ValueError("Echo tail must be between 1 and 100000 frames")
+    group, children = _echoes(group)
+    if any(
+        o.library or o.override_library or o.name not in context.scene.objects
+        for o in [group, *children]
+    ):
+        raise ValueError("Echo timing requires local controllers in the active scene")
+    if any(c.data_path == '["duration"]' for c in curves(group)):
+        raise ValueError("Group Duration is animated; edit its timing channels directly")
+    coefficients = ("vfx_offset_ratio", "vfx_duration_ratio", "vfx_local_speed")
+    for child in children:
+        composition.check_timing(child)
+        if any(c.data_path in {f'["{k}"]' for k in coefficients} for c in curves(child)):
+            raise ValueError("Layer timing ratios or Local Speed are animated; edit them directly")
+    if any(k not in c or type(c[k]) not in (int, float) for c in children for k in coefficients):
+        raise ValueError("Repair invalid echo timing coefficients")
+    if type(group.get("duration")) not in (int, float):
+        raise ValueError("Repair invalid echo group duration")
+    duration = float(group["duration"])
+    previous = [(c, *(float(c[k]) for k in coefficients)) for c in children]
+    if (
+        not math.isfinite(duration)
+        or duration < 1
+        or any(not math.isfinite(value) for row in previous for value in row[1:])
+    ):
+        raise ValueError("Repair invalid echo timing before setting the tail")
+    offsets = [duration * max(row[1], 0) for row in previous]
+    total = max(
+        1.0, *(offset + tail / max(row[3], 0.001) for offset, row in zip(offsets, previous))
+    )
+    if total > GROUP_PARAMETERS["duration"][2]:
+        raise ValueError("Tail would exceed the composition duration limit of 100000 frames")
+    try:
+        for child, offset in zip(children, offsets):
+            child["vfx_offset_ratio"] = offset / total
+            child["vfx_duration_ratio"] = float(tail) / total
+            child.update_tag()
+        group["duration"] = total
+        group.update_tag()
+        context.view_layer.update()
+    except Exception:
+        for child, offset, ratio, _ in previous:
+            child["vfx_offset_ratio"], child["vfx_duration_ratio"] = offset, ratio
+            child.update_tag()
+        group["duration"] = duration
+        group.update_tag()
+        raise
+    return group

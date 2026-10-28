@@ -1,7 +1,14 @@
 """Blender UI delegates lifecycle operations to core."""
 
 import bpy
-from bpy.props import BoolProperty, EnumProperty, FloatVectorProperty, IntProperty, StringProperty
+from bpy.props import (
+    BoolProperty,
+    EnumProperty,
+    FloatProperty,
+    FloatVectorProperty,
+    IntProperty,
+    StringProperty,
+)
 from bpy_extras.io_utils import ExportHelper, ImportHelper
 
 from . import core, palettes, presets
@@ -461,6 +468,48 @@ class VFX_OT_create_trail(bpy.types.Operator):
     def invoke(self, context, event):
         self.first, self.last = context.scene.frame_start, context.scene.frame_end
         return context.window_manager.invoke_props_dialog(self)
+
+
+class VFX_OT_set_echo_tail(bpy.types.Operator):
+    bl_idname = "vfx_studio.set_echo_tail"
+    bl_label = "Set Echo Tail"
+    bl_description = (
+        "Adjust every captured pose's lifetime, keeping entry spacing and captured meshes"
+    )
+    bl_options = {"REGISTER", "UNDO"}
+
+    tail: FloatProperty(
+        name="Tail (Frames)",
+        default=18,
+        min=1,
+        max=100000,
+        description="Lifetime before group and layer Speed; updates group duration without recapturing",
+    )
+
+    def execute(self, context):
+        from . import dash
+
+        try:
+            dash.set_tail(context, context.object, self.tail)
+        except (ValueError, RuntimeError) as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        from . import dash
+
+        try:
+            self.tail = dash.tail_frames(context.object)
+        except (ValueError, RuntimeError) as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return context.window_manager.invoke_props_dialog(self, width=360)
+
+    def draw(self, context):
+        self.layout.prop(self, "tail")
+        self.layout.label(text="Before group / layer Speed")
+        self.layout.label(text="Keeps pose entry spacing and captured meshes")
 
 
 class VFX_OT_capture_dash(bpy.types.Operator):
@@ -981,6 +1030,8 @@ class VFX_PT_main(bpy.types.Panel):
             except ValueError as error:
                 layout.label(text=str(error), icon="ERROR")
                 return
+            if "vfx_capture_frames" in root:
+                layout.operator("vfx_studio.set_echo_tail", icon="MOD_TIME")
             layout.label(text=f"{len(children)} spatial layers")
             layout.operator("vfx_studio.ungroup_all", icon="UNLINKED")
             for child in children:
@@ -1221,6 +1272,7 @@ CLASSES = (
     VFX_OT_create_shield,
     VFX_OT_create_trail,
     VFX_OT_capture_dash,
+    VFX_OT_set_echo_tail,
     VFX_OT_rebake_trail,
     VFX_OT_bind,
     VFX_OT_unbind,
