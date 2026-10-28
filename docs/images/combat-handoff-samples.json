@@ -1,0 +1,154 @@
+{
+  "generator_commit": "7e4bf68",
+  "baseline_commit": "0b8a845",
+  "baseline_scene_sha256": "5896ef6a9134334be884a80e47ecfbbbdfe70cc175efadd2c1a52dbc078ed8e5",
+  "realtime_playback_reviewed": false,
+  "viewed_release_frames": [
+    43,
+    45,
+    47,
+    49,
+    51,
+    53,
+    55,
+    57,
+    59,
+    61
+  ],
+  "additional_viewed_light_frames": [
+    36,
+    48,
+    80
+  ],
+  "batches": [
+    {
+      "variant": "light",
+      "frames": [
+        45,
+        49,
+        53
+      ],
+      "resolution": [
+        960,
+        540
+      ],
+      "engine": "BLENDER_EEVEE",
+      "samples": 16,
+      "source_digest": "084cc8e1cca23983fa329fc80fcdc8770eb6859cce9d5ee88d1cad9f0874c795",
+      "scene_sha256": "8527e6e78713bd3b68d6f1b23545f78d134e35b7d647b56ea2bf78256c574d1a"
+    },
+    {
+      "variant": "phases",
+      "frames": [
+        36,
+        43,
+        47,
+        51,
+        57,
+        61,
+        80
+      ],
+      "resolution": [
+        960,
+        540
+      ],
+      "engine": "BLENDER_EEVEE",
+      "samples": 16,
+      "source_digest": "084cc8e1cca23983fa329fc80fcdc8770eb6859cce9d5ee88d1cad9f0874c795",
+      "scene_sha256": "28f546566c18344ba834e2a10f270e47fd5e3a8a094a46a0b5bde36526ba8dda"
+    },
+    {
+      "variant": "detail",
+      "frames": [
+        48,
+        55,
+        59
+      ],
+      "resolution": [
+        960,
+        540
+      ],
+      "engine": "BLENDER_EEVEE",
+      "samples": 16,
+      "source_digest": "084cc8e1cca23983fa329fc80fcdc8770eb6859cce9d5ee88d1cad9f0874c795",
+      "scene_sha256": "4eb7fb6b55febcb75ea72bc1738ae40a2acac3659255e034846a3828b7b2ef2c"
+    },
+    {
+      "variant": "dark",
+      "frames": [
+        47,
+        49,
+        53
+      ],
+      "resolution": [
+        960,
+        540
+      ],
+      "engine": "BLENDER_EEVEE",
+      "samples": 16,
+      "source_digest": "084cc8e1cca23983fa329fc80fcdc8770eb6859cce9d5ee88d1cad9f0874c795",
+      "scene_sha256": "1e06039b48db64aaa95985ee0e21f322b3b8bf487e08d73583262862976b9d40"
+    },
+    {
+      "variant": "far",
+      "frames": [
+        49,
+        53
+      ],
+      "resolution": [
+        960,
+        540
+      ],
+      "engine": "BLENDER_EEVEE",
+      "samples": 16,
+      "source_digest": "084cc8e1cca23983fa329fc80fcdc8770eb6859cce9d5ee88d1cad9f0874c795",
+      "scene_sha256": "f2885789e1b55e5661f2e3e9d823fa24d5e462575f23eb10a4ee337ab47e03cc"
+    }
+  ],
+  "images": [
+    {
+      "file": "images/combat-handoff-after-49.png",
+      "sha256": "639d1bd29f7d8ea1136c057965e6c3f71af06c4faec84db306a40beb8ca7ebe1"
+    },
+    {
+      "file": "images/combat-handoff-after-53.png",
+      "sha256": "ac125766e10c03901c886345469f1be21279a471731e6491302042031f274ab0"
+    },
+    {
+      "file": "images/combat-handoff-before-49.png",
+      "sha256": "78f2c75e796c2764c2c7eead69025ec95fc22f435e422ebefc579691e6cde627"
+    },
+    {
+      "file": "images/combat-handoff-before-53.png",
+      "sha256": "f2a9534b971a01cccd52696beb455377d744ad9e237e0e6554d1d0c48dadef42"
+    },
+    {
+      "file": "images/combat-handoff-comparison.png",
+      "sha256": "7ba0e19178d498602233848c77e4db093c36ad2f283af7379435f551ff07489e"
+    },
+    {
+      "file": "images/combat-handoff-motion.png",
+      "sha256": "97f128e441b34cf722ae8399bd478f59c288b1f8d3c453e9aa636aacfb7036cd"
+    },
+    {
+      "file": "images/combat-charge-focus.png",
+      "frame": 36,
+      "sha256": "e36fe2f08fde9d3841f87b15d2ae2feff9cf22ea1b6993f2e1c744cd9da7e286"
+    }
+  ],
+  "native_validation": {
+    "native_render_verified": true,
+    "frames": [
+      53,
+      45,
+      49
+    ],
+    "clear_frame": 96,
+    "scene_sha256": "8527e6e78713bd3b68d6f1b23545f78d134e35b7d647b56ea2bf78256c574d1a",
+    "source_frame_sha256": {
+      "character-0053.png": "ac125766e10c03901c886345469f1be21279a471731e6491302042031f274ab0",
+      "character-0045.png": "9803f58861ee4263c5e84b1f65e13e3df4907586b26f92c21db75701179b05a5",
+      "character-0049.png": "639d1bd29f7d8ea1136c057965e6c3f71af06c4faec84db306a40beb8ca7ebe1"
+    }
+  }
+}
