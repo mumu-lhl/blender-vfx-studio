@@ -5,9 +5,13 @@ import unittest
 from pathlib import Path
 
 import bpy
+from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tests"))
+from particle_test_support import camera, render_pixels  # noqa: E402
+
 from blender_vfx_studio import assets, composition, core  # noqa: E402
 from tools.fire_asset import create  # noqa: E402
 
@@ -57,6 +61,43 @@ class FireTests(unittest.TestCase):
         member["dissolve"] = 1
         member.update_tag()
         self.assertFalse(points(member, 12))
+
+    def test_flow_can_stop_during_sustained_burning_without_changing_the_envelope(self):
+        member = main_member(create(bpy.context))
+        member["Fire Flow Speed"] = 0
+        member.update_tag()
+        still = points(member, 12)
+        self.assertEqual(points(member, 20), still)
+        member["Fire Flow Speed"] = 22
+        member.update_tag()
+        self.assertNotEqual(points(member, 12), points(member, 20))
+
+    def test_material_flow_stops_with_geometry_and_fade_keeps_its_meaning(self):
+        root = create(bpy.context)
+        member = main_member(root)
+        for other in composition.members(root):
+            other.children[0].hide_render = other != member
+        camera()
+        scene = bpy.context.scene
+        scene.camera.location = (4, -6, 3.5)
+        scene.camera.rotation_euler = (
+            (Vector((0, 0, 1)) - scene.camera.location).to_track_quat("-Z", "Y").to_euler()
+        )
+        scene.camera.data.ortho_scale = 4
+        scene.render.resolution_x = scene.render.resolution_y = 96
+        scene.render.dither_intensity = 0
+        member["Fire Flow Speed"] = 0
+        member.update_tag()
+        still = render_pixels(12)
+        self.assertEqual(render_pixels(20), still)
+        member["Fire Flow Speed"] = 22
+        member.update_tag()
+        self.assertGreater(sum(abs(a - b) for a, b in zip(render_pixels(12), render_pixels(20))), 1)
+        faded = render_pixels(44)
+        member["fade"] = 0
+        member.update_tag()
+        held = render_pixels(44)
+        self.assertGreater(sum(held[0::4]), sum(faded[0::4]) * 1.5)
 
     def test_quality_and_no_mutation_on_invalid_quality(self):
         counts = []
