@@ -26,7 +26,7 @@
 
 ![stylized-fire：第 36 帧](images/stylized-fire.png)
 
-不等高外焰与热芯；中段仍有较完整的大火面。 第 **36 帧**；[编辑与实际检查](FIRE_REVIEW.md) · [原始 Actions 附件](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40461231445)。
+直立外焰、热芯与向上移动的断口。第 **36 帧**，本地角色镜头；[编辑与实际检查](FIRE_FLOW_REVIEW.md)。部分阶段仍有鼓包，远景细余烬较弱。
 
 ## dash-echoes
 
