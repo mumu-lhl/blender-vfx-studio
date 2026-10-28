@@ -9,6 +9,9 @@ import bpy
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tests"))
+from particle_test_support import camera, render_pixels  # noqa: E402
+
 import blender_vfx_studio as addon  # noqa: E402
 from blender_vfx_studio import assets, composition, core, palettes, presets, slash, ui  # noqa: E402
 from blender_vfx_studio.animation import curves  # noqa: E402
@@ -243,6 +246,108 @@ class ArtControlsTests(unittest.TestCase):
         wide = points(member, 3)
         self.assertGreater(max(abs(v[0]) for v in wide), max(abs(v[0]) for v in short))
 
+    def test_impact_controls_change_only_their_named_geometry(self):
+        group = create_effect("impact-burst")
+        members = composition.members(group)
+        body = next(m for m in members if m.name.endswith("Main Shards"))
+        wave = next(m for m in members if m.name.endswith("Shockwave"))
+        values = ui._native_shape_values(body)
+        self.assertTrue(
+            {
+                "Pressure Unfurl",
+                "Fine Ejection Width",
+                "Pressure Fracture",
+                "Pressure Support Value",
+            }
+            <= values.keys()
+        )
+
+        def parts():
+            bpy.context.scene.frame_set(5)
+            mesh = body.children[0].evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+            roles = mesh.attributes["impact_lobe"].data
+            return {
+                role: [tuple(v.co) for v, r in zip(mesh.vertices, roles) if r.value == role]
+                for role in (0, 1, 2)
+            }
+
+        width = values["Fine Ejection Width"][1]
+        width.default_value = 0
+        thin = parts()
+        width.default_value = 1.5
+        thick = parts()
+        self.assertEqual(thin[0], thick[0])
+        self.assertEqual(thin[2], thick[2])
+        self.assertNotEqual(thin[1], thick[1])
+        curl = values["Pressure Unfurl"][1]
+        curl.default_value = 0
+        straight = parts()
+        curl.default_value = 1.8
+        curled = parts()
+        self.assertNotEqual(straight[0], curled[0])
+        self.assertEqual(straight[1], curled[1])
+        self.assertEqual(straight[2], curled[2])
+        crest = ui._native_shape_values(wave)["Pressure Crest Height"][1]
+        crest.default_value = 0
+        flat = points(wave, 5)
+        crest.default_value = 1.8
+        raised = points(wave, 5)
+        self.assertEqual([v[:2] for v in flat], [v[:2] for v in raised])
+        self.assertGreater(max(v[2] for v in raised), max(v[2] for v in flat) + 0.1)
+        path = ROOT / "work/impact-art-controls.blend"
+        assets.write(path, group)
+        loaded = assets.load(bpy.context, path)
+        other = next(
+            m
+            for m in composition.members(loaded)
+            if "Fine Ejection Width" in ui._native_shape_values(m)
+        )
+        self.assertEqual(points(other, 5), points(body, 5))
+        self.assertEqual(
+            ui._native_shape_values(other)["Fine Ejection Width"][1].default_value, 1.5
+        )
+        ui._native_shape_values(other)["Fine Ejection Width"][1].default_value = 0.25
+        self.assertEqual(width.default_value, 1.5)
+
+    def test_impact_material_controls_change_the_rendered_body(self):
+        group = create_effect("impact-burst")
+        body = next(m for m in composition.members(group) if m.name.endswith("Main Shards"))
+        for member in composition.members(group):
+            member.children[0].hide_render = member != body
+        camera()
+        scene = bpy.context.scene
+        scene.camera.data.ortho_scale = 5.5
+        scene.render.resolution_x = scene.render.resolution_y = 96
+        scene.render.film_transparent = True
+        scene.render.dither_intensity = 0
+        values = ui._native_shape_values(body)
+        fracture = values["Pressure Fracture"][1]
+        fracture.default_value = 0
+        intact = render_pixels(5)
+        fracture.default_value = 1
+        broken = render_pixels(5)
+        self.assertNotEqual(intact[3::4], broken[3::4])
+        fracture.default_value = 0.35
+        tone = values["Pressure Support Value"][1]
+        tone.default_value = 0
+        dark = render_pixels(5)
+        tone.default_value = 1
+        light = render_pixels(5)
+        self.assertEqual(dark[3::4], light[3::4])
+        self.assertGreater(max(abs(a - b) for a, b in zip(dark, light)), 0.1)
+
+    def test_impact_material_controls_hide_driven_or_disconnected_values(self):
+        group = create_effect("impact-burst")
+        body = next(m for m in composition.members(group) if m.name.endswith("Main Shards"))
+        values = ui._native_shape_values(body)
+        fracture = values["Pressure Fracture"][1]
+        fracture.driver_add("default_value").driver.expression = "0.35"
+        self.assertNotIn("Pressure Fracture", ui._native_shape_values(body))
+        tone = values["Pressure Support Value"][1]
+        for link in list(tone.links):
+            tone.id_data.links.remove(link)
+        self.assertNotIn("Pressure Support Value", ui._native_shape_values(body))
+
     def test_custom_profile_hides_controls_its_saved_nodes_do_not_read(self):
         flame = next(
             m for m in composition.members(create_fire(bpy.context)) if palettes.fire_ramp(m)
@@ -319,6 +424,17 @@ for key, saved_name, changes, frames in (
         {"Bolt Length": 4.8, "Branch Reach": 1.4},
         (3, 8, 12),
     ),
+    (
+        "impact-burst",
+        "Persisted Adjustable Impact",
+        {
+            "Pressure Unfurl": 0.45,
+            "Fine Ejection Width": 0.9,
+            "Pressure Fracture": 0.35,
+            "Pressure Support Value": 0.45,
+        },
+        (3, 5, 12),
+    ),
 ):
     bpy.context.scene.frame_set(1)
     group = create_effect(key)
@@ -332,6 +448,7 @@ for key, saved_name, changes, frames in (
     values = ui._native_shape_values(member)
     for name, value in changes.items():
         values[name][1].default_value = value
+        group[f"expected_native_{name}"] = float(values[name][1].default_value)
     for frame in frames:
         group[f"expected_shape_{frame}"] = [c for p in points(member, frame) for c in p]
 addon.unregister()
