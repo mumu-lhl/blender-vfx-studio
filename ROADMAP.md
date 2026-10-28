@@ -54,6 +54,8 @@
 - [PR #165](https://github.com/mumu-lhl/blender-vfx-studio/pull/165)：充能核心大小／压缩／释放、闪电长度／分支集中访问；Hook 与几何内缘分别控制。18 张角色对照、刀光隔离图与默认峰值／尾部像素对照已实际查看，11 项艺术控制、10 项刀光、8 项残影回归与无插件重开通过。手工嵌套节点及完整保存保留，JSON 入口明确命名；Linux 默认缩放已检查折叠、原生色轮／RGB 插帧、热色色带和五姿态捕获；其他平台／缩放与实时播放未验收。
 - Energy Charge 核心／外围视觉权重、Impact 主次调节、Lightning 放电节奏仍待后续实施；集中编辑入口不等于已经完成这些艺术改进。
 
+[#168](https://github.com/mumu-lhl/blender-vfx-studio/issues/168)／[PR #169](https://github.com/mumu-lhl/blender-vfx-studio/pull/169) 集中 Impact 现有原生造型与高级材质控制。14 项行为检查和无插件重开通过，角色 Eevee 对照待检查，不改默认画面。
+
 ## 下一步
 
 1. 先完成当前可编辑性问题的必要验证，再按实际镜头影响改进核心／外围权重、主次和运动；保留有明确画面收益的复杂节点。继续验证冲刺接落地的节奏、遮挡和远景焦点。
