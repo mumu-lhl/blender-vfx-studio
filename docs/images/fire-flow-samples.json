@@ -918,5 +918,11 @@
       "clear_frame": 104,
       "scene_sha256": "bfdd4a64c06f6744eeca5c5a721d8d416cfebd49527975b7c4d3d1bfff930f1d"
     }
+  },
+  "integration_ci": {
+    "run_id": 40780508231,
+    "source_commit": "c4c229ffa18bcbb52a1703aad925857cfb0e7e67",
+    "passed_jobs": 12,
+    "conclusion": "success"
   }
 }
