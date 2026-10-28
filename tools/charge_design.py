@@ -94,6 +94,32 @@ def _finish(g, geometry):
     g.link(hide.outputs[0], out.inputs["Geometry"])
 
 
+def _support_weight(g, geometry):
+    weight = g.m(
+        "Bound Support Weight",
+        "MINIMUM",
+        1,
+        g.m(
+            "Nonnegative Support Weight",
+            "MAXIMUM",
+            g.tree.nodes["Intake Weight"].outputs[0]
+            if g.tree.nodes.get("Intake Weight")
+            else g.value("Intake Weight", 0.6),
+            0,
+        ),
+    )
+    store = g.n(
+        "GeometryNodeStoreNamedAttribute",
+        "Carry Support Weight To Material",
+        data_type="FLOAT",
+        domain="POINT",
+    )
+    store.inputs["Name"].default_value = "charge_support_weight"
+    g.link(geometry, store.inputs["Geometry"])
+    g.link(weight, store.inputs["Value"])
+    return store.outputs[0]
+
+
 def _mesh(layer, vertices, faces, attributes=None):
     mesh = layer.data
     mesh.clear_geometry()
@@ -463,7 +489,7 @@ def _surface(root, *, core=False, ground=False):
         g.link(leading_color.outputs[0], center_mix.inputs[2])
         surface_color = center_mix.outputs[0]
         kernel_color = g.n("ShaderNodeMixRGB", "Concentrated Inner Light")
-        stored = g.stage("Stored Energy Concentration", p, 0.45, 0.84)
+        stored = g.stage("Stored Energy Concentration", p, 0.30, 0.84)
         brightness = g.m("Inner Compression Brightness", "MULTIPLY_ADD", stored, 0.77)
         brightness.node.inputs[2].default_value = 0.08
         g.link(
@@ -480,15 +506,64 @@ def _surface(root, *, core=False, ground=False):
             ),
             kernel_color.inputs[0],
         )
-        # Broad colored pressure faces surround a restricted white heart.
+        # A traveling light front follows each curved sheet, rather than painting
+        # a fixed white patch on its facing normals.
+        nucleus_phase = g.m(
+            "Stored Energy Flow Phase",
+            "FRACT",
+            g.m(
+                "Energy Travels Into The Focus",
+                "SUBTRACT",
+                g.m(
+                    "Unequal Stored Front Phase",
+                    "ADD",
+                    u,
+                    g.m("Stored Sheet Phase", "MULTIPLY", attribute("charge_filament"), 0.65),
+                ),
+                g.m(
+                    "Stored Flow Accelerates",
+                    "MULTIPLY",
+                    g.m("Stored Flow Time", "MULTIPLY", p, p),
+                    3.5,
+                ),
+            ),
+        )
+        nucleus_front = g.m(
+            "Narrow Stored Energy Front",
+            "MULTIPLY",
+            g.stage("Stored Front Arrives", nucleus_phase, 0.25, 0.5),
+            g.m(
+                "Stored Front Tapers",
+                "SUBTRACT",
+                1,
+                g.stage("Stored Front Passes", nucleus_phase, 0.55, 0.78),
+            ),
+        )
         kernel_face = g.m(
             "Nucleus White Face",
             "GREATER_THAN",
             g.m("Nucleus Facing Magnitude", "ABSOLUTE", facing.outputs["Value"]),
-            g.value("Nucleus White Threshold", 0.72),
+            g.value("Nucleus White Threshold", 0.35),
         )
-        kernel_height = g.m("Nucleus Light Toward Tip", "GREATER_THAN", u, 0.3)
-        kernel_face = g.m("Nucleus White Patch", "MULTIPLY", kernel_face, kernel_height)
+        vein = g.m(
+            "Narrow Vein Across Curled Sheets",
+            "SUBTRACT",
+            1,
+            g.stage(
+                "Stored Vein Edges",
+                g.m("Distance From Stored Vein", "ABSOLUTE", attribute("charge_filament_side")),
+                0.15,
+                0.5,
+            ),
+        )
+        flow = g.m("Connected Vein With A Moving Front", "MULTIPLY_ADD", nucleus_front, 0.75)
+        flow.node.inputs[2].default_value = 0.25
+        kernel_face = g.m(
+            "Nucleus White Patch",
+            "MULTIPLY",
+            kernel_face,
+            g.m("Stored Vein And Front", "MULTIPLY", vein, flow),
+        )
         white_amount = kernel_color.inputs[0].links[0].from_socket
         g.link(
             g.m("Restricted Nucleus White", "MULTIPLY", white_amount, kernel_face),
@@ -500,7 +575,7 @@ def _surface(root, *, core=False, ground=False):
             g.m("Nucleus Midtone Face", "GREATER_THAN", facing.outputs["Value"], 0.08),
             0.5,
         )
-        g.link(g.value("Nucleus Blue Depth", 0.18), kernel_body.node.inputs[2])
+        g.link(g.value("Nucleus Blue Depth", 0.27), kernel_body.node.inputs[2])
         g.link(
             g.v("Nucleus Colored Pressure Body", "SCALE", color.outputs[0], kernel_body),
             kernel_color.inputs[1],
@@ -571,6 +646,24 @@ def _surface(root, *, core=False, ground=False):
         surface_color = g.v(
             "Primary And Supporting Filament Color", "SCALE", edge_mix.outputs[0], hierarchy
         )
+    support = attribute("charge_support_weight")
+    if core:
+        support = g.m(
+            "Keep The Nucleus Independent",
+            "ADD",
+            support,
+            g.m(
+                "Nucleus Ignores Support Weight",
+                "MULTIPLY",
+                attribute("charge_inner"),
+                g.m("Remaining Support Weight", "SUBTRACT", 1, support),
+            ),
+        )
+    # Eevee's dithered core needs solid moving sections. Reduce their cross
+    # section in Geometry Nodes; only fully hidden support is cut out here.
+    if core:
+        support = g.m("Support Is Visible", "GREATER_THAN", support, 0)
+    alpha = g.m("Supporting Layer Opacity", "MULTIPLY", alpha, support)
     emission = g.n("ShaderNodeEmission", "Native Energy Surface")
     g.link(surface_color, emission.inputs["Color"])
     g.link(g.value("Emission", prop="strength"), emission.inputs["Strength"])
@@ -685,28 +778,37 @@ def core_shape(root):
                 next_k = (k // 3) * 3 + (k + 1) % 3 if primary else (k + 1) % sides
                 a, b = base + j * sides + k, base + j * sides + next_k
                 faces.append((a, b, b + sides, a + sides))
-    # Three unequal closed flame sections preserve gaps through the nucleus.
-    # Each uses 18 vertices: the original 54-vertex kernel budget is unchanged.
-    for lobe in range(3):
-        base, steps, sides = len(vertices), 6, 3
-        phase = lobe * math.tau / 3
+    # Curled, unequal energy sheets leave real gaps around a shared focus.
+    # Rounded lens sections provide depth from side views without solid leaf faces.
+    lens = ((-1, 0), (-0.65, 0.7), (0.65, 0.7), (1, 0), (0.65, -0.7), (-0.65, -0.7))
+    petals = (
+        (0.0, 2.8, 0.19, 0.64, 0.09),
+        (2.05, 3.3, 0.16, 0.53, 0.075),
+        (4.55, 2.2, 0.12, 0.43, 0.045),
+    )
+    for lobe, (phase, turn, reach, rise, breadth) in enumerate(petals):
+        base, steps, sides = len(vertices), 19, len(lens)
+
+        def center(t):
+            angle = phase + turn * t
+            radius = reach * (0.22 + 0.78 * (1 - t) ** 0.7)
+            return Vector((math.cos(angle) * radius, math.sin(angle) * radius, (t - 0.5) * rise))
+
         for j in range(steps):
             t = j / (steps - 1)
-            profile = max(math.sin(math.pi * t), 0) ** 0.8
-            angle = phase + t * 0.9
-            reach = profile * (0.065 + lobe * 0.01)
-            center = Vector(
-                (math.cos(angle) * reach, math.sin(angle) * reach, (t - 0.5) * (0.5 - lobe * 0.05))
-            )
-            radius = profile * (0.105 - lobe * 0.012)
-            for k in range(sides):
-                a = k * math.tau / sides + phase + t * 0.5
-                vertices.append(
-                    tuple(center + Vector((radius * math.cos(a), radius * math.sin(a), 0)))
-                )
+            profile = max(math.sin(math.pi * t), 0) ** 0.7
+            angle = phase + turn * t
+            radial = Vector((math.cos(angle), math.sin(angle), 0))
+            tangent = (center(min(t + 0.001, 1)) - center(max(t - 0.001, 0))).normalized()
+            normal = tangent.cross(radial).normalized()
+            point = center(t)
+            for k, (across, depth) in enumerate(lens):
+                offset = profile * (radial * breadth * across + normal * 0.018 * depth)
+                vertices.append(tuple(point + offset))
                 cross_sections.append((0, 0, 0))
+                a = k * math.tau / sides
                 for name, value in zip(
-                    core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0, 0.0, 0.0)
+                    core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0, lobe * 0.25, across)
                 ):
                     core_attrs[name].append(value)
         for j in range(steps - 1):
@@ -721,7 +823,7 @@ def core_shape(root):
         face.use_smooth = True
     p = g.value("Charge Clock", expression=PROGRESS)
     ignite = g.stage("Ignition Growth", p, 0, 0.18)
-    gather = g.stage("Compression Builds", p, 0.45, 0.84)
+    gather = g.stage("Compression Builds", p, 0.30, 0.84)
     release = g.stage("Release Collapse", p, 0.84, 1)
     remaining = g.m("Remaining Shape", "SUBTRACT", 1, release)
     width = g.m(
@@ -777,7 +879,7 @@ def core_shape(root):
         "Auxiliary Packet Volume",
         "MULTIPLY_ADD",
         g.m("Auxiliary Packet Taper", "POWER", packet, 2),
-        g.m("Auxiliary Width Range", "SUBTRACT", g.value("Auxiliary Packet Width", 1.32), guide),
+        g.m("Auxiliary Width Range", "SUBTRACT", g.value("Auxiliary Packet Width", 0.85), guide),
     )
     g.link(guide, concentrated.node.inputs[2])
     section = g.m(
@@ -791,6 +893,13 @@ def core_shape(root):
             g.m("Thinner Between Energy Packets", "SUBTRACT", concentrated, section),
         ),
     )
+    intake_weight = g.m(
+        "Bound Intake Width Weight",
+        "MINIMUM",
+        1,
+        g.m("Nonnegative Intake Width Weight", "MAXIMUM", g.value("Intake Weight", 0.6), 0),
+    )
+    section = g.m("Weight Supporting Intake Sections", "MULTIPLY", section, intake_weight)
     # The nucleus has its own pulse; the moving packet only affects intake paths.
     section = g.m(
         "Keep Nucleus Section",
@@ -1114,7 +1223,7 @@ def core_shape(root):
     hide = g.n("GeometryNodeDeleteGeometry", "Skip Invisible Core Surfaces", domain="POINT")
     g.link(cut.outputs[0], hide.inputs["Geometry"])
     g.link(invisible, hide.inputs["Selection"])
-    _finish(g, hide.outputs[0])
+    _finish(g, _support_weight(g, hide.outputs[0]))
     _surface(root, core=True)
     root["vfx_parameter_keys"] = "radius,expansion,opacity,strength,dissolve,noise_scale,fade"
 
@@ -1261,7 +1370,7 @@ def ribbons(root, *, ground=False):
     store.inputs["Name"].default_value = "charge_flow_u"
     g.link(shape.outputs[0], store.inputs["Geometry"])
     g.link(u, store.inputs["Value"])
-    _finish(g, store.outputs[0])
+    _finish(g, _support_weight(g, store.outputs[0]))
     _surface(root, ground=ground)
     root["vfx_parameter_keys"] = "radius,width,expansion,strength,dissolve,noise_scale,fade"
 

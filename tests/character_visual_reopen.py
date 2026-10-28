@@ -1,5 +1,6 @@
 """Seek a real combat scene without loading the extension and compare actual HD pixels."""
 
+import argparse
 import hashlib
 import json
 import math
@@ -15,6 +16,12 @@ settings = json.loads((folder / "character-settings.json").read_text())
 assert settings["contact"]["verified_intersection"]
 assert len([obj for obj in bpy.context.scene.objects if obj.type == "ARMATURE"]) == 2
 assert all(image.packed_file for image in bpy.data.images if image.source == "FILE")
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--frames", type=int, nargs="+", default=[53, 16, 32])
+args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
+frames = args.frames
+if len(set(frames)) < 2:
+    parser.error("Use at least two distinct sampled frames to check native animation")
 scene = bpy.context.scene
 scene.frame_set(47)
 core = bpy.data.objects["Charge • Compressed Core"].children[0]
@@ -38,9 +45,9 @@ assert all((angles[0] - angle + math.pi) % math.tau - math.pi > 0.05 for angle i
     "Native wakes must trail the main slash rather than stack at the same angle"
 )
 poses = []
-for frame in (53, 16, 32):
+for frame in frames:
     if frame not in settings["frames"]:
-        raise AssertionError("Render the charge, hit and build-up frames before native validation")
+        raise AssertionError("Render each requested frame before native validation")
     scene.frame_set(frame)
     rig = bpy.data.objects["Caster • Knight"].evaluated_get(bpy.context.evaluated_depsgraph_get())
     poses.append(tuple(rig.pose.bones["hand.r"].matrix.translation))
@@ -64,14 +71,14 @@ assert not any(
 assert not any("blender_vfx_studio" in name for name in sys.modules)
 record = {
     "native_render_verified": True,
-    "frames": [53, 16, 32],
+    "frames": frames,
     "clear_frame": 96,
     "scene_sha256": hashlib.sha256(Path(bpy.data.filepath).read_bytes()).hexdigest(),
     "source_frame_sha256": {
         f"character-{frame:04d}.png": hashlib.sha256(
             (folder / f"character-{frame:04d}.png").read_bytes()
         ).hexdigest()
-        for frame in (53, 16, 32)
+        for frame in frames
     },
 }
 (folder / "native-check.json").write_text(json.dumps(record, indent=2) + "\n")
