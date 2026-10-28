@@ -117,20 +117,15 @@ def create(context, objects):
     return group
 
 
-def check_detach(root):
+def check_timing(root):
+    """Validate our native timing channels without restricting pose edits."""
     root = core.resolve(root)
     group = root.get("vfx_composition") if root else None
     if group is None or core.resolve(group) is None or group["vfx_module"] != "core.composition":
         raise ValueError("Select a composition member")
-    if root.constraints:
-        raise ValueError("Remove member constraints before detaching with world preservation")
-    from .binding import _has_transform_animation
-
-    if _has_transform_animation(root):
-        raise ValueError("Bake member transform animation before detaching or copying it alone")
     timing_paths = {f'["{key}"]' for key in TIME_KEYS}
     if sum(curve.data_path in timing_paths for curve in curves(root)) != len(TIME_KEYS):
-        raise ValueError("Bake member timing animation before detaching")
+        raise ValueError("Composition timing animation has extra channels; edit timing directly")
     # Only remove the four drivers we installed. User replacements must be preserved.
     drivers = root.animation_data.drivers if root.animation_data else ()
     for key, (expression, properties) in TIMING.items():
@@ -144,7 +139,7 @@ def check_detach(root):
             or len(curve.driver.variables) != len(properties)
         ):
             raise ValueError(
-                "Composition timing drivers were edited; restore them before detaching"
+                "Composition timing drivers were edited; restore native drivers before bulk timing edits"
             )
         for var in curve.driver.variables:
             if var.name not in properties or var.type != "SINGLE_PROP":
@@ -155,6 +150,17 @@ def check_detach(root):
                 or var.targets[0].data_path != f'["{prop}"]'
             ):
                 raise ValueError("Composition timing drivers were edited")
+    return root
+
+
+def check_detach(root):
+    root = check_timing(root)
+    if root.constraints:
+        raise ValueError("Remove member constraints before detaching with world preservation")
+    from .binding import _has_transform_animation
+
+    if _has_transform_animation(root):
+        raise ValueError("Bake member transform animation before detaching or copying it alone")
     return root
 
 

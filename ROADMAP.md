@@ -59,6 +59,10 @@
 
 [#170](https://github.com/mumu-lhl/blender-vfx-studio/issues/170)／[PR #171](https://github.com/mumu-lhl/blender-vfx-studio/pull/171) 修复短闪随绑定旋转变暗：14 张高清明暗／远景／反向对照已读取，15 项行为检查和三个阶段无插件高清重开通过，退场后画面与基线一致。反向焦点被模型遮挡，未记为可读性通过。详见 [短闪检查](docs/IMPACT_FLASH_REVIEW.md)。
 
+[#172](https://github.com/mumu-lhl/blender-vfx-studio/issues/172)／[PR #173](https://github.com/mumu-lhl/blender-vfx-studio/pull/173) 支持捕获后设置 Echo Tail，保留当前进场间隔、姿态和节点；13 项残影、14 项组合与无源原生跳帧通过。8 张角色阶段图、三个阶段无插件高清像素和 Linux 默认缩放弹窗检查已完成。CI 40711832268 全部 12 项成功；Lightning 首次下载校验失败，整轮结束后单独重试通过，官方校验保持启用。
+
+PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 40700723464 均已完成全部 12 项并成功。本轮未发布新版本。
+
 ## 下一步
 
 1. 先完成当前可编辑性问题的必要验证，再按实际镜头影响改进核心／外围权重、主次和运动；保留有明确画面收益的复杂节点。继续验证冲刺接落地的节奏、遮挡和远景焦点。
