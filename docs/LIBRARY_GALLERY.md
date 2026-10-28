@@ -10,6 +10,12 @@
 
 卷曲能量片积蓄后转向剑刃释放，外围进流和粒子承担汇聚方向。第 **36 帧**，本地角色镜头；[编辑与衔接检查](COMBAT_HANDOFF_REVIEW.md)。末段仍偏片状，未观看实时播放。
 
+## Impact Burst
+
+![Impact Burst：第 53 帧](images/impact-focus-after-53.png)
+
+接触附近的翻卷压力面，配合较长的细喷射和稍后消散的余烬。第 **53 帧**，本地角色镜头；[同帧与动画抽帧检查](IMPACT_FOCUS_REVIEW.md)。压力面仍偏薄，远景细层较弱，未观看实时播放。
+
 ## lightning-strike
 
 ![lightning-strike：第 4 帧](images/lightning-strike.png)
@@ -48,4 +54,4 @@
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/fire_preview.py -- --frames 36
 ```
 
-默认生成浅背景近景，`--dark` 和 `--far` 用于对照。输出在忽略版本管理的 `work/`，不会覆盖上述已记录图像。设备、Blender 或渲染器版本可能导致像素差异。充能的来源、帧位与摘要见 [角色衔接清单](images/combat-handoff-samples.json)，其他五套见 [清单](images/library-gallery.json)；图片不作为插件运行依赖。
+默认生成浅背景近景，`--dark` 和 `--far` 用于对照。输出在忽略版本管理的 `work/`，不会覆盖上述已记录图像。设备、Blender 或渲染器版本可能导致像素差异。充能的来源、帧位与摘要见 [角色衔接清单](images/combat-handoff-samples.json)，命中见 [焦点清单](images/impact-focus-samples.json)，其他五套见 [清单](images/library-gallery.json)；图片不作为插件运行依赖。
