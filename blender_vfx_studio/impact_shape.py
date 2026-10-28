@@ -154,14 +154,43 @@ def flash(root):
         face.use_smooth = True
     material = layer.data.materials[0]
     graph = _Nodes(material.node_tree, root)
-    normal = material.node_tree.nodes["Illustrated Light"].outputs["Value"]
-    lit = graph.math("Flat White Face", "GREATER_THAN", normal, 0.48)
+    normal = graph.node("ShaderNodeNewGeometry", "Flash Surface Normal")
+    facing = graph.node("ShaderNodeVectorMath", "Flash Faces The Viewer", operation="DOT_PRODUCT")
+    graph.connect(normal.outputs["Normal"], facing.inputs[0])
+    graph.connect(normal.outputs["Incoming"], facing.inputs[1])
+    front = graph.node(
+        "ShaderNodeMapRange",
+        "Hot Center With A Colored Edge",
+        interpolation_type="SMOOTHSTEP",
+        clamp=True,
+    )
+    graph.connect(
+        graph.math("Two Sided Flash Facing", "ABSOLUTE", facing.outputs["Value"]),
+        front.inputs["Value"],
+    )
+    front.inputs["From Min"].default_value = 0.2
+    front.inputs["From Max"].default_value = 0.75
+    heat = graph.node(
+        "ShaderNodeAttribute", "Flash Center And Spokes", attribute_name="vfx_spark_heat"
+    )
+    core = graph.math("Concentrated Flash Nucleus", "GREATER_THAN", heat.outputs["Fac"], 0.98)
+    hierarchy = graph.math(
+        "Supporting Spoke Light",
+        "ADD",
+        0.35,
+        graph.math("Nucleus Light Priority", "MULTIPLY", core, 0.65),
+    )
+    lit = graph.math("Bright Center Colored Spokes", "MULTIPLY", front.outputs[0], hierarchy)
     tint = material.node_tree.nodes["Editable Particle Color"].outputs[0]
     dark = graph.vector("Warm Shadow", "SCALE", tint, 0.12)
+    hot = graph.node("ShaderNodeMixRGB", "Editable Flash Heat Tint")
+    hot.inputs[0].default_value = 0.8
+    graph.connect(tint, hot.inputs[1])
+    hot.inputs[2].default_value = (1, 0.98, 0.92, 1)
     color = graph.node("ShaderNodeMixRGB", "Illustrated Hit Volume")
     graph.connect(lit, color.inputs[0])
     graph.connect(dark, color.inputs[1])
-    color.inputs[2].default_value = (1, 0.95, 0.8, 1)
+    graph.connect(hot.outputs[0], color.inputs[2])
     graph.connect(color.outputs[0], material.node_tree.nodes["Particle Emission"].inputs["Color"])
     graph, position = _geometry(root, "Hit Compression")
     progress = graph.value("Progress", expression=PROGRESS)

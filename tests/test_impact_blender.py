@@ -201,6 +201,40 @@ class ImpactTests(unittest.TestCase):
         self.assertGreater(white_count(stages[1]), 0)
         self.assertLess(white_count(settling), white_count(stages[1]) * 0.4)
 
+    def test_flash_keeps_a_hot_focus_when_the_binding_rotates(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        flash = next(m for m in composition.members(root) if m.name.endswith("Core Flash"))
+        for member in composition.members(root):
+            member.children[0].hide_render = member != flash
+        camera()
+        scene = bpy.context.scene
+        view = scene.camera
+        view.location = (0, 5, 0.8)
+        view.rotation_euler = (-view.location).to_track_quat("-Z", "Y").to_euler()
+        view.data.ortho_scale = 2
+        scene.render.resolution_x = scene.render.resolution_y = 64
+        scene.render.dither_intensity = 0
+        for rotation in ((0, 0, 0), (0.7, 1.1, 0.2), (1.4, 0.3, 2.2)):
+            root.rotation_euler = rotation
+            pixels = render_pixels(1)
+            focus = [
+                min(pixels[(y * 64 + x) * 4 : (y * 64 + x) * 4 + 3])
+                for y in range(30, 35)
+                for x in range(30, 35)
+            ]
+            self.assertGreater(max(focus), 0.75, rotation)
+        warm = pixels
+        update(flash, color_0=0.015, color_1=0.05, color_2=1.0)
+        blue = render_pixels(1)
+        self.assertGreater(sum(blue[2::4]), sum(blue[0::4]))
+        self.assertGreater(max(abs(a - b) for a, b in zip(warm, blue)), 0.1)
+        update(flash, strength=0.0)
+        dark = render_pixels(1)
+        self.assertLess(max(v for i, v in enumerate(dark) if i % 4 != 3), 1e-5)
+        # The flash retains the same native three-frame geometry lifetime.
+        self.assertTrue(geometry(root, 3)[flash["vfx_id"]])
+        self.assertFalse(geometry(root, 4)[flash["vfx_id"]])
+
     def test_authored_pressure_controls_depth_budget_and_retiming(self):
         root = core.create(bpy.context, "IMPACT_BURST", "LOW")
         shards = next(m for m in composition.members(root) if m.name.endswith("Main Shards"))

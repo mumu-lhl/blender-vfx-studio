@@ -73,7 +73,7 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 ## Impact Burst
 
-主体使用紧凑闪核、三团明暗不同的断裂主体、四条细喷射、两条卷流及三段隆起压力弧，依次退场。它与侧栏创建使用同一生成器。
+主体使用三帧白热短闪、三团明暗不同的断裂主体、四条细喷射、两条卷流及三段隆起压力弧，依次退场。短闪保留明亮中心、有色边缘和较弱的尖线；颜色与强度可在该层调整。它与侧栏创建使用同一生成器。
 
 选择 **Impact • Main Shards**，在 **Impact Shape** 调整主体与细喷射；选择 **Shockwave** 调整压力弧。**Advanced Shape** 保留较少使用的材质控制。
 
@@ -87,7 +87,7 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 **组合 Scale** 改整套大小，主层 **Size** 改该层整体尺寸，**Planar=1** 将主层压到局部平面。各层时间、颜色和发光可分开调整，**Ungroup All** 一次拆开全部层。使用 **Save Complete Effect** 保存节点控制；参数 JSON 只保存通用参数。
 
-当前侧面仍偏实体，远景细层较弱，见 [主体](IMPACT_SURFACE_REVIEW.md)、[细喷射](IMPACT_FINE_REVIEW.md) 与 [压力弧](IMPACT_WAVE_REVIEW.md)。
+短闪的实际机位与遮挡范围见 [检查记录](IMPACT_FLASH_REVIEW.md)。当前侧面仍偏实体，远景细层较弱，见 [主体](IMPACT_SURFACE_REVIEW.md)、[细喷射](IMPACT_FINE_REVIEW.md) 与 [压力弧](IMPACT_WAVE_REVIEW.md)。
 
 ## Lightning Strike
 
