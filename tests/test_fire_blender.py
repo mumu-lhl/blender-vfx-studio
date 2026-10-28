@@ -94,6 +94,7 @@ class FireTests(unittest.TestCase):
         member.update_tag()
         self.assertGreater(sum(abs(a - b) for a, b in zip(render_pixels(12), render_pixels(20))), 1)
         faded = render_pixels(44)
+        self.assertGreater(max(faded[0::4]), 0.02, "Late flame wisps must not vanish prematurely")
         member["fade"] = 0
         member.update_tag()
         held = render_pixels(44)

@@ -16,9 +16,9 @@ def _flames(root, quality):
     # Unequal outer lobes and a smaller forward hot tongue share a grounded base.
     for index, (x, y, height, breadth, bend, inner) in enumerate(
         (
-            (0, 0.03, 1, 0.58, -0.22, 0),
-            (-0.38, 0, 0.71, 0.4, -0.5, 0),
-            (0.34, 0.04, 0.58, 0.35, 0.48, 0),
+            (0, 0.03, 1, 0.50, -0.12, 0),
+            (-0.26, 0, 0.83, 0.29, -0.20, 0),
+            (0.28, 0.04, 0.68, 0.25, 0.24, 0),
             (0, -0.25, 0.52, 0.24, 0.17, 1),
             (0.06, 0.26, 0.44, 0.22, -0.14, 1),
         )
@@ -223,7 +223,7 @@ def _material(root):
     inner = g.n("ShaderNodeAttribute", "Hot Inner Tongue", attribute_name="fire_inner").outputs[
         "Fac"
     ]
-    heat = g.m("Hotter Flame Base", "SUBTRACT", 1, g.m("Cooler Tips", "MULTIPLY", u, 0.62))
+    heat = g.m("Hotter Flame Base", "SUBTRACT", 1.08, g.m("Cooler Tips", "MULTIPLY", u, 0.52))
     heat = g.m(
         "Heat Folds",
         "ADD",
@@ -232,7 +232,7 @@ def _material(root):
             "Broad Heat Variation",
             "MULTIPLY",
             g.m("Cool Clefts And Hot Streams", "SUBTRACT", noise.outputs["Fac"], 0.5),
-            0.7,
+            0.5,
         ),
     )
     heat = g.m("Inner Core Heat", "ADD", heat, g.m("Core Accent", "MULTIPLY", inner, 0.12))
@@ -241,7 +241,7 @@ def _material(root):
         "Cool Edge",
         "SUBTRACT",
         heat,
-        g.m("Edge Contrast", "MULTIPLY", normal.outputs["Facing"], 0.32),
+        g.m("Edge Contrast", "MULTIPLY", normal.outputs["Facing"], 0.24),
     )
     ramp = g.n("ShaderNodeValToRGB", "Painted Red Orange Yellow")
     colors = tuple(zip(FIRE_STOPS, FIRE_PALETTES["ORANGE"]))
@@ -266,6 +266,16 @@ def _material(root):
         0.36,
     )
     threshold.node.inputs[2].default_value = 0.18
+    # Keep the narrow crown's leading edge. Eroding its whole height equally
+    # leaves a round middle bulge after the pointed top has disappeared.
+    threshold = g.m(
+        "Pointed Crown Outlives The Cleft",
+        "SUBTRACT",
+        threshold,
+        g.m(
+            "Keep Thin Rising Tips", "MULTIPLY", g.stage("Above The Last Fork", u, 0.72, 0.98), 0.18
+        ),
+    )
     phase = g.m("Rising Cleft Phase", "SUBTRACT", g.m("Cleft Height", "MULTIPLY", u, 12), clock)
     lobe = g.n("ShaderNodeAttribute", "Each Tongue's Flow Phase", attribute_name="fire_lobe")
     phase = g.m(
@@ -298,7 +308,17 @@ def _material(root):
             "Breaking Last Tongues",
             "MULTIPLY",
             g.m("Editable Extinction", "MULTIPLY", release, g.value("Fade", prop="fade")),
-            0.65,
+            g.m(
+                "Fuel Stops At The Foot First",
+                "ADD",
+                0.15,
+                g.m(
+                    "Unfed Flame Base",
+                    "MULTIPLY",
+                    g.m("Height Above The Fuel", "SUBTRACT", 1, u),
+                    0.55,
+                ),
+            ),
         ),
     )
     alive = g.stage(
