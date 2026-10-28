@@ -223,6 +223,14 @@ class ImpactTests(unittest.TestCase):
                 for x in range(30, 35)
             ]
             self.assertGreater(max(focus), 0.75, rotation)
+        warm = pixels
+        update(flash, color_0=0.015, color_1=0.05, color_2=1.0)
+        blue = render_pixels(1)
+        self.assertGreater(sum(blue[2::4]), sum(blue[0::4]))
+        self.assertGreater(max(abs(a - b) for a, b in zip(warm, blue)), 0.1)
+        update(flash, strength=0.0)
+        dark = render_pixels(1)
+        self.assertLess(max(v for i, v in enumerate(dark) if i % 4 != 3), 1e-5)
         # The flash retains the same native three-frame geometry lifetime.
         self.assertTrue(geometry(root, 3)[flash["vfx_id"]])
         self.assertFalse(geometry(root, 4)[flash["vfx_id"]])

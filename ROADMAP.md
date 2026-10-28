@@ -57,6 +57,8 @@
 
 [#168](https://github.com/mumu-lhl/blender-vfx-studio/issues/168)／[PR #169](https://github.com/mumu-lhl/blender-vfx-studio/pull/169) 集中 Impact 现有原生造型与高级材质控制。14 项行为检查和无插件重开通过；10 张高清角色对照已实际读取，修改场景三阶段原生重渲染像素一致。对照参数增加了实体感，因此保留默认画面；短闪的旋转可读性由 [#170](https://github.com/mumu-lhl/blender-vfx-studio/issues/170) 继续修复。
 
+[#170](https://github.com/mumu-lhl/blender-vfx-studio/issues/170)／[PR #171](https://github.com/mumu-lhl/blender-vfx-studio/pull/171) 修复短闪随绑定旋转变暗：14 张高清明暗／远景／反向对照已读取，15 项行为检查和三个阶段无插件高清重开通过，退场后画面与基线一致。反向焦点被模型遮挡，未记为可读性通过。详见 [短闪检查](docs/IMPACT_FLASH_REVIEW.md)。
+
 ## 下一步
 
 1. 先完成当前可编辑性问题的必要验证，再按实际镜头影响改进核心／外围权重、主次和运动；保留有明确画面收益的复杂节点。继续验证冲刺接落地的节奏、遮挡和远景焦点。
