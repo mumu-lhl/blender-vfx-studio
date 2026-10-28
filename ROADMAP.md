@@ -55,7 +55,7 @@
 - [#166](https://github.com/mumu-lhl/blender-vfx-studio/issues/166)／[PR #167](https://github.com/mumu-lhl/blender-vfx-studio/pull/167)：重塑 Energy Charge 卷曲内核、流动亮带与可调进流权重。21 项入门库、11 项艺术控制及原生跳帧通过。实际读取 17 张高清明暗／远景／反向对照与 60 张修改前后隔帧；三个阶段无插件高清重渲染像素一致，实测成本与观看边界见 [记录](docs/CHARGE_HIERARCHY_REVIEW.md)。三平台检查通过，长视觉 CI 仍在运行。
 - PR #165 的 [CI 40607385631](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40607385631) 全部 12 项成功。Impact 主次调节、Lightning 放电节奏仍待实施；集中编辑入口不等于已经完成艺术改进。
 
-[#168](https://github.com/mumu-lhl/blender-vfx-studio/issues/168)／[PR #169](https://github.com/mumu-lhl/blender-vfx-studio/pull/169) 集中 Impact 现有原生造型与高级材质控制。14 项行为检查和无插件重开通过，角色 Eevee 对照待检查，不改默认画面。
+[#168](https://github.com/mumu-lhl/blender-vfx-studio/issues/168)／[PR #169](https://github.com/mumu-lhl/blender-vfx-studio/pull/169) 集中 Impact 现有原生造型与高级材质控制。14 项行为检查和无插件重开通过；10 张高清角色对照已实际读取，修改场景三阶段原生重渲染像素一致。对照参数增加了实体感，因此保留默认画面；短闪的旋转可读性由 [#170](https://github.com/mumu-lhl/blender-vfx-studio/issues/170) 继续修复。
 
 ## 下一步
 
