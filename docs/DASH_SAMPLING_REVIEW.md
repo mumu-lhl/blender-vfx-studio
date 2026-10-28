@@ -49,3 +49,5 @@ LP_NUM_THREADS=2 blender -b -t 2 --factory-startup --python-exit-code 1 --python
 ```
 
 `--tail` 在捕获完成后调用同一编辑接口；不传时保留默认值。输出目录带尾部值，原生重开检查读取实际结束帧。完整效果保存时长与私有节点，参数 JSON 不保存捕获姿态。
+
+功能源码 `2157792` 的 [CI 40711832268](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40711832268) 最终全部 12 项成功。Lightning 首次在下载 Blender 的官方摘要校验处失败，未执行插件；整轮结束后仅重试该作业，下载验证与后续渲染、原生检查通过。没有弱化校验或重跑已成功的其他作业。
