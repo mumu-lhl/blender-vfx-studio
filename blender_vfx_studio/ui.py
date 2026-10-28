@@ -117,6 +117,7 @@ _NATIVE_SHAPE_VALUES = (
     ("Nucleus Stored Size", "Stored Core Size", False),
     ("Nucleus Compression", "Compression (0–0.85)", False),
     ("Release Stretch", "Release Stretch", False),
+    ("Intake Weight", "Intake Weight (0–1)", False),
     ("Bolt Length", "Bolt Length", False),
     ("Branch Reach", "Branch Reach", False),
     ("Nucleus Seed Size", "Initial Core Size", True),
@@ -1183,6 +1184,8 @@ class VFX_PT_main(bpy.types.Panel):
                 text="Bolt Shape"
                 if {"Bolt Length", "Branch Reach"} & native_values.keys()
                 else "Core Focus"
+                if "Nucleus Stored Size" in native_values
+                else "Intake"
             )
             for label, socket, advanced in native_values.values():
                 if not advanced or context.window_manager.vfx_advanced_controls:
