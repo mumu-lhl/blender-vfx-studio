@@ -19,6 +19,10 @@ def main_member(root):
     return next(member for member in composition.members(root) if "Main Discharges" in member.name)
 
 
+def contact_member(root):
+    return next(member for member in composition.members(root) if "Contact Corona" in member.name)
+
+
 def points(member, frame):
     integer = int(frame)
     bpy.context.scene.frame_set(integer, subframe=frame - integer)
@@ -79,6 +83,43 @@ class LightningTests(unittest.TestCase):
         bolt.update_tag()
         self.assertFalse(points(bolt, 4))
 
+    def test_contact_returns_repeat_and_clear_in_each_discharge_gap(self):
+        root = create(bpy.context)
+        contact = contact_member(root)
+        for frame in (3, 8, 12):
+            self.assertTrue(points(contact, frame), frame)
+        reference = points(contact, 3)
+        for frame in (0, 1, 2, 6, 10, 17, 19):
+            self.assertFalse(points(contact, frame), frame)
+        root["speed"] = 2.0
+        root.update_tag()
+        self.assertEqual(points(contact, 2), reference)
+        root["speed"], root["duration"] = 1.0, 36.0
+        root.update_tag()
+        self.assertEqual(points(contact, 5), reference)
+
+    def test_contact_shape_controls_preserve_the_main_bolt(self):
+        root = create(bpy.context)
+        contact = contact_member(root)
+        reference = points(contact, 3)
+        bolt = points(main_member(root), 3)
+        for key, value in (("radius", 0.3), ("expansion", 0.0), ("width", 0.1)):
+            previous = contact[key]
+            contact[key] = value
+            contact.update_tag()
+            self.assertNotEqual(points(contact, 3), reference, key)
+            self.assertEqual(points(main_member(root), 3), bolt)
+            contact[key] = previous
+            contact.update_tag()
+        contact["width"] = 0.0
+        contact.update_tag()
+        bpy.context.scene.frame_set(3)
+        mesh = contact.children[0].evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+        self.assertLess(sum(face.area for face in mesh.polygons), 1e-8)
+        contact["dissolve"] = 1.0
+        contact.update_tag()
+        self.assertFalse(points(contact, 3))
+
     def test_quality_profiles_change_shape_detail(self):
         counts = []
         for quality in ("LOW", "MEDIUM", "HIGH"):
@@ -100,13 +141,16 @@ class LightningTests(unittest.TestCase):
         bolt = main_member(root)
         bolt.children[0].modifiers[0].node_group.nodes["Bolt Length"].outputs[0].default_value = 4.2
         expected = points(bolt, 4)
+        expected_contact = points(contact_member(root), 8)
         path = WORK / "lightning-asset.blend"
         assets.write(path, root)
         loaded = assets.load(bpy.context, path)
         self.assertEqual(points(main_member(loaded), 4), expected)
+        self.assertEqual(points(contact_member(loaded), 8), expected_contact)
         clone = core.duplicate(bpy.context, loaded)
         self.assertNotEqual(clone["vfx_id"], root["vfx_id"])
         self.assertEqual(points(main_member(clone), 4), expected)
+        self.assertEqual(points(contact_member(clone), 8), expected_contact)
         main_member(clone)["radius"] = 1.2
         main_member(clone).update_tag()
         self.assertNotEqual(points(main_member(clone), 4), expected)
@@ -127,5 +171,9 @@ root = create(bpy.context)
 root.name = "Persisted Lightning Strike"
 for frame in (3, 7, 12):
     root[f"expected_vertices_{frame}"] = len(points(main_member(root), frame))
+for frame in (3, 8, 12):
+    root[f"expected_contact_{frame}"] = [
+        c for point in points(contact_member(root), frame) for c in point
+    ]
 bpy.ops.wm.save_as_mainfile(filepath=str(WORK / "lightning-test.blend"))
 print("LIGHTNING_NATIVE_BEHAVIOR_OK")
