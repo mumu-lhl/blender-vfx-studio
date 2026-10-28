@@ -1,0 +1,433 @@
+{
+  "generator_commit": "7e4bf68",
+  "baseline_commit": "0b8a845",
+  "baseline_scene_sha256": "5896ef6a9134334be884a80e47ecfbbbdfe70cc175efadd2c1a52dbc078ed8e5",
+  "realtime_playback_reviewed": false,
+  "viewed_release_frames": [
+    43,
+    45,
+    47,
+    49,
+    51,
+    53,
+    55,
+    57,
+    59,
+    61
+  ],
+  "additional_viewed_light_frames": [
+    36,
+    48,
+    80
+  ],
+  "batches": [
+    {
+      "variant": "light",
+      "frames": [
+        45,
+        49,
+        53
+      ],
+      "resolution": [
+        960,
+        540
+      ],
+      "engine": "BLENDER_EEVEE",
+      "samples": 16,
+      "source_digest": "084cc8e1cca23983fa329fc80fcdc8770eb6859cce9d5ee88d1cad9f0874c795",
+      "scene_sha256": "8527e6e78713bd3b68d6f1b23545f78d134e35b7d647b56ea2bf78256c574d1a"
+    },
+    {
+      "variant": "phases",
+      "frames": [
+        36,
+        43,
+        47,
+        51,
+        57,
+        61,
+        80
+      ],
+      "resolution": [
+        960,
+        540
+      ],
+      "engine": "BLENDER_EEVEE",
+      "samples": 16,
+      "source_digest": "084cc8e1cca23983fa329fc80fcdc8770eb6859cce9d5ee88d1cad9f0874c795",
+      "scene_sha256": "28f546566c18344ba834e2a10f270e47fd5e3a8a094a46a0b5bde36526ba8dda"
+    },
+    {
+      "variant": "detail",
+      "frames": [
+        48,
+        55,
+        59
+      ],
+      "resolution": [
+        960,
+        540
+      ],
+      "engine": "BLENDER_EEVEE",
+      "samples": 16,
+      "source_digest": "084cc8e1cca23983fa329fc80fcdc8770eb6859cce9d5ee88d1cad9f0874c795",
+      "scene_sha256": "4eb7fb6b55febcb75ea72bc1738ae40a2acac3659255e034846a3828b7b2ef2c"
+    },
+    {
+      "variant": "dark",
+      "frames": [
+        47,
+        49,
+        53
+      ],
+      "resolution": [
+        960,
+        540
+      ],
+      "engine": "BLENDER_EEVEE",
+      "samples": 16,
+      "source_digest": "084cc8e1cca23983fa329fc80fcdc8770eb6859cce9d5ee88d1cad9f0874c795",
+      "scene_sha256": "1e06039b48db64aaa95985ee0e21f322b3b8bf487e08d73583262862976b9d40"
+    },
+    {
+      "variant": "far",
+      "frames": [
+        49,
+        53
+      ],
+      "resolution": [
+        960,
+        540
+      ],
+      "engine": "BLENDER_EEVEE",
+      "samples": 16,
+      "source_digest": "084cc8e1cca23983fa329fc80fcdc8770eb6859cce9d5ee88d1cad9f0874c795",
+      "scene_sha256": "f2885789e1b55e5661f2e3e9d823fa24d5e462575f23eb10a4ee337ab47e03cc"
+    },
+    {
+      "variant": "reverse",
+      "frames": [
+        49
+      ],
+      "resolution": [
+        960,
+        540
+      ],
+      "engine": "BLENDER_EEVEE",
+      "samples": 16
+    },
+    {
+      "variant": "far-charge",
+      "frames": [
+        36
+      ],
+      "resolution": [
+        960,
+        540
+      ],
+      "engine": "BLENDER_EEVEE",
+      "samples": 16
+    }
+  ],
+  "images": [
+    {
+      "file": "images/combat-handoff-after-49.png",
+      "sha256": "639d1bd29f7d8ea1136c057965e6c3f71af06c4faec84db306a40beb8ca7ebe1"
+    },
+    {
+      "file": "images/combat-handoff-after-53.png",
+      "sha256": "ac125766e10c03901c886345469f1be21279a471731e6491302042031f274ab0"
+    },
+    {
+      "file": "images/combat-handoff-before-49.png",
+      "sha256": "78f2c75e796c2764c2c7eead69025ec95fc22f435e422ebefc579691e6cde627"
+    },
+    {
+      "file": "images/combat-handoff-before-53.png",
+      "sha256": "f2a9534b971a01cccd52696beb455377d744ad9e237e0e6554d1d0c48dadef42"
+    },
+    {
+      "file": "images/combat-handoff-comparison.png",
+      "sha256": "7ba0e19178d498602233848c77e4db093c36ad2f283af7379435f551ff07489e"
+    },
+    {
+      "file": "images/combat-handoff-motion.png",
+      "sha256": "97f128e441b34cf722ae8399bd478f59c288b1f8d3c453e9aa636aacfb7036cd"
+    },
+    {
+      "file": "images/combat-charge-focus.png",
+      "frame": 36,
+      "sha256": "e36fe2f08fde9d3841f87b15d2ae2feff9cf22ea1b6993f2e1c744cd9da7e286"
+    }
+  ],
+  "native_validation": {
+    "native_render_verified": true,
+    "frames": [
+      53,
+      45,
+      49
+    ],
+    "clear_frame": 96,
+    "scene_sha256": "8527e6e78713bd3b68d6f1b23545f78d134e35b7d647b56ea2bf78256c574d1a",
+    "source_frame_sha256": {
+      "character-0053.png": "ac125766e10c03901c886345469f1be21279a471731e6491302042031f274ab0",
+      "character-0045.png": "9803f58861ee4263c5e84b1f65e13e3df4907586b26f92c21db75701179b05a5",
+      "character-0049.png": "639d1bd29f7d8ea1136c057965e6c3f71af06c4faec84db306a40beb8ca7ebe1"
+    }
+  },
+  "performance": {
+    "blender": "5.2.2 LTS",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+    "cpu_quota": "200000 100000",
+    "blender_threads": 2,
+    "lp_num_threads": "2",
+    "software_gl_requested": false,
+    "gl": {
+      "vendor": "Mesa",
+      "renderer": "llvmpipe (LLVM 19.1.7, 256 bits)",
+      "version": "4.5 (Core Profile) Mesa 25.0.7-2+deb13u1"
+    },
+    "engine": "BLENDER_EEVEE",
+    "resolution": [
+      960,
+      540
+    ],
+    "samples": 16,
+    "source_sha256": {
+      "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+      "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+      "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+      "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+      "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+      "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+      "blender_vfx_studio/composition.py": "47116f337bbb6803ba24876b338218bd82506c67f4541447f12d686624f43e0a",
+      "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+      "blender_vfx_studio/dash.py": "488a07073d105e100cbff78a1d466740c43a13ea6f7b6aebf3e1b3aef91394f7",
+      "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+      "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+      "blender_vfx_studio/impact.py": "7dab11a57f08f8dc3aec9551ac6ca6368b651ef01c40860833d8ec05431c48bd",
+      "blender_vfx_studio/impact_shape.py": "187a387c2f0f395072a031ebf023dd72ced41c3b1848846f5018122811191064",
+      "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+      "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+      "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+      "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+      "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+      "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+      "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+      "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+      "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+      "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+      "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+      "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+      "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+      "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+      "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+      "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+      "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+      "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+      "blender_vfx_studio/ui.py": "86a850ee95f1ca7a4038e5851f6f8bad949de728a3fac56378440964ed3936e4",
+      "tools/character_scene.py": "bc452a221bdf7e297dc79eaae30daa6d060eb536ad57235df7498330af10360f",
+      "tools/character_combat.py": "b6cd6164d1e8ed6a68687c1c0e724bce8c59b311993052b2b3bd893c6a93fc7f",
+      "tools/build_examples.py": "d95ccef7ee2267f603a27cd97f3c16556dc0918b693257d5d0e67920994063b8",
+      "tools/charge_design.py": "00b494e7bd6dcda0a99c3ed5a756d4db3657c37452973585e915ef994f604ce6",
+      "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+      "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+      "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+      "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+    },
+    "evaluation": [
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 49,
+        "milliseconds": 1.223011000547558
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 49,
+        "milliseconds": 1.0088149992952822
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 49,
+        "milliseconds": 0.9496769998804666
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 0.8813069998723222
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 0.8678580015839543
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 0.8583340004406637
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 0.8227710004575783
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 0.8982920007838402
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 0.8278690002043732
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 0.8319140015373705
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 0.8247030000347877
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 0.8156109997798922
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 49,
+        "milliseconds": 12.71594599893433
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 49,
+        "milliseconds": 13.612705000923597
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 49,
+        "milliseconds": 13.274028000523685
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 12.038157999995747
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 11.922117999347392
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 11.822279999250895
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 11.963749000642565
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 12.130213999625994
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 12.603058999957284
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 12.660213998969994
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 12.478275999455946
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 49,
+        "milliseconds": 12.410776998876827
+      }
+    ],
+    "evaluation_summary": {
+      "bare": {
+        "scene_evaluation_median_ms": 0.8319140015373705,
+        "scene_evaluation_p95_ms": 0.8813069998723222,
+        "measured_samples": 9
+      },
+      "fx": {
+        "scene_evaluation_median_ms": 12.130213999625994,
+        "scene_evaluation_p95_ms": 12.603058999957284,
+        "measured_samples": 9
+      }
+    },
+    "renders": [
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 49,
+        "seconds": 72.3947009780004
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 49,
+        "seconds": 17.34120138000071
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 49,
+        "seconds": 15.457154588000776
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 49,
+        "seconds": 26.667745898999783
+      }
+    ],
+    "limits": [
+      "Headless scene evaluation and render wall time, not viewport FPS",
+      "Two warmup renders and 1 matched frame pairs; too few for a render p95",
+      "The same saved scene is used; only its VFX collection is excluded",
+      "Evaluation excludes the collection from the viewport dependency graph; render comparison only excludes it from rendering"
+    ]
+  },
+  "standalone_slash_viewed_frames": [
+    5,
+    13
+  ]
+}

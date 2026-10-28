@@ -60,6 +60,8 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 使用 **Save Complete Effect** 保存这些形状和节点控制；参数 JSON 不包含 Intake Weight 等私有节点数值。角色镜头、明暗背景与实际观看范围见 [充能焦点检查](CHARGE_HIERARCHY_REVIEW.md)。
 
+释放沿控制器的局部 **+Z** 方向前送。挂到武器或施法点时，将这个方向朝向能量要去的位置；可以给控制器旋转插关键帧，让积蓄转为沿剑刃或法术方向释放。
+
 ## Arc Slash
 
 这是单层程序化刀光，与侧栏创建使用同一生成器，资产时长为 18 帧。
@@ -70,6 +72,8 @@ examples ZIP 是资产库，**不是插件安装包**。
 4. 要手动保持连续轮廓，关闭 **Surface Cuts、Noise Erosion、Dissolve**，并将 **Fragment Release** 设为 0；此时 **Fade** 控制连续淡出。
 
 风格按钮只改参数，不重建节点；尺寸、配色和整体时间保持不变。各控制的区别见 [刀光编辑](USAGE.md#编辑刀光)。实际图像和检查限制见 [艺术控制审查](ART_CONTROLS_REVIEW.md)。
+
+放进角色动作后，先按实际武器设置 **Radius**，再用 **Arc** 限制刀光跟随的挥动范围、用 **Width** 保留角色轮廓。贴着剑刃的斩击可将 **Expansion** 设为 0；宽大的独立预览并不适合直接套入每个近身镜头。三维折叠会随带宽收尖，**Bank=0** 仍保持平面。
 
 ## Impact Burst
 
