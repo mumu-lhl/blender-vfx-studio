@@ -497,7 +497,8 @@ class VFX_OT_capture_dash(bpy.types.Operator):
         if self.last > self.first:
             spacing = (self.last - self.first) / (self.count - 1)
             layout.label(text=f"Pose spacing: {spacing:g} frames (subframes supported)")
-        layout.label(text="Keeps source mesh detail; more echoes increase render cost", icon="INFO")
+        layout.label(text="Keeps source mesh detail", icon="INFO")
+        layout.label(text="More echoes increase render cost")
 
     def invoke(self, context, event):
         self.last = context.scene.frame_current
@@ -941,7 +942,7 @@ class VFX_PT_main(bpy.types.Panel):
                 "vfx_studio.export_preset", text="Save Parameters (JSON)", icon="EXPORT"
             )
         else:
-            layout.label(text="Reuse with Duplicate or Save Complete Effect")
+            layout.label(text="Reuse: Save Complete Effect")
         row = layout.row(align=True)
         row.operator("vfx_studio.duplicate", text="Duplicate", icon="DUPLICATE")
         row.operator("vfx_studio.delete", text="Delete", icon="TRASH")
