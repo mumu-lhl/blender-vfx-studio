@@ -514,7 +514,12 @@ def _surface(root, *, core=False, ground=False):
             g.m(
                 "Energy Travels Into The Focus",
                 "SUBTRACT",
-                u,
+                g.m(
+                    "Unequal Stored Front Phase",
+                    "ADD",
+                    u,
+                    g.m("Stored Sheet Phase", "MULTIPLY", attribute("charge_filament"), 0.65),
+                ),
                 g.m(
                     "Stored Flow Accelerates",
                     "MULTIPLY",
@@ -538,10 +543,27 @@ def _surface(root, *, core=False, ground=False):
             "Nucleus White Face",
             "GREATER_THAN",
             g.m("Nucleus Facing Magnitude", "ABSOLUTE", facing.outputs["Value"]),
-            g.value("Nucleus White Threshold", 0.72),
+            g.value("Nucleus White Threshold", 0.35),
         )
-        kernel_height = nucleus_front
-        kernel_face = g.m("Nucleus White Patch", "MULTIPLY", kernel_face, kernel_height)
+        vein = g.m(
+            "Narrow Vein Across Curled Sheets",
+            "SUBTRACT",
+            1,
+            g.stage(
+                "Stored Vein Edges",
+                g.m("Distance From Stored Vein", "ABSOLUTE", attribute("charge_filament_side")),
+                0.15,
+                0.5,
+            ),
+        )
+        flow = g.m("Connected Vein With A Moving Front", "MULTIPLY_ADD", nucleus_front, 0.75)
+        flow.node.inputs[2].default_value = 0.25
+        kernel_face = g.m(
+            "Nucleus White Patch",
+            "MULTIPLY",
+            kernel_face,
+            g.m("Stored Vein And Front", "MULTIPLY", vein, flow),
+        )
         white_amount = kernel_color.inputs[0].links[0].from_socket
         g.link(
             g.m("Restricted Nucleus White", "MULTIPLY", white_amount, kernel_face),
@@ -786,7 +808,7 @@ def core_shape(root):
                 cross_sections.append((0, 0, 0))
                 a = k * math.tau / sides
                 for name, value in zip(
-                    core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0, 0.0, across)
+                    core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0, lobe * 0.25, across)
                 ):
                     core_attrs[name].append(value)
         for j in range(steps - 1):
