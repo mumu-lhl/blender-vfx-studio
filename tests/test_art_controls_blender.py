@@ -264,6 +264,9 @@ class ArtControlsTests(unittest.TestCase):
         modifier.node_group = wrap_geometry(modifier.node_group)
 
         class Layout:
+            def panel(self, *args, **kwargs):
+                return self, self
+
             def prop(self, owner, path, **kwargs):
                 drawn.append(path)
 

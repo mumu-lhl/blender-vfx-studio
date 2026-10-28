@@ -28,7 +28,7 @@ Arc Slash 无需角色或采样路径，直接生成可编辑刀面与两条残�
 | **Shape → Depth Bend** | 三维弯折；0 时所有刀面位于局部 XY 平面 |
 | **Motion → Attack / Spin / Motion Ease** | 展开所占时间、总转角和减速；Spin 的正负值改变挥斩方向 |
 | **Motion → Wake Amount / Wake Spread** | 残弧面积与角度分离；Wake Amount=0 关闭残弧 |
-| **Color → Body / Blade** | 主体与残弧共用主体颜色，锋刃可独立换色；右侧菱形给实际 RGB 通道插入关键帧 |
+| **Color → Body / Blade** | 主体与残弧共用主体颜色，锋刃可独立换色；右侧插帧按钮给实际 RGB 通道插入关键帧 |
 | **Material → Blade Width / Brush Detail / Surface Cuts** | 锋刃宽度、笔触对比和固定缺口；Surface Cuts=0 关闭固定裁切与残弧分段 |
 | **Dissolve → Noise Erosion / Dissolve** | 挥斩后的噪声侵蚀与整体溶解；两项均为 0 时关闭噪声侵蚀 |
 | **Dissolve → Fade / Fragment Release** | 淡出量与退场方式；Fragment Release=0 使用连续透明淡出，1 使用分段退场 |
@@ -37,7 +37,7 @@ Arc Slash 无需角色或采样路径，直接生成可编辑刀面与两条残�
 
 例如，先选 **Clean**，再把 **Body** 设为橙色、**Blade** 设为浅黄色，可以制作暖色连续刀光。需要有色残弧时再增加 **Wake Amount**，不必同时开启轮廓扰动或材质破碎。
 
-侧栏按 **Shape / Motion / Color / Material / Dissolve** 组织参数，其余控制收在 **Advanced**。颜色选择器编辑的是保存于控制器的 RGB 数值；用旁边的菱形制作颜色动画，保存后无需插件也能播放。普通数值仍可右键插入关键帧。
+选中效果时，创建入口收在 **Create / Load**；展开即可创建或载入其他效果。配色置于常用编辑区，**Shape / Motion / Material / Dissolve** 可以分别折叠，其余控制收在 **Advanced**。颜色选择器编辑的是保存于控制器的 RGB 数值；用旁边的插帧按钮制作颜色动画，保存后无需插件也能播放。普通数值仍可右键插入关键帧。
 
 旋转控制器即可改变挥斩方向；Start / Duration / Speed / Loop 控制整体播放。Low / Medium / High 分别使用 32 / 64 / 128 个沿弧分段。保留网格的 `vfx_arc`、`vfx_inner` 和 `vfx_wake` 属性，它们记录沿弧位置、横向宽度和残影编号。需要雕改最终网格时，先复制，再应用 Geometry Nodes 修改器。跟随武器路径的采样刀带请使用 **Ribbon Trail**。
 

@@ -195,10 +195,13 @@ def _draw_art_parameters(layout, context, root, keys):
         shown = [key for key in candidates if key in remaining]
         if not shown:
             continue
-        box = layout.box()
-        box.label(text=title)
-        for key in shown:
-            box.prop(root, f'["{key}"]', text=_ART_LABELS.get(key, key.replace("_", " ").title()))
+        header, body = layout.panel(f"vfx_art_{title.lower()}", default_closed=title != "Shape")
+        header.label(text=title)
+        if body is not None:
+            for key in shown:
+                body.prop(
+                    root, f'["{key}"]', text=_ART_LABELS.get(key, key.replace("_", " ").title())
+                )
         remaining.difference_update(shown)
     if remaining:
         layout.prop(context.window_manager, "vfx_advanced_controls", text="Advanced")
@@ -884,35 +887,46 @@ class VFX_PT_main(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator("vfx_studio.create", text="Create Mesh VFX", icon="ADD")
-        layout.operator("vfx_studio.create_flipbook", text="Create Flipbook", icon="IMAGE_DATA")
-        layout.operator(
-            "vfx_studio.create_sequence", text="Create Image Sequence", icon="FILE_IMAGE"
-        )
-        layout.operator(
-            "vfx_studio.create_particle", text="Create Particle Burst", icon="PARTICLES"
-        )
-        layout.operator(
-            "vfx_studio.create_emitter", text="Create Continuous Emitter", icon="PARTICLES"
-        )
-        layout.operator("vfx_studio.create_screen", text="Add Screen VFX", icon="RENDERLAYERS")
-        layout.operator(
-            "vfx_studio.create_shield", text="Create Energy Shield", icon="SHADING_RENDERED"
-        )
-        layout.operator(
-            "vfx_studio.create_simulation", text="Create Cloth Simulation", icon="MOD_CLOTH"
-        )
-        layout.operator("vfx_studio.create_trail", text="Bake Ribbon Trail", icon="CURVE_PATH")
-        layout.operator("vfx_studio.capture_dash", text="Capture Dash Echoes", icon="MOD_TIME")
-        layout.operator(
-            "vfx_studio.compose", text="Compose Selected VFX", icon="OUTLINER_COLLECTION"
-        )
-        layout.operator("vfx_studio.import_preset", text="Load Parameters (JSON)", icon="IMPORT")
-        layout.operator("vfx_studio.import_asset", text="Load Complete Effect", icon="APPEND_BLEND")
+        error = None
         try:
             root = core.resolve(context.object)
-        except ValueError as error:
-            layout.label(text=str(error), icon="ERROR")
+        except ValueError as exc:
+            root, error = None, str(exc)
+        header, body = layout.panel(
+            "vfx_create_selected" if root is not None else "vfx_create_empty",
+            default_closed=root is not None,
+        )
+        header.label(text="Create / Load")
+        if body is not None:
+            body.operator("vfx_studio.create", text="Create Mesh VFX", icon="ADD")
+            body.operator("vfx_studio.create_flipbook", text="Create Flipbook", icon="IMAGE_DATA")
+            body.operator(
+                "vfx_studio.create_sequence", text="Create Image Sequence", icon="FILE_IMAGE"
+            )
+            body.operator(
+                "vfx_studio.create_particle", text="Create Particle Burst", icon="PARTICLES"
+            )
+            body.operator(
+                "vfx_studio.create_emitter", text="Create Continuous Emitter", icon="PARTICLES"
+            )
+            body.operator("vfx_studio.create_screen", text="Add Screen VFX", icon="RENDERLAYERS")
+            body.operator(
+                "vfx_studio.create_shield", text="Create Energy Shield", icon="SHADING_RENDERED"
+            )
+            body.operator(
+                "vfx_studio.create_simulation", text="Create Cloth Simulation", icon="MOD_CLOTH"
+            )
+            body.operator("vfx_studio.create_trail", text="Bake Ribbon Trail", icon="CURVE_PATH")
+            body.operator("vfx_studio.capture_dash", text="Capture Dash Echoes", icon="MOD_TIME")
+            body.operator(
+                "vfx_studio.compose", text="Compose Selected VFX", icon="OUTLINER_COLLECTION"
+            )
+            body.operator("vfx_studio.import_preset", text="Load Parameters (JSON)", icon="IMPORT")
+            body.operator(
+                "vfx_studio.import_asset", text="Load Complete Effect", icon="APPEND_BLEND"
+            )
+        if error:
+            layout.label(text=error, icon="ERROR")
             return
         if root is None:
             layout.label(text="Select a VFX controller or layer")
@@ -1133,20 +1147,6 @@ class VFX_PT_main(bpy.types.Panel):
         if isinstance(profile, str):
             visible = {key.strip() for key in profile.split(",")}
             keys = tuple(key for key in keys if key in visible)
-        _draw_art_parameters(layout, context, root, keys)
-        native_values = _native_shape_values(root)
-        if native_values:
-            box = layout.box()
-            box.label(
-                text="Bolt Shape"
-                if {"Bolt Length", "Branch Reach"} & native_values.keys()
-                else "Core Focus"
-            )
-            for label, socket, advanced in native_values.values():
-                if not advanced or context.window_manager.vfx_advanced_controls:
-                    box.prop(socket, "default_value", text=label)
-            if any(v[2] for v in native_values.values()):
-                box.prop(context.window_manager, "vfx_advanced_controls", text="Advanced Shape")
         color_box = layout.box()
         color_box.label(text="Color")
         row = color_box.row(align=True)
@@ -1175,10 +1175,26 @@ class VFX_PT_main(bpy.types.Panel):
             palette_box.prop(context.window_manager, "vfx_advanced_controls", text="Edit Heat Ramp")
             if context.window_manager.vfx_advanced_controls:
                 palette_box.template_color_ramp(heat_ramp, "color_ramp")
+        _draw_art_parameters(layout, context, root, keys)
+        native_values = _native_shape_values(root)
+        if native_values:
+            box = layout.box()
+            box.label(
+                text="Bolt Shape"
+                if {"Bolt Length", "Branch Reach"} & native_values.keys()
+                else "Core Focus"
+            )
+            for label, socket, advanced in native_values.values():
+                if not advanced or context.window_manager.vfx_advanced_controls:
+                    box.prop(socket, "default_value", text=label)
+            if any(v[2] for v in native_values.values()):
+                box.prop(context.window_manager, "vfx_advanced_controls", text="Advanced Shape")
         if root.get("vfx_parameter_keys"):
-            layout.label(text="Custom shape: save Complete Effect (.blend)", icon="INFO")
-        layout.label(text="Diamonds key colors; right-click other controls")
-        layout.label(text="Material Preview / Rendered shows shader")
+            layout.label(text="Nodes need Complete Effect", icon="INFO")
+            layout.label(text="JSON saves parameters only")
+        layout.label(text="Key buttons: insert color keys")
+        layout.label(text="Other controls: right-click")
+        layout.label(text="Preview: Material / Rendered")
 
 
 CLASSES = (

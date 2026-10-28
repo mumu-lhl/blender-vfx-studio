@@ -63,7 +63,7 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 1. 选择 **Clean** 获得平整连续的基础刀光，或 **Stylized** 使用钩形、分面与破碎残弧。
 2. 在 **Shape / Motion** 调整弧度、宽度、展开速度和残弧。**Depth Bend=0** 关闭深度弯折，**Contour=0** 关闭额外几何轮廓扰动；需要保留不规则轮廓时，**Hook / Inner Notches** 可分别调整前端钩形与几何内缘。
-3. 用 **Body / Blade** 原生颜色选择器编辑主体和锋刃；主体颜色也用于残弧。右侧菱形可给颜色插入关键帧。
+3. 用 **Body / Blade** 原生颜色选择器编辑主体和锋刃；主体颜色也用于残弧。右侧插帧按钮可给颜色插入关键帧。
 4. 要手动保持连续轮廓，关闭 **Surface Cuts、Noise Erosion、Dissolve**，并将 **Fragment Release** 设为 0；此时 **Fade** 控制连续淡出。
 
 风格按钮只改参数，不重建节点；尺寸、配色和整体时间保持不变。各控制的区别见 [刀光编辑](USAGE.md#编辑刀光)。实际图像和检查限制见 [艺术控制审查](ART_CONTROLS_REVIEW.md)。
