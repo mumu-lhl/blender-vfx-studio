@@ -3,9 +3,19 @@
   "baseline_commit": "edbb1fdcb497e82f7fdc052fc3731933fecc8dac",
   "realtime_playback_reviewed": false,
   "viewed_light_frames": [
+    1,
     3,
+    5,
+    7,
     8,
-    12
+    9,
+    11,
+    12,
+    13,
+    15,
+    17,
+    19,
+    28
   ],
   "images": {
     "lightning-contact-before-3.png": "95a3c5648974ef7511bb68d558dc1bc60e79de99b079d2643336f6ccf0d87b5c",
@@ -13,7 +23,9 @@
     "lightning-contact-before-8.png": "5c9d146a9cbfcebf50dda1bd565c89f8b9759665f9b88e7ba46af809767ae2f1",
     "lightning-contact-after-8.png": "6544f35bad49928e0e72b94479b2a2e66990ba820b9c493b540d2802dad83757",
     "lightning-contact-before-12.png": "e7d4542bdca874f149853f0036a07cc665a8bfe7eeb129eb8b56aeee7a27d7d7",
-    "lightning-contact-after-12.png": "1245670e1cc0672b4674ba1053e9bf0e0223b218712f3f231135dedce7bc3006"
+    "lightning-contact-after-12.png": "1245670e1cc0672b4674ba1053e9bf0e0223b218712f3f231135dedce7bc3006",
+    "lightning-contact-dark-8.png": "9ad707e305dded01a39f84b6a2601290e57cf267eaf37d08bd77db55f81a2d03",
+    "lightning-contact-far-12.png": "2b1ce5d9a34dc2b524032babf33b79854449d866cbecec9ca382a3e25cc3c41b"
   },
   "before_batch": {
     "engine": "BLENDER_EEVEE",
@@ -23,93 +35,19 @@
       8,
       12
     ],
-    "fps": 24,
-    "fps_base": 1,
     "resolution": [
       960,
       540
     ],
     "samples": 16,
-    "view_transform": "AgX",
-    "look": "None",
-    "bloom": false,
     "dark": false,
     "far": false,
-    "contact": {
-      "frame": 3,
-      "hilt": [
-        -0.5040510296821594,
-        -0.10794141888618469,
-        0.5526474118232727
-      ],
-      "tip": [
-        0.9185565114021301,
-        0.4261956810951233,
-        0.8506161570549011
-      ],
-      "hits": [
-        {
-          "position": [
-            0.7292304039001465,
-            0.35511070489883423,
-            0.8109614253044128
-          ],
-          "normal": [
-            -0.744300365447998,
-            0.31550633907318115,
-            -0.5886193513870239
-          ],
-          "mesh": "Rogue_ArmRight",
-          "distance": 1.3424330068278896
-        }
-      ],
-      "verified_intersection": true,
-      "source_frame": 49
-    },
-    "actor_timeline_offset": -46,
-    "source_sha256": {
-      "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
-      "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
-      "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
-      "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
-      "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
-      "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
-      "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
-      "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
-      "blender_vfx_studio/dash.py": "aaba23272a1fe6db67763ed69a7a9e595bbce84bd67a0a6b4d96d02ae209e894",
-      "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
-      "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
-      "blender_vfx_studio/impact.py": "7dab11a57f08f8dc3aec9551ac6ca6368b651ef01c40860833d8ec05431c48bd",
-      "blender_vfx_studio/impact_shape.py": "187a387c2f0f395072a031ebf023dd72ced41c3b1848846f5018122811191064",
-      "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
-      "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
-      "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
-      "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
-      "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
-      "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
-      "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
-      "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
-      "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
-      "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
-      "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
-      "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
-      "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
-      "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
-      "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
-      "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
-      "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
-      "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
-      "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
-      "tools/build_examples.py": "d95ccef7ee2267f603a27cd97f3c16556dc0918b693257d5d0e67920994063b8",
-      "tools/charge_design.py": "00b494e7bd6dcda0a99c3ed5a756d4db3657c37452973585e915ef994f604ce6",
-      "tools/character_scene.py": "bc452a221bdf7e297dc79eaae30daa6d060eb536ad57235df7498330af10360f",
-      "tools/lightning_asset.py": "a154931c4cf84fe9d57164a4478782a2be1d23f98ee88f8adf246dfb7e18e1bb",
-      "tools/lightning_preview.py": "1381ad88a7baa1517d188e7d72cc991770a0a5561fa68a53fa2d4c60b705fee0",
-      "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
-      "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
-      "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
-      "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
-    },
+    "camera_location": [
+      0.0,
+      7.0,
+      4.150000095367432
+    ],
+    "camera_lens_mm": 32.0,
     "render_timings": [
       {
         "frame": 3,
@@ -124,16 +62,7 @@
         "seconds": 13.8127810579972
       }
     ],
-    "saved_frame": 3,
-    "portable_render_path": "//renders/lightning-",
-    "camera_location": [
-      0.0,
-      7.0,
-      4.150000095367432
-    ],
-    "camera_lens_mm": 32.0,
-    "realtime_playback_reviewed": false,
-    "method": "PNG stages and optional complete sequence; realtime playback unreviewed"
+    "source_digest": "104d712d11bf6ebf83951f1f0ccb2c70641f0ee6e353af1c2018f7d86ba22c72"
   },
   "light_batch": {
     "engine": "BLENDER_EEVEE",
@@ -143,93 +72,19 @@
       8,
       12
     ],
-    "fps": 24,
-    "fps_base": 1,
     "resolution": [
       960,
       540
     ],
     "samples": 16,
-    "view_transform": "AgX",
-    "look": "None",
-    "bloom": false,
     "dark": false,
     "far": false,
-    "contact": {
-      "frame": 3,
-      "hilt": [
-        -0.5040510296821594,
-        -0.10794141888618469,
-        0.5526474118232727
-      ],
-      "tip": [
-        0.9185565114021301,
-        0.4261956810951233,
-        0.8506161570549011
-      ],
-      "hits": [
-        {
-          "position": [
-            0.7292304039001465,
-            0.35511070489883423,
-            0.8109614253044128
-          ],
-          "normal": [
-            -0.744300365447998,
-            0.31550633907318115,
-            -0.5886193513870239
-          ],
-          "mesh": "Rogue_ArmRight",
-          "distance": 1.3424330068278896
-        }
-      ],
-      "verified_intersection": true,
-      "source_frame": 49
-    },
-    "actor_timeline_offset": -46,
-    "source_sha256": {
-      "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
-      "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
-      "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
-      "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
-      "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
-      "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
-      "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
-      "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
-      "blender_vfx_studio/dash.py": "aaba23272a1fe6db67763ed69a7a9e595bbce84bd67a0a6b4d96d02ae209e894",
-      "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
-      "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
-      "blender_vfx_studio/impact.py": "7dab11a57f08f8dc3aec9551ac6ca6368b651ef01c40860833d8ec05431c48bd",
-      "blender_vfx_studio/impact_shape.py": "187a387c2f0f395072a031ebf023dd72ced41c3b1848846f5018122811191064",
-      "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
-      "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
-      "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
-      "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
-      "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
-      "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
-      "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
-      "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
-      "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
-      "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
-      "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
-      "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
-      "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
-      "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
-      "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
-      "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
-      "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
-      "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
-      "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
-      "tools/build_examples.py": "d95ccef7ee2267f603a27cd97f3c16556dc0918b693257d5d0e67920994063b8",
-      "tools/charge_design.py": "00b494e7bd6dcda0a99c3ed5a756d4db3657c37452973585e915ef994f604ce6",
-      "tools/character_scene.py": "bc452a221bdf7e297dc79eaae30daa6d060eb536ad57235df7498330af10360f",
-      "tools/lightning_asset.py": "bbca7f05943b50394e13359c4801fc8613ec893386b0c232e773775295dad6cc",
-      "tools/lightning_preview.py": "1381ad88a7baa1517d188e7d72cc991770a0a5561fa68a53fa2d4c60b705fee0",
-      "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
-      "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
-      "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
-      "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
-    },
+    "camera_location": [
+      0.0,
+      7.0,
+      4.150000095367432
+    ],
+    "camera_lens_mm": 32.0,
     "render_timings": [
       {
         "frame": 3,
@@ -244,15 +99,474 @@
         "seconds": 13.522814129995822
       }
     ],
-    "saved_frame": 3,
-    "portable_render_path": "//renders/lightning-",
+    "source_digest": "888132de208d04a3cbf7a595928a79bc577ed64fe11eca478735f95ba5b57fbc"
+  },
+  "motion_batch": {
+    "engine": "BLENDER_EEVEE",
+    "blender_version": "5.2.2 LTS",
+    "frames": [
+      1,
+      5,
+      7,
+      9,
+      11,
+      13,
+      15,
+      17,
+      19,
+      28
+    ],
+    "resolution": [
+      960,
+      540
+    ],
+    "samples": 16,
+    "dark": false,
+    "far": false,
     "camera_location": [
       0.0,
       7.0,
       4.150000095367432
     ],
     "camera_lens_mm": 32.0,
-    "realtime_playback_reviewed": false,
-    "method": "PNG stages and optional complete sequence; realtime playback unreviewed"
+    "render_timings": [
+      {
+        "frame": 1,
+        "seconds": 11.775475226000708
+      },
+      {
+        "frame": 5,
+        "seconds": 13.77686092499789
+      },
+      {
+        "frame": 7,
+        "seconds": 12.928903432999505
+      },
+      {
+        "frame": 9,
+        "seconds": 13.017902553001477
+      },
+      {
+        "frame": 11,
+        "seconds": 12.893643446004717
+      },
+      {
+        "frame": 13,
+        "seconds": 13.395618874004867
+      },
+      {
+        "frame": 15,
+        "seconds": 12.861487682996085
+      },
+      {
+        "frame": 17,
+        "seconds": 12.469567639003799
+      },
+      {
+        "frame": 19,
+        "seconds": 12.64531390999764
+      },
+      {
+        "frame": 28,
+        "seconds": 12.740513789001852
+      }
+    ],
+    "source_digest": "888132de208d04a3cbf7a595928a79bc577ed64fe11eca478735f95ba5b57fbc"
+  },
+  "dark_batch": {
+    "engine": "BLENDER_EEVEE",
+    "blender_version": "5.2.2 LTS",
+    "frames": [
+      3,
+      8,
+      12
+    ],
+    "resolution": [
+      960,
+      540
+    ],
+    "samples": 16,
+    "dark": true,
+    "far": false,
+    "camera_location": [
+      0.0,
+      7.0,
+      4.150000095367432
+    ],
+    "camera_lens_mm": 32.0,
+    "render_timings": [
+      {
+        "frame": 3,
+        "seconds": 11.770534762996249
+      },
+      {
+        "frame": 8,
+        "seconds": 12.355715709003562
+      },
+      {
+        "frame": 12,
+        "seconds": 12.640223472000798
+      }
+    ],
+    "source_digest": "888132de208d04a3cbf7a595928a79bc577ed64fe11eca478735f95ba5b57fbc"
+  },
+  "far_batch": {
+    "engine": "BLENDER_EEVEE",
+    "blender_version": "5.2.2 LTS",
+    "frames": [
+      3,
+      8,
+      12
+    ],
+    "resolution": [
+      960,
+      540
+    ],
+    "samples": 16,
+    "dark": false,
+    "far": true,
+    "camera_location": [
+      0.0,
+      14.0,
+      6.5
+    ],
+    "camera_lens_mm": 32.0,
+    "render_timings": [
+      {
+        "frame": 3,
+        "seconds": 10.935899793999852
+      },
+      {
+        "frame": 8,
+        "seconds": 12.071052095998311
+      },
+      {
+        "frame": 12,
+        "seconds": 12.12674313900061
+      }
+    ],
+    "source_digest": "888132de208d04a3cbf7a595928a79bc577ed64fe11eca478735f95ba5b57fbc"
+  },
+  "viewed_dark_frames": [
+    3,
+    8,
+    12
+  ],
+  "viewed_far_frames": [
+    3,
+    8,
+    12
+  ],
+  "native_hd": {
+    "frames": [
+      12,
+      3,
+      8
+    ],
+    "pixels_identical": true,
+    "clear_frame": 19,
+    "process_exit_code": 0,
+    "scene_sha256": "4525c1fd5eeb3112ffc88bbcc0f8265c1b458758d798c20e816558c483ef84b8"
+  },
+  "performance": {
+    "blender": "5.2.2 LTS",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+    "cpu_quota": "200000 100000",
+    "blender_threads": 2,
+    "lp_num_threads": "2",
+    "software_gl_requested": false,
+    "gl": {
+      "vendor": "Mesa",
+      "renderer": "llvmpipe (LLVM 19.1.7, 256 bits)",
+      "version": "4.5 (Core Profile) Mesa 25.0.7-2+deb13u1"
+    },
+    "engine": "BLENDER_EEVEE",
+    "resolution": [
+      960,
+      540
+    ],
+    "samples": 16,
+    "evaluation": [
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 8,
+        "milliseconds": 1.5023230007500388
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 8,
+        "milliseconds": 1.0468309992575087
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 8,
+        "milliseconds": 0.9546159999445081
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 0.9457630003453232
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 1.170894000097178
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 1.2353589991107583
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 0.84423299995251
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 0.9280470039811917
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 1.122472996939905
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 0.8962299980339594
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 0.8596260013291612
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 0.9233300006599165
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 8,
+        "milliseconds": 5.89427199884085
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 8,
+        "milliseconds": 5.360716000723187
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 8,
+        "milliseconds": 5.764349996752571
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 5.6498310004826635
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 5.432961996120866
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 5.478718994709197
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 5.733044003136456
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 5.231876006291714
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 5.2894309992552735
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 5.116325999551918
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 5.166790004295763
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 8,
+        "milliseconds": 6.285547002335079
+      }
+    ],
+    "evaluation_summary": {
+      "bare": {
+        "scene_evaluation_median_ms": 0.9280470039811917,
+        "scene_evaluation_p95_ms": 1.170894000097178,
+        "measured_samples": 9
+      },
+      "fx": {
+        "scene_evaluation_median_ms": 5.432961996120866,
+        "scene_evaluation_p95_ms": 5.733044003136456,
+        "measured_samples": 9
+      }
+    },
+    "renders": [
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 8,
+        "seconds": 39.00821453599929
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 8,
+        "seconds": 13.419492583001556
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 8,
+        "seconds": 13.277024096998503
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 8,
+        "seconds": 13.112730660002853
+      }
+    ],
+    "limits": [
+      "Headless scene evaluation and render wall time, not viewport FPS",
+      "Two warmup renders and 1 matched frame pairs; too few for a render p95",
+      "The same saved scene is used; only its VFX collection is excluded",
+      "Evaluation excludes the collection from the viewport dependency graph; render comparison only excludes it from rendering"
+    ]
+  },
+  "exports": [
+    {
+      "quality": "LOW",
+      "sha256": "f8e40e3a76cfffee81aa9f2660439495ff7e3f640999c792862634847ed0fd58",
+      "contact_vertices": [
+        72,
+        72,
+        72
+      ],
+      "preview": [
+        256,
+        256
+      ],
+      "clear_frame": 19
+    },
+    {
+      "quality": "MEDIUM",
+      "sha256": "767b43e12d32218d6972e4e17fb779fd60ee3aa49c79491a5ee2da0cb8f8ff13",
+      "contact_vertices": [
+        160,
+        160,
+        160
+      ],
+      "preview": [
+        256,
+        256
+      ],
+      "clear_frame": 19
+    },
+    {
+      "quality": "HIGH",
+      "sha256": "a1fa753d7e4960af19812aaed8219a1eca4ed52f38a4a6cc2f22f02c393046ae",
+      "contact_vertices": [
+        308,
+        308,
+        308
+      ],
+      "preview": [
+        256,
+        256
+      ],
+      "clear_frame": 19
+    }
+  ],
+  "viewed_embedded_previews": [
+    "LOW",
+    "MEDIUM",
+    "HIGH"
+  ],
+  "source_sha256": {
+    "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+    "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+    "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+    "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+    "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+    "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+    "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+    "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+    "blender_vfx_studio/dash.py": "aaba23272a1fe6db67763ed69a7a9e595bbce84bd67a0a6b4d96d02ae209e894",
+    "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+    "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+    "blender_vfx_studio/impact.py": "7dab11a57f08f8dc3aec9551ac6ca6368b651ef01c40860833d8ec05431c48bd",
+    "blender_vfx_studio/impact_shape.py": "187a387c2f0f395072a031ebf023dd72ced41c3b1848846f5018122811191064",
+    "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+    "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+    "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+    "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+    "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+    "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+    "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+    "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+    "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+    "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+    "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+    "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+    "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+    "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+    "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+    "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+    "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+    "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+    "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+    "tools/build_examples.py": "d95ccef7ee2267f603a27cd97f3c16556dc0918b693257d5d0e67920994063b8",
+    "tools/charge_design.py": "00b494e7bd6dcda0a99c3ed5a756d4db3657c37452973585e915ef994f604ce6",
+    "tools/character_scene.py": "bc452a221bdf7e297dc79eaae30daa6d060eb536ad57235df7498330af10360f",
+    "tools/lightning_asset.py": "bbca7f05943b50394e13359c4801fc8613ec893386b0c232e773775295dad6cc",
+    "tools/lightning_preview.py": "1381ad88a7baa1517d188e7d72cc991770a0a5561fa68a53fa2d4c60b705fee0",
+    "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+    "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+    "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+    "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
   }
 }

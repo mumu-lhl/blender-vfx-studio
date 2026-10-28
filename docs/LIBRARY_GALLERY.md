@@ -12,9 +12,9 @@
 
 ## lightning-strike
 
-![lightning-strike：第 4 帧](images/lightning-strike.png)
+![Lightning Strike：第 8 帧](images/lightning-strike.png)
 
-分支落雷；细枝与接触火花在远景偏弱。 第 **4 帧**；[编辑与实际检查](LIGHTNING_REVIEW.md) · [原始 Actions 附件](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40454784154)。
+主干复击时，地表分叉电弧重新展开。第 **8 帧**，本地角色镜头；[同帧与动画抽帧检查](LIGHTNING_CONTACT_REVIEW.md)。远景第三次放电和细枝仍偏弱，未观看实时播放。
 
 ## dust-impact
 
