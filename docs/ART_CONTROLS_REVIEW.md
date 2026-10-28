@@ -7,7 +7,7 @@
 | 效果 | 核对结果与处理顺序 |
 | --- | --- |
 | Arc Slash | Bank=0 已能恢复平面，但固定材质裁切仍留下小缺口，锋刃颜色固定。先补全关闭裁切和独立锋刃配色，再用同一生成器提供 Clean / Stylized。Hook 与 Inner Notches 分别控制前端钩形和几何内缘，Contour 保留总强度；材质 Surface Cuts 单独调整。 |
-| Energy Charge | 侧栏 Core Focus 集中内部蓄满大小、压缩和释放拉伸，直接编辑现有节点；初始大小与收腰留 Advanced Shape。外围权重与远景焦点仍待处理，集中入口不等于这些艺术问题已解决。 |
+| Energy Charge | 侧栏 Core Focus 集中内部蓄满大小、压缩和释放拉伸，直接编辑现有节点；初始大小与收腰留 Advanced Shape。[#166](https://github.com/mumu-lhl/blender-vfx-studio/issues/166) 已完成卷曲内核与进流权重；远景细亮带仍弱，见 [充能焦点检查](CHARGE_HIERARCHY_REVIEW.md)。 |
 | Impact Burst | 实际侧栏已经隐藏特制主体不使用的 Count / Shape / Gravity / Spread。复用原生数值入口集中卷曲、细喷射宽度与压力弧高度，初期断裂和辅助明度留高级设置；不改默认图。侧面实体感仍待处理。 |
 | Lightning Strike | 侧栏 Bolt Shape 提供已有长度与分支伸展。放电时序保留原演出，远景细枝与接触火花仍偏弱。 |
 | Stylized Fire | RGB 是暖色色带的乘色，不能方便变成蓝火。提供原生五色配色与直接色带编辑；集中 Height / Flow / Curl。持续阶段大火面仍未解决。 |
@@ -64,6 +64,8 @@ blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python to
 `--light` / `--dark` 切换上述各工具支持的背景；输出设置记录源文件摘要。CI 生成 Clean、暖色刀光和蓝／绿火焰的阶段图，保存为原有 visual-review 附件，不增加散落的发布附件。
 
 功能检查覆盖风格切换不重建节点、独立 Hook／内缘、原生 RGB 动画、现有参数预设、手工完整资产、火焰色带保护、烟尘实际透明渲染。新增控制检查 11 项，加上刀光 10 项与残影 8 项回归均通过。手工嵌套几何组的核心值可编辑，完整 .blend 保存／载入和无插件重开保持几何；测试分组保留原接口标识，重开无无效修改器驱动警告。刀光颜色动画与蓝焰均已保存并在不导入插件的新进程跳帧重开；Clean 第 2／5／11 帧和蓝焰第 20／36／60 帧的高清重渲染均与原图解码像素一致，并正常退出。当前源码完整后台套件、ZIP 构建、安装／启用／卸载与八套后台面板绘制通过。小型界面与配色改动不重复所有无关电影渲染；最终提交的检查范围另记于 PR。
+
+PR #165 的功能提交 `0ad5dbf8833e681301566d2d9c43d3687fb08e13` 已由 [CI 40607385631](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40607385631) 完成全部 12 项检查，均成功。该结果覆盖上一轮控制与界面改动，不作为本轮充能造型的视觉验收。
 
 ## Impact 的集中入口
 

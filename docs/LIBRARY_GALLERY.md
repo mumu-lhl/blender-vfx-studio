@@ -1,8 +1,14 @@
-# 新资产的真实角色镜头
+# 特效的真实角色镜头
 
-这里展示 main 新五套效果的实际 CI 渲染，均为 **960×540、Eevee、AgX、无额外辉光**。图片直接复制自渲染 PNG，没有调色、裁切或重绘；点击可查看原尺寸。单帧只说明当前画面，完整时序、隔帧观看范围与成本见各效果记录。
+这里展示内置效果的实际角色渲染，来源包括 CI 和本地检查，均为 **960×540、Eevee、AgX、无额外辉光**。图片直接复制自渲染 PNG，没有调色、裁切或重绘；点击可查看原尺寸。单帧只说明当前画面，完整时序、隔帧观看范围与成本见各效果记录。
 
 角色、地面、灯光和相机用于检查，**不包含在效果资产中**。残影本身包含已捕获的角色网格，也可用 Capture Dash Echoes 捕获自己的角色。测试角色来源及 CC0 许可见 [资产说明](../assets/character-review/README.md)。
+
+## energy-charge
+
+![Energy Charge：第 36 帧](images/energy-charge.png)
+
+卷曲能量片围出中心，外围进流和粒子承担汇聚方向。第 **36 帧**，本地同源角色镜头；[编辑与实际检查](CHARGE_HIERARCHY_REVIEW.md)。远景细亮带仍弱，未观看实时播放。
 
 ## lightning-strike
 
@@ -42,4 +48,4 @@
 blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/fire_preview.py -- --frames 36
 ```
 
-默认生成浅背景近景，`--dark` 和 `--far` 用于对照。输出在忽略版本管理的 `work/`，不会覆盖上述已记录图像。设备、Blender 或渲染器版本可能导致像素差异。图片来源、帧位与摘要见 [清单](images/library-gallery.json)；图片不作为插件运行依赖。
+默认生成浅背景近景，`--dark` 和 `--far` 用于对照。输出在忽略版本管理的 `work/`，不会覆盖上述已记录图像。设备、Blender 或渲染器版本可能导致像素差异。充能的来源、帧位与摘要见 [充能清单](images/charge-hierarchy-samples.json)，其他五套见 [清单](images/library-gallery.json)；图片不作为插件运行依赖。

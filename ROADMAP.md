@@ -37,7 +37,7 @@
 
 [PR #136](https://github.com/mumu-lhl/blender-vfx-studio/pull/136) 已完成两名 CC0 KayKit 蒙皮角色的必要战斗验证：96 帧、24 fps，全部 48 张视频隔帧图和远景、暗背景、反向机位实际读取，无插件三帧像素一致，恢复阶段清空。见 [角色镜头记录](docs/CHARACTER_COMBAT_REVIEW.md)。
 
-- **Energy Charge**：原生束流、压缩内核和地面进流已重做；远景主体仍小、细碎。见 [束流](docs/CHARGE_STREAM_REVIEW.md)、[内核](docs/CHARGE_FOCUS_REVIEW.md)、[压缩](docs/CHARGE_TENSION_REVIEW.md) 与 [地面进流](docs/CHARGE_GROUND_REVIEW.md)。
+- **Energy Charge**：卷曲内核、沿形体运动的亮带和可调进流权重已完成角色对照；中心更集中，远景细亮带与部分角度的弯片感仍待改善。见 [焦点与动画检查](docs/CHARGE_HIERARCHY_REVIEW.md)。
 - **Arc Slash**：主刀面配有色、两端收尖的独立残弧；硬笔触和远景细尾仍待完整动作判断。见 [残影记录](docs/SLASH_WAKE_REVIEW.md)。
 - **Impact Burst**：已分为断裂主体、细喷射、辅助卷流与隆起压力弧；侧面偏实体、远景细层弱。见 [主体](docs/IMPACT_SURFACE_REVIEW.md)、[细喷射](docs/IMPACT_FINE_REVIEW.md) 与 [压力弧](docs/IMPACT_WAVE_REVIEW.md)。
 
@@ -52,7 +52,8 @@
 - [PR #162](https://github.com/mumu-lhl/blender-vfx-studio/pull/162)：Clean / Stylized 刀光、独立锋刃配色、原生颜色选择器与关键帧、蓝／绿火焰色带、现有 Fire / Dust / Magic 控制分组、Ground Veil Fade 修复。多阶段 Eevee 图已实际读取，Clean 与蓝焰无插件高清重开像素一致，完整后台与安装检查通过；CI 仍以 PR 的最终状态为准。
 - [#163](https://github.com/mumu-lhl/blender-vfx-studio/issues/163)：独立 Echo Count 与任意跨度的均匀子帧捕获，保留源网格细节；八项捕获测试与无源重开通过；五姿态角色的三个高清阶段及暗背景已读取，原生重渲染像素一致。浅背景旧影仍淡，详见 [采样记录](docs/DASH_SAMPLING_REVIEW.md)。
 - [PR #165](https://github.com/mumu-lhl/blender-vfx-studio/pull/165)：充能核心大小／压缩／释放、闪电长度／分支集中访问；Hook 与几何内缘分别控制。18 张角色对照、刀光隔离图与默认峰值／尾部像素对照已实际查看，11 项艺术控制、10 项刀光、8 项残影回归与无插件重开通过。手工嵌套节点及完整保存保留，JSON 入口明确命名；Linux 默认缩放已检查折叠、原生色轮／RGB 插帧、热色色带和五姿态捕获；其他平台／缩放与实时播放未验收。
-- Energy Charge 核心／外围视觉权重、Impact 主次调节、Lightning 放电节奏仍待后续实施；集中编辑入口不等于已经完成这些艺术改进。
+- [#166](https://github.com/mumu-lhl/blender-vfx-studio/issues/166)／[PR #167](https://github.com/mumu-lhl/blender-vfx-studio/pull/167)：重塑 Energy Charge 卷曲内核、流动亮带与可调进流权重。21 项入门库、11 项艺术控制及原生跳帧通过。实际读取 17 张高清明暗／远景／反向对照与 60 张修改前后隔帧；三个阶段无插件高清重渲染像素一致，实测成本与观看边界见 [记录](docs/CHARGE_HIERARCHY_REVIEW.md)。三平台检查通过，长视觉 CI 仍在运行。
+- PR #165 的 [CI 40607385631](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40607385631) 全部 12 项成功。Impact 主次调节、Lightning 放电节奏仍待实施；集中编辑入口不等于已经完成艺术改进。
 
 [#168](https://github.com/mumu-lhl/blender-vfx-studio/issues/168)／[PR #169](https://github.com/mumu-lhl/blender-vfx-studio/pull/169) 集中 Impact 现有原生造型与高级材质控制。14 项行为检查和无插件重开通过，角色 Eevee 对照待检查，不改默认画面。
 

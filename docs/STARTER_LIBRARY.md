@@ -30,7 +30,7 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 ## Energy Charge
 
-主体使用错开前沿的双束、辅助进流、汇入中心的短弯流和弯曲粒子。外围逐步收紧，中心积蓄为有间隙的蓝白束，再原位收束释放，由四层构成。
+中心由三片大小不同的弯曲能量片组成，片与片之间留出空隙，蓝白亮带沿形体移动。主进流把能量带向中心，外围短流和粒子作为辅助；随积蓄逐渐压缩，释放时拉伸收束。整套效果由四层构成。
 
 粒子层的 **Spawn Radius** 控制出生距离，正的 **Velocity** 越大，抵达中心越快；抵达后停止，不穿过中心向外飞。粒子在控制器局部空间运动，移动整体也会移动已出生粒子，不保留角色走过的世界轨迹。
 
@@ -40,8 +40,11 @@ examples ZIP 是资产库，**不是插件安装包**。
 | --- | --- |
 | **Stored Core Size** | 蓄满时内部能量团的相对大小，不扩大外围进流 |
 | **Compression** | 积蓄时压低内核并撑开截面；0 关闭，有效范围 0–0.85 |
-| **Release Stretch** | 释放时沿局部 Z 轴拉伸此层 |
+| **Release Stretch** | 释放时沿局部 Z 轴拉伸内核，不拉伸外围进流 |
+| **Intake Weight (0–1)** | 改变核心层进流的粗细；0 隐藏进流，保留内核 |
 | **Advanced Shape → Initial Core Size / Release Pinch** | 初始内核大小与释放时收腰；一般不必先改这两项 |
+
+外层 **Converging Vortex** 和地面 **Ground Intake** 的 **Intake → Intake Weight** 分别调整这两层的透明权重；0 隐藏该层。它们不改变内核，也不控制独立粒子层。核心层通过截面粗细调整权重，避免实体束流出现半透明噪点。
 
 **组合的 Scale** 改变整套效果；核心层的 **Radius** 改变该层的内核与主进流；**Stored Core Size** 只改变内部积蓄，不是另一套整体尺寸。其他局部造型留在对应层的 Geometry Nodes，白色阈值位于核心材质：
 
@@ -55,7 +58,7 @@ examples ZIP 是资产库，**不是插件安装包**。
 | Spiral Turns / Intake Vertical Reach | 外层路径的绕行角度与起始高度 |
 | Ground Intake Lift | 地面三条进流的抬升高度，默认 0.8 配合该层 Z=-0.8 |
 
-远景主体仍偏小、细碎。具体对象、节点和观看范围见 [进流](CHARGE_INTAKE_REVIEW.md)、[外层路径](CHARGE_FLOW_REVIEW.md)、[束流](CHARGE_STREAM_REVIEW.md)、[内核](CHARGE_FOCUS_REVIEW.md) 与 [压缩](CHARGE_TENSION_REVIEW.md)。
+使用 **Save Complete Effect** 保存这些形状和节点控制；参数 JSON 不包含 Intake Weight 等私有节点数值。角色镜头、明暗背景与实际观看范围见 [充能焦点检查](CHARGE_HIERARCHY_REVIEW.md)。
 
 ## Arc Slash
 
