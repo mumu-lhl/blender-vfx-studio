@@ -118,6 +118,11 @@ _NATIVE_SHAPE_VALUES = (
     ("Nucleus Compression", "Compression (0–0.85)", False),
     ("Release Stretch", "Release Stretch", False),
     ("Intake Weight", "Intake Weight (0–1)", False),
+    ("Pressure Unfurl", "Body Curl", False),
+    ("Fine Ejection Width", "Fine Jet Width", False),
+    ("Pressure Crest Height", "Wave Height", False),
+    ("Pressure Fracture", "Early Body Breakup", True),
+    ("Pressure Support Value", "Support Tone (0–1)", True),
     ("Bolt Length", "Bolt Length", False),
     ("Branch Reach", "Branch Reach", False),
     ("Nucleus Seed Size", "Initial Core Size", True),
@@ -141,22 +146,21 @@ def _native_shape_values(root):
     for child in root.children:
         if child.get("vfx_role") != "layer" or child.get("vfx_id") != root["vfx_id"]:
             continue
-        for modifier in child.modifiers:
-            if modifier.type != "NODES" or modifier.node_group is None:
-                continue
-            for tree in _nested_trees([modifier.node_group]):
-                driven = (
-                    {c.data_path for c in tree.animation_data.drivers}
-                    if tree.animation_data
-                    else set()
-                )
-                for name, label, advanced in _NATIVE_SHAPE_VALUES:
-                    node = tree.nodes.get(name)
-                    if node is None or node.type != "VALUE" or not node.outputs[0].is_linked:
-                        continue
-                    socket = node.outputs[0]
-                    if socket.path_from_id("default_value") not in driven:
-                        found.setdefault(name, (label, socket, advanced))
+        trees = [m.node_tree for m in getattr(child.data, "materials", ()) if m and m.node_tree]
+        # _nested_trees visits the last seed first: prefer the layer's geometry
+        # controls if an artist gives a shader value the same name.
+        trees.extend(m.node_group for m in child.modifiers if m.type == "NODES" and m.node_group)
+        for tree in _nested_trees(trees):
+            driven = (
+                {c.data_path for c in tree.animation_data.drivers} if tree.animation_data else set()
+            )
+            for name, label, advanced in _NATIVE_SHAPE_VALUES:
+                node = tree.nodes.get(name)
+                if node is None or node.type != "VALUE" or not node.outputs[0].is_linked:
+                    continue
+                socket = node.outputs[0]
+                if socket.path_from_id("default_value") not in driven:
+                    found.setdefault(name, (label, socket, advanced))
     return found
 
 
@@ -1183,6 +1187,9 @@ class VFX_PT_main(bpy.types.Panel):
             box.label(
                 text="Bolt Shape"
                 if {"Bolt Length", "Branch Reach"} & native_values.keys()
+                else "Impact Shape"
+                if {"Pressure Unfurl", "Fine Ejection Width", "Pressure Crest Height"}
+                & native_values.keys()
                 else "Core Focus"
                 if "Nucleus Stored Size" in native_values
                 else "Intake"

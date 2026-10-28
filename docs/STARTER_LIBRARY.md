@@ -75,7 +75,17 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 主体使用紧凑闪核、三团明暗不同的断裂主体、四条细喷射、两条卷流及三段隆起压力弧，依次退场。它与侧栏创建使用同一生成器。
 
-**Size** 调整主层整体尺寸；主层 Geometry Nodes 的 **Fine Ejection Width** 单独调整细喷射宽度。各层时间与颜色可分开编辑，**Ungroup All** 一次拆开全部层。
+选择 **Impact • Main Shards**，在 **Impact Shape** 调整主体与细喷射；选择 **Shockwave** 调整压力弧。**Advanced Shape** 保留较少使用的材质控制。
+
+| 控制 | 作用 |
+| --- | --- |
+| **Body Curl** | 压力体截面的翻卷强度；0 关闭截面翻卷，中心路径仍保持弯曲 |
+| **Fine Jet Width** | 只改细喷射的粗细，保留压力体和辅助卷流 |
+| **Wave Height** | 压力弧的隆起高度，随该层 Width 成比例变化 |
+| **Advanced → Early Body Breakup** | 主压力体出现初期的断裂程度，不改变细喷射 |
+| **Advanced → Support Tone (0–1)** | 辅助压力体的着色明度；0 为黑色 |
+
+**组合 Scale** 改整套大小，主层 **Size** 改该层整体尺寸，**Planar=1** 将主层压到局部平面。各层时间、颜色和发光可分开调整，**Ungroup All** 一次拆开全部层。使用 **Save Complete Effect** 保存节点控制；参数 JSON 只保存通用参数。
 
 当前侧面仍偏实体，远景细层较弱，见 [主体](IMPACT_SURFACE_REVIEW.md)、[细喷射](IMPACT_FINE_REVIEW.md) 与 [压力弧](IMPACT_WAVE_REVIEW.md)。
 

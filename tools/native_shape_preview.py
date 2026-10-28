@@ -22,6 +22,16 @@ CASES = {
         (18, 36, 46),
     ),
     "lightning": ({"Bolt Length": 4.8, "Branch Reach": 1.4}, (2, 3, 12)),
+    "impact": (
+        {
+            "Pressure Unfurl": 0.45,
+            "Fine Ejection Width": 0.9,
+            "Pressure Fracture": 0.35,
+            "Pressure Support Value": 0.45,
+            "Pressure Crest Height": 1.4,
+        },
+        (49, 53, 58),
+    ),
 }
 
 
@@ -49,8 +59,8 @@ def setup(effect, light, far):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     fixture = setup_base(light=light, far=far)
     scene = bpy.context.scene
-    if effect == "charge":
-        group = add_effects(fixture)["effects"][0]
+    if effect in {"charge", "impact"}:
+        group = add_effects(fixture)["effects"][0 if effect == "charge" else 2]
     else:
         offset = fixture["contact"]["frame"] - 3
         for actor in (fixture["caster"], fixture["defender"]):
@@ -68,10 +78,15 @@ def setup(effect, light, far):
         )
         scene.camera.data.lens = 32
     names = set(CASES[effect][0])
-    member = next(
-        m for m in composition.members(group) if names <= ui._native_shape_values(m).keys()
-    )
-    return member
+    values = {
+        name: value
+        for m in composition.members(group)
+        for name, value in ui._native_shape_values(m).items()
+        if name in names
+    }
+    if names != values.keys():
+        raise RuntimeError("The generated effect is missing a requested native art control")
+    return values
 
 
 def main():
@@ -85,7 +100,7 @@ def main():
         raise RuntimeError("Use a fresh factory background process")
     changes, defaults = CASES[args.effect]
     frames = args.frames or list(defaults)
-    if min(frames) < 1 or max(frames) > (52 if args.effect == "charge" else 19):
+    if min(frames) < 1 or max(frames) > {"charge": 52, "lightning": 19, "impact": 96}[args.effect]:
         parser.error("Frames must be inside this effect's review range")
     frozen = hashes()
     folder = (
@@ -99,8 +114,7 @@ def main():
     record.unlink(missing_ok=True)
     results = []
     for case in ("baseline", "edited"):
-        member = setup(args.effect, not args.dark, args.far)
-        values = ui._native_shape_values(member)
+        values = setup(args.effect, not args.dark, args.far)
         if case == "edited":
             for name, value in changes.items():
                 values[name][1].default_value = value
