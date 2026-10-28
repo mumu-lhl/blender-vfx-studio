@@ -174,7 +174,7 @@ def setup_base(*, light=True, far=False, view="front", engine="BLENDER_EEVEE"):
 
 
 def add_effects(fixture):
-    """Place unchanged starter effects on the actual sword and contact, with native keys."""
+    """Fit editable starter effects to this sword stroke with native keys."""
     from blender_vfx_studio import binding
     from blender_vfx_studio.animation import curves
     from tools.build_examples import create_effect
@@ -203,6 +203,24 @@ def add_effects(fixture):
     ).matrix_world.translation
     binding.bind(bpy.context, charge, socket)
 
+    # The stored focus turns into the blade before discharge, rather than
+    # collapsing vertically while an unrelated slash appears across it.
+    socket.rotation_mode = "QUATERNION"
+    previous = Quaternion()
+    for frame in (1, 41, 43, 45, 47, 49, 51):
+        scene.frame_set(frame)
+        matrix = weapon.evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world
+        direction = (matrix @ tip - matrix.translation).normalized()
+        aim = Vector((0, 0, 1)).rotation_difference(direction)
+        rotation = Quaternion().slerp(aim, min(max((frame - 41) / 6, 0), 1))
+        rotation.make_compatible(previous)
+        previous = rotation.copy()
+        socket.rotation_quaternion = rotation
+        socket.keyframe_insert(data_path="rotation_quaternion", frame=frame)
+    for curve in curves(socket):
+        for key in curve.keyframe_points:
+            key.interpolation = "LINEAR"
+
     hit_frame = contact["frame"]
     slash = create_effect("arc-slash")
     slash.name = "Combat • Arc Slash"
@@ -213,6 +231,15 @@ def add_effects(fixture):
     directions = {
         item["frame"]: Vector(item["tip"]) - Vector(item["hilt"]) for item in fixture["trace"]
     }
+    # This shot is a close sword cut, not the asset's broad standalone sweep.
+    # Measure the arc traversed into contact; leave some trailing coverage.
+    slash["arc"] = math.degrees(directions[hit_frame - 2].angle(directions[hit_frame])) * 0.85
+    slash["width"] = slash["radius"] * 0.14
+    slash["expansion"] = 0.0
+    slash["bank"], slash["contour"] = 0.10, 0.35
+    slash["afterimage"], slash["wake_spread"] = 0.28, 0.3
+    for index, color in enumerate((0.025, 0.32, 0.7)):
+        slash[f"color_{index}"] = color
     normal = directions[hit_frame - 2].cross(directions[hit_frame + 2]).normalized()
     if normal.length < 0.9:
         raise RuntimeError("Cannot determine the sword's swing plane")

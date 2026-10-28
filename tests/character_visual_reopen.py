@@ -9,6 +9,7 @@ from array import array
 from pathlib import Path
 
 import bpy
+from mathutils import Vector
 
 assert not any("blender_vfx_studio" in name for name in sys.modules)
 folder = Path(bpy.data.filepath).parent
@@ -23,6 +24,14 @@ frames = args.frames
 if len(set(frames)) < 2:
     parser.error("Use at least two distinct sampled frames to check native animation")
 scene = bpy.context.scene
+for frame in (47, 49, 51):
+    scene.frame_set(frame)
+    graph = bpy.context.evaluated_depsgraph_get()
+    socket = bpy.data.objects["Charge socket • world up"].evaluated_get(graph)
+    blade = next(sample for sample in settings["blade_trace"] if sample["frame"] == frame)
+    direction = (Vector(blade["tip"]) - Vector(blade["hilt"])).normalized()
+    self_direction = (socket.matrix_world.to_3x3() @ Vector((0, 0, 1))).normalized()
+    assert self_direction.dot(direction) > 0.999, "Native charge release must aim along the blade"
 scene.frame_set(47)
 core = bpy.data.objects["Charge • Compressed Core"].children[0]
 assert core.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices, (

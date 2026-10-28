@@ -134,6 +134,19 @@ class SlashTests(unittest.TestCase):
         update(restored, start=1.0)
         self.assertEqual(points(restored, 5), peak)
 
+    def test_pointed_ends_close_in_depth_with_banking_and_colored_wakes(self):
+        root = slash.create(bpy.context, "LOW")
+        update(root, bank=0.8, contour=0.0)
+        for frame in (2, 5, 11):
+            vertices = points(root, frame)
+            band_size = len(vertices) // 3
+            for band in range(3):
+                for section in (0, 32):
+                    row = vertices[
+                        band * band_size + section * 6 : band * band_size + (section + 1) * 6
+                    ]
+                    self.assertLess(max(p[2] for p in row) - min(p[2] for p in row), 1e-5)
+
     def test_head_bias_moves_body_mass_forward_without_changing_the_radius(self):
         root = core.create(bpy.context, "ARC_SLASH", "LOW")
         update(root, duration=18.0, spin=0.0, bank=0.0, contour=0.0, head_bias=1.0)
