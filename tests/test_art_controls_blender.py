@@ -352,18 +352,21 @@ class ArtControlsTests(unittest.TestCase):
         flame = next(
             m for m in composition.members(create_fire(bpy.context)) if palettes.fire_ramp(m)
         )
-        # Keep the artist's static flow value and all graph links; it no longer reads this property.
+
+        def make_static(tree):
+            # Keep the artist's values and links; only stop reading this property.
+            for curve in list(tree.animation_data.drivers):
+                if any(
+                    t.id == flame and t.data_path == '["Fire Flow Speed"]'
+                    for v in curve.driver.variables
+                    for t in v.targets
+                ):
+                    tree.driver_remove(curve.data_path)
+
         for child in flame.children:
             for modifier in child.modifiers:
                 if modifier.type == "NODES":
-                    tree = modifier.node_group
-                    for curve in list(tree.animation_data.drivers):
-                        if any(
-                            t.id == flame and t.data_path == '["Fire Flow Speed"]'
-                            for v in curve.driver.variables
-                            for t in v.targets
-                        ):
-                            tree.driver_remove(curve.data_path)
+                    make_static(modifier.node_group)
         drawn = []
         modifier = flame.children[0].modifiers[0]
         modifier.node_group = wrap_geometry(modifier.node_group)
@@ -378,6 +381,12 @@ class ArtControlsTests(unittest.TestCase):
             def __getattr__(self, name):
                 return lambda *a, **kw: self
 
+        ui._draw_art_parameters(Layout(), bpy.context, flame, ("width", "Fire Flow Speed"))
+        self.assertIn('["width"]', drawn)
+        self.assertIn('["Fire Flow Speed"]', drawn, "The heat material still reads this control")
+        for material in flame.children[0].data.materials:
+            make_static(material.node_tree)
+        drawn.clear()
         ui._draw_art_parameters(Layout(), bpy.context, flame, ("width", "Fire Flow Speed"))
         self.assertIn('["width"]', drawn)
         self.assertNotIn('["Fire Flow Speed"]', drawn)

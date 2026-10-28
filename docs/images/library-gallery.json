@@ -19,9 +19,10 @@
     "effect": "stylized-fire",
     "frame": 36,
     "file": "images/stylized-fire.png",
-    "sha256": "f5b89cc738bcb41aae28c5bb376936d1dee1fb0fd904ccedcba0ca5f3055aba1",
+    "sha256": "a1e8d4de97fae9c012dc051f8886434fc3297a93fe765f5cff0e2cc81fd53884",
     "generator": "tools/fire_preview.py",
-    "workflow_run": 40461231445
+    "generator_commit": "22b1c96",
+    "source": "Local Blender 5.2.2 Eevee character render"
   },
   {
     "effect": "dash-echoes",

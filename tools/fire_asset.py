@@ -11,14 +11,14 @@ from tools.charge_design import _Fields, _geometry, _mesh
 def _flames(root, quality):
     layer, g, geometry = _geometry(root, "Rising Sculpted Flame")
     rows, sides = {"LOW": (14, 8), "MEDIUM": (22, 12), "HIGH": (30, 16)}[quality]
-    vertices, faces = [], []
+    vertices, faces, centers = [], [], []
     attributes = {k: [] for k in ("fire_u", "fire_lobe", "fire_inner")}
     # Unequal outer lobes and a smaller forward hot tongue share a grounded base.
     for index, (x, y, height, breadth, bend, inner) in enumerate(
         (
-            (0, 0.03, 1, 0.58, -0.22, 0),
-            (-0.38, 0, 0.71, 0.4, -0.5, 0),
-            (0.34, 0.04, 0.58, 0.35, 0.48, 0),
+            (0, 0.03, 1, 0.50, -0.12, 0),
+            (-0.26, 0, 0.83, 0.29, -0.20, 0),
+            (0.28, 0.04, 0.68, 0.25, 0.24, 0),
             (0, -0.25, 0.52, 0.24, 0.17, 1),
             (0.06, 0.26, 0.44, 0.22, -0.14, 1),
         )
@@ -26,9 +26,7 @@ def _flames(root, quality):
         base = len(vertices)
         for row in range(rows + 1):
             u = row / rows
-            radius = max(
-                0.002, (0.36 + 0.64 * math.sin(math.pi * u)) ** 0.8 * (1 - u) ** 0.6 * breadth
-            )
+            radius = max(0.002, (0.6 + 0.4 * math.sin(math.pi * u)) * (1 - u) ** 0.85 * breadth)
             cx = x * (1 - u) + bend * math.sin(math.pi * u) + 0.22 * math.sin(u * 5) * u
             cy = y * (1 - u * 0.5) + 0.13 * math.sin(u * 4 + index) * u
             for side in range(sides):
@@ -41,6 +39,7 @@ def _flames(root, quality):
                         u * height,
                     )
                 )
+                centers.append((cx, cy, u * height))
                 for key, value in zip(attributes, (u, index, inner)):
                     attributes[key].append(value)
         faces.append(tuple(base + side for side in reversed(range(sides))))
@@ -50,6 +49,9 @@ def _flames(root, quality):
                 b = base + row * sides + (side + 1) % sides
                 faces.append((a, b, b + sides, a + sides))
     _mesh(layer, vertices, faces, attributes)
+    rest = layer.data.attributes.new("fire_center", "FLOAT_VECTOR", "POINT")
+    for item, center in zip(rest.data, centers):
+        item.vector = center
     for face in layer.data.polygons:
         face.use_smooth = True
     p = g.value("Fire Clock", expression=PROGRESS)
@@ -70,13 +72,35 @@ def _flames(root, quality):
         "Flame Flow Phase",
         "SUBTRACT",
         g.m("Rolling Flame Time", "MULTIPLY", p, g.value("Flow Speed", prop="Fire Flow Speed")),
-        g.m("Flow Up The Tongue", "MULTIPLY", u, 5),
+        g.m("Flow Up The Tongue", "MULTIPLY", u, 12),
+    )
+    phase = g.m(
+        "Tongues Rise At Different Times",
+        "ADD",
+        phase,
+        g.m("Tongue Phase", "MULTIPLY", g.attr("fire_lobe"), 1.9),
     )
     pulse = g.m(
-        "Living Flame Breadth", "MULTIPLY_ADD", g.m("Travelling Flame Lobe", "SINE", phase), 0.16
+        "Living Flame Breadth", "MULTIPLY_ADD", g.m("Travelling Flame Lobe", "SINE", phase), 0.32
     )
-    pulse.node.inputs[2].default_value = 0.84
-    width = g.m("Flame Breadth", "MULTIPLY", g.value("Width", prop="width"), pulse)
+    pulse.node.inputs[2].default_value = 0.68
+    pulse = g.m(
+        "Keep A Connected Hot Foot",
+        "ADD",
+        1,
+        g.m(
+            "Necks Above The Foot",
+            "MULTIPLY",
+            g.stage("Neck Starts Above Ground", u, 0.08, 0.35),
+            g.m("Travelling Neck Depth", "SUBTRACT", pulse, 1),
+        ),
+    )
+    center = g.attr("fire_center", "FLOAT_VECTOR")
+    section = g.v("Section Around Its Own Rising Path", "SUBTRACT", pos.outputs[0], center)
+    section = g.v("Moving Bulges And Narrow Necks", "SCALE", section, pulse)
+    rest_position = g.v("Connected Unequal Flame Streams", "ADD", center, section)
+    g.link(rest_position, axes.inputs[0])
+    width = g.value("Width", prop="width")
     width = g.m(
         "Ignition And Shrinking Breadth",
         "MULTIPLY",
@@ -101,7 +125,8 @@ def _flames(root, quality):
     g.link(pos.outputs[0], noise.inputs["Vector"])
     noise.inputs["Scale"].default_value = 2.3
     noise.inputs["Detail"].default_value = 1
-    g.link(g.m("Unsteady Flame Clock", "MULTIPLY", p, 4), noise.inputs["W"])
+    clock = g.m("Shared Flame Clock", "MULTIPLY", p, g.value("Flow Speed", prop="Fire Flow Speed"))
+    g.link(g.m("Unsteady Flame Clock", "MULTIPLY", clock, 0.25), noise.inputs["W"])
     curl = g.v("Signed Flame Curl", "SUBTRACT", noise.outputs["Color"], (0.5, 0.5, 0.5))
     curl = g.v(
         "Curl Away From Ground",
@@ -115,6 +140,33 @@ def _flames(root, quality):
         ),
     )
     position = g.v("Moving Asymmetric Tongues", "ADD", position, curl)
+    bend = g.m(
+        "Rising Fold Envelope",
+        "MULTIPLY",
+        g.m("Fold Away From Ground", "POWER", u, 0.8),
+        g.value("Curl", prop="Fire Curl"),
+    )
+    position = g.v(
+        "Flame Folds Travel Upward",
+        "ADD",
+        position,
+        g.xyz(
+            "Two Plane Updraft",
+            g.m(
+                "Sideways Rising Fold",
+                "MULTIPLY",
+                g.m("Rolling Fold", "SINE", phase),
+                g.m("Fold Width", "MULTIPLY", bend, 0.25),
+            ),
+            g.m(
+                "Depth Of Rising Fold",
+                "MULTIPLY",
+                g.m("Turning Fold", "COSINE", phase),
+                g.m("Fold Depth", "MULTIPLY", bend, 0.16),
+            ),
+            0,
+        ),
+    )
     position = g.v(
         "Last Flame Lifts Away",
         "ADD",
@@ -149,33 +201,39 @@ def _material(root):
     material.surface_render_method = "DITHERED"
     g = _Fields(material.node_tree, root)
     p = g.value("Fire Clock", expression=PROGRESS)
+    clock = g.m("Shared Flame Clock", "MULTIPLY", p, g.value("Flow Speed", prop="Fire Flow Speed"))
     coordinates = g.n("ShaderNodeTexCoord", "Local Flame Coordinates")
     noise = g.n("ShaderNodeTexNoise", "Rising Broken Heat Bands", noise_dimensions="4D")
     sample = g.v(
-        "Long Vertical Flame Strokes", "MULTIPLY", coordinates.outputs["Object"], (2.4, 2.4, 0.6)
+        "Long Vertical Flame Strokes", "MULTIPLY", coordinates.outputs["Object"], (1.6, 1.6, 0.85)
     )
     sample = g.v(
         "Heat Advects Upward",
         "SUBTRACT",
         sample,
-        g.xyz("Rising Heat", 0, 0, g.m("Heat Speed", "MULTIPLY", p, 4)),
+        g.xyz("Rising Heat", 0, 0, g.m("Heat Speed", "MULTIPLY", clock, 0.25)),
     )
     g.link(sample, noise.inputs["Vector"])
     g.link(g.value("Heat Detail", prop="noise_scale"), noise.inputs["Scale"])
     noise.inputs["Detail"].default_value = 1.2
-    g.link(g.m("Heat Evolution", "MULTIPLY", p, 1.5), noise.inputs["W"])
+    g.link(g.m("Heat Evolution", "MULTIPLY", clock, 0.06), noise.inputs["W"])
     u = g.n("ShaderNodeAttribute", "Height Along Each Flame", attribute_name="fire_u").outputs[
         "Fac"
     ]
     inner = g.n("ShaderNodeAttribute", "Hot Inner Tongue", attribute_name="fire_inner").outputs[
         "Fac"
     ]
-    heat = g.m("Hotter Flame Base", "SUBTRACT", 1, g.m("Cooler Tips", "MULTIPLY", u, 0.62))
+    heat = g.m("Hotter Flame Base", "SUBTRACT", 1.08, g.m("Cooler Tips", "MULTIPLY", u, 0.52))
     heat = g.m(
         "Heat Folds",
         "ADD",
         heat,
-        g.m("Broad Heat Variation", "MULTIPLY", noise.outputs["Fac"], 0.32),
+        g.m(
+            "Broad Heat Variation",
+            "MULTIPLY",
+            g.m("Cool Clefts And Hot Streams", "SUBTRACT", noise.outputs["Fac"], 0.5),
+            0.5,
+        ),
     )
     heat = g.m("Inner Core Heat", "ADD", heat, g.m("Core Accent", "MULTIPLY", inner, 0.12))
     normal = g.n("ShaderNodeLayerWeight", "Dark Flame Boundary")
@@ -183,7 +241,7 @@ def _material(root):
         "Cool Edge",
         "SUBTRACT",
         heat,
-        g.m("Edge Contrast", "MULTIPLY", normal.outputs["Facing"], 0.32),
+        g.m("Edge Contrast", "MULTIPLY", normal.outputs["Facing"], 0.24),
     )
     ramp = g.n("ShaderNodeValToRGB", "Painted Red Orange Yellow")
     colors = tuple(zip(FIRE_STOPS, FIRE_PALETTES["ORANGE"]))
@@ -202,16 +260,72 @@ def _material(root):
     g.link(g.value("Strength", prop="strength"), emission.inputs["Strength"])
     release = g.stage("Late Extinction", p, 0.64, 1)
     threshold = g.m(
+        "Living Flame Separates Toward The Crown",
+        "MULTIPLY_ADD",
+        g.m("Upper Flame Breakup", "POWER", u, 1.25),
+        0.36,
+    )
+    threshold.node.inputs[2].default_value = 0.18
+    # Keep the narrow crown's leading edge. Eroding its whole height equally
+    # leaves a round middle bulge after the pointed top has disappeared.
+    threshold = g.m(
+        "Pointed Crown Outlives The Cleft",
+        "SUBTRACT",
+        threshold,
+        g.m(
+            "Keep Thin Rising Tips", "MULTIPLY", g.stage("Above The Last Fork", u, 0.72, 0.98), 0.18
+        ),
+    )
+    phase = g.m("Rising Cleft Phase", "SUBTRACT", g.m("Cleft Height", "MULTIPLY", u, 12), clock)
+    lobe = g.n("ShaderNodeAttribute", "Each Tongue's Flow Phase", attribute_name="fire_lobe")
+    phase = g.m(
+        "Cleft Follows Its Own Neck",
+        "SUBTRACT",
+        phase,
+        g.m("Tongue Phase", "MULTIPLY", lobe.outputs["Fac"], 1.9),
+    )
+    threshold = g.m(
+        "Forks Open Between Rising Bulges",
+        "ADD",
+        threshold,
+        g.m(
+            "Clefts Leave The Foot Intact",
+            "MULTIPLY",
+            g.stage("Fork Above Ground", u, 0.15, 0.55),
+            g.m("Alternating Cleft Depth", "MULTIPLY", g.m("Rising Cleft", "SINE", phase), 0.08),
+        ),
+    )
+    threshold = g.m(
         "Fuel Erosion",
         "ADD",
-        g.value("Dissolve", prop="dissolve"),
-        g.m("Breaking Last Tongues", "MULTIPLY", release, 0.65),
+        g.m(
+            "Editable Dissolve And Living Crown",
+            "ADD",
+            threshold,
+            g.value("Dissolve", prop="dissolve"),
+        ),
+        g.m(
+            "Breaking Last Tongues",
+            "MULTIPLY",
+            g.m("Editable Extinction", "MULTIPLY", release, g.value("Fade", prop="fade")),
+            g.m(
+                "Fuel Stops At The Foot First",
+                "ADD",
+                0.15,
+                g.m(
+                    "Unfed Flame Base",
+                    "MULTIPLY",
+                    g.m("Height Above The Fuel", "SUBTRACT", 1, u),
+                    0.55,
+                ),
+            ),
+        ),
     )
     alive = g.stage(
         "Soft Broken Heat Edge",
         g.m("Heat Above Erosion", "SUBTRACT", noise.outputs["Fac"], threshold),
         0,
-        0.1,
+        0.035,
     )
     air = g.n("ShaderNodeBsdfTransparent", "Air Between Flame Tongues")
     mix = g.n("ShaderNodeMixShader", "Flame Erosion")
@@ -235,7 +349,7 @@ def create(context, quality="MEDIUM"):
         flame[f"color_{index}"] = 1.0
     for name, value, maximum in (
         ("Fire Height", 2.2, 30),
-        ("Fire Flow Speed", 16.0, 100),
+        ("Fire Flow Speed", 22.0, 100),
         ("Fire Curl", 0.6, 5),
     ):
         flame[name] = value
