@@ -1,6 +1,6 @@
 # 原生效果入门库
 
-**main 包含 8 种完整效果、18 个资产文件。** 原三套使用 Low；新增五套默认 Medium，`quality/` 目录另提供各自的 Low 和 High。质量文件属于同一种效果。
+**main 包含 8 种完整效果、18 个资产文件。** Energy Charge、Arc Slash、Impact Burst 使用 Low；其余五套默认 Medium，`quality/` 目录另提供各自的 Low 和 High。质量文件属于同一种效果。
 
 项目尚未正式分发。使用成功 [开发构建](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 的 `blender-vfx-studio-extension` 附件，或从源码构建。实际画面见 [角色镜头图集](LIBRARY_GALLERY.md)。
 
@@ -34,7 +34,16 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 粒子层的 **Spawn Radius** 控制出生距离，正的 **Velocity** 越大，抵达中心越快；抵达后停止，不穿过中心向外飞。粒子在控制器局部空间运动，移动整体也会移动已出生粒子，不保留角色走过的世界轨迹。
 
-私有造型控制位于对应层的 Geometry Nodes，白色阈值位于核心材质：
+选择 **Charge • Compressed Core**，侧栏的 **Core Focus** 集中常用控制：
+
+| 侧栏控制 | 作用 |
+| --- | --- |
+| **Stored Core Size** | 蓄满时内部能量团的相对大小，不扩大外围进流 |
+| **Compression** | 积蓄时压低内核并撑开截面；0 关闭，有效范围 0–0.85 |
+| **Release Stretch** | 释放时沿局部 Z 轴拉伸此层 |
+| **Advanced Shape → Initial Core Size / Release Pinch** | 初始内核大小与释放时收腰；一般不必先改这两项 |
+
+**组合的 Scale** 改变整套效果；核心层的 **Radius** 改变该层的内核与主进流；**Stored Core Size** 只改变内部积蓄，不是另一套整体尺寸。其他局部造型留在对应层的 Geometry Nodes，白色阈值位于核心材质：
 
 | 控制 | 作用 |
 | --- | --- |
@@ -53,8 +62,8 @@ examples ZIP 是资产库，**不是插件安装包**。
 这是单层程序化刀光，与侧栏创建使用同一生成器，资产时长为 18 帧。
 
 1. 选择 **Clean** 获得平整连续的基础刀光，或 **Stylized** 使用钩形、分面与破碎残弧。
-2. 在 **Shape / Motion** 调整弧度、宽度、展开速度和残弧。**Depth Bend=0** 关闭深度弯折，**Contour=0** 关闭额外轮廓扰动。
-3. 用 **Body / Blade** 原生颜色选择器编辑主体和锋刃；主体颜色也用于残弧。右侧菱形可给颜色插入关键帧。
+2. 在 **Shape / Motion** 调整弧度、宽度、展开速度和残弧。**Depth Bend=0** 关闭深度弯折，**Contour=0** 关闭额外几何轮廓扰动；需要保留不规则轮廓时，**Hook / Inner Notches** 可分别调整前端钩形与几何内缘。
+3. 用 **Body / Blade** 原生颜色选择器编辑主体和锋刃；主体颜色也用于残弧。右侧插帧按钮可给颜色插入关键帧。
 4. 要手动保持连续轮廓，关闭 **Surface Cuts、Noise Erosion、Dissolve**，并将 **Fragment Release** 设为 0；此时 **Fade** 控制连续淡出。
 
 风格按钮只改参数，不重建节点；尺寸、配色和整体时间保持不变。各控制的区别见 [刀光编辑](USAGE.md#编辑刀光)。实际图像和检查限制见 [艺术控制审查](ART_CONTROLS_REVIEW.md)。
@@ -71,7 +80,7 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 主干先落地，再做两次逐渐减弱的复击，第一峰值在 Start+2 左右。接触闪光短促，火花和地面余波随后退去。
 
-**Radius / Width / Strength** 调整分支横向范围、线宽与光量，**Noise Scale / Dissolve** 调整细扰动和侵蚀。主层 Geometry Nodes 的 **Bolt Length / Branch Reach** 调整高度和分支伸展。
+**Radius / Width / Strength** 调整分支横向范围、线宽与光量，**Noise Scale / Dissolve** 调整细扰动和侵蚀。选择主干层，在侧栏 **Bolt Shape → Bolt Length / Branch Reach** 直接调整高度和分支伸展。**Radius** 改变整层横向范围，**Branch Reach** 从各分叉的连接处伸缩，不改变主干高度。放电仍采用默认一次主击与两次复击。
 
 已查看高清角色阶段图、全部隔帧样本与无插件重开。远景细枝和接触火花仍弱；范围与成本见 [闪电记录](LIGHTNING_REVIEW.md)。
 
@@ -87,7 +96,13 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 三团不等高的外焰围绕较小的热芯，持续产生上升余烬。主焰在 48 帧内点燃、维持并断燃，余烬晚四帧结束，完整资产为 52 帧。
 
-**Width / Noise Scale / Strength / Dissolve / Fade** 控制宽度、流动色带、光量和退场。选择主焰层，在侧栏 **Shape / Motion** 使用 **Fire Height / Fire Flow Speed / Fire Curl** 调整高度、上卷节奏与火舌形变。**Heat Palette → Orange / Blue / Green** 直接替换主焰原生色带的五种颜色，并把 **Heat Tint** 归为白色；不会重建节点或改变几何。**Heat Tint** 用于在现有色带上乘色，不适合单独把橙火变为蓝火。需要自定热芯和边缘颜色时展开 **Edit Heat Ramp**；余烬是独立层，可用其颜色选择器调整。色带和手动节点请用 **Save Complete Effect** 保存，参数 JSON 不包含色带。
+**Width / Noise Scale / Strength / Dissolve / Fade** 控制宽度、流动色带、光量和退场。选择主焰层，在侧栏 **Shape / Motion** 使用 **Fire Height / Fire Flow Speed / Fire Curl** 调整高度、上卷节奏与火舌形变。
+
+换色时：
+
+1. 选择 **Fire • Sculpted Tongues**，点击 **Heat Palette → Orange / Blue / Green**。按钮直接修改主焰原生色带，并将乘色 **Heat Tint** 归为白色，不重建节点或改变几何。
+2. 需要自定热芯和边缘颜色时，展开 **Edit Heat Ramp**，修改五个色点。Heat Tint 适合整体乘色，单独用它不容易把橙火变成蓝火。
+3. 余烬是独立层，用该层的颜色选择器调整。最后使用 **Save Complete Effect** 保存色带和手动节点；参数 JSON 不包含这些数据。
 
 三档改变截面细节和余烬生成率。已实际查看高清、明暗与远景、全部隔帧样本和三档预览；中段大火面与远景细余烬仍需改善。见 [火焰记录](FIRE_REVIEW.md)。
 

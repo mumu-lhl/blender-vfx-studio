@@ -46,7 +46,7 @@
 1. 在 VFX 面板点击 **Create Mesh VFX**。
 2. 选择 **Arc Slash**、**Impact Burst**、**Shockwave** 或 **Energy Ring**，再选择质量。
 3. 切换到 **Material Preview** 或 **Rendered**，播放时间轴。
-4. 修改颜色、尺寸和时间；数值可右键选择 **Insert Keyframe**，颜色使用选择器旁的菱形插入关键帧。
+4. 修改颜色、尺寸和时间；数值可右键选择 **Insert Keyframe**，颜色使用选择器旁的插帧按钮插入关键帧。
 
 效果在 **3D Cursor** 处创建，以当前帧开始。移动、旋转或缩放 Empty 控制器，就能变换整个效果；选中网格也能查看所属效果的参数。
 
@@ -76,7 +76,7 @@
 | Character Dash Echoes | 捕获角色姿态，制作冲刺残影 | 捕获自己的角色姿态 |
 | Calligraphic Magic Circle | 逐笔形成、转动与立体符记释放 | 笔画形成、反向转动与符记升起 |
 
-main 现有 **8 种完整效果、18 个资产文件**。原三套保留 Low，新五套各提供 Low / Medium / High；质量文件不作为额外种类。当前源码和开发构建包含这些资产。
+main 现有 **8 种完整效果、18 个资产文件**。Energy Charge、Arc Slash、Impact Burst 提供 Low，其余五套各提供 Low / Medium / High；质量文件不作为额外种类。当前源码和开发构建包含这些资产。
 
 新增效果的真实 Eevee 图像见 **[角色镜头图集](docs/LIBRARY_GALLERY.md)**。图集保留实际画面，包括远景弱细节等问题；不代表全部效果已达到商业成片品质。
 
@@ -95,7 +95,7 @@ main 现有 **8 种完整效果、18 个资产文件**。原三套保留 Low，�
 
 例如，Start=1、Duration=24、Speed=1 时，第 1–24 帧可见，第 25 帧隐藏；Speed=2 时，第 13 帧开始隐藏。以上采用默认场景时间映射。
 
-侧栏按 **Shape / Motion / Color / Material / Dissolve** 分组。刀光可切换 **Clean / Stylized**，主体与锋刃可以分别换色；火焰主层提供 **Orange / Blue / Green** 热色色带。
+选中效果后，创建入口收在 **Create / Load**，颜色与常用编辑直接可见；**Shape / Motion / Material / Dissolve** 可分别折叠。刀光可切换 **Clean / Stylized**，主体与锋刃可以分别换色；火焰主层提供 **Orange / Blue / Green** 热色色带。
 
 调整面板参数不会重建节点，可以继续编辑网格、Geometry Nodes 和材质。组合中的各层也能单独修改。场景中复制、删除请使用 **VFX Duplicate / Delete**，相关操作支持 Undo。
 
@@ -104,7 +104,7 @@ main 现有 **8 种完整效果、18 个资产文件**。原三套保留 Low，�
 | 要保留什么 | 使用方式 |
 | --- | --- |
 | 完整造型、节点、参数动画、各层关系、轨迹或已烘焙运动 | **Save Complete Effect**，保存为 `.blend` |
-| 一组参数数值，用于重新创建基础模块 | **Save Preset**，保存为 JSON |
+| 一组参数数值，用于重新创建基础模块 | **Save Parameters (JSON)**，保存为 JSON |
 
 **手动改过节点，或使用完整入门资产时，优先保存完整效果。** 参数 JSON 不包含私有造型、手动节点和关键帧。静态贴图可打包进 `.blend`；图片序列仍需保留外部文件。
 
@@ -130,5 +130,13 @@ blender -b --factory-startup --python-exit-code 1 --python tools/build_examples.
 ```
 
 构建结果在 `dist/`，`BLENDER_BIN` 可指定 Blender 路径。未发布的构建也可从 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 成功运行的 `blender-vfx-studio-extension` 附件下载。
+
+开发时使用与 CI 相同的 **Ruff 0.14.1** 检查代码；项目配置会拒绝其他版本，避免格式检查结果不一致：
+
+```sh
+python -m pip install ruff==0.14.1
+ruff check blender_vfx_studio tools tests
+ruff format --check blender_vfx_studio tools tests
+```
 
 许可证：**[GPL-3.0-or-later](LICENSE)**。测试角色的来源和独立许可见 [角色资产说明](assets/character-review/README.md)。

@@ -10,9 +10,10 @@ import bpy
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 import blender_vfx_studio as addon  # noqa: E402
-from blender_vfx_studio import assets, composition, core, palettes, presets, slash  # noqa: E402
+from blender_vfx_studio import assets, composition, core, palettes, presets, slash, ui  # noqa: E402
 from blender_vfx_studio.animation import curves  # noqa: E402
 from blender_vfx_studio.parameters import SLASH_ART_PARAMETERS  # noqa: E402
+from tools.build_examples import create_effect  # noqa: E402
 from tools.fire_asset import create as create_fire  # noqa: E402
 
 
@@ -22,6 +23,32 @@ def points(root, frame):
         tuple(v.co)
         for v in root.children[0].evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices
     ]
+
+
+def freeze_optional_geometry_controls(root, keys):
+    paths = {f'["{key}"]' for key in keys}
+    tree = root.children[0].modifiers[0].node_group
+    for curve in list(tree.animation_data.drivers):
+        if any(
+            t.id == root and t.data_path in paths for v in curve.driver.variables for t in v.targets
+        ):
+            tree.driver_remove(curve.data_path)
+
+
+def wrap_geometry(tree):
+    # Like grouping nodes inside the existing tree, retain modifier socket identifiers.
+    wrapper = tree.copy()
+    wrapper.name = "Artist Geometry Wrapper"
+    wrapper.animation_data_clear()
+    wrapper.nodes.clear()
+    inp = wrapper.nodes.new("NodeGroupInput")
+    out = wrapper.nodes.new("NodeGroupOutput")
+    group = wrapper.nodes.new("GeometryNodeGroup")
+    group.node_tree = tree
+    for socket in group.inputs:
+        wrapper.links.new(inp.outputs[socket.name], socket)
+    wrapper.links.new(group.outputs["Geometry"], out.inputs["Geometry"])
+    return wrapper
 
 
 class ArtControlsTests(unittest.TestCase):
@@ -48,6 +75,44 @@ class ArtControlsTests(unittest.TestCase):
         self.assertIn("Artist Note", material.nodes)
         bpy.ops.vfx_studio.slash_style(style="STYLIZED")
         self.assertEqual(points(root, 5), shaped)
+
+    def test_hook_and_inner_geometry_are_independent_with_contour_as_master(self):
+        root = slash.create(bpy.context, "LOW")
+        root["bank"] = 0.0
+        root.update_tag()
+        before = points(root, 5)
+        edge = [
+            i
+            for i, item in enumerate(root.children[0].data.attributes["vfx_inner"].data)
+            if item.value == 0
+        ]
+        root["inner_notches"] = 0.0
+        root.update_tag()
+        no_notches = points(root, 5)
+        self.assertNotEqual(no_notches, before)
+        self.assertEqual([no_notches[i] for i in edge], [before[i] for i in edge])
+        root["hook"] = 0.0
+        root.update_tag()
+        no_hook = points(root, 5)
+        self.assertNotEqual([no_hook[i] for i in edge], [no_notches[i] for i in edge])
+        root["contour"] = 0.0
+        root.update_tag()
+        plain = points(root, 5)
+        root["hook"], root["inner_notches"] = 1.0, 1.0
+        root.update_tag()
+        self.assertEqual(points(root, 5), plain)
+        self.assertTrue(all(p[2] == 0 for p in plain))
+
+    def test_saved_slash_keeps_styles_without_adding_shape_controls(self):
+        root = slash.create(bpy.context, "LOW")
+        freeze_optional_geometry_controls(root, ("hook", "inner_notches"))
+        del root["hook"], root["inner_notches"]
+        slash.apply_style(root, "CLEAN")
+        self.assertNotIn("hook", root)
+        self.assertNotIn("inner_notches", root)
+        self.assertTrue(all(p[2] == 0 for p in points(root, 5)))
+        slash.apply_style(root, "STYLIZED")
+        self.assertNotIn("hook", root)
 
     def test_color_picker_keys_native_channels(self):
         root = slash.create(bpy.context, "LOW")
@@ -87,6 +152,7 @@ class ArtControlsTests(unittest.TestCase):
         emit.name = "Artist Surface"
         out = material.nodes.new("ShaderNodeOutputMaterial")
         material.links.new(emit.outputs[0], out.inputs["Surface"])
+        freeze_optional_geometry_controls(root, SLASH_ART_PARAMETERS)
         for key in SLASH_ART_PARAMETERS:
             del root[key]
         root.vfx_primary_color = (0.8, 0.3, 0.1)
@@ -135,6 +201,82 @@ class ArtControlsTests(unittest.TestCase):
             palettes.apply_fire(flame, "BLUE")
         self.assertEqual([tuple(e.color) for e in ramp.color_ramp.elements], before)
 
+    def test_existing_core_focus_values_change_native_geometry(self):
+        group = create_effect("energy-charge")
+        member = next(m for m in composition.members(group) if "Compressed Core" in m.name)
+        modifier = member.children[0].modifiers[0]
+        modifier.node_group = wrap_geometry(modifier.node_group)
+        values = ui._native_shape_values(member)
+        for name, frame, a, b in (
+            ("Nucleus Stored Size", 36, 1.9, 2.8),
+            ("Nucleus Compression", 36, 0, 0.85),
+            ("Release Stretch", 44, 0, 2),
+        ):
+            socket = values[name][1]
+            socket.default_value = a
+            before = points(member, frame)
+            socket.default_value = b
+            self.assertNotEqual(points(member, frame), before, name)
+        path = ROOT / "work/artist-grouped-charge.blend"
+        assets.write(path, group)
+        loaded = assets.load(bpy.context, path)
+        loaded_core = next(m for m in composition.members(loaded) if "Compressed Core" in m.name)
+        self.assertEqual(points(loaded_core, 44), points(member, 44))
+        # A hand-written driver owns this value; do not offer a misleading editable field.
+        socket = values["Nucleus Stored Size"][1]
+        socket.driver_add("default_value").driver.expression = "2.8"
+        self.assertNotIn("Nucleus Stored Size", ui._native_shape_values(member))
+
+    def test_native_bolt_values_change_length_and_branch_span(self):
+        group = create_effect("lightning-strike")
+        member = next(
+            m for m in composition.members(group) if "Bolt Length" in ui._native_shape_values(m)
+        )
+        values = ui._native_shape_values(member)
+        before = points(member, 3)
+        values["Bolt Length"][1].default_value = 4.8
+        after = points(member, 3)
+        self.assertGreater(max(v[2] for v in after), max(v[2] for v in before) * 1.2)
+        values["Branch Reach"][1].default_value = 0.2
+        short = points(member, 3)
+        values["Branch Reach"][1].default_value = 1.8
+        wide = points(member, 3)
+        self.assertGreater(max(abs(v[0]) for v in wide), max(abs(v[0]) for v in short))
+
+    def test_custom_profile_hides_controls_its_saved_nodes_do_not_read(self):
+        flame = next(
+            m for m in composition.members(create_fire(bpy.context)) if palettes.fire_ramp(m)
+        )
+        # Keep the artist's static flow value and all graph links; it no longer reads this property.
+        for child in flame.children:
+            for modifier in child.modifiers:
+                if modifier.type == "NODES":
+                    tree = modifier.node_group
+                    for curve in list(tree.animation_data.drivers):
+                        if any(
+                            t.id == flame and t.data_path == '["Fire Flow Speed"]'
+                            for v in curve.driver.variables
+                            for t in v.targets
+                        ):
+                            tree.driver_remove(curve.data_path)
+        drawn = []
+        modifier = flame.children[0].modifiers[0]
+        modifier.node_group = wrap_geometry(modifier.node_group)
+
+        class Layout:
+            def panel(self, *args, **kwargs):
+                return self, self
+
+            def prop(self, owner, path, **kwargs):
+                drawn.append(path)
+
+            def __getattr__(self, name):
+                return lambda *a, **kw: self
+
+        ui._draw_art_parameters(Layout(), bpy.context, flame, ("width", "Fire Flow Speed"))
+        self.assertIn('["width"]', drawn)
+        self.assertNotIn('["Fire Flow Speed"]', drawn)
+
 
 addon.register()
 result = unittest.TextTestRunner(verbosity=2).run(
@@ -164,6 +306,34 @@ fire["expected_heat_colors"] = [
 ]
 for frame in (8, 20, 44):
     fire[f"expected_shape_{frame}"] = [c for p in points(flame, frame) for c in p]
+for key, saved_name, changes, frames in (
+    (
+        "energy-charge",
+        "Persisted Adjustable Charge",
+        {"Nucleus Stored Size": 2.8, "Nucleus Compression": 0.8, "Release Stretch": 2.0},
+        (18, 36, 44),
+    ),
+    (
+        "lightning-strike",
+        "Persisted Adjustable Lightning",
+        {"Bolt Length": 4.8, "Branch Reach": 1.4},
+        (3, 8, 12),
+    ),
+):
+    bpy.context.scene.frame_set(1)
+    group = create_effect(key)
+    group.name = saved_name
+    member = next(
+        m for m in composition.members(group) if set(changes) <= ui._native_shape_values(m).keys()
+    )
+    group["expected_member_name"] = member.name
+    modifier = member.children[0].modifiers[0]
+    modifier.node_group = wrap_geometry(modifier.node_group)
+    values = ui._native_shape_values(member)
+    for name, value in changes.items():
+        values[name][1].default_value = value
+    for frame in frames:
+        group[f"expected_shape_{frame}"] = [c for p in points(member, frame) for c in p]
 addon.unregister()
 assert not hasattr(bpy.types.Object, "vfx_primary_color")
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "work/art-controls.blend"))

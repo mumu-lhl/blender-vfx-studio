@@ -29,6 +29,8 @@ _ART_GROUPS = (
             "taper",
             "head_bias",
             "contour",
+            "hook",
+            "inner_notches",
             "bank",
             "size",
             "shape",
@@ -109,36 +111,97 @@ _EXTRA_ART_KEYS = {
     "Sigil Lift",
 }
 
+# These existing constant nodes already author the complete assets. Edit their
+# native sockets directly instead of adding a second controller value/driver.
+_NATIVE_SHAPE_VALUES = (
+    ("Nucleus Stored Size", "Stored Core Size", False),
+    ("Nucleus Compression", "Compression (0–0.85)", False),
+    ("Release Stretch", "Release Stretch", False),
+    ("Bolt Length", "Bolt Length", False),
+    ("Branch Reach", "Branch Reach", False),
+    ("Nucleus Seed Size", "Initial Core Size", True),
+    ("Release Pinch", "Release Pinch (0–1)", True),
+)
 
-def _driven_art_properties(root):
-    """Expose known custom art properties only when native drivers actually read them."""
+
+def _nested_trees(trees):
+    pending, seen = list(trees), set()
+    while pending:
+        tree = pending.pop()
+        if tree is None or tree in seen:
+            continue
+        seen.add(tree)
+        yield tree
+        pending.extend(n.node_tree for n in tree.nodes if getattr(n, "node_tree", None))
+
+
+def _native_shape_values(root):
+    found = {}
+    for child in root.children:
+        if child.get("vfx_role") != "layer" or child.get("vfx_id") != root["vfx_id"]:
+            continue
+        for modifier in child.modifiers:
+            if modifier.type != "NODES" or modifier.node_group is None:
+                continue
+            for tree in _nested_trees([modifier.node_group]):
+                driven = (
+                    {c.data_path for c in tree.animation_data.drivers}
+                    if tree.animation_data
+                    else set()
+                )
+                for name, label, advanced in _NATIVE_SHAPE_VALUES:
+                    node = tree.nodes.get(name)
+                    if node is None or node.type != "VALUE" or not node.outputs[0].is_linked:
+                        continue
+                    socket = node.outputs[0]
+                    if socket.path_from_id("default_value") not in driven:
+                        found.setdefault(name, (label, socket, advanced))
+    return found
+
+
+def _driven_parameters(root):
+    """Read actual native driver references without changing a saved graph."""
     trees = []
+    owners = [root]
     for obj in root.children:
+        owners.append(obj)
         if obj.type != "MESH":
             continue
+        owners.extend([obj.data, obj.data.shape_keys])
         trees += [m.node_group for m in obj.modifiers if m.type == "NODES" and m.node_group]
         trees += [m.node_tree for m in obj.data.materials if m and m.node_tree]
     paths = set()
-    for tree in trees:
-        if tree.animation_data:
-            for curve in tree.animation_data.drivers:
+    owners.extend(_nested_trees(trees))
+    for owner in owners:
+        animation = getattr(owner, "animation_data", None)
+        if animation:
+            for curve in animation.drivers:
+                if curve.mute:
+                    continue
                 for variable in curve.driver.variables:
                     for target in variable.targets:
                         if target.id == root:
                             paths.add(target.data_path)
-    return {key for key in _EXTRA_ART_KEYS if key in root and f'["{key}"]' in paths}
+    return {key for key in root.keys() if f'["{key}"]' in paths}
 
 
 def _draw_art_parameters(layout, context, root, keys):
-    remaining = {key for key in keys if key in root} | _driven_art_properties(root)
+    driven = _driven_parameters(root)
+    remaining = {key for key in keys if key in root}
+    if root.get("vfx_parameter_keys"):
+        remaining.intersection_update(driven)
+    remaining |= driven & _EXTRA_ART_KEYS
     for title, candidates in _ART_GROUPS:
         shown = [key for key in candidates if key in remaining]
         if not shown:
             continue
-        box = layout.box()
-        box.label(text=title)
-        for key in shown:
-            box.prop(root, f'["{key}"]', text=_ART_LABELS.get(key, key.replace("_", " ").title()))
+        header, body = layout.panel(f"vfx_art_{title.lower()}", default_closed=title != "Shape")
+        header.label(text=title)
+        if body is not None:
+            for key in shown:
+                body.prop(
+                    root, f'["{key}"]', text=_ART_LABELS.get(key, key.replace("_", " ").title())
+                )
         remaining.difference_update(shown)
     if remaining:
         layout.prop(context.window_manager, "vfx_advanced_controls", text="Advanced")
@@ -434,7 +497,8 @@ class VFX_OT_capture_dash(bpy.types.Operator):
         if self.last > self.first:
             spacing = (self.last - self.first) / (self.count - 1)
             layout.label(text=f"Pose spacing: {spacing:g} frames (subframes supported)")
-        layout.label(text="Keeps source mesh detail; more echoes increase render cost", icon="INFO")
+        layout.label(text="Keeps source mesh detail", icon="INFO")
+        layout.label(text="More echoes increase render cost")
 
     def invoke(self, context, event):
         self.last = context.scene.frame_current
@@ -734,7 +798,7 @@ class VFX_OT_export_preset(bpy.types.Operator, ExportHelper):
     bl_description = (
         "Save current parameter values to JSON; use Save Complete Effect for edited nodes or paths"
     )
-    bl_label = "Save VFX Preset"
+    bl_label = "Save Parameters (JSON)"
     filename_ext = ".json"
     filter_glob: StringProperty(default="*.json", options={"HIDDEN"})
 
@@ -750,7 +814,7 @@ class VFX_OT_export_preset(bpy.types.Operator, ExportHelper):
 class VFX_OT_import_preset(bpy.types.Operator, ImportHelper):
     bl_idname = "vfx_studio.import_preset"
     bl_description = "Create an independent effect from a validated parameter JSON file"
-    bl_label = "Load VFX Preset"
+    bl_label = "Load Parameters (JSON)"
     bl_options = {"REGISTER", "UNDO"}
     filename_ext = ".json"
     filter_glob: StringProperty(default="*.json", options={"HIDDEN"})
@@ -824,35 +888,46 @@ class VFX_PT_main(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator("vfx_studio.create", text="Create Mesh VFX", icon="ADD")
-        layout.operator("vfx_studio.create_flipbook", text="Create Flipbook", icon="IMAGE_DATA")
-        layout.operator(
-            "vfx_studio.create_sequence", text="Create Image Sequence", icon="FILE_IMAGE"
-        )
-        layout.operator(
-            "vfx_studio.create_particle", text="Create Particle Burst", icon="PARTICLES"
-        )
-        layout.operator(
-            "vfx_studio.create_emitter", text="Create Continuous Emitter", icon="PARTICLES"
-        )
-        layout.operator("vfx_studio.create_screen", text="Add Screen VFX", icon="RENDERLAYERS")
-        layout.operator(
-            "vfx_studio.create_shield", text="Create Energy Shield", icon="SHADING_RENDERED"
-        )
-        layout.operator(
-            "vfx_studio.create_simulation", text="Create Cloth Simulation", icon="MOD_CLOTH"
-        )
-        layout.operator("vfx_studio.create_trail", text="Bake Ribbon Trail", icon="CURVE_PATH")
-        layout.operator("vfx_studio.capture_dash", text="Capture Dash Echoes", icon="MOD_TIME")
-        layout.operator(
-            "vfx_studio.compose", text="Compose Selected VFX", icon="OUTLINER_COLLECTION"
-        )
-        layout.operator("vfx_studio.import_preset", text="Load Preset", icon="IMPORT")
-        layout.operator("vfx_studio.import_asset", text="Load Complete Effect", icon="APPEND_BLEND")
+        error = None
         try:
             root = core.resolve(context.object)
-        except ValueError as error:
-            layout.label(text=str(error), icon="ERROR")
+        except ValueError as exc:
+            root, error = None, str(exc)
+        header, body = layout.panel(
+            "vfx_create_selected" if root is not None else "vfx_create_empty",
+            default_closed=root is not None,
+        )
+        header.label(text="Create / Load")
+        if body is not None:
+            body.operator("vfx_studio.create", text="Create Mesh VFX", icon="ADD")
+            body.operator("vfx_studio.create_flipbook", text="Create Flipbook", icon="IMAGE_DATA")
+            body.operator(
+                "vfx_studio.create_sequence", text="Create Image Sequence", icon="FILE_IMAGE"
+            )
+            body.operator(
+                "vfx_studio.create_particle", text="Create Particle Burst", icon="PARTICLES"
+            )
+            body.operator(
+                "vfx_studio.create_emitter", text="Create Continuous Emitter", icon="PARTICLES"
+            )
+            body.operator("vfx_studio.create_screen", text="Add Screen VFX", icon="RENDERLAYERS")
+            body.operator(
+                "vfx_studio.create_shield", text="Create Energy Shield", icon="SHADING_RENDERED"
+            )
+            body.operator(
+                "vfx_studio.create_simulation", text="Create Cloth Simulation", icon="MOD_CLOTH"
+            )
+            body.operator("vfx_studio.create_trail", text="Bake Ribbon Trail", icon="CURVE_PATH")
+            body.operator("vfx_studio.capture_dash", text="Capture Dash Echoes", icon="MOD_TIME")
+            body.operator(
+                "vfx_studio.compose", text="Compose Selected VFX", icon="OUTLINER_COLLECTION"
+            )
+            body.operator("vfx_studio.import_preset", text="Load Parameters (JSON)", icon="IMPORT")
+            body.operator(
+                "vfx_studio.import_asset", text="Load Complete Effect", icon="APPEND_BLEND"
+            )
+        if error:
+            layout.label(text=error, icon="ERROR")
             return
         if root is None:
             layout.label(text="Select a VFX controller or layer")
@@ -863,9 +938,11 @@ class VFX_PT_main(bpy.types.Panel):
                 "vfx_studio.export_asset", text="Save Complete Effect", icon="FILE_BLEND"
             )
         if root["vfx_module"] not in {"trail.ribbon", "core.composition", "simulation.cloth"}:
-            layout.operator("vfx_studio.export_preset", text="Save Preset", icon="EXPORT")
+            layout.operator(
+                "vfx_studio.export_preset", text="Save Parameters (JSON)", icon="EXPORT"
+            )
         else:
-            layout.label(text="Reuse with Duplicate or Save Complete Effect")
+            layout.label(text="Reuse: Save Complete Effect")
         row = layout.row(align=True)
         row.operator("vfx_studio.duplicate", text="Duplicate", icon="DUPLICATE")
         row.operator("vfx_studio.delete", text="Delete", icon="TRASH")
@@ -950,7 +1027,15 @@ class VFX_PT_main(bpy.types.Panel):
                 "streaks",
                 "breakup",
             )
-            keys += ("contour", "bank", "wake_spread", "surface_cuts", "fragment_release")
+            keys += (
+                "contour",
+                "hook",
+                "inner_notches",
+                "bank",
+                "wake_spread",
+                "surface_cuts",
+                "fragment_release",
+            )
         elif root["vfx_module"] == "simulation.cloth":
             from . import simulation
 
@@ -1063,7 +1148,6 @@ class VFX_PT_main(bpy.types.Panel):
         if isinstance(profile, str):
             visible = {key.strip() for key in profile.split(",")}
             keys = tuple(key for key in keys if key in visible)
-        _draw_art_parameters(layout, context, root, keys)
         color_box = layout.box()
         color_box.label(text="Color")
         row = color_box.row(align=True)
@@ -1092,10 +1176,26 @@ class VFX_PT_main(bpy.types.Panel):
             palette_box.prop(context.window_manager, "vfx_advanced_controls", text="Edit Heat Ramp")
             if context.window_manager.vfx_advanced_controls:
                 palette_box.template_color_ramp(heat_ramp, "color_ramp")
+        native_values = _native_shape_values(root)
+        if native_values:
+            box = layout.box()
+            box.label(
+                text="Bolt Shape"
+                if {"Bolt Length", "Branch Reach"} & native_values.keys()
+                else "Core Focus"
+            )
+            for label, socket, advanced in native_values.values():
+                if not advanced or context.window_manager.vfx_advanced_controls:
+                    box.prop(socket, "default_value", text=label)
+            if any(v[2] for v in native_values.values()):
+                box.prop(context.window_manager, "vfx_advanced_controls", text="Advanced Shape")
+        _draw_art_parameters(layout, context, root, keys)
         if root.get("vfx_parameter_keys"):
-            layout.label(text="Custom shape: save Complete Effect (.blend)", icon="INFO")
-        layout.label(text="Diamonds key colors; right-click other controls")
-        layout.label(text="Material Preview / Rendered shows shader")
+            layout.label(text="Nodes need Complete Effect", icon="INFO")
+            layout.label(text="JSON saves parameters only")
+        layout.label(text="Key buttons: insert color keys")
+        layout.label(text="Other controls: right-click")
+        layout.label(text="Preview: Material / Rendered")
 
 
 CLASSES = (

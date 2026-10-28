@@ -1,6 +1,6 @@
 # 开发进度与后续计划
 
-更新：2026-10-27（UTC）。目标 **Blender 5.2 LTS**，优先 Eevee，兼容 Cycles。**项目尚未正式分发，仅提供开发构建。** 当前实现可以调整，过时生成器和兼容性专用代码无需保留。
+更新：2026-10-28（UTC）。目标 **Blender 5.2 LTS**，优先 Eevee，兼容 Cycles。**项目尚未正式分发，仅提供开发构建。** 当前实现可以调整，过时生成器和兼容性专用代码无需保留。
 
 ## 当前重点
 
@@ -51,7 +51,8 @@
 
 - [PR #162](https://github.com/mumu-lhl/blender-vfx-studio/pull/162)：Clean / Stylized 刀光、独立锋刃配色、原生颜色选择器与关键帧、蓝／绿火焰色带、现有 Fire / Dust / Magic 控制分组、Ground Veil Fade 修复。多阶段 Eevee 图已实际读取，Clean 与蓝焰无插件高清重开像素一致，完整后台与安装检查通过；CI 仍以 PR 的最终状态为准。
 - [#163](https://github.com/mumu-lhl/blender-vfx-studio/issues/163)：独立 Echo Count 与任意跨度的均匀子帧捕获，保留源网格细节；八项捕获测试与无源重开通过；五姿态角色的三个高清阶段及暗背景已读取，原生重渲染像素一致。浅背景旧影仍淡，详见 [采样记录](docs/DASH_SAMPLING_REVIEW.md)。
-- Energy Charge 核心／外围权重、Impact 主次调节、Lightning 长度与放电控制仍待后续实施；不为已隐藏的无效 Impact 参数重复制造任务。
+- [PR #165](https://github.com/mumu-lhl/blender-vfx-studio/pull/165)：充能核心大小／压缩／释放、闪电长度／分支集中访问；Hook 与几何内缘分别控制。18 张角色对照、刀光隔离图与默认峰值／尾部像素对照已实际查看，11 项艺术控制、10 项刀光、8 项残影回归与无插件重开通过。手工嵌套节点及完整保存保留，JSON 入口明确命名；Linux 默认缩放已检查折叠、原生色轮／RGB 插帧、热色色带和五姿态捕获；其他平台／缩放与实时播放未验收。
+- Energy Charge 核心／外围视觉权重、Impact 主次调节、Lightning 放电节奏仍待后续实施；集中编辑入口不等于已经完成这些艺术改进。
 
 ## 下一步
 

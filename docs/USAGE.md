@@ -24,17 +24,20 @@ Arc Slash 无需角色或采样路径，直接生成可编辑刀面与两条残�
 | 设置 | 直接影响什么 |
 | --- | --- |
 | **Shape → Arc / Width / Taper** | 弧度、刀面宽度和收尖；Leading Weight 将宽度偏向前端 |
-| **Shape → Contour / Depth Bend** | 额外钩形与轮廓扰动、三维弯折；分别设为 0 可关闭，Depth Bend=0 时所有刀面位于局部 XY 平面 |
+| **Shape → Contour / Hook / Inner Notches** | Contour 是额外几何轮廓的总强度；Hook 单独控制前端钩形，Inner Notches 单独控制几何内缘起伏；各项 0 关闭相应部分 |
+| **Shape → Depth Bend** | 三维弯折；0 时所有刀面位于局部 XY 平面 |
 | **Motion → Attack / Spin / Motion Ease** | 展开所占时间、总转角和减速；Spin 的正负值改变挥斩方向 |
 | **Motion → Wake Amount / Wake Spread** | 残弧面积与角度分离；Wake Amount=0 关闭残弧 |
-| **Color → Body / Blade** | 主体与残弧共用主体颜色，锋刃可独立换色；右侧菱形给实际 RGB 通道插入关键帧 |
+| **Color → Body / Blade** | 主体与残弧共用主体颜色，锋刃可独立换色；右侧插帧按钮给实际 RGB 通道插入关键帧 |
 | **Material → Blade Width / Brush Detail / Surface Cuts** | 锋刃宽度、笔触对比和固定缺口；Surface Cuts=0 关闭固定裁切与残弧分段 |
 | **Dissolve → Noise Erosion / Dissolve** | 挥斩后的噪声侵蚀与整体溶解；两项均为 0 时关闭噪声侵蚀 |
 | **Dissolve → Fade / Fragment Release** | 淡出量与退场方式；Fragment Release=0 使用连续透明淡出，1 使用分段退场 |
 
+**Inner Notches 改几何轮廓，Surface Cuts 改材质切口。** 关闭前者不代表关闭材质破碎；要回到完全平整连续的基础形态，直接选择 Clean，再逐项添加需要的扰动。
+
 例如，先选 **Clean**，再把 **Body** 设为橙色、**Blade** 设为浅黄色，可以制作暖色连续刀光。需要有色残弧时再增加 **Wake Amount**，不必同时开启轮廓扰动或材质破碎。
 
-侧栏按 **Shape / Motion / Color / Material / Dissolve** 组织参数，其余控制收在 **Advanced**。颜色选择器编辑的是保存于控制器的 RGB 数值；用旁边的菱形制作颜色动画，保存后无需插件也能播放。普通数值仍可右键插入关键帧。
+选中效果时，创建入口收在 **Create / Load**；展开即可创建或载入其他效果。配色置于常用编辑区，**Shape / Motion / Material / Dissolve** 可以分别折叠，其余控制收在 **Advanced**。颜色选择器编辑的是保存于控制器的 RGB 数值；用旁边的插帧按钮制作颜色动画，保存后无需插件也能播放。普通数值仍可右键插入关键帧。
 
 旋转控制器即可改变挥斩方向；Start / Duration / Speed / Loop 控制整体播放。Low / Medium / High 分别使用 32 / 64 / 128 个沿弧分段。保留网格的 `vfx_arc`、`vfx_inner` 和 `vfx_wake` 属性，它们记录沿弧位置、横向宽度和残影编号。需要雕改最终网格时，先复制，再应用 Geometry Nodes 修改器。跟随武器路径的采样刀带请使用 **Ribbon Trail**。
 
@@ -264,9 +267,9 @@ Screen 依赖场景合成链，图片序列依赖外部文件；两者继续使�
 
 ## 保存和管理预设
 
-选择效果后点击 **Save Preset** 导出参数 JSON，点击 **Load Preset** 读取文件，在当前帧和 3D Cursor 创建独立实例。它保存当前参数值、名称和质量，Flipbook 另存图片路径；不保存开始帧、绑定、变换、关键帧、图片内容或编辑后的节点。完整资产使用前文的 `.blend` 效果文件。
+选择效果后点击 **Save Parameters (JSON)** 导出参数 JSON，点击 **Load Parameters (JSON)** 读取文件，在当前帧和 3D Cursor 创建独立实例。它保存当前参数值、名称和质量，Flipbook 另存图片路径；不保存开始帧、绑定、变换、关键帧、图片内容或编辑后的节点。完整资产使用前文的 `.blend` 效果文件。
 
-**User Preset Library** 面板提供用户库。点击 Refresh 读取列表，Save New 保存并命名，Create 创建效果，Rename 改名，Delete File 删除选中的 JSON。短标识用于区分同名条目。同名保存不会覆盖旧文件。文件删除先确认且不能 Undo，也不影响已创建的场景效果。
+**Parameter Library (JSON)** 面板提供用户库。点击 Refresh 读取列表，Save New 保存并命名，Create 创建效果，Rename 改名，Delete File 删除选中的 JSON。短标识用于区分同名条目。同名保存不会覆盖旧文件。文件删除先确认且不能 Undo，也不影响已创建的场景效果。
 
 库放在 Blender 用户 DATAFILES 目录下的 `blender_vfx_studio/presets/`，不随 `.blend` 保存，卸载插件也不会自动删除。可以把外部参数 JSON 复制到该目录后刷新。最多 256 个 JSON 文件；损坏、超大和符号链接条目会被报告。Flipbook 图片缺失时会报错，不创建残缺实例，也不修改预设文件。
 

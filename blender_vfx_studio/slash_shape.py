@@ -1,4 +1,4 @@
-"""Build version-3 silhouette and depth fields; playback uses native nodes only."""
+"""Build editable silhouette and depth fields; playback uses native nodes only."""
 
 from .nodes import drive, node
 
@@ -49,6 +49,7 @@ def shape(tree, root, u, across, band, progress, radius, offset):
     hook = mathn("Hook Limits", "MAXIMUM", hook, 0)
     hook = mathn("Pointed Hook", "POWER", hook, 1.5)
     hook = mathn("Hook Reach", "MULTIPLY", hook, 0.3)
+    hook = mathn("Editable Leading Hook", "MULTIPLY", hook, value("Hook", "hook"))
     contour_field = mathn("Authored Edge", "ADD", wave, hook)
     contour_field = mathn("Tapered Edge", "MULTIPLY", contour_field, envelope)
     contour_field = mathn("Contour Amount", "MULTIPLY", contour_field, contour)
@@ -76,6 +77,9 @@ def shape(tree, root, u, across, band, progress, radius, offset):
         opening = mathn(label + " Moving Tear", "MULTIPLY", opening, pulse)
         tooth = mathn(label + " Contribution", "ADD", tooth, opening)
     tooth = mathn("Editable Teeth", "MULTIPLY", tooth, contour)
+    tooth = mathn(
+        "Independent Inner Notches", "MULTIPLY", tooth, value("Inner Notches", "inner_notches")
+    )
     tooth = mathn("Full Inner Width", "ADD", 1, tooth)
     offset = mathn("Torn Inner Edge", "MULTIPLY", offset, tooth)
     depth_phase = mathn("Bank Along Arc", "MULTIPLY", u, 3.8)

@@ -268,8 +268,10 @@ STYLE_KEYS = (
     "fragment_release",
 )
 STYLE_VALUES = {
-    "STYLIZED": {key: SLASH_PARAMETERS[key][0] for key in STYLE_KEYS},
+    "STYLIZED": {key: SLASH_PARAMETERS[key][0] for key in (*STYLE_KEYS, "hook", "inner_notches")},
     "CLEAN": {
+        "hook": 1.0,
+        "inner_notches": 1.0,
         "contour": 0.0,
         "bank": 0.0,
         "head_bias": 0.3,
@@ -292,7 +294,8 @@ def apply_style(root, style):
     if not all(key in root for key in STYLE_KEYS):
         raise ValueError("This custom shader keeps its saved controls; edit its native nodes")
     for key, value in STYLE_VALUES[style].items():
-        root[key] = value
+        if key in root:
+            root[key] = value
     root.update_tag()
     bpy.context.view_layer.update()
     return root

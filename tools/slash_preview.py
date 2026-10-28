@@ -83,6 +83,9 @@ def main():
     parser.add_argument("--style", choices=("DEFAULT", "CLEAN", "STYLIZED"), default="DEFAULT")
     parser.add_argument("--body-color", type=float, nargs=3, metavar=("R", "G", "B"))
     parser.add_argument("--blade-color", type=float, nargs=3, metavar=("R", "G", "B"))
+    parser.add_argument("--contour", type=float)
+    parser.add_argument("--hook", type=float)
+    parser.add_argument("--inner-notches", type=float)
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
     if not bpy.app.background or "--factory-startup" not in sys.argv or bpy.data.filepath:
         raise RuntimeError("Use a fresh background process with --factory-startup and no project")
@@ -93,6 +96,9 @@ def main():
     for color in (args.body_color, args.blade_color):
         if color is not None and any(not 0 <= c <= 1 for c in color):
             parser.error("Color channels must be within 0–1")
+    shape_values = {"contour": args.contour, "hook": args.hook, "inner_notches": args.inner_notches}
+    if any(value is not None and not 0 <= value <= 1 for value in shape_values.values()):
+        parser.error("Contour, Hook and Inner Notches must be within 0–1")
     sources = [
         "blender_vfx_studio/" + name + ".py"
         for name in ("slash", "slash_shape", "slash_shader", "parameters", "registry")
@@ -113,6 +119,9 @@ def main():
     )
     if args.style != "DEFAULT":
         slash.apply_style(root, args.style)
+    for key, value in shape_values.items():
+        if value is not None:
+            root[key] = value
     for prefix, color in (("color", args.body_color), ("blade_color", args.blade_color)):
         if color is not None:
             for i, channel in enumerate(color):
@@ -127,6 +136,9 @@ def main():
     prefix += "-pale" if args.pale else ""
     prefix += "-agx" if args.view_transform == "AgX" else ""
     prefix += "" if args.style == "DEFAULT" else "-" + args.style.lower()
+    for key, value in shape_values.items():
+        if value is not None:
+            prefix += f"-{key}-{value:g}"
     for label, color in (("body", args.body_color), ("blade", args.blade_color)):
         if color is not None:
             prefix += "-" + label + "-" + "-".join(f"{c:g}" for c in color)
@@ -148,6 +160,7 @@ def main():
             {
                 "asset_version": root["vfx_asset_version"],
                 "style": args.style,
+                "shape_values": {key: root[key] for key in shape_values},
                 "body_color": [root[f"color_{i}"] for i in range(3)],
                 "blade_color": [root[f"blade_color_{i}"] for i in range(3)],
                 "engine": args.engine,
