@@ -9,7 +9,7 @@ from array import array
 from pathlib import Path
 
 import bpy
-from mathutils import Vector
+from mathutils import Euler, Vector
 
 assert not any("blender_vfx_studio" in name for name in sys.modules)
 folder = Path(bpy.data.filepath).parent
@@ -38,6 +38,20 @@ assert core.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices, 
     "The charge focus must survive until the slash begins"
 )
 scene.frame_set(53)
+pressure = bpy.data.objects["Combat • Impact Burst"]
+body = next(child for child in pressure.children if "Main Shards" in child.name).children[0]
+rotation = (
+    body.modifiers[0]
+    .node_group.nodes["Pressure Surface Alignment"]
+    .inputs["Rotation"]
+    .default_value
+)
+surface_normal = (
+    body.matrix_world.to_3x3() @ Euler(rotation).to_matrix() @ Vector((0, 0, 1))
+).normalized()
+assert surface_normal.dot(Vector(settings["contact"]["hits"][0]["normal"])) > 0.999, (
+    "Native pressure sheets must open across the struck surface"
+)
 slash = bpy.data.objects["Combat • Arc Slash"].children[0]
 mesh = slash.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
 angles = []

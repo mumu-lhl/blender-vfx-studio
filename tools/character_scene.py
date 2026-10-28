@@ -275,6 +275,13 @@ def add_effects(fixture):
     impact["start"], impact["duration"] = float(hit_frame), 24.0
     impact.location = contact["hits"][0]["position"]
     impact.rotation_mode, impact.rotation_quaternion = "QUATERNION", plane
+    # Pressure opens over the struck surface. The wave keeps the measured
+    # swing plane; rotating the whole burst also rotates its long pressure arcs.
+    surface = Vector((0, 0, 1)).rotation_difference(Vector(contact["hits"][0]["normal"]))
+    body = next(c for c in impact.children if "Main Shards" in c.name)
+    body.children[0].modifiers[0].node_group.nodes["Pressure Surface Alignment"].inputs[
+        "Rotation"
+    ].default_value = (plane.inverted() @ surface).to_euler()
     for effect in (charge, slash, impact):
         effect.update_tag()
     collection = bpy.data.collections.new("Combat VFX • toggle for comparison")
