@@ -145,14 +145,21 @@ class StarterTests(unittest.TestCase):
         )
 
         def dimensions(frame):
-            vertices = mesh(core_member, frame).vertices
-            radial = sum(v.co.x**2 + v.co.y**2 for v in vertices) / len(vertices)
+            evaluated = mesh(core_member, frame)
+            vertices = evaluated.vertices
+            intake = [
+                v
+                for v, inner in zip(vertices, evaluated.attributes["charge_inner"].data)
+                if inner.value < 0.5
+            ]
+            radial = sum(v.co.x**2 + v.co.y**2 for v in intake) / len(intake)
             height = max(v.co.z for v in vertices) - min(v.co.z for v in vertices)
             return radial, height
 
         early, charged = dimensions(13), dimensions(37)
         self.assertLess(charged[0], early[0] * 0.5)
-        # Pressure contracts all three axes while retaining a visible depth.
+        # Intake contracts while the stored center gains volume; the whole
+        # effect keeps depth instead of collapsing to a flat slice.
         self.assertGreater(charged[1], early[1] * 0.35)
         self.assertLess(charged[1], early[1] * 0.85)
         # Seeking does not accumulate generated geometry. Topology counts are
@@ -160,6 +167,28 @@ class StarterTests(unittest.TestCase):
         expected = {frame: vertex_count(charge, frame) for frame in (1, 7, 22, 37, 46, 48)}
         for frame in (37, 7, 48, 1, 46, 22):
             self.assertEqual(vertex_count(charge, frame), expected[frame])
+
+    def test_pressure_heart_has_filled_volume_and_responds_to_stored_size(self):
+        charge = create_effect("energy-charge")
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+
+        def volume(frame):
+            evaluated = mesh(member, frame)
+            selected = evaluated.attributes["charge_heart"].data
+            evaluated.calc_loop_triangles()
+            result = 0
+            for triangle in evaluated.loop_triangles:
+                if all(selected[i].value > 0.5 for i in triangle.vertices):
+                    a, b, c = (evaluated.vertices[i].co for i in triangle.vertices)
+                    result += a.dot(b.cross(c)) / 6
+            return abs(result)
+
+        early, stored = volume(13), volume(37)
+        self.assertGreater(early, 0.00001)
+        self.assertGreater(stored, early * 3)
+        node = member.children[0].modifiers[0].node_group.nodes["Nucleus Stored Size"]
+        node.outputs[0].default_value *= 0.6
+        self.assertLess(volume(37), stored * 0.6)
 
     def test_auxiliary_intake_width_preserves_main_paths_and_survives_assets(self):
         charge = create_effect("energy-charge")

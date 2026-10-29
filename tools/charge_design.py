@@ -558,11 +558,23 @@ def _surface(root, *, core=False, ground=False):
         )
         flow = g.m("Connected Vein With A Moving Front", "MULTIPLY_ADD", nucleus_front, 0.75)
         flow.node.inputs[2].default_value = 0.25
+        stored_facing = kernel_face
         kernel_face = g.m(
             "Nucleus White Patch",
             "MULTIPLY",
             kernel_face,
             g.m("Stored Vein And Front", "MULTIPLY", vein, flow),
+        )
+        kernel_face = g.m(
+            "Stored Heart Retains Its Energy",
+            "MAXIMUM",
+            kernel_face,
+            g.m(
+                "Dense Heart With A Colored Contour",
+                "MULTIPLY",
+                attribute("charge_heart"),
+                stored_facing,
+            ),
         )
         white_amount = kernel_color.inputs[0].links[0].from_socket
         g.link(
@@ -689,6 +701,7 @@ def core_shape(root):
             "charge_tongue",
             "charge_filament",
             "charge_filament_side",
+            "charge_heart",
         )
     }
     # Unequal curved strands leave actual space around a small nucleus.
@@ -770,6 +783,7 @@ def core_shape(root):
                         float(tongue),
                         float(filament),
                         math.cos(a) if primary else 0.0,
+                        0.0,
                     ),
                 ):
                     core_attrs[name].append(value)
@@ -808,13 +822,46 @@ def core_shape(root):
                 cross_sections.append((0, 0, 0))
                 a = k * math.tau / sides
                 for name, value in zip(
-                    core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0, lobe * 0.25, across)
+                    core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0, lobe * 0.25, across, 0.0)
                 ):
                     core_attrs[name].append(value)
         for j in range(steps - 1):
             for k in range(sides):
                 a, b = base + j * sides + k, base + j * sides + (k + 1) % sides
                 faces.append((a, b, b + sides, a + sides))
+    # A filled, twisted pressure knot sits inside the curled shell. Its volume
+    # inherits the existing storage, compression and directed-release controls.
+    base, rows, sides = len(vertices), 18, 12
+    for row in range(rows + 1):
+        u = row / rows
+        profile = max(0.02, (1 - (2 * u - 1) ** 2) ** 0.65)
+        for side in range(sides):
+            a = side / sides * math.tau
+            angle = a + 0.9 * u
+            radius = (
+                0.14
+                * profile
+                * (1 + 0.2 * math.cos(3 * a + 2 * u) + 0.07 * math.cos(5 * a - 4 * u))
+            )
+            vertices.append(
+                (
+                    0.025 * math.sin(math.pi * u) * math.sin(6 * u) + radius * math.cos(angle),
+                    0.02 * math.sin(math.pi * u) * math.cos(5 * u) + radius * math.sin(angle),
+                    (u - 0.5) * 0.46,
+                )
+            )
+            cross_sections.append((0, 0, 0))
+            for name, value in zip(
+                core_attrs, (u, math.sin(a), math.cos(a), 1.0, 7.0, 0.0, 0.0, 1.0)
+            ):
+                core_attrs[name].append(value)
+    faces.append(tuple(base + side for side in reversed(range(sides))))
+    for row in range(rows):
+        for side in range(sides):
+            a = base + row * sides + side
+            b = base + row * sides + (side + 1) % sides
+            faces.append((a, b, b + sides, a + sides))
+    faces.append(tuple(base + rows * sides + side for side in range(sides)))
     _mesh(layer, vertices, faces, core_attrs)
     cross = layer.data.attributes.new("charge_cross", "FLOAT_VECTOR", "POINT")
     for slot, value in zip(cross.data, cross_sections):
