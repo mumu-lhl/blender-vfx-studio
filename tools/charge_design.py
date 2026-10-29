@@ -535,12 +535,9 @@ def _surface(root, *, core=False, ground=False):
                 g.stage("Stored Front Passes", nucleus_phase, 0.55, 0.78),
             ),
         )
-        kernel_face = g.m(
-            "Nucleus White Face",
-            "GREATER_THAN",
-            g.m("Nucleus Facing Magnitude", "ABSOLUTE", facing.outputs["Value"]),
-            g.value("Nucleus White Threshold", 0.35),
-        )
+        white_threshold = g.value("Nucleus White Threshold", 0.35)
+        view_facing = g.m("Nucleus Facing Magnitude", "ABSOLUTE", facing.outputs["Value"])
+        kernel_face = g.m("Nucleus White Face", "GREATER_THAN", view_facing, white_threshold)
         vein = g.m(
             "Narrow Vein Across Curled Sheets",
             "SUBTRACT",
@@ -554,7 +551,12 @@ def _surface(root, *, core=False, ground=False):
         )
         flow = g.m("Connected Vein With A Moving Front", "MULTIPLY_ADD", nucleus_front, 0.75)
         flow.node.inputs[2].default_value = 0.25
-        stored_facing = kernel_face
+        stored_facing = g.m(
+            "Bright Pressure Rim Around The Dark Heart",
+            "GREATER_THAN",
+            g.m("Pressure Rim Facing", "SUBTRACT", 1, view_facing),
+            white_threshold,
+        )
         heart_values = g.m("Pressure Heart Volume Values", "MULTIPLY_ADD", cel, 1.4)
         heart_values.node.inputs[2].default_value = 0.25
         stored_facing = g.m(
@@ -595,10 +597,11 @@ def _surface(root, *, core=False, ground=False):
             0.5,
         )
         g.link(g.value("Nucleus Blue Depth", 0.27), kernel_body.node.inputs[2])
-        g.link(
-            g.v("Nucleus Colored Pressure Body", "SCALE", color.outputs[0], kernel_body),
-            kernel_color.inputs[1],
-        )
+        interior = g.m("Stored Heart Interior Value", "MULTIPLY_ADD", heart, -0.96)
+        interior.node.inputs[2].default_value = 1
+        body_color = g.v("Nucleus Colored Pressure Body", "SCALE", color.outputs[0], kernel_body)
+        body_color = g.v("Dark Interior Within The Pressure Rim", "SCALE", body_color, interior)
+        g.link(body_color, kernel_color.inputs[1])
         kernel_color.inputs[2].default_value = (0.9, 0.98, 1, 1)
         core_mix = g.n("ShaderNodeMixRGB", "Light Beneath Broken Shell")
         g.link(inner, core_mix.inputs[0])
@@ -650,6 +653,23 @@ def _surface(root, *, core=False, ground=False):
             "MAXIMUM",
             edge,
             g.m("Only Filament Ink", "MULTIPLY", border, primary),
+        )
+        heart_ink = g.m(
+            "Thin Ink Outside The Pressure Rim",
+            "SUBTRACT",
+            1,
+            g.stage("Pressure Rim Outer Boundary", view_facing, 0, 0.12),
+        )
+        edge = g.m(
+            "Separate Heart And Intake Boundaries",
+            "ADD",
+            g.m(
+                "Intake And Shell Ink",
+                "MULTIPLY",
+                edge,
+                g.m("Outside The Pressure Heart", "SUBTRACT", 1, heart),
+            ),
+            g.m("Pressure Heart Ink", "MULTIPLY", heart, heart_ink),
         )
         edge = g.m("Editable Core Edge", "MULTIPLY", edge, g.value("Core Edge Contrast", 0.85))
         edge_mix = g.n("ShaderNodeMixRGB", "Dark Contour Around Luminous Paths")
