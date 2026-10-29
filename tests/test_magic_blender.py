@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 
 import bpy
+from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -25,6 +26,36 @@ def points(obj, frame):
 class MagicTests(unittest.TestCase):
     def setUp(self):
         bpy.ops.wm.read_factory_settings(use_empty=True)
+
+    def test_release_direction_and_gather_preserve_stroke_width(self):
+        root = create(bpy.context)
+        release = member(root, "Release")
+        tree = release.children[0].modifiers[0].node_group
+        direction = tree.nodes["Release Direction"]
+        up = points(release, 65)
+        direction.inputs["X"].default_value, direction.inputs["Z"].default_value = 1, 0
+        right = points(release, 65)
+        for a, b in zip(up, right):
+            self.assertLess((Vector(b) - Vector(a) - Vector((1.7, 0, -1.7))).length, 1e-5)
+        direction.inputs["X"].default_value = 10
+        self.assertEqual(points(release, 65), right)
+        direction.inputs["X"].default_value = 0
+        stationary = points(release, 65)
+        release["Sigil Lift"] = 0
+        release.update_tag()
+        self.assertEqual(points(release, 65), stationary)
+        tree.nodes["Release Gather"].outputs[0].default_value = 1
+        gathered = points(release, 65)
+        self.assertEqual(len(gathered), len(stationary))
+        self.assertLess(
+            max(Vector(p).xy.length for p in gathered),
+            max(Vector(p).xy.length for p in stationary) * 0.5,
+        )
+        self.assertAlmostEqual(
+            (Vector(gathered[0]) - Vector(gathered[1])).length,
+            (Vector(stationary[0]) - Vector(stationary[1])).length,
+            places=5,
+        )
 
     def test_native_formation_and_later_release(self):
         root = create(bpy.context)
@@ -88,6 +119,11 @@ class MagicTests(unittest.TestCase):
         member(root)["Sigil Spin"] = 44
         member(root).update_tag()
         expected = points(member(root), 40)
+        release = member(root, "Release")
+        tree = release.children[0].modifiers[0].node_group
+        tree.nodes["Release Gather"].outputs[0].default_value = 0.8
+        tree.nodes["Release Direction"].inputs["X"].default_value = 1
+        expected_release = points(release, 65)
         path = ROOT / "work/magic-asset-test.blend"
         path.parent.mkdir(exist_ok=True)
         assets.write(path, root)
@@ -95,6 +131,8 @@ class MagicTests(unittest.TestCase):
         duplicate = core.duplicate(bpy.context, loaded)
         self.assertEqual(points(member(loaded), 40), expected)
         self.assertEqual(points(member(duplicate), 40), expected)
+        self.assertEqual(points(member(loaded, "Release"), 65), expected_release)
+        self.assertEqual(points(member(duplicate, "Release"), 65), expected_release)
         member(duplicate)["radius"] = 2.1
         member(duplicate).update_tag()
         self.assertNotEqual(points(member(duplicate), 40), expected)
@@ -115,5 +153,11 @@ if __name__ == "__main__":
     root.name = "Persisted Magic Circle"
     for frame in (8, 35, 60):
         root[f"expected_vertices_{frame}"] = len(points(member(root), frame))
+    release = member(root, "Release")
+    tree = release.children[0].modifiers[0].node_group
+    tree.nodes["Release Gather"].outputs[0].default_value = 0.8
+    tree.nodes["Release Direction"].inputs["X"].default_value = 1
+    for frame in (50, 65):
+        root[f"expected_release_{frame}"] = [c for point in points(release, frame) for c in point]
     bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "work/magic-test.blend"))
     print("MAGIC_NATIVE_BEHAVIOR_OK")

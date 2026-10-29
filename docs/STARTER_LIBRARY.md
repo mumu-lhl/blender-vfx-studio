@@ -152,9 +152,11 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 主印逐笔形成，符文带反向转动；释放时立体符记升起，地面图案先退去。笔画由本项目生成，不依赖字体、贴图或缓存。
 
-**Radius / Width** 调整尺寸和笔画，颜色与 **Strength** 可分层编辑，**Noise Scale / Dissolve / Fade** 调整侵蚀和消散。侧栏 **Motion → Sigil Spin** 控制各层周期转角；释放层还可用 **Sigil Lift** 调整升起高度。三档改变曲线采样密度，保持同一图案和时序。
+**Radius / Width** 调整尺寸和笔画，颜色与 **Strength** 可分层编辑，**Noise Scale / Dissolve / Fade** 调整侵蚀和消散。侧栏 **Motion → Sigil Spin** 控制各层周期转角；释放层还可用 **Sigil Lift** 调整移动距离，默认向上。三档改变曲线采样密度，保持同一图案和时序。
 
-已查看高清、明暗与远景、全部隔帧样本和三档实际嵌入预览。细符文远景偏弱，画面仍偏干净的线描风格，见 [魔法阵记录](MAGIC_REVIEW.md)。
+要让符记汇聚到角色前方，展开 **Magic • Release**，选中它的网格子对象，在 Geometry Nodes 中调整 **Release Direction** 和 **Release Gather**。例如方向 `(1, 0, 0)`、Gather `1`，配合 **Sigil Lift** 向本地 X 方向收拢移动；Gather `0` 保留分散排列，零方向停止平移。使用 **Save Complete Effect** 保存这些节点编辑。
+
+细符文在远景仍偏弱，默认图案偏线描风格。默认形成与升起见 [魔法阵记录](MAGIC_REVIEW.md)，角色接火焰的空间衔接见 [施法检查](SPELL_TRANSFER_REVIEW.md)。
 
 ## 保存、质量与观看范围
 
