@@ -109,7 +109,7 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 不等大的云团先横向铺开，再抬升并变薄。**它不发光，需要场景灯光。** 原生 Volume Cube 把空间分成小格，几何节点直接计算每格当前帧的密度；这不是流体模拟，不需要历史缓存或外部 VDB 文件。Solid 模式只显示编辑域边界。
 
-**Width / Expansion** 调整云团大小与铺开距离，**Noise Scale / Dissolve / Fade** 调整细节、密度侵蚀与消散。选择主层，在侧栏 **Shape / Motion / Material** 中使用 **Dust Rise Height / Dust Roll Speed / Dust Density** 调整抬升、纹理上卷与光学密度。地面薄雾层的 **Fade** 单独控制它的透明消散；它是较弱的辅助层，不替代主体体积。
+**Width / Expansion** 调整云团大小与铺开距离，**Noise Scale / Dissolve / Fade** 调整细节、密度侵蚀与消散。选择主层，在侧栏 **Shape / Motion / Material** 中使用 **Dust Rise Height / Dust Roll Speed / Dust Density** 调整抬升、纹理上卷与光学密度。接触时两侧体积先压低铺开，再抬升翻滚。地面薄雾层的 **Fade** 单独控制它的透明消散；它是较弱的辅助层，不替代主体体积。
 
 三档改变密度网格分辨率、密度团和碎屑数量，体积计算有明显 CPU 成本。已实际查看高清图、全部隔帧样本、三档比较及 Cycles 预览；修复后的矩形伪影未再出现。检查范围、代价和限制见 [烟尘记录](DUST_REVIEW.md)。
 

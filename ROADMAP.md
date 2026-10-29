@@ -1,6 +1,6 @@
 # 开发进度与后续计划
 
-更新：2026-10-28（UTC）。目标 **Blender 5.2 LTS**，优先 Eevee，兼容 Cycles。**项目尚未正式分发，仅提供开发构建。** 当前实现可以调整，过时生成器和兼容性专用代码无需保留。
+更新：2026-10-29（UTC）。目标 **Blender 5.2 LTS**，优先 Eevee，兼容 Cycles。**项目尚未正式分发，仅提供开发构建。** 当前实现可以调整，过时生成器和兼容性专用代码无需保留。
 
 ## 当前重点
 
@@ -67,12 +67,12 @@ PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 4070072
 
 [#178](https://github.com/mumu-lhl/blender-vfx-studio/issues/178)／[PR #179](https://github.com/mumu-lhl/blender-vfx-studio/pull/179) 收敛近身命中的压力弧，并将主压力体改为独立贴合接触面的翻卷曲面，细喷射保留方向。实际同帧与隔帧中遮挡、主次和恢复阶段有所改善；主体体积感仍不足，未宣布整体艺术验收通过。功能与图像范围见 [命中焦点检查](docs/IMPACT_FOCUS_REVIEW.md)。
 
-[#156](https://github.com/mumu-lhl/blender-vfx-studio/issues/156)／[PR #157](https://github.com/mumu-lhl/blender-vfx-studio/pull/157) 用真实脚部接触连接冲刺、腾空和落地；新建残影保留透明填充与稍晚消退的轮廓，两侧体积烟尘先压低展开再翻滚。高清阶段与原生像素对照已检查，完整抽帧和明暗远景仍在补齐，不宣布整体艺术验收通过。见 [角色衔接](docs/DASH_LANDING_REVIEW.md)。
+[#156](https://github.com/mumu-lhl/blender-vfx-studio/issues/156)／[PR #157](https://github.com/mumu-lhl/blender-vfx-studio/pull/157) 用真实脚部接触连接冲刺、腾空和落地；新建残影保留透明填充与稍晚消退的轮廓，两侧体积烟尘先压低展开再翻滚。14 张高清阶段、42 张原生隔帧、六个质量资产及无插件像素复现已检查，CI 全部 12 项成功。远景旧残影与接触后一帧仍弱，不宣布整体艺术验收通过。见 [角色衔接](docs/DASH_LANDING_REVIEW.md)。
 
 ## 下一步
 
 1. 当前重点转向实际画面。[#174](https://github.com/mumu-lhl/blender-vfx-studio/issues/174) 修正刀光深度收尖，并按真实挥剑轨迹连接充能与释放；同帧角色图、连续隔帧、明暗／远景与原生复现已检查，方向衔接和遮挡改善，反向命中仍被角色遮住。实测成本和艺术边界见 [衔接检查](docs/COMBAT_HANDOFF_REVIEW.md)。
-2. [#176](https://github.com/mumu-lhl/blender-vfx-studio/issues/176) 的持续火焰已完成角色多阶段、两组各 11 张持续燃烧抽帧、明暗／远景与无插件高清复现。轮廓与退场改善，局部鼓包、色块和细节仍弱；见 [流动检查](docs/FIRE_FLOW_REVIEW.md)。下一优先项为 [#178](https://github.com/mumu-lhl/blender-vfx-studio/issues/178) 在完整近身动作中集中命中压力主体、拉开喷流与余烬层次，再处理接触闪电和冲刺落地；暂缓继续整理参数。
+2. [#176](https://github.com/mumu-lhl/blender-vfx-studio/issues/176) 的持续火焰已完成角色多阶段、两组各 11 张持续燃烧抽帧、明暗／远景与无插件高清复现。轮廓与退场改善，局部鼓包、色块和细节仍弱；见 [流动检查](docs/FIRE_FLOW_REVIEW.md)。命中主体、接触闪电和冲刺落地的首轮改动已合入；下一优先项是施法符记向火焰的空间交接，再依据完整镜头处理仍弱的远景层次。暂缓继续整理参数。
 3. 保留质量选择，在可用设备测量有／无特效成本；需要更高复杂度时以画面收益判断，不用低顶点数代替性能证据。
 4. 处理发布所需的实际问题并检查安装附件；完成必要视觉与使用验证后再准备首次正式分发，不急于新增仅换色的第九套。
 
