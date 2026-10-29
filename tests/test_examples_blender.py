@@ -186,6 +186,10 @@ class StarterTests(unittest.TestCase):
         early, stored = volume(13), volume(37)
         self.assertGreater(early, 0.00001)
         self.assertGreater(stored, early * 3)
+        compression = member.children[0].modifiers[0].node_group.nodes["Nucleus Compression"]
+        compression.outputs[0].default_value = 0
+        self.assertLess(stored, volume(37) * 0.8)
+        compression.outputs[0].default_value = 0.6
         node = member.children[0].modifiers[0].node_group.nodes["Nucleus Stored Size"]
         node.outputs[0].default_value *= 0.6
         self.assertLess(volume(37), stored * 0.6)
@@ -368,6 +372,10 @@ class StarterTests(unittest.TestCase):
             evaluated = mesh(member, frame)
             points, outside = [], []
             for v, part in zip(evaluated.vertices, evaluated.attributes["charge_inner"].data):
+                # The surrounding curled sheets preserve volume while the
+                # filled heart deliberately condenses in all three axes.
+                if evaluated.attributes["charge_heart"].data[v.index].value > 0.5:
+                    continue
                 (points if part.value > 0.5 else outside).append(tuple(v.co))
             spans = [max(v[i] for v in points) - min(v[i] for v in points) for i in range(3)]
             return spans, outside, points

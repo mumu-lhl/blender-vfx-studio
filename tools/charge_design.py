@@ -881,7 +881,7 @@ def core_shape(root):
             a = side / sides * math.tau
             angle = a + 0.9 * u
             radius = (
-                0.13
+                0.18
                 * profile
                 * (1 + 0.32 * math.cos(3 * a + 2 * u) + 0.07 * math.cos(5 * a - 4 * u))
             )
@@ -889,7 +889,7 @@ def core_shape(root):
                 (
                     0.025 * math.sin(math.pi * u) * math.sin(6 * u) + radius * math.cos(angle),
                     0.02 * math.sin(math.pi * u) * math.cos(5 * u) + radius * math.sin(angle),
-                    (u - 0.5) * 0.46,
+                    (u - 0.5) * 0.62,
                 )
             )
             cross_sections.append((0, 0, 0))
@@ -1239,6 +1239,26 @@ def core_shape(root):
         ),
     )
     compression_axes = g.xyz("Nucleus Compression Proportions", sideways, sideways, vertical)
+    # Curled sheets spread sideways as they flatten. The filled knot instead
+    # condenses in all three dimensions; applying the sheet transform to it
+    # turns the stored mass into a rigid, shield-like slab.
+    heart_pressure = g.m("Pressure In The Dense Knot", "MULTIPLY", stored_tension, compression)
+    heart_width = g.m("Knot Contracts Radially", "MULTIPLY_ADD", heart_pressure, -0.45)
+    heart_width.node.inputs[2].default_value = 1
+    heart_height = g.m("Knot Contracts Vertically", "MULTIPLY_ADD", heart_pressure, -0.7)
+    heart_height.node.inputs[2].default_value = 1
+    heart_axes = g.xyz("Three Dimensional Condensation", heart_width, heart_width, heart_height)
+    compression_axes = g.v(
+        "Separate Knot And Sheet Compression",
+        "ADD",
+        compression_axes,
+        g.v(
+            "Condensation Only Within The Knot",
+            "SCALE",
+            g.v("Knot Compression Difference", "SUBTRACT", heart_axes, compression_axes),
+            g.attr("charge_heart"),
+        ),
+    )
     position = g.v(
         "Incoming Energy Pressurizes The Nucleus", "MULTIPLY", position, compression_axes
     )
