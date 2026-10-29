@@ -97,7 +97,9 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 ## Lightning Strike
 
-主干先落地，再做两次逐渐减弱的复击，第一峰值在 Start+2 左右。接触闪光短促，火花和地面余波随后退去。
+主干先落地，再做两次逐渐减弱的复击，第一峰值在 Start+2 左右。地表分叉电弧随每次放电重新展开，在间歇清空；接触短闪与飞散火花承担第一击后的短暂反馈。
+
+选择 **Lightning • Contact Corona**，用 **Radius / Expansion** 调整地表范围，**Width** 调整电弧粗细，**Dissolve** 裁去末端；**Width=0** 或 **Dissolve=1** 关闭该层。脚部遮挡和远景第三次放电仍较弱，见 [角色与时序检查](LIGHTNING_CONTACT_REVIEW.md)。
 
 **Radius / Width / Strength** 调整分支横向范围、线宽与光量，**Noise Scale / Dissolve** 调整细扰动和侵蚀。选择主干层，在侧栏 **Bolt Shape → Bolt Length / Branch Reach** 直接调整高度和分支伸展。**Radius** 改变整层横向范围，**Branch Reach** 从各分叉的连接处伸缩，不改变主干高度。放电仍采用默认一次主击与两次复击。
 

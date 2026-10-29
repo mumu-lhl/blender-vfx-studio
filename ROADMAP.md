@@ -45,6 +45,8 @@
 
 软件 Eevee 曾在完成像素检查后退出崩溃；CI 的原生重开采用局部 Mesa 磁盘缓存设置并要求正常退出，不忽略失败。具体范围和对照见 [退出记录](docs/EEVEE_EXIT_REVIEW.md)。
 
+[#180](https://github.com/mumu-lhl/blender-vfx-studio/issues/180)／[PR #181](https://github.com/mumu-lhl/blender-vfx-studio/pull/181) 将闪电的单次细圆环改为随三次放电重新展开的地表分叉电弧。19 张最终高清图、九张有序隔帧与三阶段无插件像素对照已检查，三档原生资产与嵌入预览保留；前两次远景反馈改善，第三次和细枝仍弱。详见 [接触反馈](docs/LIGHTNING_CONTACT_REVIEW.md)，未宣布整套艺术验收通过。
+
 ## 艺术控制与易用性
 
 [#161](https://github.com/mumu-lhl/blender-vfx-studio/issues/161) 先处理真实无效、无法关闭造型和换色困难的控制；[审查记录](docs/ART_CONTROLS_REVIEW.md) 列出八套的核对结果与边界。
