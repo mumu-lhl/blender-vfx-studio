@@ -198,7 +198,14 @@ def add_effects(fixture):
     midpoint = bpy.data.objects.new("Charge socket • blade midpoint", None)
     scene.collection.objects.link(midpoint)
     midpoint.parent = weapon
-    midpoint.location = tip * 0.5
+    # Store energy near the grip while raising the sword, keeping the face free.
+    # Feed it along the blade as the wind-up hands over to the actual slice.
+    for frame, reach in ((1, 0.2), (37, 0.2), (43, 0.5)):
+        midpoint.location = tip * reach
+        midpoint.keyframe_insert(data_path="location", frame=frame)
+    for curve in curves(midpoint):
+        for key in curve.keyframe_points:
+            key.interpolation = "LINEAR"
     socket = bpy.data.objects.new("Charge socket • world up", None)
     scene.collection.objects.link(socket)
     follow = socket.constraints.new("COPY_LOCATION")

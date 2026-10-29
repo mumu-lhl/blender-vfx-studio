@@ -36,5 +36,13 @@ for frame in range(41, 57):
 track.mute = False
 for frame in (32, 1, 49, 16):
     assert all((a - b).length < 1e-5 for a, b in zip(blade(frame), prepared[frame], strict=True))
+for frame, reach in ((16, 0.2), (37, 0.2), (43, 0.5), (49, 0.5)):
+    hilt, endpoint = blade(frame)
+    socket = bpy.data.objects["Charge socket • world up"].evaluated_get(
+        bpy.context.evaluated_depsgraph_get()
+    )
+    assert (socket.matrix_world.translation - hilt.lerp(endpoint, reach)).length < 1e-5, (
+        "Native energy should gather near the grip and feed into the blade before contact"
+    )
 assert not any("blender_vfx_studio" in name for name in sys.modules)
 print("CHARACTER_PREPARATION_NATIVE_POSE_AND_ORIGINAL_ATTACK_OK")
