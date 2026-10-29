@@ -1497,7 +1497,230 @@
     "complete_asset_tests": 25,
     "art_control_tests": 14,
     "native_examples": "passed",
-    "native_hd": "incomplete; previous process interrupted; rerun active",
+    "native_hd": "45 -> 36 pixels identical, rig animation and tail clear, normal process exit",
     "regression": "white removal failed before independent heart shading, passed after fix"
+  },
+  "native": {
+    "native_render_verified": true,
+    "frames": [
+      45,
+      36
+    ],
+    "clear_frame": 96,
+    "scene_sha256": "115082085c3ee463f67d040d58763d50a5b8166f95d7088b054e1547ca0de810",
+    "source_frame_sha256": {
+      "character-0045.png": "138d561db38c614a18015584b7e70f0ded40c43e3e56a234744b2de8ffe5ad53",
+      "character-0036.png": "44f372c196c06016fb975fdf4e04dcd9d88692915d1fbe56aecb217eb6dd80fa"
+    },
+    "process_exit_code": 0
+  },
+  "performance": {
+    "blender": "5.2.2 LTS",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+    "cpu_quota": "200000 100000",
+    "blender_threads": 2,
+    "lp_num_threads": "2",
+    "software_gl_requested": false,
+    "gl": {
+      "vendor": "Mesa",
+      "renderer": "llvmpipe (LLVM 19.1.7, 256 bits)",
+      "version": "4.5 (Core Profile) Mesa 25.0.7-2+deb13u1"
+    },
+    "engine": "BLENDER_EEVEE",
+    "resolution": [
+      960,
+      540
+    ],
+    "samples": 16,
+    "evaluation": [
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 36,
+        "milliseconds": 0.9837729994615074
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 36,
+        "milliseconds": 0.697588999173604
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 36,
+        "milliseconds": 0.7851610025682021
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 0.6506969984911848
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 0.7918709998193663
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 0.84469099965645
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 0.6127000015112571
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 0.6632759977946989
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 1.0542689997237176
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 0.9349890024168417
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 0.8769300002313685
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 0.9404970005562063
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 36,
+        "milliseconds": 11.947396000323351
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 36,
+        "milliseconds": 11.5815509998356
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 36,
+        "milliseconds": 11.67590399927576
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 12.119286999222822
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 11.523542998475023
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 12.103081000532256
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 12.55204300105106
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 11.630474997218698
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 12.08841999687138
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 11.634370999672683
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 11.645528000371996
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 36,
+        "milliseconds": 11.587730001338059
+      }
+    ],
+    "evaluation_summary": {
+      "bare": {
+        "scene_evaluation_median_ms": 0.84469099965645,
+        "scene_evaluation_p95_ms": 0.9404970005562063,
+        "measured_samples": 9
+      },
+      "fx": {
+        "scene_evaluation_median_ms": 11.645528000371996,
+        "scene_evaluation_p95_ms": 12.119286999222822,
+        "measured_samples": 9
+      }
+    },
+    "renders": [
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 36,
+        "seconds": 63.28640235399871
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 36,
+        "seconds": 14.515224348000629
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 36,
+        "seconds": 14.302797979999013
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 36,
+        "seconds": 28.18178699499913
+      }
+    ],
+    "limits": [
+      "Headless scene evaluation and render wall time, not viewport FPS",
+      "Two warmup renders and 1 matched frame pairs; too few for a render p95",
+      "The same saved scene is used; only its VFX collection is excluded",
+      "Evaluation excludes the collection from the viewport dependency graph; render comparison only excludes it from rendering"
+    ]
   }
 }
