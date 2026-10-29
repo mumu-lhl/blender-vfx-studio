@@ -49,3 +49,5 @@ LP_NUM_THREADS=2 blender -b -t 2 --factory-startup --disable-autoexec --python-e
 | 配对高清渲染 | 13.277 s | 13.113 s |
 
 首次有特效准备与渲染为 39.008 秒。单组渲染差异不足以判断稳定开销或声称加速，也不报告渲染 p95；后台求值和软件渲染时间不能换算为视口 FPS。没有以固定顶点数作为性能结论。
+
+[CI 40787695367](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40787695367) 全部 12 项成功，包括三平台后台套件和原生角色视觉作业。自动检查不代替本文实际读取的图像。
