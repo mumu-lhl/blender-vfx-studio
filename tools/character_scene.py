@@ -94,6 +94,16 @@ def setup_base(*, light=True, far=False, view="front", engine="BLENDER_EEVEE"):
     scene.frame_start, scene.frame_end = 1, FRAMES
     caster = actor("Knight", "Caster • Knight", (-0.8, 0), math.pi / 2, sword=True)
     defender = actor("Rogue", "Defender • Rogue", (0.8, 0.08), -math.pi / 2)
+    # Reuse only the opening of the native chop as a slow, readable wind-up.
+    # It blends away before the measured slice trajectory starts at frame 41.
+    preparation = clip(caster["rig"], caster["actions"]["2H_Melee_Attack_Chop"], 1, 41)
+    preparation.action_frame_end = (
+        preparation.action_frame_start
+        + (preparation.action_frame_end - preparation.action_frame_start) * 0.18
+    )
+    preparation.scale = 40 / (preparation.action_frame_end - preparation.action_frame_start)
+    preparation.blend_in, preparation.blend_out = 12, 4
+    preparation.name = "Charge preparation • native chop opening"
     clip(caster["rig"], caster["actions"]["2H_Melee_Attack_Slice"], 37, 69, blend=4)
     # The actual blade trace determines contact; the reaction begins there.
     weapon = caster["weapon"]
