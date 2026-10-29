@@ -2077,5 +2077,22 @@
     "video_sha256": "912a6da57c57009bef0b82a6ef3f9d677a26f4d800622bd776d7e789231afdb9",
     "profile": "spell",
     "realtime_playback_reviewed": false
+  },
+  "integration": {
+    "main_merge": "54026f541b4fb38b38480189cdadd28da847cfbe",
+    "commit": "b1fd347",
+    "checks": {
+      "art_controls": 14,
+      "complete_assets": 22,
+      "spell_scene": 4,
+      "landing_scene": 2,
+      "native_replays": [
+        "complete_assets",
+        "spell_scene",
+        "landing_scene"
+      ],
+      "ruff": "0.14.1 lint and format passed"
+    },
+    "render_source_commit_unchanged": "194f4fe5cb5d48cd182250054b89c7351e0bb01a"
   }
 }
