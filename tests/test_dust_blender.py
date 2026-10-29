@@ -8,6 +8,9 @@ import bpy
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tests"))
+from particle_test_support import camera, render_pixels  # noqa: E402
+
 from blender_vfx_studio import assets, composition, core  # noqa: E402
 from tools.dust_asset import create  # noqa: E402
 
@@ -25,6 +28,22 @@ def bounds(member, frame):
 class DustTests(unittest.TestCase):
     def setUp(self):
         bpy.ops.wm.read_factory_settings(use_empty=True)
+
+    def test_early_contact_has_real_density_and_density_zero_clears_it(self):
+        root = create(bpy.context, "LOW")
+        volume = body(root)
+        for member in composition.members(root):
+            member.children[0].hide_render = member != volume
+        camera()
+        scene = bpy.context.scene
+        scene.render.film_transparent = True
+        scene.render.resolution_x = scene.render.resolution_y = 64
+        scene.camera.data.ortho_scale = 3
+        early = render_pixels(2)
+        self.assertGreater(sum(early[3::4]), 1)
+        volume["Dust Density"] = 0.0
+        volume.update_tag()
+        self.assertEqual(sum(render_pixels(2)[3::4]), 0)
 
     def test_relative_start_and_arbitrary_frame_timing(self):
         bpy.context.scene.frame_set(17, subframe=0.5)
@@ -96,6 +115,17 @@ class DustTests(unittest.TestCase):
         camera.location = (0, 0, 5)
         camera.data.type, camera.data.ortho_scale = "ORTHO", 4
         scene.camera = camera
+        # A ground contact must register before the rolling volume fills in.
+        early_opacity = []
+        for frame in (1, 2):
+            scene.frame_set(frame)
+            scene.render.filepath = str(ROOT / f"work/dust-contact-test-{frame}.png")
+            bpy.ops.render.render(write_still=True)
+            image = bpy.data.images.load(scene.render.filepath, check_existing=False)
+            early_opacity.append(sum(image.pixels[3::4]))
+            bpy.data.images.remove(image)
+        self.assertEqual(early_opacity[0], 0)
+        self.assertGreater(early_opacity[1], 1)
         scene.frame_set(21)
         opacities = []
         for amount in (0.0, 1.0):

@@ -8,6 +8,9 @@ import bpy
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tests"))
+from particle_test_support import camera, render_pixels  # noqa: E402
+
 from blender_vfx_studio import assets, composition, core, dash  # noqa: E402
 
 
@@ -42,6 +45,45 @@ def timing_values(member):
 class DashTests(unittest.TestCase):
     def setUp(self):
         bpy.ops.wm.read_factory_settings(use_empty=True)
+
+    def test_late_echo_surface_respects_opacity_fade_and_complete_asset_save(self):
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, radius=0.7)
+        obj = bpy.context.object
+        for frame, x in ((1, 0), (5, 2)):
+            obj.location.x = x
+            obj.keyframe_insert(data_path="location", frame=frame)
+        root = dash.create(bpy.context, obj, 1, 5, count=2)
+        obj.hide_render = True
+        members = composition.members(root)
+        first = members[0]
+        for other in members[1:]:
+            other.children[0].hide_render = True
+        camera()
+        scene = bpy.context.scene
+        scene.render.film_transparent = True
+        scene.render.resolution_x = scene.render.resolution_y = 64
+        faded = render_pixels(15)
+        self.assertGreater(sum(faded[3::4]), 1)
+        first["opacity"] = 0.0
+        first.update_tag()
+        self.assertEqual(sum(render_pixels(15)[3::4]), 0)
+        first["opacity"], first["fade"] = 0.82, 0.0
+        first.update_tag()
+        held = render_pixels(15)
+        self.assertGreater(sum(held[3::4]), sum(faded[3::4]) * 1.2)
+        first["dissolve"] = 1.0
+        first.update_tag()
+        self.assertEqual(sum(render_pixels(15)[3::4]), 0)
+        first["dissolve"] = 0.04
+        first["color_0"], first["color_1"], first["color_2"] = 0.8, 0.1, 0.02
+        first.update_tag()
+        warm = render_pixels(15)
+        self.assertGreater(sum(warm[0::4]), sum(warm[2::4]))
+        path = ROOT / "work/dash-surface-test.blend"
+        assets.write(path, root)
+        core.delete(root)
+        assets.load(bpy.context, path)
+        self.assertEqual(render_pixels(15), warm)
 
     def test_capture_restores_time_and_preserves_source_animation(self):
         obj = source()

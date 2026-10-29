@@ -91,7 +91,7 @@ def sample(context, source, first, last, quality, *, count=None):
 
 
 def _surface(member):
-    """Retain shield controls, add a legible body and a faster opacity falloff."""
+    """Keep a transparent body while the colored contour outlasts its fill."""
     material = member.children[0].data.materials[0]
     material.name = "VFX • Spectral Dash Echo"
     material.surface_render_method = "BLENDED"
@@ -103,7 +103,7 @@ def _surface(member):
     edge.inputs["From Min"].default_value, edge.inputs["From Max"].default_value = 0.025, 0.3
     tree.links.new(tree.nodes["Rim Falloff"].outputs[0], edge.inputs["Value"])
     tree.links.new(edge.outputs[0], body.inputs[0])
-    body.inputs[1].default_value, body.inputs[2].default_value = 0.85, 0.15
+    body.inputs[1].default_value, body.inputs[2].default_value = 0.70, 0.30
     tree.links.new(body.outputs[0], tree.nodes["Rim × Noise"].inputs[0])
     fade = tree.nodes["Lifetime Opacity"].outputs[0]
     fade.driver_remove("default_value")
@@ -122,18 +122,45 @@ def _surface(member):
         drive(color.inputs[index], "default_value", member, "c", {"c": f"color_{index}"})
     border = node(tree, "ShaderNodeMapRange", "Dark Outer Contour", -650, -450)
     border.interpolation_type, border.clamp = "SMOOTHSTEP", True
-    border.inputs["From Min"].default_value, border.inputs["From Max"].default_value = 0.45, 0.8
-    tree.links.new(tree.nodes["Fresnel Edge"].outputs[0], border.inputs["Value"])
+    border.inputs["From Min"].default_value, border.inputs["From Max"].default_value = 0.12, 0.38
+    tree.links.new(tree.nodes["Rim Falloff"].outputs[0], border.inputs["Value"])
     dark = node(
         tree, "ShaderNodeVectorMath", "Deep Spectral Outline", -400, -650, operation="SCALE"
     )
     tree.links.new(color.outputs[0], dark.inputs[0])
-    dark.inputs["Scale"].default_value = 0.18
+    dark.inputs["Scale"].default_value = 0.08
     mix = node(tree, "ShaderNodeMixRGB", "Cyan Edge With Dark Border", -150, -450)
     tree.links.new(border.outputs[0], mix.inputs[0])
     tree.links.new(color.outputs[0], mix.inputs[1])
     tree.links.new(dark.outputs[0], mix.inputs[2])
     tree.links.new(mix.outputs[0], emission.inputs["Color"])
+
+    contour_life = node(tree, "ShaderNodeValue", "Retained Contour Life", -900, -900)
+    drive(
+        contour_life.outputs[0],
+        "default_value",
+        member,
+        f"o*pow(max(1-({PROGRESS}),0),0.45*f)",
+        dict(TIME_PROPS, o="opacity", f="fade"),
+    )
+    contour = border.outputs[0]
+    for index, (label, factor) in enumerate(
+        (
+            ("Contour Age", contour_life.outputs[0]),
+            ("Dissolve Contour", tree.nodes["Dissolve"].outputs[0]),
+            ("Exterior Contour", tree.nodes["Exterior Only"].outputs[0]),
+        )
+    ):
+        mask = node(tree, "ShaderNodeMath", label, -600 + index * 220, -900, operation="MULTIPLY")
+        tree.links.new(contour, mask.inputs[0])
+        tree.links.new(factor, mask.inputs[1])
+        contour = mask.outputs[0]
+    opacity = node(
+        tree, "ShaderNodeMath", "Fill Or Retained Contour", 150, -650, operation="MAXIMUM"
+    )
+    tree.links.new(tree.nodes["Final Opacity"].outputs[0], opacity.inputs[0])
+    tree.links.new(contour, opacity.inputs[1])
+    tree.links.new(opacity.outputs[0], tree.nodes["Shield Surface"].inputs[0])
 
 
 def create(context, source, first, last, quality="MEDIUM", *, tail=18.0, count=None):

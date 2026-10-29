@@ -128,6 +128,11 @@ subprocess.run(
     base + [str(ROOT / "work/dash-tail-native.blend"), "--python", "tests/dash_tail_reopen.py"],
     check=True,
 )
+subprocess.run(base + ["--python", "tests/test_dash_landing_scene.py"], check=True)
+subprocess.run(
+    base + [str(ROOT / "work/dash-landing-test.blend"), "--python", "tests/dash_landing_reopen.py"],
+    check=True,
+)
 
 subprocess.run(base + ["--python", "tests/test_magic_blender.py"], check=True)
 subprocess.run(
