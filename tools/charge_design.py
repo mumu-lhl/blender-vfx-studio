@@ -597,7 +597,7 @@ def _surface(root, *, core=False, ground=False):
             0.5,
         )
         g.link(g.value("Nucleus Blue Depth", 0.27), kernel_body.node.inputs[2])
-        interior = g.m("Stored Heart Interior Value", "MULTIPLY_ADD", heart, -0.96)
+        interior = g.m("Stored Heart Interior Value", "MULTIPLY_ADD", heart, -0.45)
         interior.node.inputs[2].default_value = 1
         body_color = g.v("Nucleus Colored Pressure Body", "SCALE", color.outputs[0], kernel_body)
         body_color = g.v("Dark Interior Within The Pressure Rim", "SCALE", body_color, interior)
@@ -703,6 +703,23 @@ def _surface(root, *, core=False, ground=False):
     if core:
         support = g.m("Support Is Visible", "GREATER_THAN", support, 0)
     alpha = g.m("Supporting Layer Opacity", "MULTIPLY", alpha, support)
+    if core:
+        # A permanently filled dark shell reads as armor around the weapon.
+        # Keep solid, moving plasma sections with real gaps between fronts;
+        # this is a cutout rather than uniformly transparent ghost geometry.
+        visible_front = g.m("Solid Traveling Knot Front", "GREATER_THAN", nucleus_front, 0.24)
+        coverage = g.m(
+            "Keep The Existing Intake Surfaces",
+            "ADD",
+            1,
+            g.m(
+                "Only The Knot Opens Between Fronts",
+                "MULTIPLY",
+                heart,
+                g.m("Gaps Between Stored Fronts", "SUBTRACT", visible_front, 1),
+            ),
+        )
+        alpha = g.m("Open Coiling Plasma Surface", "MULTIPLY", alpha, coverage)
     emission = g.n("ShaderNodeEmission", "Native Energy Surface")
     g.link(surface_color, emission.inputs["Color"])
     radiance = g.value("Emission", prop="strength")
