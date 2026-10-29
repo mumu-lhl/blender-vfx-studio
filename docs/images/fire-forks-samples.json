@@ -902,9 +902,10 @@
   ],
   "ci": {
     "run": 40911022777,
-    "status": "in_progress",
-    "last_successful_jobs": 3,
-    "all_jobs_passed": false
+    "conclusion": "success",
+    "successful_jobs": 12,
+    "all_jobs_passed": true,
+    "source_commit": "a7658f9a5f197d9ead815afce17794909b5cf4bd"
   },
   "ci_full_video": {
     "width": 960,
