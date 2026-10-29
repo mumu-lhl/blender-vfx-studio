@@ -905,5 +905,17 @@
     "status": "in_progress",
     "last_successful_jobs": 3,
     "all_jobs_passed": false
+  },
+  "ci_full_video": {
+    "width": 960,
+    "height": 540,
+    "r_frame_rate": "24/1",
+    "duration": "3.000000",
+    "nb_frames": "72",
+    "source_sha256": "0c1c3de6ab0495f2b3fc51243b0734527f7f2a63a53c0354e5134c4daa3d3011",
+    "video_sha256": "b8829146b8b5dde27f5b9848ca169a5043fa19db37585344c7813e77b9b0391a",
+    "profile": "fire",
+    "realtime_playback_reviewed": false,
+    "artifact_id": 12917010987
   }
 }

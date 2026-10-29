@@ -26,7 +26,7 @@
 
 已逐张查看从保存的原生场景直接渲染的全部 36 张隔帧：第 1–71 帧，每隔一帧，480×270、16 samples，新进程未导入插件，正常退出。这组图用于时序检查，不代替上面的高清细节。
 
-[1–11](images/fire-forks-motion-01.png) · [13–23](images/fire-forks-motion-02.png) · [25–35](images/fire-forks-motion-03.png) · [37–47](images/fire-forks-motion-04.png) · [49–59](images/fire-forks-motion-05.png) · [61–71](images/fire-forks-motion-06.png)。另外提供 [12 fps 抽帧 MP4](images/fire-forks-sampled.mp4)，36 个实际样本、3 秒，与 72 帧／24 fps 时间轴等长，没有补帧。**未观看该视频或实时播放。**
+[1–11](images/fire-forks-motion-01.png) · [13–23](images/fire-forks-motion-02.png) · [25–35](images/fire-forks-motion-03.png) · [37–47](images/fire-forks-motion-04.png) · [49–59](images/fire-forks-motion-05.png) · [61–71](images/fire-forks-motion-06.png)。另外提供 [12 fps 抽帧 MP4](images/fire-forks-sampled.mp4)，36 个实际样本、3 秒，与 72 帧／24 fps 时间轴等长，没有补帧。另已取回 [CI 的完整 960×540、24 fps MP4](images/fire-forks.mp4)：72 个实际渲染帧、3 秒，生成器摘要一致；没有把该视频标为已观看。**未观看视频或实时播放。**
 
 第 19–23 帧点燃后展开，保持阶段的双尖交替伸长、侵蚀断开；高度变化较大，不能仅凭抽帧断言实时节奏自然。第 55–61 帧下部先散成碎片，随后恢复干净。相比固定双角与整支透明淡出的候选，生长和消散更清楚，底部团块与局部薄片仍未解决。
 
