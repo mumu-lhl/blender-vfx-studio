@@ -71,7 +71,7 @@ PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 4070072
 
 [#182](https://github.com/mumu-lhl/blender-vfx-studio/issues/182)／[PR #183](https://github.com/mumu-lhl/blender-vfx-studio/pull/183) 让释放符记沿原生可编辑方向汇聚，再接上火焰点燃。地面逐笔形成和符文反转保留，完整角色多阶段、明暗／远景、54 张解码隔帧、三档资产与无插件高清复现已检查，实测成本已记录，CI 全部 12 项成功。符记重叠与初生火焰大面仍需改善，见 [施法交接](docs/SPELL_TRANSFER_REVIEW.md)。
 
-[#184](https://github.com/mumu-lhl/blender-vfx-studio/issues/184)／[PR #185](https://github.com/mumu-lhl/blender-vfx-studio/pull/185) 正在检查共享下部、错相生长的分叉火舌和沿流向的热色冷缝。已读取三个高清角色阶段；底部团块仍偏圆，明暗远景、完整时序与上下文仍在补齐。保持草稿，见 [分叉检查](docs/FIRE_FORK_REVIEW.md)。
+[#184](https://github.com/mumu-lhl/blender-vfx-studio/issues/184)／[PR #185](https://github.com/mumu-lhl/blender-vfx-studio/pull/185) 正在检查共享下部、错相生长的分叉火舌和沿流向的热色冷缝。已读取 14 张高清明暗／远景及施法阶段、36 张原生隔帧和三档完整资产预览；无插件高清像素一致，实测成本已记录。底部团块仍偏圆，CI 尚未全部结束，保持草稿。见 [分叉检查](docs/FIRE_FORK_REVIEW.md)。
 
 ## 下一步
 

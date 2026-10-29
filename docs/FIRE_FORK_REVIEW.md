@@ -16,11 +16,19 @@
 
 已实际读取基线第 36／48 帧与当前第 36／40／48 帧高清角色图。中上部有不同高度的分叉和缺口，完整大面减少，尖端不再固定地同时伸长；底部亮色团块仍偏圆，整体仍有片状边缘。没有声称达到成熟游戏火焰品质。
 
-[36 前](images/fire-forks-before-36.png) · [36 后](images/fire-forks-after-36.png) · [40 后](images/fire-forks-after-40.png) · [48 前](images/fire-forks-before-48.png) · [48 后](images/fire-forks-after-48.png)。图片直接复制自渲染，没有裁切或调色。浅背景第 25／60／69 帧、明暗和远景第 36／40 帧，以及完整施法第 64／76／92／104 帧也已实际读取。方向关系与退场保留，远景细尖偏弱，底部块感仍明显。整段隔帧和三档导出仍在补齐；**未观看实时播放，PR 保持草稿。**
+[36 前](images/fire-forks-before-36.png) · [36 后](images/fire-forks-after-36.png) · [40 后](images/fire-forks-after-40.png) · [48 前](images/fire-forks-before-48.png) · [48 后](images/fire-forks-after-48.png)。图片直接复制自渲染，没有裁切或调色。浅背景第 25／60／69 帧、明暗和远景第 36／40 帧，以及完整施法第 64／76／92／104 帧也已实际读取。方向关系与退场保留，远景细尖偏弱，底部块感仍明显。整段隔帧和三档导出已查看，CI 仍在运行；**未观看实时播放，PR 保持草稿。**
 
 参考的用途与原作方法见 [参考区分](LIBRARY_REFERENCE_STUDY.md)。本轮实际查看了原作者成片 GIF 的八张样本：可见错相运动与变化的边界，但其 HDR、辉光和纹理也影响了观感，不能当作本项目实现或验收结果。
 
 [暗背景 40](images/fire-forks-dark-40.png) · [远景 40](images/fire-forks-far-40.png) · [施法 76](images/fire-forks-spell-76.png) · [衰减 60](images/fire-forks-decay-60.png)。
+
+## 完整时间轴抽帧
+
+已逐张查看从保存的原生场景直接渲染的全部 36 张隔帧：第 1–71 帧，每隔一帧，480×270、16 samples，新进程未导入插件，正常退出。这组图用于时序检查，不代替上面的高清细节。
+
+[1–11](images/fire-forks-motion-01.png) · [13–23](images/fire-forks-motion-02.png) · [25–35](images/fire-forks-motion-03.png) · [37–47](images/fire-forks-motion-04.png) · [49–59](images/fire-forks-motion-05.png) · [61–71](images/fire-forks-motion-06.png)。另外提供 [12 fps 抽帧 MP4](images/fire-forks-sampled.mp4)，36 个实际样本、3 秒，与 72 帧／24 fps 时间轴等长，没有补帧。**未观看该视频或实时播放。**
+
+第 19–23 帧点燃后展开，保持阶段的双尖交替伸长、侵蚀断开；高度变化较大，不能仅凭抽帧断言实时节奏自然。第 55–61 帧下部先散成碎片，随后恢复干净。相比固定双角与整支透明淡出的候选，生长和消散更清楚，底部团块与局部薄片仍未解决。
 
 ## 当前设备上的成本
 
@@ -35,7 +43,7 @@ Blender 5.2.2、两线程、两核 CPU 配额、Mesa 25.0.7 llvmpipe（LLVM 19.1
 
 ## 功能检查与复现
 
-8 项火焰、14 项艺术控制和 22 项完整资产检查通过，包含停止流动、实际热缝像素、分叉范围不改变共享下部、完整资产节点编辑与独立复制。无插件顶点回放与八套完整资产回放通过。高清图在无插件新进程按 48→36→40 倒序重渲染，三张 PNG 全通道一致，第 70 帧清空，正常退出。测试通过不代表艺术验收。
+8 项火焰、14 项艺术控制和 22 项完整资产检查通过，包含停止流动、实际热缝像素、分叉范围不改变共享下部、完整资产节点编辑与独立复制。无插件顶点回放与八套完整资产回放通过。高清图在无插件新进程按 48→36→40 倒序重渲染，三张 PNG 全通道一致，第 70 帧清空，正常退出。三档完整资产已重新生成，在无插件进程验证分叉属性、原生节点、256×256 嵌入预览与结束帧，正常退出；三张 Cycles CPU 预览已实际查看。测试通过不代表艺术验收。CI [40911022777](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40911022777) 尚未全部结束，PR 保持草稿。
 
 ```sh
 LP_NUM_THREADS=2 blender -b -t 2 --factory-startup --disable-autoexec --python-exit-code 1 --python tools/fire_preview.py -- --frames 36 40 48

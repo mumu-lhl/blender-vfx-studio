@@ -30,9 +30,9 @@
 
 ## stylized-fire
 
-![stylized-fire：第 36 帧](images/stylized-fire.png)
+![stylized-fire：第 40 帧](images/stylized-fire.png)
 
-直立外焰、热芯与向上移动的断口。第 **36 帧**，本地角色镜头；[编辑与实际检查](FIRE_FLOW_REVIEW.md)。部分阶段仍有鼓包，远景细余烬较弱。
+从共享下部交替伸长的分叉与热流，尖端在断裂前先侵蚀。第 **40 帧**，本地角色镜头；[完整抽帧与实际检查](FIRE_FORK_REVIEW.md)。底部团块和局部薄边仍需改善，远景细余烬较弱。
 
 ## dash-echoes
 
