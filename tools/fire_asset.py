@@ -8,12 +8,37 @@ from blender_vfx_studio.palettes import FIRE_PALETTES, FIRE_STOPS
 from tools.charge_design import _Fields, _geometry, _mesh
 
 
+def _shoot_phase(g, clock, branch, lobe):
+    """Share the rising shoot clock so its shader hides the geometry reset."""
+    phase = g.m(
+        "Shoot Flow Clock",
+        "ADD",
+        clock,
+        g.m("Opposite Shoot Phase", "MULTIPLY", branch, math.pi / 2),
+    )
+    phase = g.m(
+        "Separate Tongue Cycles", "ADD", phase, g.m("Shoot Lobe Phase", "MULTIPLY", lobe, 1.9)
+    )
+    return g.m(
+        "Shoot Growth Cycle", "FRACT", g.m("Shoot Cycle Fraction", "DIVIDE", phase, math.tau)
+    )
+
+
 def _flames(root, quality):
     layer, g, geometry = _geometry(root, "Rising Sculpted Flame")
     rows, sides = {"LOW": (14, 8), "MEDIUM": (22, 12), "HIGH": (30, 16)}[quality]
     vertices, faces, centers, forks = [], [], [], []
     attributes = {
-        k: [] for k in ("fire_u", "fire_lobe", "fire_inner", "fire_side_sin", "fire_side_cos")
+        k: []
+        for k in (
+            "fire_u",
+            "fire_lobe",
+            "fire_inner",
+            "fire_side_sin",
+            "fire_side_cos",
+            "fire_branch",
+            "fire_branch_z",
+        )
     }
     # Unequal outer lobes and a smaller forward hot tongue share a grounded base.
     for index, (x, y, height, breadth, bend, inner) in enumerate(
@@ -65,7 +90,16 @@ def _flames(root, quality):
                     centers.append(center)
                     forks.append(fork)
                     for key, value in zip(
-                        attributes, (u, index, inner, math.sin(2 * a), math.cos(2 * a))
+                        attributes,
+                        (
+                            u,
+                            index,
+                            inner,
+                            math.sin(2 * a),
+                            math.cos(2 * a),
+                            branch,
+                            z - split * height if branch else 0,
+                        ),
                     ):
                         attributes[key].append(value)
             if first == 0:
@@ -98,10 +132,11 @@ def _flames(root, quality):
     axes = g.n("ShaderNodeSeparateXYZ", "Rest Axes")
     g.link(pos.outputs[0], axes.inputs[0])
     u = g.attr("fire_u")
+    clock = g.m("Shared Flame Clock", "MULTIPLY", p, g.value("Flow Speed", prop="Fire Flow Speed"))
     phase = g.m(
         "Flame Flow Phase",
         "SUBTRACT",
-        g.m("Rolling Flame Time", "MULTIPLY", p, g.value("Flow Speed", prop="Fire Flow Speed")),
+        clock,
         g.m("Flow Up The Tongue", "MULTIPLY", u, 12),
     )
     phase = g.m(
@@ -125,15 +160,39 @@ def _flames(root, quality):
             g.m("Travelling Neck Depth", "SUBTRACT", pulse, 1),
         ),
     )
+    branch = g.attr("fire_branch")
+    branch_mask = g.m("Only Upper Shoots", "ABSOLUTE", branch)
+    shoot_phase = _shoot_phase(g, clock, branch, g.attr("fire_lobe"))
+    shoot_growth = g.m(
+        "Shoot Rises From Its Junction",
+        "MULTIPLY_ADD",
+        g.stage("New Shoot Lengthens", shoot_phase, 0, 0.72),
+        0.96,
+    )
+    shoot_growth.node.inputs[2].default_value = 0.04
     center = g.attr("fire_center", "FLOAT_VECTOR")
     section = g.v("Section Around Its Own Rising Path", "SUBTRACT", pos.outputs[0], center)
     section = g.v("Moving Bulges And Narrow Necks", "SCALE", section, pulse)
+    branch_breadth = g.m("Shoots Thicken As They Rise", "SQRT", shoot_growth)
+    branch_breadth = g.m(
+        "Shared Foot Keeps Its Breadth",
+        "SUBTRACT",
+        1,
+        g.m(
+            "Upper Shoot Breadth",
+            "MULTIPLY",
+            branch_mask,
+            g.m("Young Shoots Are Narrower", "SUBTRACT", 1, branch_breadth),
+        ),
+    )
+    section = g.v("Growing Shoot Sections", "SCALE", section, branch_breadth)
     rest_position = g.v("Connected Unequal Flame Streams", "ADD", center, section)
     fork_breath = g.m(
         "Living Fork Reach", "MULTIPLY_ADD", g.m("Forks Follow The Updraft", "SINE", phase), 0.18
     )
     fork_breath.node.inputs[2].default_value = 1
     fork_spread = g.m("Editable Fork Reach", "MULTIPLY", fork_breath, g.value("Fork Spread", 1))
+    fork_spread = g.m("Fork Opens As The Shoot Rises", "MULTIPLY", fork_spread, shoot_growth)
     rest_position = g.v(
         "Shoots Separate Above Their Shared Foot",
         "ADD",
@@ -143,6 +202,22 @@ def _flames(root, quality):
             "SCALE",
             g.attr("fire_fork", "FLOAT_VECTOR"),
             g.m("Fork Offset From Rest", "SUBTRACT", fork_spread, 1),
+        ),
+    )
+    rest_position = g.v(
+        "Successive Shoots Carry Heat Upward",
+        "ADD",
+        rest_position,
+        g.xyz(
+            "Shoot Vertical Growth",
+            0,
+            0,
+            g.m(
+                "Growth Above The Junction",
+                "MULTIPLY",
+                g.attr("fire_branch_z"),
+                g.m("Shoot Height From Rest", "SUBTRACT", shoot_growth, 1),
+            ),
         ),
     )
     g.link(rest_position, axes.inputs[0])
@@ -171,7 +246,6 @@ def _flames(root, quality):
     g.link(pos.outputs[0], noise.inputs["Vector"])
     noise.inputs["Scale"].default_value = 2.3
     noise.inputs["Detail"].default_value = 1
-    clock = g.m("Shared Flame Clock", "MULTIPLY", p, g.value("Flow Speed", prop="Fire Flow Speed"))
     g.link(g.m("Unsteady Flame Clock", "MULTIPLY", clock, 0.25), noise.inputs["W"])
     curl = g.v("Signed Flame Curl", "SUBTRACT", noise.outputs["Color"], (0.5, 0.5, 0.5))
     curl = g.v(
@@ -417,6 +491,34 @@ def _material(root):
         0,
         0.035,
     )
+    branch = g.n(
+        "ShaderNodeAttribute", "Upper Shoot Identity", attribute_name="fire_branch"
+    ).outputs["Fac"]
+    lobe = g.n("ShaderNodeAttribute", "Shoot Parent", attribute_name="fire_lobe").outputs["Fac"]
+    shoot_phase = _shoot_phase(g, clock, branch, lobe)
+    shoot_life = g.m(
+        "Shoot Ignites Then Breaks Away",
+        "MULTIPLY",
+        g.stage("Shoot Appears At Its Junction", shoot_phase, 0.02, 0.12),
+        g.m(
+            "Spent Shoot Fades Before Reset",
+            "SUBTRACT",
+            1,
+            g.stage("Shoot Spends Its Heat", shoot_phase, 0.78, 0.98),
+        ),
+    )
+    shoot_life = g.m(
+        "Shared Flame Remains Between Shoots",
+        "SUBTRACT",
+        1,
+        g.m(
+            "Only Shoots Reset",
+            "MULTIPLY",
+            g.m("Upper Shoots", "ABSOLUTE", branch),
+            g.m("Spent Shoot", "SUBTRACT", 1, shoot_life),
+        ),
+    )
+    alive = g.m("Living Shoots With Flowing Erosion", "MULTIPLY", alive, shoot_life)
     air = g.n("ShaderNodeBsdfTransparent", "Air Between Flame Tongues")
     mix = g.n("ShaderNodeMixShader", "Flame Erosion")
     g.link(alive, mix.inputs[0])
