@@ -492,18 +492,14 @@ def _surface(root, *, core=False, ground=False):
         stored = g.stage("Stored Energy Concentration", p, 0.30, 0.84)
         brightness = g.m("Inner Compression Brightness", "MULTIPLY_ADD", stored, 0.77)
         brightness.node.inputs[2].default_value = 0.08
+        energy_remaining = g.m(
+            "Nucleus Energy Remaining",
+            "SUBTRACT",
+            1,
+            g.stage("Nucleus Hands Off Energy", p, 0.88, 0.96),
+        )
         g.link(
-            g.m(
-                "Spend Inner White During Release",
-                "MULTIPLY",
-                brightness,
-                g.m(
-                    "Nucleus Energy Remaining",
-                    "SUBTRACT",
-                    1,
-                    g.stage("Nucleus Hands Off Energy", p, 0.88, 0.96),
-                ),
-            ),
+            g.m("Spend Inner White During Release", "MULTIPLY", brightness, energy_remaining),
             kernel_color.inputs[0],
         )
         # A traveling light front follows each curved sheet, rather than painting
@@ -559,6 +555,11 @@ def _surface(root, *, core=False, ground=False):
         flow = g.m("Connected Vein With A Moving Front", "MULTIPLY_ADD", nucleus_front, 0.75)
         flow.node.inputs[2].default_value = 0.25
         stored_facing = kernel_face
+        heart_values = g.m("Pressure Heart Volume Values", "MULTIPLY_ADD", cel, 1.4)
+        heart_values.node.inputs[2].default_value = 0.25
+        stored_facing = g.m(
+            "Lit Ridges In The Pressure Heart", "MULTIPLY", stored_facing, heart_values
+        )
         kernel_face = g.m(
             "Nucleus White Patch",
             "MULTIPLY",
@@ -678,7 +679,16 @@ def _surface(root, *, core=False, ground=False):
     alpha = g.m("Supporting Layer Opacity", "MULTIPLY", alpha, support)
     emission = g.n("ShaderNodeEmission", "Native Energy Surface")
     g.link(surface_color, emission.inputs["Color"])
-    g.link(g.value("Emission", prop="strength"), emission.inputs["Strength"])
+    radiance = g.value("Emission", prop="strength")
+    if core:
+        stored_light = g.m("Light Stored In The Dense Heart", "MULTIPLY", stored, energy_remaining)
+        stored_light = g.m(
+            "Only The Heart Stores Radiance", "MULTIPLY", stored_light, attribute("charge_heart")
+        )
+        stored_light = g.m("Accumulating Heart Radiance", "MULTIPLY_ADD", stored_light, 2)
+        stored_light.node.inputs[2].default_value = 1
+        radiance = g.m("Stored Pressure Becomes Light", "MULTIPLY", radiance, stored_light)
+    g.link(radiance, emission.inputs["Strength"])
     transparent = g.n("ShaderNodeBsdfTransparent", "Transparent")
     surface = g.n("ShaderNodeMixShader", "Ignite And Dissipate")
     g.link(alpha, surface.inputs[0])
@@ -796,9 +806,9 @@ def core_shape(root):
     # Rounded lens sections provide depth from side views without solid leaf faces.
     lens = ((-1, 0), (-0.65, 0.7), (0.65, 0.7), (1, 0), (0.65, -0.7), (-0.65, -0.7))
     petals = (
-        (0.0, 2.8, 0.19, 0.64, 0.09),
-        (2.05, 3.3, 0.16, 0.53, 0.075),
-        (4.55, 2.2, 0.12, 0.43, 0.045),
+        (0.0, 2.8, 0.22, 0.64, 0.04),
+        (2.05, 3.3, 0.18, 0.53, 0.035),
+        (4.55, 2.2, 0.15, 0.43, 0.025),
     )
     for lobe, (phase, turn, reach, rise, breadth) in enumerate(petals):
         base, steps, sides = len(vertices), 19, len(lens)
