@@ -175,7 +175,7 @@ def setup_base(*, light=True, far=False, view="front", engine="BLENDER_EEVEE"):
 
 def add_effects(fixture):
     """Fit editable starter effects to this sword stroke with native keys."""
-    from blender_vfx_studio import binding
+    from blender_vfx_studio import binding, composition
     from blender_vfx_studio.animation import curves
     from tools.build_examples import create_effect
 
@@ -195,8 +195,17 @@ def add_effects(fixture):
     follow.target = midpoint
     scene.frame_set(1)
     charge = create_effect("energy-charge")
-    # Keep the final compression visible until the sword actually accelerates.
-    charge["duration"] = 52.0
+    # Place this asset's native discharge peak at measured blade contact.
+    # A fixed duration releases into the backswing, before the blade turns.
+    nucleus = next(m for m in composition.members(charge) if m["vfx_module"] == "shader.shield")
+    release = nucleus.children[0].modifiers[0].node_group.nodes["Release Pinch Begins"]
+    peak = release.inputs["From Max"].default_value
+    charge["duration"] = (contact["frame"] - charge["start"]) * charge["speed"] / peak
+    fixture["charge_release"] = {
+        "frame": contact["frame"],
+        "phase": peak,
+        "duration": charge["duration"],
+    }
     bpy.context.view_layer.update()
     charge.location = socket.evaluated_get(
         bpy.context.evaluated_depsgraph_get()
@@ -207,7 +216,7 @@ def add_effects(fixture):
     # collapsing vertically while an unrelated slash appears across it.
     socket.rotation_mode = "QUATERNION"
     previous = Quaternion()
-    for frame in (1, 41, 43, 45, 47, 49, 51):
+    for frame in (1, *range(41, 52)):
         scene.frame_set(frame)
         matrix = weapon.evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world
         direction = (matrix @ tip - matrix.translation).normalized()
@@ -293,7 +302,7 @@ def add_effects(fixture):
     for label, frame in (
         ("Charge", 1),
         ("Wind-up", 37),
-        ("Release", hit_frame - 2),
+        ("Discharge peak", hit_frame),
         ("Verified blade contact", hit_frame),
         ("Aftermath", hit_frame + 24),
         ("Recovery", 80),
