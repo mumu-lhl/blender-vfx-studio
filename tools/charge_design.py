@@ -700,7 +700,7 @@ def _surface(root, *, core=False, ground=False):
 
 def core_shape(root):
     layer, g, geometry = _geometry(root, "Compressed Flame Core")
-    vertices, faces, cross_sections = [], [], []
+    vertices, faces, cross_sections, shell_sections = [], [], [], []
     core_attrs = {
         k: []
         for k in (
@@ -783,6 +783,7 @@ def core_shape(root):
                     offset = width * (side * math.cos(a) + up * math.sin(a) * 0.28)
                 vertices.append(tuple(point + lane_center + offset))
                 cross_sections.append(tuple(offset))
+                shell_sections.append((0, 0, 0))
                 for name, value in zip(
                     core_attrs,
                     (
@@ -806,9 +807,9 @@ def core_shape(root):
     # Rounded lens sections provide depth from side views without solid leaf faces.
     lens = ((-1, 0), (-0.65, 0.7), (0.65, 0.7), (1, 0), (0.65, -0.7), (-0.65, -0.7))
     petals = (
-        (0.0, 2.8, 0.22, 0.64, 0.04),
-        (2.05, 3.3, 0.18, 0.53, 0.035),
-        (4.55, 2.2, 0.15, 0.43, 0.025),
+        (0.0, 2.8, 0.19, 0.64, 0.09),
+        (2.05, 3.3, 0.16, 0.53, 0.075),
+        (4.55, 2.2, 0.12, 0.43, 0.045),
     )
     for lobe, (phase, turn, reach, rise, breadth) in enumerate(petals):
         base, steps, sides = len(vertices), 19, len(lens)
@@ -830,6 +831,7 @@ def core_shape(root):
                 offset = profile * (radial * breadth * across + normal * 0.018 * depth)
                 vertices.append(tuple(point + offset))
                 cross_sections.append((0, 0, 0))
+                shell_sections.append(tuple(offset))
                 a = k * math.tau / sides
                 for name, value in zip(
                     core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0, lobe * 0.25, across, 0.0)
@@ -861,6 +863,7 @@ def core_shape(root):
                 )
             )
             cross_sections.append((0, 0, 0))
+            shell_sections.append((0, 0, 0))
             for name, value in zip(
                 core_attrs, (u, math.sin(a), math.cos(a), 1.0, 7.0, 0.0, 0.0, 1.0)
             ):
@@ -876,6 +879,21 @@ def core_shape(root):
     cross = layer.data.attributes.new("charge_cross", "FLOAT_VECTOR", "POINT")
     for slot, value in zip(cross.data, cross_sections):
         slot.vector = value
+    shell_attr = layer.data.attributes.new("charge_shell", "FLOAT_VECTOR", "POINT")
+    for slot, value in zip(shell_attr.data, shell_sections):
+        slot.vector = value
+    shells = g.n("GeometryNodeSetPosition", "Editable Pressure Shell Width")
+    g.link(geometry, shells.inputs["Geometry"])
+    g.link(
+        g.v(
+            "Shell Section From Its Centerline",
+            "SCALE",
+            g.attr("charge_shell", "FLOAT_VECTOR"),
+            g.m("Shell Width From Rest", "SUBTRACT", g.value("Nucleus Shell Width", 0.22), 1),
+        ),
+        shells.inputs["Offset"],
+    )
+    geometry = shells.outputs["Geometry"]
     for face in layer.data.polygons:
         face.use_smooth = True
     p = g.value("Charge Clock", expression=PROGRESS)
