@@ -67,6 +67,8 @@ PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 4070072
 
 [#178](https://github.com/mumu-lhl/blender-vfx-studio/issues/178)／[PR #179](https://github.com/mumu-lhl/blender-vfx-studio/pull/179) 收敛近身命中的压力弧，并将主压力体改为独立贴合接触面的翻卷曲面，细喷射保留方向。实际同帧与隔帧中遮挡、主次和恢复阶段有所改善；主体体积感仍不足，未宣布整体艺术验收通过。功能与图像范围见 [命中焦点检查](docs/IMPACT_FOCUS_REVIEW.md)。
 
+[#156](https://github.com/mumu-lhl/blender-vfx-studio/issues/156)／[PR #157](https://github.com/mumu-lhl/blender-vfx-studio/pull/157) 用真实脚部接触连接冲刺、腾空和落地；新建残影保留透明填充与稍晚消退的轮廓，两侧体积烟尘先压低展开再翻滚。高清阶段与原生像素对照已检查，完整抽帧和明暗远景仍在补齐，不宣布整体艺术验收通过。见 [角色衔接](docs/DASH_LANDING_REVIEW.md)。
+
 ## 下一步
 
 1. 当前重点转向实际画面。[#174](https://github.com/mumu-lhl/blender-vfx-studio/issues/174) 修正刀光深度收尖，并按真实挥剑轨迹连接充能与释放；同帧角色图、连续隔帧、明暗／远景与原生复现已检查，方向衔接和遮挡改善，反向命中仍被角色遮住。实测成本和艺术边界见 [衔接检查](docs/COMBAT_HANDOFF_REVIEW.md)。

@@ -1,0 +1,697 @@
+{
+  "generator_commit": "51c007b299a3aecaa6ee5f7fd6107744e3f52111",
+  "baseline_commit": "201a93c",
+  "realtime_playback_reviewed": false,
+  "viewed_hd_light_frames": [
+    18,
+    35,
+    43,
+    44,
+    45,
+    47,
+    52,
+    76
+  ],
+  "images": {
+    "dash-landing-before-18.png": "363c9e3c15688ed94758e3492e74adebde1aa219bb4af2b2620c4007d25ce5bf",
+    "dash-landing-after-18.png": "3c224ddbfbdec7f598d7071a426120a2c0d9a189717b2961c05d3df88dbe6778",
+    "dash-landing-before-35.png": "9cd03ce0058f6efdcbd5942ad38c591edf6e577e408336084b90659755977563",
+    "dash-landing-after-35.png": "3e4bd8c9ec6b24cfeff12aa52345507350b325a8be3b8295d8c0ce50d8b614c0",
+    "dash-landing-before-45.png": "d2f0ccf78ffba9d75c3be5292f34739395433543e0db15bec30077e70a0fa4ae",
+    "dash-landing-after-45.png": "ac2ff2bb8bc40cdd7f76b2ad95f1cfb10d6cb984b2a35b246154dca849906869",
+    "dash-landing-before-47.png": "7ccd33324bf35d478d263a2508f32e20e253335753522161442acf78844d1ba2",
+    "dash-landing-after-47.png": "094d8727692cab436ccc29005b8f38c3420173b012ccf251c332ae88c3348f93"
+  },
+  "source_sha256": {
+    "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+    "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+    "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+    "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+    "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+    "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+    "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+    "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+    "blender_vfx_studio/dash.py": "cae04666618b5af84c54595c49e29c4f06c2295d1743f11584fda1d186c2afa1",
+    "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+    "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+    "blender_vfx_studio/impact.py": "c7718004d7a04e08de232b688f57fe9c140d8a87db5b286f934e15bca0029921",
+    "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+    "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+    "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+    "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+    "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+    "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+    "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+    "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+    "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+    "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+    "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+    "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+    "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+    "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+    "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+    "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+    "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+    "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+    "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+    "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+    "tools/dust_asset.py": "09ce80c5bd63163411e0989ed4ed17b1fe3fb37b7fd5f2bf8c06d8028f3db46c",
+    "tools/dash_landing_preview.py": "5e5e12716b5b3d885a5606682dad651748d951fc735e1cc7b43b355121ca1e39",
+    "tools/character_scene.py": "0b860bd7d40087e60aa178c74a85f75936e88e32c6652c39a64fb5298dbee68b",
+    "tools/charge_design.py": "00b494e7bd6dcda0a99c3ed5a756d4db3657c37452973585e915ef994f604ce6",
+    "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+    "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+    "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+    "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+  },
+  "batches": [
+    {
+      "variant": "baseline",
+      "frames": [
+        18,
+        35,
+        43,
+        45
+      ],
+      "resolution": [
+        960,
+        540
+      ],
+      "samples": 32,
+      "contact": {
+        "frame": 44,
+        "foot_trace": [
+          {
+            "frame": 18,
+            "lowest_foot_z": 0.023628227412700653
+          },
+          {
+            "frame": 19,
+            "lowest_foot_z": -0.04902937263250351
+          },
+          {
+            "frame": 20,
+            "lowest_foot_z": -0.05590803176164627
+          },
+          {
+            "frame": 21,
+            "lowest_foot_z": -0.018782272934913635
+          },
+          {
+            "frame": 22,
+            "lowest_foot_z": 0.0002244231291115284
+          },
+          {
+            "frame": 23,
+            "lowest_foot_z": 0.1304149329662323
+          },
+          {
+            "frame": 24,
+            "lowest_foot_z": 0.24829939007759094
+          },
+          {
+            "frame": 25,
+            "lowest_foot_z": 0.35376378893852234
+          },
+          {
+            "frame": 26,
+            "lowest_foot_z": 0.4473700523376465
+          },
+          {
+            "frame": 27,
+            "lowest_foot_z": 0.5304854512214661
+          },
+          {
+            "frame": 28,
+            "lowest_foot_z": 0.6043809652328491
+          },
+          {
+            "frame": 29,
+            "lowest_foot_z": 0.6640328764915466
+          },
+          {
+            "frame": 30,
+            "lowest_foot_z": 0.7074213027954102
+          },
+          {
+            "frame": 31,
+            "lowest_foot_z": 0.7384130954742432
+          },
+          {
+            "frame": 32,
+            "lowest_foot_z": 0.7566055655479431
+          },
+          {
+            "frame": 33,
+            "lowest_foot_z": 0.7607815861701965
+          },
+          {
+            "frame": 34,
+            "lowest_foot_z": 0.7517927885055542
+          },
+          {
+            "frame": 35,
+            "lowest_foot_z": 0.7306066751480103
+          },
+          {
+            "frame": 36,
+            "lowest_foot_z": 0.6974280476570129
+          },
+          {
+            "frame": 37,
+            "lowest_foot_z": 0.6524573564529419
+          },
+          {
+            "frame": 38,
+            "lowest_foot_z": 0.5954450368881226
+          },
+          {
+            "frame": 39,
+            "lowest_foot_z": 0.5272563099861145
+          },
+          {
+            "frame": 40,
+            "lowest_foot_z": 0.4466817378997803
+          },
+          {
+            "frame": 41,
+            "lowest_foot_z": 0.35371270775794983
+          },
+          {
+            "frame": 42,
+            "lowest_foot_z": 0.2483423948287964
+          },
+          {
+            "frame": 43,
+            "lowest_foot_z": 0.1304129660129547
+          },
+          {
+            "frame": 44,
+            "lowest_foot_z": -0.00028842478059232235
+          },
+          {
+            "frame": 45,
+            "lowest_foot_z": -0.0007810225943103433
+          },
+          {
+            "frame": 46,
+            "lowest_foot_z": -7.62087875045836e-05
+          },
+          {
+            "frame": 47,
+            "lowest_foot_z": -0.002324499888345599
+          },
+          {
+            "frame": 48,
+            "lowest_foot_z": -0.003149867057800293
+          },
+          {
+            "frame": 49,
+            "lowest_foot_z": -0.0021193702705204487
+          },
+          {
+            "frame": 50,
+            "lowest_foot_z": -3.869703505188227e-06
+          },
+          {
+            "frame": 51,
+            "lowest_foot_z": -1.8147402442991734e-06
+          },
+          {
+            "frame": 52,
+            "lowest_foot_z": -2.898741513490677e-07
+          },
+          {
+            "frame": 53,
+            "lowest_foot_z": -5.05475327372551e-07
+          },
+          {
+            "frame": 54,
+            "lowest_foot_z": -3.2915850169956684e-06
+          },
+          {
+            "frame": 55,
+            "lowest_foot_z": -6.420537829399109e-06
+          },
+          {
+            "frame": 56,
+            "lowest_foot_z": -7.278867997229099e-06
+          },
+          {
+            "frame": 57,
+            "lowest_foot_z": -3.7451391108334064e-06
+          },
+          {
+            "frame": 58,
+            "lowest_foot_z": -5.422451067715883e-06
+          },
+          {
+            "frame": 59,
+            "lowest_foot_z": -2.8964714147150517e-06
+          },
+          {
+            "frame": 60,
+            "lowest_foot_z": 2.5371555238962173e-06
+          }
+        ],
+        "pose": "KayKit Running_A / Jump_Full_Short / idle",
+        "sample_frames": [
+          6.0,
+          15.0,
+          24.0
+        ],
+        "root_motion": "Native X travel -2.6 to 1.75; 0.75 m jump arc, frames 22\u201344"
+      },
+      "scene_sha256": "f2cfdaec9d90e46283ace2857f43608aab4b6eb3910a3a27b77723c46653d01a",
+      "settings_sha256": "e9dabeafc7147e0ccddeae8f47ebfe585a599a34cb714f7a543d10aa8510430d",
+      "source_digest": "7773e74ad412c4404c42098dd0efb675c7855c83bed2a75f351bcfffa0bbfb53"
+    },
+    {
+      "variant": "ground-kick-only",
+      "frames": [
+        18,
+        35,
+        43,
+        44,
+        45,
+        47,
+        52,
+        76
+      ],
+      "resolution": [
+        960,
+        540
+      ],
+      "samples": 32,
+      "contact": {
+        "frame": 44,
+        "foot_trace": [
+          {
+            "frame": 18,
+            "lowest_foot_z": 0.023628227412700653
+          },
+          {
+            "frame": 19,
+            "lowest_foot_z": -0.04902937263250351
+          },
+          {
+            "frame": 20,
+            "lowest_foot_z": -0.05590803176164627
+          },
+          {
+            "frame": 21,
+            "lowest_foot_z": -0.018782272934913635
+          },
+          {
+            "frame": 22,
+            "lowest_foot_z": 0.0002244231291115284
+          },
+          {
+            "frame": 23,
+            "lowest_foot_z": 0.1304149329662323
+          },
+          {
+            "frame": 24,
+            "lowest_foot_z": 0.24829939007759094
+          },
+          {
+            "frame": 25,
+            "lowest_foot_z": 0.35376378893852234
+          },
+          {
+            "frame": 26,
+            "lowest_foot_z": 0.4473700523376465
+          },
+          {
+            "frame": 27,
+            "lowest_foot_z": 0.5304854512214661
+          },
+          {
+            "frame": 28,
+            "lowest_foot_z": 0.6043809652328491
+          },
+          {
+            "frame": 29,
+            "lowest_foot_z": 0.6640328764915466
+          },
+          {
+            "frame": 30,
+            "lowest_foot_z": 0.7074213027954102
+          },
+          {
+            "frame": 31,
+            "lowest_foot_z": 0.7384130954742432
+          },
+          {
+            "frame": 32,
+            "lowest_foot_z": 0.7566055655479431
+          },
+          {
+            "frame": 33,
+            "lowest_foot_z": 0.7607815861701965
+          },
+          {
+            "frame": 34,
+            "lowest_foot_z": 0.7517927885055542
+          },
+          {
+            "frame": 35,
+            "lowest_foot_z": 0.7306066751480103
+          },
+          {
+            "frame": 36,
+            "lowest_foot_z": 0.6974280476570129
+          },
+          {
+            "frame": 37,
+            "lowest_foot_z": 0.6524573564529419
+          },
+          {
+            "frame": 38,
+            "lowest_foot_z": 0.5954450368881226
+          },
+          {
+            "frame": 39,
+            "lowest_foot_z": 0.5272563099861145
+          },
+          {
+            "frame": 40,
+            "lowest_foot_z": 0.4466817378997803
+          },
+          {
+            "frame": 41,
+            "lowest_foot_z": 0.35371270775794983
+          },
+          {
+            "frame": 42,
+            "lowest_foot_z": 0.2483423948287964
+          },
+          {
+            "frame": 43,
+            "lowest_foot_z": 0.1304129660129547
+          },
+          {
+            "frame": 44,
+            "lowest_foot_z": -0.00028842478059232235
+          },
+          {
+            "frame": 45,
+            "lowest_foot_z": -0.0007810225943103433
+          },
+          {
+            "frame": 46,
+            "lowest_foot_z": -7.62087875045836e-05
+          },
+          {
+            "frame": 47,
+            "lowest_foot_z": -0.002324499888345599
+          },
+          {
+            "frame": 48,
+            "lowest_foot_z": -0.003149867057800293
+          },
+          {
+            "frame": 49,
+            "lowest_foot_z": -0.0021193702705204487
+          },
+          {
+            "frame": 50,
+            "lowest_foot_z": -3.869703505188227e-06
+          },
+          {
+            "frame": 51,
+            "lowest_foot_z": -1.8147402442991734e-06
+          },
+          {
+            "frame": 52,
+            "lowest_foot_z": -2.898741513490677e-07
+          },
+          {
+            "frame": 53,
+            "lowest_foot_z": -5.05475327372551e-07
+          },
+          {
+            "frame": 54,
+            "lowest_foot_z": -3.2915850169956684e-06
+          },
+          {
+            "frame": 55,
+            "lowest_foot_z": -6.420537829399109e-06
+          },
+          {
+            "frame": 56,
+            "lowest_foot_z": -7.278867997229099e-06
+          },
+          {
+            "frame": 57,
+            "lowest_foot_z": -3.7451391108334064e-06
+          },
+          {
+            "frame": 58,
+            "lowest_foot_z": -5.422451067715883e-06
+          },
+          {
+            "frame": 59,
+            "lowest_foot_z": -2.8964714147150517e-06
+          },
+          {
+            "frame": 60,
+            "lowest_foot_z": 2.5371555238962173e-06
+          }
+        ],
+        "pose": "KayKit Running_A / Jump_Full_Short / idle",
+        "sample_frames": [
+          6.0,
+          15.0,
+          24.0
+        ],
+        "echo_tail": 20.0,
+        "root_motion": "Native X travel -2.6 to 1.75; 0.75 m jump arc, frames 22\u201344"
+      },
+      "scene_sha256": "4255a72cad1a9e7944df99abe8615ba820daf14ef065759bba32e866bff879ad",
+      "settings_sha256": "18731cc24287061863eb4764c29111255b44aac6da751809442c918d56b1264f",
+      "source_digest": "a089da31bd8ed476734c039a422a4cf70221e6c5aca0618f0390aaf1114e7520"
+    },
+    {
+      "variant": "final",
+      "frames": [
+        18,
+        35,
+        43,
+        44,
+        45,
+        47,
+        52,
+        76
+      ],
+      "resolution": [
+        960,
+        540
+      ],
+      "samples": 32,
+      "contact": {
+        "frame": 44,
+        "foot_trace": [
+          {
+            "frame": 18,
+            "lowest_foot_z": 0.023628227412700653
+          },
+          {
+            "frame": 19,
+            "lowest_foot_z": -0.04902937263250351
+          },
+          {
+            "frame": 20,
+            "lowest_foot_z": -0.05590803176164627
+          },
+          {
+            "frame": 21,
+            "lowest_foot_z": -0.018782272934913635
+          },
+          {
+            "frame": 22,
+            "lowest_foot_z": 0.0002244231291115284
+          },
+          {
+            "frame": 23,
+            "lowest_foot_z": 0.1304149329662323
+          },
+          {
+            "frame": 24,
+            "lowest_foot_z": 0.24829939007759094
+          },
+          {
+            "frame": 25,
+            "lowest_foot_z": 0.35376378893852234
+          },
+          {
+            "frame": 26,
+            "lowest_foot_z": 0.4473700523376465
+          },
+          {
+            "frame": 27,
+            "lowest_foot_z": 0.5304854512214661
+          },
+          {
+            "frame": 28,
+            "lowest_foot_z": 0.6043809652328491
+          },
+          {
+            "frame": 29,
+            "lowest_foot_z": 0.6640328764915466
+          },
+          {
+            "frame": 30,
+            "lowest_foot_z": 0.7074213027954102
+          },
+          {
+            "frame": 31,
+            "lowest_foot_z": 0.7384130954742432
+          },
+          {
+            "frame": 32,
+            "lowest_foot_z": 0.7566055655479431
+          },
+          {
+            "frame": 33,
+            "lowest_foot_z": 0.7607815861701965
+          },
+          {
+            "frame": 34,
+            "lowest_foot_z": 0.7517927885055542
+          },
+          {
+            "frame": 35,
+            "lowest_foot_z": 0.7306066751480103
+          },
+          {
+            "frame": 36,
+            "lowest_foot_z": 0.6974280476570129
+          },
+          {
+            "frame": 37,
+            "lowest_foot_z": 0.6524573564529419
+          },
+          {
+            "frame": 38,
+            "lowest_foot_z": 0.5954450368881226
+          },
+          {
+            "frame": 39,
+            "lowest_foot_z": 0.5272563099861145
+          },
+          {
+            "frame": 40,
+            "lowest_foot_z": 0.4466817378997803
+          },
+          {
+            "frame": 41,
+            "lowest_foot_z": 0.35371270775794983
+          },
+          {
+            "frame": 42,
+            "lowest_foot_z": 0.2483423948287964
+          },
+          {
+            "frame": 43,
+            "lowest_foot_z": 0.1304129660129547
+          },
+          {
+            "frame": 44,
+            "lowest_foot_z": -0.00028842478059232235
+          },
+          {
+            "frame": 45,
+            "lowest_foot_z": -0.0007810225943103433
+          },
+          {
+            "frame": 46,
+            "lowest_foot_z": -7.62087875045836e-05
+          },
+          {
+            "frame": 47,
+            "lowest_foot_z": -0.002324499888345599
+          },
+          {
+            "frame": 48,
+            "lowest_foot_z": -0.003149867057800293
+          },
+          {
+            "frame": 49,
+            "lowest_foot_z": -0.0021193702705204487
+          },
+          {
+            "frame": 50,
+            "lowest_foot_z": -3.869703505188227e-06
+          },
+          {
+            "frame": 51,
+            "lowest_foot_z": -1.8147402442991734e-06
+          },
+          {
+            "frame": 52,
+            "lowest_foot_z": -2.898741513490677e-07
+          },
+          {
+            "frame": 53,
+            "lowest_foot_z": -5.05475327372551e-07
+          },
+          {
+            "frame": 54,
+            "lowest_foot_z": -3.2915850169956684e-06
+          },
+          {
+            "frame": 55,
+            "lowest_foot_z": -6.420537829399109e-06
+          },
+          {
+            "frame": 56,
+            "lowest_foot_z": -7.278867997229099e-06
+          },
+          {
+            "frame": 57,
+            "lowest_foot_z": -3.7451391108334064e-06
+          },
+          {
+            "frame": 58,
+            "lowest_foot_z": -5.422451067715883e-06
+          },
+          {
+            "frame": 59,
+            "lowest_foot_z": -2.8964714147150517e-06
+          },
+          {
+            "frame": 60,
+            "lowest_foot_z": 2.5371555238962173e-06
+          }
+        ],
+        "pose": "KayKit Running_A / Jump_Full_Short / idle",
+        "sample_frames": [
+          6.0,
+          15.0,
+          24.0
+        ],
+        "echo_tail": 20.0,
+        "root_motion": "Native X travel -2.6 to 1.75; 0.75 m jump arc, frames 22\u201344"
+      },
+      "scene_sha256": "5d780985beee98f27fe2d911157bc824246461b46b036994fe042b4beac85dae",
+      "settings_sha256": "2e437e94bfa6f60755eff254405ded2091d17f7f6e2edf536dd23f04a1e5b028",
+      "source_digest": "42bedc567980778adb84517af0673a0ec7753f1ea61a6ec6da639009d7d8f98c"
+    }
+  ],
+  "native": {
+    "frames": [
+      52,
+      18,
+      35
+    ],
+    "pixels_identical": true,
+    "clear_frame": 84,
+    "scene_sha256": "5d780985beee98f27fe2d911157bc824246461b46b036994fe042b4beac85dae",
+    "source_frame_sha256": {
+      "52": "2d3e3d5f13c799ca4cf04ea3f10960bed187fa9243e8a570f3e2ccccb0f5e5c3",
+      "18": "3c224ddbfbdec7f598d7071a426120a2c0d9a189717b2961c05d3df88dbe6778",
+      "35": "3e4bd8c9ec6b24cfeff12aa52345507350b325a8be3b8295d8c0ce50d8b614c0"
+    }
+  }
+}
