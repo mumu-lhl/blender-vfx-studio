@@ -220,6 +220,31 @@ class StarterTests(unittest.TestCase):
             all((a - b).length < 1e-6 for a, b, shell in zip(before, after, shells) if not shell)
         )
 
+    def test_heart_volume_values_can_remove_white_without_changing_the_body(self):
+        charge = create_effect("energy-charge")
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+        for other in composition.members(charge):
+            other.children[0].hide_render = other != member
+        geometry = member.children[0].modifiers[0].node_group
+        geometry.nodes["Intake Weight"].outputs[0].default_value = 0
+        geometry.nodes["Nucleus Shell Width"].outputs[0].default_value = 0
+        camera()
+        scene = bpy.context.scene
+        scene.camera.location = (3, -5, 3)
+        scene.camera.rotation_euler = (-scene.camera.location).to_track_quat("-Z", "Y").to_euler()
+        scene.camera.data.ortho_scale = 1.6
+        scene.render.resolution_x = scene.render.resolution_y = 96
+        scene.render.dither_intensity = 0
+        before = render_pixels(37)
+        material = member.children[0].data.materials[0].node_tree
+        shading = material.nodes["Pressure Heart Volume Values"]
+        shading.inputs[1].default_value = shading.inputs[2].default_value = 0
+        no_white = render_pixels(37)
+        material.nodes["Nucleus White Threshold"].outputs[0].default_value = 1.01
+        white_off = render_pixels(37)
+        self.assertLess(sum(abs(a - b) for a, b in zip(no_white, white_off)), 0.01)
+        self.assertGreater(sum(abs(a - b) for a, b in zip(before, no_white)), 1)
+
     def test_auxiliary_intake_width_preserves_main_paths_and_survives_assets(self):
         charge = create_effect("energy-charge")
         core_member = next(

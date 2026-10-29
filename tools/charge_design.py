@@ -571,16 +571,17 @@ def _surface(root, *, core=False, ground=False):
             kernel_face,
             g.m("Stored Vein And Front", "MULTIPLY", vein, flow),
         )
+        heart = attribute("charge_heart")
         kernel_face = g.m(
-            "Stored Heart Retains Its Energy",
-            "MAXIMUM",
-            kernel_face,
+            "Independent Stored Heart Shading",
+            "ADD",
             g.m(
-                "Dense Heart With A Colored Contour",
+                "Curled Shell White",
                 "MULTIPLY",
-                attribute("charge_heart"),
-                stored_facing,
+                kernel_face,
+                g.m("Outside The Dense Heart", "SUBTRACT", 1, heart),
             ),
+            g.m("Dense Heart White", "MULTIPLY", stored_facing, heart),
         )
         white_amount = kernel_color.inputs[0].links[0].from_socket
         g.link(
@@ -687,9 +688,7 @@ def _surface(root, *, core=False, ground=False):
     radiance = g.value("Emission", prop="strength")
     if core:
         stored_light = g.m("Light Stored In The Dense Heart", "MULTIPLY", stored, energy_remaining)
-        stored_light = g.m(
-            "Only The Heart Stores Radiance", "MULTIPLY", stored_light, attribute("charge_heart")
-        )
+        stored_light = g.m("Only The Heart Stores Radiance", "MULTIPLY", stored_light, heart)
         front_radiance = g.m(
             "Energy Concentrates In Moving Fronts", "MULTIPLY_ADD", nucleus_front, 5
         )
