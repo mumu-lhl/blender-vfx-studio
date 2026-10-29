@@ -18,11 +18,11 @@
   },
   {
     "effect": "stylized-fire",
-    "frame": 36,
+    "frame": 40,
     "file": "images/stylized-fire.png",
-    "sha256": "a1e8d4de97fae9c012dc051f8886434fc3297a93fe765f5cff0e2cc81fd53884",
+    "sha256": "6c7ef0dc2a542a323a2e372a6524788b0646a70494071a8f8eb2f55a24313188",
     "generator": "tools/fire_preview.py",
-    "generator_commit": "22b1c96",
+    "generator_commit": "a7658f9a5f197d9ead815afce17794909b5cf4bd",
     "source": "Local Blender 5.2.2 Eevee character render"
   },
   {

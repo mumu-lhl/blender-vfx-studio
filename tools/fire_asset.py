@@ -8,11 +8,38 @@ from blender_vfx_studio.palettes import FIRE_PALETTES, FIRE_STOPS
 from tools.charge_design import _Fields, _geometry, _mesh
 
 
+def _shoot_phase(g, clock, branch, lobe):
+    """Share the rising shoot clock so its shader hides the geometry reset."""
+    phase = g.m(
+        "Shoot Flow Clock",
+        "ADD",
+        clock,
+        g.m("Opposite Shoot Phase", "MULTIPLY", branch, math.pi / 2),
+    )
+    phase = g.m(
+        "Separate Tongue Cycles", "ADD", phase, g.m("Shoot Lobe Phase", "MULTIPLY", lobe, 1.9)
+    )
+    return g.m(
+        "Shoot Growth Cycle", "FRACT", g.m("Shoot Cycle Fraction", "DIVIDE", phase, math.tau)
+    )
+
+
 def _flames(root, quality):
     layer, g, geometry = _geometry(root, "Rising Sculpted Flame")
     rows, sides = {"LOW": (14, 8), "MEDIUM": (22, 12), "HIGH": (30, 16)}[quality]
-    vertices, faces, centers = [], [], []
-    attributes = {k: [] for k in ("fire_u", "fire_lobe", "fire_inner")}
+    vertices, faces, centers, forks = [], [], [], []
+    attributes = {
+        k: []
+        for k in (
+            "fire_u",
+            "fire_lobe",
+            "fire_inner",
+            "fire_side_sin",
+            "fire_side_cos",
+            "fire_branch",
+            "fire_branch_z",
+        )
+    }
     # Unequal outer lobes and a smaller forward hot tongue share a grounded base.
     for index, (x, y, height, breadth, bend, inner) in enumerate(
         (
@@ -23,35 +50,72 @@ def _flames(root, quality):
             (0.06, 0.26, 0.44, 0.22, -0.14, 1),
         )
     ):
-        base = len(vertices)
-        for row in range(rows + 1):
-            u = row / rows
-            radius = max(0.002, (0.6 + 0.4 * math.sin(math.pi * u)) * (1 - u) ** 0.85 * breadth)
-            cx = x * (1 - u) + bend * math.sin(math.pi * u) + 0.22 * math.sin(u * 5) * u
-            cy = y * (1 - u * 0.5) + 0.13 * math.sin(u * 4 + index) * u
-            for side in range(sides):
-                a = side / sides * math.tau
-                fold = 1 + 0.15 * math.sin(3 * a + u * 8 + index)
-                vertices.append(
-                    (
-                        cx + math.cos(a) * radius * fold,
-                        cy + math.sin(a) * radius * 0.65 * fold,
-                        u * height,
+        split = {0: 0.28, 1: 0.38}.get(index)
+        # A shared lower tongue feeds two unequal shoots. Their short overlap
+        # keeps the junction filled without booleans or frame-by-frame rebuilding.
+        sections = (
+            [(0, 1, 0)] if split is None else [(0, split + 0.1, 0), (split, 1, -1), (split, 1, 1)]
+        )
+        for first, last, branch in sections:
+            base = len(vertices)
+            segment_rows = max(4, math.ceil(rows * (last - first)))
+            for row in range(segment_rows + 1):
+                u = first + (last - first) * row / segment_rows
+                radius = max(0.002, (0.6 + 0.4 * math.sin(math.pi * u)) * (1 - u) ** 0.85 * breadth)
+                cx = x * (1 - u) + bend * math.sin(math.pi * u) + 0.22 * math.sin(u * 5) * u
+                cy = y * (1 - u * 0.5) + 0.13 * math.sin(u * 4 + index) * u
+                fork = (0, 0, 0)
+                z = u * height
+                if split is not None:
+                    if branch:
+                        t = (u - split) / (1 - split)
+                        reach = (0.32 if index == 0 else 0.22) * t**0.8
+                        fork = (branch * reach, branch * reach * 0.25, 0)
+                        radius *= 0.68 if branch < 0 else 0.52
+                        if branch > 0:
+                            z -= 0.17 * height * t**1.5
+                    elif u > split:
+                        radius *= max(0.002, (last - u) / (last - split))
+                center = (cx + fork[0], cy + fork[1], z)
+                for side in range(sides):
+                    a = side / sides * math.tau
+                    fold = 1 + 0.15 * math.sin(3 * a + u * 8 + index)
+                    vertices.append(
+                        (
+                            center[0] + math.cos(a) * radius * fold,
+                            center[1] + math.sin(a) * radius * 0.65 * fold,
+                            z,
+                        )
                     )
-                )
-                centers.append((cx, cy, u * height))
-                for key, value in zip(attributes, (u, index, inner)):
-                    attributes[key].append(value)
-        faces.append(tuple(base + side for side in reversed(range(sides))))
-        for row in range(rows):
-            for side in range(sides):
-                a = base + row * sides + side
-                b = base + row * sides + (side + 1) % sides
-                faces.append((a, b, b + sides, a + sides))
+                    centers.append(center)
+                    forks.append(fork)
+                    for key, value in zip(
+                        attributes,
+                        (
+                            u,
+                            index,
+                            inner,
+                            math.sin(2 * a),
+                            math.cos(2 * a),
+                            branch,
+                            z - split * height if branch else 0,
+                        ),
+                    ):
+                        attributes[key].append(value)
+            if first == 0:
+                faces.append(tuple(base + side for side in reversed(range(sides))))
+            for row in range(segment_rows):
+                for side in range(sides):
+                    a = base + row * sides + side
+                    b = base + row * sides + (side + 1) % sides
+                    faces.append((a, b, b + sides, a + sides))
     _mesh(layer, vertices, faces, attributes)
     rest = layer.data.attributes.new("fire_center", "FLOAT_VECTOR", "POINT")
     for item, center in zip(rest.data, centers):
         item.vector = center
+    fork_attr = layer.data.attributes.new("fire_fork", "FLOAT_VECTOR", "POINT")
+    for item, fork in zip(fork_attr.data, forks):
+        item.vector = fork
     for face in layer.data.polygons:
         face.use_smooth = True
     p = g.value("Fire Clock", expression=PROGRESS)
@@ -68,10 +132,11 @@ def _flames(root, quality):
     axes = g.n("ShaderNodeSeparateXYZ", "Rest Axes")
     g.link(pos.outputs[0], axes.inputs[0])
     u = g.attr("fire_u")
+    clock = g.m("Shared Flame Clock", "MULTIPLY", p, g.value("Flow Speed", prop="Fire Flow Speed"))
     phase = g.m(
         "Flame Flow Phase",
         "SUBTRACT",
-        g.m("Rolling Flame Time", "MULTIPLY", p, g.value("Flow Speed", prop="Fire Flow Speed")),
+        clock,
         g.m("Flow Up The Tongue", "MULTIPLY", u, 12),
     )
     phase = g.m(
@@ -95,10 +160,66 @@ def _flames(root, quality):
             g.m("Travelling Neck Depth", "SUBTRACT", pulse, 1),
         ),
     )
+    branch = g.attr("fire_branch")
+    branch_mask = g.m("Only Upper Shoots", "ABSOLUTE", branch)
+    shoot_phase = _shoot_phase(g, clock, branch, g.attr("fire_lobe"))
+    shoot_growth = g.m(
+        "Shoot Rises From Its Junction",
+        "MULTIPLY_ADD",
+        g.stage("New Shoot Lengthens", shoot_phase, 0, 0.72),
+        0.96,
+    )
+    shoot_growth.node.inputs[2].default_value = 0.04
     center = g.attr("fire_center", "FLOAT_VECTOR")
     section = g.v("Section Around Its Own Rising Path", "SUBTRACT", pos.outputs[0], center)
     section = g.v("Moving Bulges And Narrow Necks", "SCALE", section, pulse)
+    branch_breadth = g.m("Shoots Thicken As They Rise", "SQRT", shoot_growth)
+    branch_breadth = g.m(
+        "Shared Foot Keeps Its Breadth",
+        "SUBTRACT",
+        1,
+        g.m(
+            "Upper Shoot Breadth",
+            "MULTIPLY",
+            branch_mask,
+            g.m("Young Shoots Are Narrower", "SUBTRACT", 1, branch_breadth),
+        ),
+    )
+    section = g.v("Growing Shoot Sections", "SCALE", section, branch_breadth)
     rest_position = g.v("Connected Unequal Flame Streams", "ADD", center, section)
+    fork_breath = g.m(
+        "Living Fork Reach", "MULTIPLY_ADD", g.m("Forks Follow The Updraft", "SINE", phase), 0.18
+    )
+    fork_breath.node.inputs[2].default_value = 1
+    fork_spread = g.m("Editable Fork Reach", "MULTIPLY", fork_breath, g.value("Fork Spread", 1))
+    fork_spread = g.m("Fork Opens As The Shoot Rises", "MULTIPLY", fork_spread, shoot_growth)
+    rest_position = g.v(
+        "Shoots Separate Above Their Shared Foot",
+        "ADD",
+        rest_position,
+        g.v(
+            "Native Fork Offset",
+            "SCALE",
+            g.attr("fire_fork", "FLOAT_VECTOR"),
+            g.m("Fork Offset From Rest", "SUBTRACT", fork_spread, 1),
+        ),
+    )
+    rest_position = g.v(
+        "Successive Shoots Carry Heat Upward",
+        "ADD",
+        rest_position,
+        g.xyz(
+            "Shoot Vertical Growth",
+            0,
+            0,
+            g.m(
+                "Growth Above The Junction",
+                "MULTIPLY",
+                g.attr("fire_branch_z"),
+                g.m("Shoot Height From Rest", "SUBTRACT", shoot_growth, 1),
+            ),
+        ),
+    )
     g.link(rest_position, axes.inputs[0])
     width = g.value("Width", prop="width")
     width = g.m(
@@ -125,7 +246,6 @@ def _flames(root, quality):
     g.link(pos.outputs[0], noise.inputs["Vector"])
     noise.inputs["Scale"].default_value = 2.3
     noise.inputs["Detail"].default_value = 1
-    clock = g.m("Shared Flame Clock", "MULTIPLY", p, g.value("Flow Speed", prop="Fire Flow Speed"))
     g.link(g.m("Unsteady Flame Clock", "MULTIPLY", clock, 0.25), noise.inputs["W"])
     curl = g.v("Signed Flame Curl", "SUBTRACT", noise.outputs["Color"], (0.5, 0.5, 0.5))
     curl = g.v(
@@ -235,6 +355,50 @@ def _material(root):
             0.5,
         ),
     )
+    # Periodic rest-section attributes avoid an angular seam at the closed ring.
+    # The cool channel winds upward with the same editable flow clock.
+    side_sin = g.n(
+        "ShaderNodeAttribute", "Across Flame Sine", attribute_name="fire_side_sin"
+    ).outputs["Fac"]
+    side_cos = g.n(
+        "ShaderNodeAttribute", "Across Flame Cosine", attribute_name="fire_side_cos"
+    ).outputs["Fac"]
+    lobe_phase = g.n(
+        "ShaderNodeAttribute", "Heat Stream Phase", attribute_name="fire_lobe"
+    ).outputs["Fac"]
+    stream_phase = g.m(
+        "Heat Streams Rise",
+        "SUBTRACT",
+        g.m("Heat Stream Height", "MULTIPLY", u, 8),
+        g.m("Heat Stream Advection", "MULTIPLY", clock, 0.7),
+    )
+    stream_phase = g.m(
+        "Each Tongue Carries Its Own Heat",
+        "ADD",
+        stream_phase,
+        g.m("Heat Phase Offset", "MULTIPLY", lobe_phase, 1.9),
+    )
+    channel = g.m(
+        "Winding Cool Channel",
+        "ADD",
+        g.m("Section Sine", "MULTIPLY", side_sin, g.m("Stream Cosine", "COSINE", stream_phase)),
+        g.m("Section Cosine", "MULTIPLY", side_cos, g.m("Stream Sine", "SINE", stream_phase)),
+    )
+    channel = g.stage("Narrow Cool Flow Between Hot Streams", channel, 0.35, 0.9)
+    channel = g.m(
+        "Keep The Hot Foot Together",
+        "MULTIPLY",
+        channel,
+        g.stage("Flow Separation Above Ground", u, 0.08, 0.4),
+    )
+    heat = g.m(
+        "Heat Has Flowing Internal Structure",
+        "SUBTRACT",
+        heat,
+        g.m(
+            "Editable Flow Seam Contrast", "MULTIPLY", channel, g.value("Flow Seam Contrast", 0.22)
+        ),
+    )
     heat = g.m("Inner Core Heat", "ADD", heat, g.m("Core Accent", "MULTIPLY", inner, 0.12))
     normal = g.n("ShaderNodeLayerWeight", "Dark Flame Boundary")
     heat = g.m(
@@ -319,6 +483,41 @@ def _material(root):
                     0.55,
                 ),
             ),
+        ),
+    )
+    branch = g.n(
+        "ShaderNodeAttribute", "Upper Shoot Identity", attribute_name="fire_branch"
+    ).outputs["Fac"]
+    lobe = g.n("ShaderNodeAttribute", "Shoot Parent", attribute_name="fire_lobe").outputs["Fac"]
+    shoot_phase = _shoot_phase(g, clock, branch, lobe)
+    shoot_life = g.m(
+        "Shoot Ignites Then Breaks Away",
+        "MULTIPLY",
+        g.stage("Shoot Appears At Its Junction", shoot_phase, 0.02, 0.12),
+        g.m(
+            "Spent Shoot Fades Before Reset",
+            "SUBTRACT",
+            1,
+            g.stage("Shoot Spends Its Heat", shoot_phase, 0.78, 0.98),
+        ),
+    )
+    shoot_life = g.m(
+        "Shared Flame Remains Between Shoots",
+        "SUBTRACT",
+        1,
+        g.m(
+            "Only Shoots Reset",
+            "MULTIPLY",
+            g.m("Upper Shoots", "ABSOLUTE", branch),
+            g.m("Spent Shoot", "SUBTRACT", 1, shoot_life),
+        ),
+    )
+    threshold = g.m(
+        "Spent Shoots Break Into The Existing Flow",
+        "ADD",
+        threshold,
+        g.m(
+            "Shoot Erosion", "MULTIPLY", g.m("Shoot Heat Runs Out", "SUBTRACT", 1, shoot_life), 0.8
         ),
     )
     alive = g.stage(
