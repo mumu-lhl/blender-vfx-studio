@@ -41,7 +41,7 @@
 - **Arc Slash**：主刀面配有色、两端收尖的独立残弧；硬笔触和远景细尾仍待完整动作判断。见 [残影记录](docs/SLASH_WAKE_REVIEW.md)。
 - **Impact Burst**：已分为断裂主体、细喷射、辅助卷流与隆起压力弧；侧面偏实体、远景细层弱。见 [主体](docs/IMPACT_SURFACE_REVIEW.md)、[细喷射](docs/IMPACT_FINE_REVIEW.md) 与 [压力弧](docs/IMPACT_WAVE_REVIEW.md)。
 
-[#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 跟踪整体艺术品质。完整施法镜头的准备／释放／退场已完成必要检查，实际读取 54 张解码隔帧图及明暗、远景对照；范围与成本见 [施法记录](docs/SPELL_SEQUENCE_REVIEW.md)。冲刺接落地烟尘 [#156](https://github.com/mumu-lhl/blender-vfx-studio/issues/156) 继续检查位移／接触／恢复。当前参数与艺术可编辑性审查由 [#161](https://github.com/mumu-lhl/blender-vfx-studio/issues/161) 跟踪。
+[#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 跟踪整体艺术品质。完整施法镜头的准备／释放／退场已完成必要检查，实际读取 54 张解码隔帧图及明暗、远景对照；范围与成本见 [施法记录](docs/SPELL_SEQUENCE_REVIEW.md)。冲刺接落地烟尘 [#156](https://github.com/mumu-lhl/blender-vfx-studio/issues/156) 已完成位移／接触／恢复的镜头与抽帧检查，远景与早期反馈的艺术限制仍保留。当前参数与艺术可编辑性审查由 [#161](https://github.com/mumu-lhl/blender-vfx-studio/issues/161) 跟踪。
 
 软件 Eevee 曾在完成像素检查后退出崩溃；CI 的原生重开采用局部 Mesa 磁盘缓存设置并要求正常退出，不忽略失败。具体范围和对照见 [退出记录](docs/EEVEE_EXIT_REVIEW.md)。
 
@@ -54,7 +54,7 @@
 - [PR #162](https://github.com/mumu-lhl/blender-vfx-studio/pull/162)：Clean / Stylized 刀光、独立锋刃配色、原生颜色选择器与关键帧、蓝／绿火焰色带、现有 Fire / Dust / Magic 控制分组、Ground Veil Fade 修复。多阶段 Eevee 图已实际读取，Clean 与蓝焰无插件高清重开像素一致，完整后台与安装检查通过；CI 仍以 PR 的最终状态为准。
 - [#163](https://github.com/mumu-lhl/blender-vfx-studio/issues/163)：独立 Echo Count 与任意跨度的均匀子帧捕获，保留源网格细节；八项捕获测试与无源重开通过；五姿态角色的三个高清阶段及暗背景已读取，原生重渲染像素一致。浅背景旧影仍淡，详见 [采样记录](docs/DASH_SAMPLING_REVIEW.md)。
 - [PR #165](https://github.com/mumu-lhl/blender-vfx-studio/pull/165)：充能核心大小／压缩／释放、闪电长度／分支集中访问；Hook 与几何内缘分别控制。18 张角色对照、刀光隔离图与默认峰值／尾部像素对照已实际查看，11 项艺术控制、10 项刀光、8 项残影回归与无插件重开通过。手工嵌套节点及完整保存保留，JSON 入口明确命名；Linux 默认缩放已检查折叠、原生色轮／RGB 插帧、热色色带和五姿态捕获；其他平台／缩放与实时播放未验收。
-- [#166](https://github.com/mumu-lhl/blender-vfx-studio/issues/166)／[PR #167](https://github.com/mumu-lhl/blender-vfx-studio/pull/167)：重塑 Energy Charge 卷曲内核、流动亮带与可调进流权重。21 项入门库、11 项艺术控制及原生跳帧通过。实际读取 17 张高清明暗／远景／反向对照与 60 张修改前后隔帧；三个阶段无插件高清重渲染像素一致，实测成本与观看边界见 [记录](docs/CHARGE_HIERARCHY_REVIEW.md)。三平台检查通过，长视觉 CI 仍在运行。
+- [#166](https://github.com/mumu-lhl/blender-vfx-studio/issues/166)／[PR #167](https://github.com/mumu-lhl/blender-vfx-studio/pull/167)：重塑 Energy Charge 卷曲内核、流动亮带与可调进流权重。21 项入门库、11 项艺术控制及原生跳帧通过。实际读取 17 张高清明暗／远景／反向对照与 60 张修改前后隔帧；三个阶段无插件高清重渲染像素一致，实测成本与观看边界见 [记录](docs/CHARGE_HIERARCHY_REVIEW.md)。三平台及长视觉 CI 已全部成功。
 - PR #165 的 [CI 40607385631](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40607385631) 全部 12 项成功。Impact 主次调节、Lightning 放电节奏仍待实施；集中编辑入口不等于已经完成艺术改进。
 
 [#168](https://github.com/mumu-lhl/blender-vfx-studio/issues/168)／[PR #169](https://github.com/mumu-lhl/blender-vfx-studio/pull/169) 集中 Impact 现有原生造型与高级材质控制。14 项行为检查和无插件重开通过；10 张高清角色对照已实际读取，修改场景三阶段原生重渲染像素一致。对照参数增加了实体感，因此保留默认画面；短闪的旋转可读性由 [#170](https://github.com/mumu-lhl/blender-vfx-studio/issues/170) 继续修复。
