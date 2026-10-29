@@ -1392,7 +1392,13 @@
     "charge-heart-detail-49.png": "72aa71e04cc99c56468f4fac624783cd3f70596f641627364a791af761038b77",
     "charge-heart-detail-80.png": "5b65267ed635e93a1e9819e9069c32a852b7cdc90936a8db92a6dcbd27591725",
     "charge-heart-before-36.png": "e36fe2f08fde9d3841f87b15d2ae2feff9cf22ea1b6993f2e1c744cd9da7e286",
-    "charge-heart-opaque-45.png": "2ad3b444d2d9795f00a66db7e65a45b8374056afe48722c2c5f90c11a848487c"
+    "charge-heart-opaque-45.png": "2ad3b444d2d9795f00a66db7e65a45b8374056afe48722c2c5f90c11a848487c",
+    "charge-heart-motion-01.png": "2e664071d5b1f286499ae3705ba6cf084f5c4d176e3a19b0e1405c59d26a18a7",
+    "charge-heart-motion-02.png": "dff6dd25e3503ce11481d539bb7f11b0b9386ee2e04af6e9a9990e691d53ddfc",
+    "charge-heart-motion-04.png": "77b1d82a448fd188b4ef223a6813990087875c071c8cdcda40cbf5c93d6516d9",
+    "charge-heart-motion-05.png": "db0074f29076e745ef426ba96fdd471f3e64ccd425bca4ee4a1d321e865725bf",
+    "charge-heart-motion-03.png": "afc1e7da03373f57291ea55330dad99260667eed97b024a25013d73451e9e1a7",
+    "charge-heart-motion-06.png": "5af9a2887bfd3d544f2d57ad41fdc57ff9ca0fad56ba3fec28215dc724181770"
   },
   "source_sha256": {
     "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
@@ -1722,5 +1728,246 @@
       "The same saved scene is used; only its VFX collection is excluded",
       "Evaluation excludes the collection from the viewport dependency graph; render comparison only excludes it from rendering"
     ]
-  }
+  },
+  "native_motion": {
+    "frames": [
+      {
+        "frame": 1,
+        "seconds": 0.0,
+        "render_seconds": 42.947527254000306,
+        "sha256": "ed1b4533c2b42b33e32243ba28b9c61f2261623e72eee29bef926105c4057069"
+      },
+      {
+        "frame": 3,
+        "seconds": 0.08333333333333333,
+        "render_seconds": 15.069894896001642,
+        "sha256": "9f6a0fdf7685177f03183f780a8cfa3695b15ec493193fcd1ecea615c5a043de"
+      },
+      {
+        "frame": 5,
+        "seconds": 0.16666666666666666,
+        "render_seconds": 14.767969226002606,
+        "sha256": "b413141385e546cc8d1a79f478b806c58db3e76b6c7e79cca4167af979ac184c"
+      },
+      {
+        "frame": 7,
+        "seconds": 0.25,
+        "render_seconds": 14.776271452999936,
+        "sha256": "773edda68f3382e6e232aae92d70448778a0edcee7c23426ddd462a5902d202d"
+      },
+      {
+        "frame": 9,
+        "seconds": 0.3333333333333333,
+        "render_seconds": 15.901476114002435,
+        "sha256": "7bd1380504d41ff23074d092751c4bcc965a79f4379038f6ee1081fcc1986266"
+      },
+      {
+        "frame": 11,
+        "seconds": 0.4166666666666667,
+        "render_seconds": 16.325164009998844,
+        "sha256": "38268223b684839d0053ef918d99e37982d81d3b52d18792b801b0b8e5866517"
+      },
+      {
+        "frame": 13,
+        "seconds": 0.5,
+        "render_seconds": 17.231159887000103,
+        "sha256": "9d8e09c9705114664125c7abb4eef688574ac0807fc8c8b0db1f044c86fb25c7"
+      },
+      {
+        "frame": 15,
+        "seconds": 0.5833333333333334,
+        "render_seconds": 16.440342771998985,
+        "sha256": "2c61d460596c13b663f84300aefc7e2494308a3d2e945f94330b0da5fd71f19f"
+      },
+      {
+        "frame": 17,
+        "seconds": 0.6666666666666666,
+        "render_seconds": 15.497353769002075,
+        "sha256": "686d7f904648d7ea8c5340e1fa286c1c0fa3b9fa0d3523ce98910312ebd872b2"
+      },
+      {
+        "frame": 19,
+        "seconds": 0.75,
+        "render_seconds": 15.456845845001226,
+        "sha256": "f852b5559b89b3564c108b7e5c3b32545c2d59236e3f7029a14570ce3e14f822"
+      },
+      {
+        "frame": 21,
+        "seconds": 0.8333333333333334,
+        "render_seconds": 16.032082990001072,
+        "sha256": "590db4c1af740b1b09cbb9a91b3201f8288e9f8a9fe51dd441014993a785e760"
+      },
+      {
+        "frame": 23,
+        "seconds": 0.9166666666666666,
+        "render_seconds": 15.7878868350017,
+        "sha256": "0be3d9221c9b7bb06a407111b28131c5d453f58c43f841fb45d076355cfe5eae"
+      },
+      {
+        "frame": 25,
+        "seconds": 1.0,
+        "render_seconds": 14.849694035001448,
+        "sha256": "5e2c2a81627cec0e124f33c04dfa641f91bb110e65210dff5351556c5f7811ce"
+      },
+      {
+        "frame": 27,
+        "seconds": 1.0833333333333333,
+        "render_seconds": 16.210163526000542,
+        "sha256": "e211958bd97ab9a892a53aafd31deeeb40dc24602672e3cc4ae5b21af33df0fd"
+      },
+      {
+        "frame": 29,
+        "seconds": 1.1666666666666667,
+        "render_seconds": 15.089505703999748,
+        "sha256": "c2c82f7ac0e2e1cf3d56235126541958255e3d445ed486c5b23ba8e97ad41c4c"
+      },
+      {
+        "frame": 31,
+        "seconds": 1.25,
+        "render_seconds": 15.186925060999783,
+        "sha256": "df25b4c8d5ff210badb2ab9480ced57a8d45fd356a459b47d93a6288f55fc375"
+      },
+      {
+        "frame": 33,
+        "seconds": 1.3333333333333333,
+        "render_seconds": 16.23459078399901,
+        "sha256": "7119d3add02167642a03979737d077cd3ad6f451edd94c8beb48cf98ca9da7a6"
+      },
+      {
+        "frame": 35,
+        "seconds": 1.4166666666666667,
+        "render_seconds": 16.235545604002255,
+        "sha256": "745b233ca932315ffc21e64afba2c4216b629ab47cffb58543ecae4e88d5f724"
+      },
+      {
+        "frame": 37,
+        "seconds": 1.5,
+        "render_seconds": 16.280992612002592,
+        "sha256": "4e779e57c8dce26d1654ba879bd48bb811a65a7c2d1ab46bcdc2738676eb0966"
+      },
+      {
+        "frame": 39,
+        "seconds": 1.5833333333333333,
+        "render_seconds": 15.740301672998612,
+        "sha256": "15f04f630f79ccfcb3f924b438db10c1634d531b47a05299e5b776d21b035370"
+      },
+      {
+        "frame": 41,
+        "seconds": 1.6666666666666667,
+        "render_seconds": 15.942781301997456,
+        "sha256": "ad107eba7a15a441fe48fed5a14b21465b8ed605c145f258bdafe13acc7b99a0"
+      },
+      {
+        "frame": 43,
+        "seconds": 1.75,
+        "render_seconds": 15.24686555000153,
+        "sha256": "5c6152b480ea8688509f5f5be0a69f87e878ac694ab66cfc1eb72a60e6478b7b"
+      },
+      {
+        "frame": 45,
+        "seconds": 1.8333333333333333,
+        "render_seconds": 15.650295423001808,
+        "sha256": "bf54a41c188816e5b0cbd58524b466b2650656514fb5a4effafa5dab58214cb7"
+      },
+      {
+        "frame": 47,
+        "seconds": 1.9166666666666667,
+        "render_seconds": 17.061504859000706,
+        "sha256": "cfa8cfc6a43658e576e27759fac43a59a61ed508aa47c24cf68c8da5178e68c9"
+      },
+      {
+        "frame": 49,
+        "seconds": 2.0,
+        "render_seconds": 16.9302650919999,
+        "sha256": "e75e72d46ec6eb06038e6f8a4aee76bc0ec1bd123c13c7dc75d44475934d1811"
+      },
+      {
+        "frame": 51,
+        "seconds": 2.0833333333333335,
+        "render_seconds": 15.18647944300028,
+        "sha256": "a4c89f837897e5be98ea02392b26e1ea7365b3f299cdda75b0c11b60f350ddcb"
+      },
+      {
+        "frame": 53,
+        "seconds": 2.1666666666666665,
+        "render_seconds": 15.523077374000422,
+        "sha256": "02e3aaad5e4252b86c478529a34640f401ccca410e0a0a1e258102a24eadba85"
+      },
+      {
+        "frame": 57,
+        "seconds": 2.3333333333333335,
+        "render_seconds": 16.514625659001467,
+        "sha256": "3906467605bb584177351f6c5c9a852d0629704c48fabd15ee18a0776def2152"
+      },
+      {
+        "frame": 61,
+        "seconds": 2.5,
+        "render_seconds": 17.840945110001485,
+        "sha256": "28765eb89cb030d0c59f356a682cb7523b84b6cd800fd74e0f793820208a6573"
+      },
+      {
+        "frame": 65,
+        "seconds": 2.6666666666666665,
+        "render_seconds": 18.08205522800199,
+        "sha256": "3f543a8c161c745932742937b971650fb394cad1579b14bfcf3130c834031c12"
+      },
+      {
+        "frame": 80,
+        "seconds": 3.2916666666666665,
+        "render_seconds": 11.01205654899968,
+        "sha256": "33b424d70b1da907e2ad5e105719cb76fab7b5775467b36d756de4ce44b8e7d8"
+      },
+      {
+        "frame": 96,
+        "seconds": 3.9583333333333335,
+        "render_seconds": 10.90095464299884,
+        "sha256": "3647ee79f19ba2ad88280318625fc51d1bb2f8bb641d5ac7cee5d6c4d86bea64"
+      }
+    ],
+    "resolution": [
+      480,
+      270
+    ],
+    "samples": 16,
+    "fps": 24,
+    "realtime_playback_reviewed": false,
+    "scene_sha256": "115082085c3ee463f67d040d58763d50a5b8166f95d7088b054e1547ca0de810",
+    "clear_frame": 96,
+    "source_hashes_match": true,
+    "process_exit_code": 0
+  },
+  "viewed_native_motion_frames": [
+    1,
+    3,
+    5,
+    7,
+    9,
+    11,
+    13,
+    15,
+    17,
+    19,
+    21,
+    23,
+    25,
+    27,
+    29,
+    31,
+    33,
+    35,
+    37,
+    39,
+    41,
+    43,
+    45,
+    47,
+    49,
+    51,
+    53,
+    57,
+    61,
+    65,
+    80,
+    96
+  ]
 }
