@@ -5,9 +5,16 @@
   "viewed_light_frames": [
     16,
     52,
+    54,
+    56,
+    58,
     60,
+    62,
     64,
-    96
+    66,
+    69,
+    96,
+    104
   ],
   "images": {
     "spell-transfer-before-64.png": "e6e60cd5eb6b740eea0c16dcf18aacb0c05e575608cfb6929cef0342cf539f32",
@@ -15,7 +22,10 @@
     "spell-transfer-before-96.png": "ba170f7df914dfd2040ac9052a223a0c90767c0da5e330f54d5ca4d7d1881814",
     "spell-transfer-after-96.png": "abad02259c48ddff8645fd66b5b799dad088ba66fbc379bc8b8a55678a83cced",
     "spell-transfer-after-52.png": "a46f4ee67ce3fefc308a79fe357a8c352da59f42566d4461102b769adf265fbf",
-    "spell-transfer-after-60.png": "c270f6528161a40dc77a605a745ef87cf3dfb0a51f6fdb1c6d219a7b8ef9f620"
+    "spell-transfer-after-60.png": "c270f6528161a40dc77a605a745ef87cf3dfb0a51f6fdb1c6d219a7b8ef9f620",
+    "spell-transfer-after-58.png": "9278ca57584f64e39e81db99aaf27dce49a271925d5bd33fb87de51571a6a70f",
+    "spell-transfer-after-62.png": "6b09dac898a443cd2a33d3802edd0d85975bfbd23be2d33d8768558066d4b538",
+    "spell-transfer-after-69.png": "78169e3cd5001705df7345c5cb4e6bd9ddabc3d2e6defde5736d92a761c17ecd"
   },
   "source_sha256": {
     "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
@@ -114,6 +124,75 @@
       {
         "frame": 96,
         "seconds": 27.9045079120001
+      }
+    ],
+    "realtime_playback_reviewed": false,
+    "method": "Rendered PNG stages; realtime playback unreviewed"
+  },
+  "detail_batch": {
+    "engine": "BLENDER_EEVEE",
+    "blender_version": "5.2.2 LTS",
+    "frames": [
+      54,
+      56,
+      58,
+      62,
+      66,
+      69,
+      104
+    ],
+    "fps": 24,
+    "fps_base": 1,
+    "resolution": [
+      960,
+      540
+    ],
+    "samples": 16,
+    "view_transform": "AgX",
+    "look": "None",
+    "bloom": false,
+    "dark": false,
+    "far": false,
+    "contact": {
+      "frame": 52,
+      "ignition_frame": 60,
+      "release_target": [
+        0.6499999761581421,
+        0.0,
+        0.7799999713897705
+      ],
+      "pose": "KayKit Spellcast_Raise / Long / Shoot",
+      "trigger": "Authored spell release, not a claimed physical contact"
+    },
+    "saved_frame": 59,
+    "render_timings": [
+      {
+        "frame": 54,
+        "seconds": 31.79308618399955
+      },
+      {
+        "frame": 56,
+        "seconds": 28.15354447699974
+      },
+      {
+        "frame": 58,
+        "seconds": 25.51006554899959
+      },
+      {
+        "frame": 62,
+        "seconds": 30.329241942000408
+      },
+      {
+        "frame": 66,
+        "seconds": 37.846973134999644
+      },
+      {
+        "frame": 69,
+        "seconds": 37.792126749999625
+      },
+      {
+        "frame": 104,
+        "seconds": 19.673586861999866
       }
     ],
     "realtime_playback_reviewed": false,
