@@ -36,9 +36,9 @@
 
 ## dash-echoes
 
-![dash-echoes：第 19 帧](images/dash-echoes.png)
+![dash-echoes：第 18 帧](images/dash-echoes.png)
 
-真实位移留下的角色姿态；较旧残影在浅背景较淡。 第 **19 帧**；[编辑与实际检查](DASH_REVIEW.md) · [原始 Actions 附件](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40465954679)。
+真实冲刺位移留下的透明姿态，随后腾空并接上落地烟尘。第 **18 帧**，本地角色镜头；[完整动作与实际检查](DASH_LANDING_REVIEW.md)。远景旧姿态仍偏淡，未观看实时播放。
 
 ## magic-circle
 

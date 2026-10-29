@@ -27,11 +27,12 @@
   },
   {
     "effect": "dash-echoes",
-    "frame": 19,
+    "frame": 18,
     "file": "images/dash-echoes.png",
-    "sha256": "20dc19684ffd48ebabb6987edbc881545d1214916858a3bf9e9ae7b52edf1baa",
-    "generator": "tools/dash_preview.py",
-    "workflow_run": 40465954679
+    "sha256": "3c224ddbfbdec7f598d7071a426120a2c0d9a189717b2961c05d3df88dbe6778",
+    "generator": "tools/dash_landing_preview.py",
+    "generator_commit": "51c007b299a3aecaa6ee5f7fd6107744e3f52111",
+    "source": "local Eevee character render"
   },
   {
     "effect": "magic-circle",

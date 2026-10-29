@@ -4,7 +4,7 @@ import math
 import random
 
 from blender_vfx_studio import composition, core
-from blender_vfx_studio.nodes import ACTIVE, PROGRESS, drive
+from blender_vfx_studio.nodes import ACTIVE, PROGRESS, drive, node
 from tools.charge_design import _Fields, _geometry, _mesh
 
 
@@ -54,7 +54,7 @@ def _diffuse(root, *, haze=False, grit=False):
             g.m(
                 "Veil Lifetime",
                 "MULTIPLY",
-                g.stage("Veil Ignites", p, 0, 0.12),
+                g.stage("Veil Ignites", p, 0, 0.035),
                 g.m(
                     "Veil Dissipates",
                     "SUBTRACT",
@@ -249,14 +249,21 @@ def _density(g, position, quality):
         angle = (1.45, 0.12, 2.95)[cluster] + (0 if index < 3 else randomizer.uniform(-0.35, 0.35))
         travel = (0.22, 0.92, 1.0)[cluster] if index < 3 else randomizer.uniform(0.22, 0.82)
         scale = (1.15, 0.9, 0.8)[index] if index < 3 else randomizer.uniform(0.38, 0.7)
-        delay = index * 0.015 if index < 3 else randomizer.uniform(0.02, 0.14)
+        delay = 0 if index < 3 else randomizer.uniform(0.02, 0.14)
         lift = (0.75, 0.45, 0.6)[index] if index < 3 else randomizer.uniform(0.2, 0.65)
         age = g.m(
             prefix + " Age", "DIVIDE", g.m(prefix + " Since Birth", "SUBTRACT", p, delay), 1 - delay
         )
         age = g.m(prefix + " Nonnegative Age", "MAXIMUM", age, 0)
         age = g.m(prefix + " Bounded Age", "MINIMUM", age, 1)
-        grow = g.stage(prefix + " Rolls Up", age, 0, 0.23)
+        contact_bank = index in (1, 2)
+        grow = g.stage(prefix + " Rolls Up", age, 0, 0.09 if contact_bank else 0.23)
+        if contact_bank:
+            height_fraction = g.stage(prefix + " Unfolds From Ground", age, 0, 0.22)
+            height_fraction = g.m(
+                prefix + " Low Contact Crown", "MULTIPLY_ADD", height_fraction, 0.75
+            )
+            height_fraction.node.inputs[2].default_value = 0.25
         loss = g.m(
             prefix + " Density Loss",
             "MULTIPLY",
@@ -307,7 +314,12 @@ def _density(g, position, quality):
                 g.value(prefix + " Editable Rise", prop="Dust Rise Height"),
             ),
         )
-        height = g.m(prefix + " Above Ground", "ADD", height, 0.12 * scale)
+        base_height = (
+            g.m(prefix + " Grounded Center", "MULTIPLY", height_fraction, 0.12 * scale)
+            if contact_bank
+            else 0.12 * scale
+        )
+        height = g.m(prefix + " Above Ground", "ADD", height, base_height)
         center = g.xyz(
             prefix + " Center",
             g.m(prefix + " X", "MULTIPLY", distance, math.cos(angle)),
@@ -322,9 +334,33 @@ def _density(g, position, quality):
         )
         radius = g.m(prefix + " Growing Radius", "MULTIPLY", radius, size)
         radius = g.m(prefix + " Safe Radius", "MAXIMUM", radius, 0.0001)
-        dist = g.n("ShaderNodeVectorMath", prefix + " Distance", operation="DISTANCE")
-        g.link(warped, dist.inputs[0])
-        g.link(center, dist.inputs[1])
+        if contact_bank:
+            # Expand sideways before rising. Apply the existing fold noise in
+            # this compressed space so it cannot swallow the thin initial crown.
+            delta = g.v(prefix + " From Contact Center", "SUBTRACT", position, center)
+            delta = g.v(
+                prefix + " Compressed Contact Profile",
+                "MULTIPLY",
+                delta,
+                g.xyz(
+                    prefix + " Contact Aspect",
+                    1,
+                    1,
+                    g.m(prefix + " Inverse Crown Height", "DIVIDE", 1, height_fraction),
+                ),
+            )
+            delta = g.v(
+                prefix + " Folded Contact Crown",
+                "ADD",
+                delta,
+                g.v(prefix + " Fold Offset", "SUBTRACT", warped, position),
+            )
+            dist = g.n("ShaderNodeVectorMath", prefix + " Distance", operation="LENGTH")
+            g.link(delta, dist.inputs[0])
+        else:
+            dist = g.n("ShaderNodeVectorMath", prefix + " Distance", operation="DISTANCE")
+            g.link(warped, dist.inputs[0])
+            g.link(center, dist.inputs[1])
         relative = g.m(prefix + " Relative Distance", "DIVIDE", dist.outputs["Value"], radius)
         soft = g.m(
             prefix + " Soft Density",
@@ -404,6 +440,15 @@ def create(context, quality="MEDIUM"):
     haze.name = "Dust • Ground Veil"
     haze["vfx_parameter_keys"] = "radius,width,expansion,noise_scale,fade"
     _diffuse(haze, haze=True)
+    # The low ground kick arrives before the slower rolling banks. Preserve
+    # the ordinary radius/expansion controls and the final footprint.
+    tree = haze.children[0].modifiers[0].node_group
+    travel = node(
+        tree, "ShaderNodeMath", "Fast Ground Contact Spread", -470, -100, operation="POWER"
+    )
+    travel.inputs[1].default_value = 0.5
+    tree.links.new(tree.nodes["Ring Controls"].outputs["Progress"], travel.inputs[0])
+    tree.links.new(travel.outputs[0], tree.nodes["Expansion Over Life"].inputs[1])
     grit = core.create_particle(context, quality)
     for key, value in dict(
         start=start,

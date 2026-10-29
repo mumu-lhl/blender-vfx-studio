@@ -460,7 +460,7 @@ jobs:
   dash_review:
     name: Character Dash Echoes · native asset and Eevee
     runs-on: ubuntu-24.04
-    timeout-minutes: 75
+    timeout-minutes: 90
     env:
       LIBGL_ALWAYS_SOFTWARE: '1'
       EGL_PLATFORM: surfaceless
@@ -478,9 +478,10 @@ jobs:
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/dash_preview.py -- --sequence
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/dash_preview.py -- --dark
           blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/dash_preview.py -- --far
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/dash_preview.py -- --echo-count 5 --capture-first 6 --capture-last 19 --frames 12 19 31
-          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/dash_preview.py -- --echo-count 5 --capture-first 6 --capture-last 19 --dark --frames 19
-          MESA_SHADER_CACHE_DISABLE=true blender -b work/dash-review/light-near-echoes-5-6-19/dash.blend --disable-autoexec --python-exit-code 1 -t 2 --python tests/dash_visual_reopen.py -- --frames 31 12 19
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/dash_landing_preview.py -- --frames 18 35 44 45 52 76
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/dash_landing_preview.py -- --dark --frames 18 45
+          blender -b --factory-startup --disable-autoexec --python-exit-code 1 -t 2 --python tools/dash_landing_preview.py -- --far --frames 18 45
+          MESA_SHADER_CACHE_DISABLE=true blender -b work/dash-landing-review/light-near/dash-landing.blend --disable-autoexec --python-exit-code 1 -t 2 --python tests/dash_landing_visual_reopen.py
           MESA_SHADER_CACHE_DISABLE=true blender -b work/dash-review/light-near/dash.blend --disable-autoexec --python-exit-code 1 -t 2 --python tests/dash_visual_reopen.py
           MESA_SHADER_CACHE_DISABLE=true blender -b work/dash-review/light-near/dash.blend --disable-autoexec --python-exit-code 1 -t 2 --python tools/character_performance.py -- --settings dash-settings.json --frames 12 19 27
           python tools/combat_video.py work/dash-review/light-near --profile dash
@@ -489,7 +490,9 @@ jobs:
         if: always()
         with:
           name: dash-strike-review
-          path: work/dash-review/
+          path: |
+            work/dash-review/
+            work/dash-landing-review/
           if-no-files-found: warn
 
   magic_review:
