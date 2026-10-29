@@ -190,6 +190,36 @@ class StarterTests(unittest.TestCase):
         node.outputs[0].default_value *= 0.6
         self.assertLess(volume(37), stored * 0.6)
 
+    def test_shell_can_close_without_moving_the_heart_or_intakes(self):
+        charge = create_effect("energy-charge")
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+
+        def sample():
+            evaluated = mesh(member, 37)
+            shells = [
+                a.value > 0.5 and b.value < 0.5
+                for a, b in zip(
+                    evaluated.attributes["charge_inner"].data,
+                    evaluated.attributes["charge_heart"].data,
+                )
+            ]
+            area = sum(
+                face.area for face in evaluated.polygons if all(shells[i] for i in face.vertices)
+            )
+            return [v.co.copy() for v in evaluated.vertices], shells, area
+
+        before, shells, area = sample()
+        self.assertGreater(area, 0.001)
+        member.children[0].modifiers[0].node_group.nodes["Nucleus Shell Width"].outputs[
+            0
+        ].default_value = 0
+        after, _, collapsed_area = sample()
+        self.assertLess(collapsed_area, area * 0.01)
+        self.assertGreater(max((a - b).length for a, b in zip(before, after)), 0.01)
+        self.assertTrue(
+            all((a - b).length < 1e-6 for a, b, shell in zip(before, after, shells) if not shell)
+        )
+
     def test_auxiliary_intake_width_preserves_main_paths_and_survives_assets(self):
         charge = create_effect("energy-charge")
         core_member = next(

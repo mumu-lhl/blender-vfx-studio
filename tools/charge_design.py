@@ -560,6 +560,11 @@ def _surface(root, *, core=False, ground=False):
         stored_facing = g.m(
             "Lit Ridges In The Pressure Heart", "MULTIPLY", stored_facing, heart_values
         )
+        heart_flow = g.m(
+            "Flowing Light Across The Stored Volume", "MULTIPLY_ADD", nucleus_front, 0.7
+        )
+        heart_flow.node.inputs[2].default_value = 0.3
+        stored_facing = g.m("Moving Plasma Within The Heart", "MULTIPLY", stored_facing, heart_flow)
         kernel_face = g.m(
             "Nucleus White Patch",
             "MULTIPLY",
@@ -685,8 +690,14 @@ def _surface(root, *, core=False, ground=False):
         stored_light = g.m(
             "Only The Heart Stores Radiance", "MULTIPLY", stored_light, attribute("charge_heart")
         )
-        stored_light = g.m("Accumulating Heart Radiance", "MULTIPLY_ADD", stored_light, 2)
-        stored_light.node.inputs[2].default_value = 1
+        front_radiance = g.m(
+            "Energy Concentrates In Moving Fronts", "MULTIPLY_ADD", nucleus_front, 5
+        )
+        front_radiance.node.inputs[2].default_value = 2
+        stored_light = g.m(
+            "Light Follows The Stored Front", "MULTIPLY", stored_light, front_radiance
+        )
+        stored_light = g.m("Accumulating Heart Radiance", "ADD", stored_light, 1)
         radiance = g.m("Stored Pressure Becomes Light", "MULTIPLY", radiance, stored_light)
     g.link(radiance, emission.inputs["Strength"])
     transparent = g.n("ShaderNodeBsdfTransparent", "Transparent")
@@ -851,9 +862,9 @@ def core_shape(root):
             a = side / sides * math.tau
             angle = a + 0.9 * u
             radius = (
-                0.14
+                0.13
                 * profile
-                * (1 + 0.2 * math.cos(3 * a + 2 * u) + 0.07 * math.cos(5 * a - 4 * u))
+                * (1 + 0.32 * math.cos(3 * a + 2 * u) + 0.07 * math.cos(5 * a - 4 * u))
             )
             vertices.append(
                 (
@@ -865,7 +876,17 @@ def core_shape(root):
             cross_sections.append((0, 0, 0))
             shell_sections.append((0, 0, 0))
             for name, value in zip(
-                core_attrs, (u, math.sin(a), math.cos(a), 1.0, 7.0, 0.0, 0.0, 1.0)
+                core_attrs,
+                (
+                    u,
+                    math.sin(a),
+                    math.cos(a),
+                    1.0,
+                    7.0,
+                    0.45 * math.sin(a) + 0.2 * math.cos(2 * a),
+                    0.0,
+                    1.0,
+                ),
             ):
                 core_attrs[name].append(value)
     faces.append(tuple(base + side for side in reversed(range(sides))))
