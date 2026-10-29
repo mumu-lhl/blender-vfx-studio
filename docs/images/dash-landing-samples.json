@@ -835,5 +835,18 @@
     79,
     81,
     83
-  ]
+  ],
+  "sampled_video": {
+    "file": "dash-landing-sampled.mp4",
+    "sha256": "621d23e23e1023271d908a60e5b9157e1b4323efa263fb2c4b7c01ed9bda67c6",
+    "frames": 42,
+    "fps": 12,
+    "source_fps": 24,
+    "resolution": [
+      480,
+      270
+    ],
+    "duration_seconds": 3.5,
+    "realtime_playback_reviewed": false
+  }
 }

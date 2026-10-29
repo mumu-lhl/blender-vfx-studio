@@ -20,7 +20,7 @@
 
 改善集中在轮廓与先后层次，不能据此宣布整段动作有足够力量感。第 45 帧反馈仍弱，旧残影仍偏线描；已经逐张读取全部 42 张原生隔帧，覆盖第 1–83 帧、每隔一帧；它们为 480×270、32 samples，用于检查完整时序，不代替高清细节判断。暗背景、远景和实测成本正在补齐。部分交叠阶段会带出蓝色叠影，烟尘整体仍偏柔和。**未观看实时播放，艺术验收仍有边界，#156 保持开放。**
 
-完整抽帧：[第 1–11 帧](images/dash-landing-motion-01.png) · [第 13–23 帧](images/dash-landing-motion-02.png) · [第 25–35 帧](images/dash-landing-motion-03.png) · [第 37–47 帧](images/dash-landing-motion-04.png) · [第 49–59 帧](images/dash-landing-motion-05.png) · [第 61–71 帧](images/dash-landing-motion-06.png) · [第 73–83 帧](images/dash-landing-motion-07.png)。这些是真实时间轴 PNG，没有当作已观看的实时视频。
+完整抽帧：[第 1–11 帧](images/dash-landing-motion-01.png) · [第 13–23 帧](images/dash-landing-motion-02.png) · [第 25–35 帧](images/dash-landing-motion-03.png) · [第 37–47 帧](images/dash-landing-motion-04.png) · [第 49–59 帧](images/dash-landing-motion-05.png) · [第 61–71 帧](images/dash-landing-motion-06.png) · [第 73–83 帧](images/dash-landing-motion-07.png)。这些是真实时间轴 PNG，没有当作已观看的实时视频。另提供 [12 fps 隔帧预览 MP4](images/dash-landing-sampled.mp4)：42 个实际样本、480×270、3.5 秒，与 84 帧／24 fps 时间轴等长。没有补成 24 fps，也没有声称观看该视频。
 
 ## 原生与功能验证
 
