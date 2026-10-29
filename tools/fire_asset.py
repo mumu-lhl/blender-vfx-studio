@@ -50,7 +50,7 @@ def _flames(root, quality):
             (0.06, 0.26, 0.44, 0.22, -0.14, 1),
         )
     ):
-        split = {0: 0.48, 1: 0.55}.get(index)
+        split = {0: 0.28, 1: 0.38}.get(index)
         # A shared lower tongue feeds two unequal shoots. Their short overlap
         # keeps the junction filled without booleans or frame-by-frame rebuilding.
         sections = (
@@ -69,9 +69,9 @@ def _flames(root, quality):
                 if split is not None:
                     if branch:
                         t = (u - split) / (1 - split)
-                        reach = (0.27 if index == 0 else 0.19) * t**1.3
+                        reach = (0.32 if index == 0 else 0.22) * t**0.8
                         fork = (branch * reach, branch * reach * 0.25, 0)
-                        radius *= 0.82 if branch < 0 else 0.64
+                        radius *= 0.68 if branch < 0 else 0.52
                         if branch > 0:
                             z -= 0.17 * height * t**1.5
                     elif u > split:
@@ -485,12 +485,6 @@ def _material(root):
             ),
         ),
     )
-    alive = g.stage(
-        "Soft Broken Heat Edge",
-        g.m("Heat Above Erosion", "SUBTRACT", noise.outputs["Fac"], threshold),
-        0,
-        0.035,
-    )
     branch = g.n(
         "ShaderNodeAttribute", "Upper Shoot Identity", attribute_name="fire_branch"
     ).outputs["Fac"]
@@ -518,7 +512,20 @@ def _material(root):
             g.m("Spent Shoot", "SUBTRACT", 1, shoot_life),
         ),
     )
-    alive = g.m("Living Shoots With Flowing Erosion", "MULTIPLY", alive, shoot_life)
+    threshold = g.m(
+        "Spent Shoots Break Into The Existing Flow",
+        "ADD",
+        threshold,
+        g.m(
+            "Shoot Erosion", "MULTIPLY", g.m("Shoot Heat Runs Out", "SUBTRACT", 1, shoot_life), 0.8
+        ),
+    )
+    alive = g.stage(
+        "Soft Broken Heat Edge",
+        g.m("Heat Above Erosion", "SUBTRACT", noise.outputs["Fac"], threshold),
+        0,
+        0.035,
+    )
     air = g.n("ShaderNodeBsdfTransparent", "Air Between Flame Tongues")
     mix = g.n("ShaderNodeMixShader", "Flame Erosion")
     g.link(alive, mix.inputs[0])
