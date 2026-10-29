@@ -69,7 +69,7 @@ PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 4070072
 
 [#156](https://github.com/mumu-lhl/blender-vfx-studio/issues/156)／[PR #157](https://github.com/mumu-lhl/blender-vfx-studio/pull/157) 用真实脚部接触连接冲刺、腾空和落地；新建残影保留透明填充与稍晚消退的轮廓，两侧体积烟尘先压低展开再翻滚。14 张高清阶段、42 张原生隔帧、六个质量资产及无插件像素复现已检查，CI 全部 12 项成功。远景旧残影与接触后一帧仍弱，不宣布整体艺术验收通过。见 [角色衔接](docs/DASH_LANDING_REVIEW.md)。
 
-[#182](https://github.com/mumu-lhl/blender-vfx-studio/issues/182)／[PR #183](https://github.com/mumu-lhl/blender-vfx-studio/pull/183) 让释放符记沿原生可编辑方向汇聚，再接上火焰点燃。地面逐笔形成和符文反转保留，完整角色多阶段、明暗／远景与无插件高清复现已检查；完整隔帧与成本正在补齐。符记重叠与初生火焰大面仍需改善，见 [施法交接](docs/SPELL_TRANSFER_REVIEW.md)。
+[#182](https://github.com/mumu-lhl/blender-vfx-studio/issues/182)／[PR #183](https://github.com/mumu-lhl/blender-vfx-studio/pull/183) 让释放符记沿原生可编辑方向汇聚，再接上火焰点燃。地面逐笔形成和符文反转保留，完整角色多阶段、明暗／远景、54 张解码隔帧、三档资产与无插件高清复现已检查，实测成本已记录，CI 全部 12 项成功。符记重叠与初生火焰大面仍需改善，见 [施法交接](docs/SPELL_TRANSFER_REVIEW.md)。
 
 ## 下一步
 

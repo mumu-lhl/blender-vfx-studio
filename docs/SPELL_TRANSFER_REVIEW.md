@@ -28,9 +28,28 @@
 
 [暗背景 60](images/spell-transfer-dark-60.png) · [远景 64](images/spell-transfer-far-64.png) · [修改前 52](images/spell-transfer-before-52.png) · [修改前 60](images/spell-transfer-before-60.png)。点燃时刻刻意后移八帧，因此同帧火焰的年龄不同；这组对照用于判断交接，不用来声称火焰造型本身改善。
 
+## 完整时序抽帧
+
+CI 完整渲染的 108 帧已编码成 [960×540、24 fps、4.5 秒 MP4](images/spell-transfer.mp4)，附件的生成器摘要与本地对照完全一致。已实际查看由该视频解码的全部 54 张隔帧：
+
+[1–11](images/spell-transfer-motion-01.png) · [13–23](images/spell-transfer-motion-02.png) · [25–35](images/spell-transfer-motion-03.png) · [37–47](images/spell-transfer-motion-04.png) · [49–59](images/spell-transfer-motion-05.png) · [61–71](images/spell-transfer-motion-06.png) · [73–83](images/spell-transfer-motion-07.png) · [85–95](images/spell-transfer-motion-08.png) · [97–107](images/spell-transfer-motion-09.png)。页面只缩小排列和标注，没有插帧。**解码图检查不等于观看实时播放。**
+
+起势与地面主印形成连续；第 54–60 帧符记朝前汇聚，第 61 帧火苗接入，随后地面图案退去。第 91–99 帧火焰由下向上断开，恢复阶段干净。空间联系比独立升起更清楚，释放力度仍偏轻，持续燃烧仍有较完整的平滑色面。实际读取的高清阶段和隔帧用于限定这次判断，没有把整个火焰资产宣布为艺术验收通过。
+
+## 实测成本
+
+本地 Blender 5.2.2、两线程、两核 CPU 配额、Mesa 25.0.7 llvmpipe（LLVM 19.1.7），960×540、Eevee 16 samples。在第 64 帧只开关效果集合，求值各预热三次、再测九次：
+
+| 第 64 帧 | 无效果 | 有效果 |
+| --- | --- | --- |
+| 场景求值中位数／p95 | 0.75／0.79 ms | 5.35／7.08 ms |
+| 同帧渲染，预热后一次 | 17.68 s | 40.53 s |
+
+渲染仅一组同帧对照，不能计算可靠的渲染 p95，也不代表视口 FPS。CI 的另一台 llvmpipe 设备测了第 40／64／96 帧，原始数据另列在检查清单中；不混合两台设备，也不声称相比旧生成器更快。
+
 ## 功能验证与复现
 
-5 项魔法阵和 4 项施法场景检查通过，包含方向归一化、零方向、汇聚时保留笔画宽度、完整资产复制与保存，以及符记实际到达火焰核心附近。无插件新进程读取方向与汇聚后的顶点一致，结束时清空，正常退出；这些属于功能验证。另一个无插件进程按 96→16→64 倒序重渲染，三张 960×540 PNG 全通道一致，第 104 帧清空，进程正常退出。14 项艺术控制和 22 项完整资产检查也通过。
+5 项魔法阵和 4 项施法场景检查通过，包含方向归一化、零方向、汇聚时保留笔画宽度、完整资产复制与保存，以及符记实际到达火焰核心附近。无插件新进程读取方向与汇聚后的顶点一致，结束时清空，正常退出；这些属于功能验证。另一个无插件进程按 96→16→64 倒序重渲染，三张 960×540 PNG 全通道一致，第 104 帧清空，进程正常退出。14 项艺术控制和 22 项完整资产检查也通过。三档完整魔法阵已重新构建，在无插件进程验证预览、方向、汇聚和清空，正常退出；三张嵌入预览与[默认向上释放的高清图](images/spell-transfer-default-up-60.png)已实际读取。CI [40896478638](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40896478638) 全部 12 项成功。
 
 ```sh
 LP_NUM_THREADS=2 blender -b -t 2 --factory-startup --disable-autoexec --python-exit-code 1 --python tools/spell_preview.py -- --frames 16 52 60 64 96
