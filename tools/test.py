@@ -109,6 +109,15 @@ subprocess.run(
     ],
     check=True,
 )
+subprocess.run(
+    base
+    + [
+        str(ROOT / "work/character-timing-test.blend"),
+        "--python",
+        "tests/character_preparation_reopen.py",
+    ],
+    check=True,
+)
 
 subprocess.run(base + ["--python", "tests/test_impact_blender.py"], check=True)
 subprocess.run(
