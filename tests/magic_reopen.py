@@ -14,6 +14,13 @@ for frame in (60, 0, 8, 73, 35, 60):
     )
     expected = root[f"expected_vertices_{frame}"] if frame in (8, 35, 60) else 0
     assert actual == expected, (frame, actual, expected)
+release = next(o for o in root.children if o.name.startswith("Magic • Release"))
+for frame in (65, 50, 65):
+    bpy.context.scene.frame_set(frame)
+    mesh = release.children[0].evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+    assert [c for vertex in mesh.vertices for c in vertex.co] == list(
+        root[f"expected_release_{frame}"]
+    )
 bpy.context.scene.frame_set(73)
 assert not any(
     o.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices

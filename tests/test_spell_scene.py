@@ -51,11 +51,32 @@ class SpellSceneTests(unittest.TestCase):
 
         self.assertTrue(visible(magic, 40))
         self.assertFalse(visible(fire, 51))
-        self.assertTrue(visible(fire, 56))
+        self.assertFalse(visible(fire, 56))
+        self.assertFalse(visible(fire, 59))
         self.assertTrue(visible(fire, 64))
         self.assertFalse(visible(magic, 73))
         self.assertFalse(visible(fire, 104))
         self.assertFalse(visible(magic, 0))
+
+    def test_release_marks_converge_at_the_fire_instead_of_above_the_caster(self):
+        from mathutils import Vector
+
+        magic = bpy.data.objects["Spell • Magic Circle"]
+        release = next(obj for obj in magic.children if obj.name == "Magic • Release").children[0]
+        fire = bpy.data.objects["Spell • Fire Release"]
+
+        def center(frame):
+            bpy.context.scene.frame_set(frame)
+            evaluated = release.evaluated_get(bpy.context.evaluated_depsgraph_get())
+            return sum(
+                (evaluated.matrix_world @ v.co for v in evaluated.data.vertices), Vector()
+            ) / len(evaluated.data.vertices)
+
+        before, arrival = center(50), center(64)
+        target = fire.location + Vector((0, 0, 0.75))
+        self.assertGreater(arrival.x - before.x, 1.0)
+        self.assertLess((arrival - target).length, 0.15)
+        self.assertEqual(fire["start"], 60)
 
     def test_jump_frames_and_recovery_pose(self):
         expected = snapshot(64)

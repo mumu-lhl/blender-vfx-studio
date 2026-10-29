@@ -9,6 +9,7 @@ import time
 from pathlib import Path
 
 import bpy
+from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -58,15 +59,37 @@ def setup(*, light=True, far=False):
     magic.name = "Spell • Magic Circle"
     magic.location = (-0.65, 0, 0.03)
     magic.update_tag()
-    scene.frame_set(52)
+    scene.frame_set(60)
     fire = create_fire(bpy.context)
     fire.name = "Spell • Fire Release"
     fire.location = (0.65, 0, 0.03)
+    fire["duration"] = 44.0
     fire.update_tag()
+    # Carry the existing release marks from the caster toward the ignition.
+    # Direction and gathering are saved editable fields in the actual asset.
+    marks = next(obj for obj in magic.children if obj.name == "Magic • Release")
+    marks.location.z = 0.8
+    marks["radius"] = 0.95
+    layer = marks.children[0]
+    anchors = layer.data.attributes["sigil_anchor"].data
+    local_center = sum(
+        (vertex.co - anchor.vector for vertex, anchor in zip(layer.data.vertices, anchors)),
+        Vector(),
+    ) / len(layer.data.vertices)
+    target = fire.location + Vector((0, 0, 0.75))
+    origin = magic.location + marks.location + local_center * marks["radius"]
+    direction = target - origin
+    marks["Sigil Lift"] = direction.length
+    tree = layer.modifiers[0].node_group
+    tree.nodes["Release Gather"].outputs[0].default_value = 1
+    for index in range(3):
+        tree.nodes["Release Direction"].inputs[index].default_value = direction[index]
+    marks.update_tag()
     for label, frame in (
         ("Preparation", 1),
         ("Hold", 24),
         ("Release", 52),
+        ("Ignition", 60),
         ("Circle clear", 73),
         ("All clear", 104),
     ):
@@ -83,6 +106,8 @@ def setup(*, light=True, far=False):
     bpy.ops.file.pack_all()
     return {
         "frame": 52,
+        "ignition_frame": 60,
+        "release_target": list(target),
         "pose": "KayKit Spellcast_Raise / Long / Shoot",
         "trigger": "Authored spell release, not a claimed physical contact",
     }

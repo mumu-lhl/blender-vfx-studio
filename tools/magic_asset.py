@@ -30,9 +30,9 @@ def _mesh_pattern(layer, kind, quality):
     detail = {"LOW": 20, "MEDIUM": 32, "HIGH": 48}[quality]
     vertices, faces = [], []
     attributes = {k: [] for k in ("sigil_draw", "sigil_edge", "sigil_weight")}
-    offsets = []
+    offsets, anchors = [], []
 
-    def stroke(points, weight, phase, *, normal=(0, 0, 1)):
+    def stroke(points, weight, phase, *, normal=(0, 0, 1), anchor=(0, 0, 0)):
         points = [Vector(p) for p in points]
         subdivisions = max(
             1, math.ceil({"LOW": 8, "MEDIUM": 12, "HIGH": 18}[quality] / (len(points) - 1))
@@ -50,6 +50,8 @@ def _mesh_pattern(layer, kind, quality):
                 offset = side * sign
                 vertices.append(tuple(position + offset))
                 offsets.append(offset)
+                if kind == "release":
+                    anchors.append(anchor)
                 attributes["sigil_draw"].append(phase + (1 - phase) * i / (len(points) - 1))
                 attributes["sigil_edge"].append((sign + 1) / 2)
                 attributes["sigil_weight"].append(weight)
@@ -127,11 +129,16 @@ def _mesh_pattern(layer, kind, quality):
                     0.62,
                     0.08 * index,
                     normal=normal,
+                    anchor=(0.52 * math.cos(a), 0.52 * math.sin(a), 0),
                 )
     _mesh(layer, vertices, faces, attributes)
     attr = layer.data.attributes.new("sigil_offset", "FLOAT_VECTOR", "POINT")
     for item, offset in zip(attr.data, offsets):
         item.vector = offset
+    if kind == "release":
+        attr = layer.data.attributes.new("sigil_anchor", "FLOAT_VECTOR", "POINT")
+        for item, anchor in zip(attr.data, anchors):
+            item.vector = anchor
 
 
 def _pattern(root, kind, quality):
@@ -143,6 +150,18 @@ def _pattern(root, kind, quality):
     center = g.v("Authored Stroke Center", "SUBTRACT", position.outputs[0], offset)
     radius = g.value("Seal Radius", prop="radius")
     center = g.v("Editable Seal Size", "SCALE", center, radius)
+    if kind == "release":
+        lifted = g.stage("Runes Lift At Release", p, 0.68, 0.87)
+        gather = g.m("Nonnegative Release Gather", "MAXIMUM", g.value("Release Gather", 0), 0)
+        gather = g.m("Bounded Release Gather", "MINIMUM", gather, 1)
+        gather = g.m("Gather During Release", "MULTIPLY", gather, lifted)
+        anchor = g.v("Scaled Rune Anchors", "SCALE", g.attr("sigil_anchor", "FLOAT_VECTOR"), radius)
+        center = g.v(
+            "Gather Centers Without Shrinking Strokes",
+            "SUBTRACT",
+            center,
+            g.v("Gathered Rune Anchors", "SCALE", anchor, gather),
+        )
     width = g.m(
         "Individual Stroke Weight",
         "MULTIPLY",
@@ -163,15 +182,18 @@ def _pattern(root, kind, quality):
     g.link(g.m("Spin In Radians", "MULTIPLY", angle, math.pi / 180), rotation.inputs["Angle"])
     shaped = rotation.outputs["Vector"]
     if kind == "release":
-        lifted = g.stage("Runes Lift At Release", p, 0.52, 0.92)
+        direction = g.n("ShaderNodeCombineXYZ", "Release Direction")
+        direction.inputs["Z"].default_value = 1
+        unit = g.n("ShaderNodeVectorMath", "Unit Release Direction", operation="NORMALIZE")
+        g.link(direction.outputs[0], unit.inputs[0])
         shaped = g.v(
             "Rising Rune Stamps",
             "ADD",
             shaped,
-            g.xyz(
-                "Editable Release Height",
-                0,
-                0,
+            g.v(
+                "Editable Release Travel",
+                "SCALE",
+                unit.outputs[0],
                 g.m("Lift Height", "MULTIPLY", lifted, g.value("Rune Lift", prop="Sigil Lift")),
             ),
         )
@@ -342,7 +364,7 @@ def create(context, quality="MEDIUM"):
             min=-720, max=720, description="Rotation in degrees during one effect cycle"
         )
         root.id_properties_ui("Sigil Lift").update(
-            min=0, max=20, description="Release rune rise in Blender units"
+            min=0, max=20, description="Rune travel distance along the native Release Direction"
         )
         root.name = "Magic • " + kind.title()
         root.location.z += z
