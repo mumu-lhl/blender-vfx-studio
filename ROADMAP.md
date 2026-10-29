@@ -71,6 +71,8 @@ PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 4070072
 
 [#182](https://github.com/mumu-lhl/blender-vfx-studio/issues/182)／[PR #183](https://github.com/mumu-lhl/blender-vfx-studio/pull/183) 让释放符记沿原生可编辑方向汇聚，再接上火焰点燃。地面逐笔形成和符文反转保留，完整角色多阶段、明暗／远景、54 张解码隔帧、三档资产与无插件高清复现已检查，实测成本已记录，CI 全部 12 项成功。符记重叠与初生火焰大面仍需改善，见 [施法交接](docs/SPELL_TRANSFER_REVIEW.md)。
 
+[#184](https://github.com/mumu-lhl/blender-vfx-studio/issues/184)／[PR #185](https://github.com/mumu-lhl/blender-vfx-studio/pull/185) 正在检查共享下部、错相生长的分叉火舌和沿流向的热色冷缝。已读取三个高清角色阶段；底部团块仍偏圆，明暗远景、完整时序与上下文仍在补齐。保持草稿，见 [分叉检查](docs/FIRE_FORK_REVIEW.md)。
+
 ## 下一步
 
 1. 当前重点转向实际画面。[#174](https://github.com/mumu-lhl/blender-vfx-studio/issues/174) 修正刀光深度收尖，并按真实挥剑轨迹连接充能与释放；同帧角色图、连续隔帧、明暗／远景与原生复现已检查，方向衔接和遮挡改善，反向命中仍被角色遮住。实测成本和艺术边界见 [衔接检查](docs/COMBAT_HANDOFF_REVIEW.md)。
