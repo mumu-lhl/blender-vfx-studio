@@ -36,15 +36,21 @@
 
 ## dash-echoes
 
-![dash-echoes：第 19 帧](images/dash-echoes.png)
+![dash-echoes：第 18 帧](images/dash-echoes.png)
 
-真实位移留下的角色姿态；较旧残影在浅背景较淡。 第 **19 帧**；[编辑与实际检查](DASH_REVIEW.md) · [原始 Actions 附件](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40465954679)。
+真实冲刺位移留下的透明姿态，随后腾空并接上落地烟尘。第 **18 帧**，本地角色镜头；[完整动作与实际检查](DASH_LANDING_REVIEW.md)。远景旧姿态仍偏淡，未观看实时播放。
 
 ## magic-circle
 
 ![magic-circle：第 40 帧](images/magic-circle.png)
 
 保持阶段的主印和反转符文带；细笔画在远景较弱。 第 **40 帧**；[编辑与实际检查](MAGIC_REVIEW.md) · [原始 Actions 附件](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40466594123)。
+
+## 施法与火焰释放
+
+![符记汇聚后点燃：第 62 帧](images/spell-transfer-after-62.png)
+
+符记从施法位置向剑前汇聚，火焰开始接入。第 **62 帧**，本地角色镜头；[多阶段与原生节点检查](SPELL_TRANSFER_REVIEW.md)。聚拢线条仍有重叠，初生火焰仍偏片状，未观看实时播放。
 
 ## 复现图像
 

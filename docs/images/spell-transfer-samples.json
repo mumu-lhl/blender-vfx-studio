@@ -25,7 +25,12 @@
     "spell-transfer-after-60.png": "c270f6528161a40dc77a605a745ef87cf3dfb0a51f6fdb1c6d219a7b8ef9f620",
     "spell-transfer-after-58.png": "9278ca57584f64e39e81db99aaf27dce49a271925d5bd33fb87de51571a6a70f",
     "spell-transfer-after-62.png": "6b09dac898a443cd2a33d3802edd0d85975bfbd23be2d33d8768558066d4b538",
-    "spell-transfer-after-69.png": "78169e3cd5001705df7345c5cb4e6bd9ddabc3d2e6defde5736d92a761c17ecd"
+    "spell-transfer-after-69.png": "78169e3cd5001705df7345c5cb4e6bd9ddabc3d2e6defde5736d92a761c17ecd",
+    "spell-transfer-before-52.png": "3a485693787690dc65336eeb1e2397b0c7205ceaea31b22766a425d96ca796a3",
+    "spell-transfer-before-60.png": "a8fe6bcfb59f887ec8281048757cf1626a8e8325f30caf8b0cbb08928fc9af21",
+    "spell-transfer-dark-60.png": "5da7762431b7e33208ec188a8b5483254a0739200df65475c1844c844ec6fe27",
+    "spell-transfer-far-64.png": "eb108093843ea25f398bc4229160f0b27bdc424a8f7e09041c226ee005fbfdcf",
+    "spell-transfer-timing.png": "ef4f59d4516f7fcdf55aa8ce58384b6efce30ffee875335411f1c160ba1ddd20"
   },
   "source_sha256": {
     "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
@@ -197,5 +202,116 @@
     ],
     "realtime_playback_reviewed": false,
     "method": "Rendered PNG stages; realtime playback unreviewed"
-  }
+  },
+  "native": {
+    "native_render_verified": true,
+    "frames": [
+      96,
+      16,
+      64
+    ],
+    "clear_frame": 104,
+    "scene_sha256": "10e69206601719301265ebd197caf8c751280e53ea43dbe2f626729e2aeb626e",
+    "process_exit_code": 0
+  },
+  "dark_batch": {
+    "engine": "BLENDER_EEVEE",
+    "blender_version": "5.2.2 LTS",
+    "frames": [
+      60,
+      64
+    ],
+    "fps": 24,
+    "fps_base": 1,
+    "resolution": [
+      960,
+      540
+    ],
+    "samples": 16,
+    "view_transform": "AgX",
+    "look": "None",
+    "bloom": false,
+    "dark": true,
+    "far": false,
+    "contact": {
+      "frame": 52,
+      "ignition_frame": 60,
+      "release_target": [
+        0.6499999761581421,
+        0.0,
+        0.7799999713897705
+      ],
+      "pose": "KayKit Spellcast_Raise / Long / Shoot",
+      "trigger": "Authored spell release, not a claimed physical contact"
+    },
+    "saved_frame": 59,
+    "render_timings": [
+      {
+        "frame": 60,
+        "seconds": 19.778898300999572
+      },
+      {
+        "frame": 64,
+        "seconds": 34.99609259099998
+      }
+    ],
+    "realtime_playback_reviewed": false,
+    "method": "Rendered PNG stages; realtime playback unreviewed"
+  },
+  "viewed_dark_frames": [
+    60,
+    64
+  ],
+  "far_batch": {
+    "engine": "BLENDER_EEVEE",
+    "blender_version": "5.2.2 LTS",
+    "frames": [
+      60,
+      64
+    ],
+    "fps": 24,
+    "fps_base": 1,
+    "resolution": [
+      960,
+      540
+    ],
+    "samples": 16,
+    "view_transform": "AgX",
+    "look": "None",
+    "bloom": false,
+    "dark": false,
+    "far": true,
+    "contact": {
+      "frame": 52,
+      "ignition_frame": 60,
+      "release_target": [
+        0.6499999761581421,
+        0.0,
+        0.7799999713897705
+      ],
+      "pose": "KayKit Spellcast_Raise / Long / Shoot",
+      "trigger": "Authored spell release, not a claimed physical contact"
+    },
+    "saved_frame": 59,
+    "render_timings": [
+      {
+        "frame": 60,
+        "seconds": 19.020153534999736
+      },
+      {
+        "frame": 64,
+        "seconds": 27.3900064569998
+      }
+    ],
+    "realtime_playback_reviewed": false,
+    "method": "Rendered PNG stages; realtime playback unreviewed"
+  },
+  "viewed_far_frames": [
+    60,
+    64
+  ],
+  "viewed_before_additional_hd_frames": [
+    52,
+    60
+  ]
 }

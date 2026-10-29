@@ -109,7 +109,7 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 不等大的云团先横向铺开，再抬升并变薄。**它不发光，需要场景灯光。** 原生 Volume Cube 把空间分成小格，几何节点直接计算每格当前帧的密度；这不是流体模拟，不需要历史缓存或外部 VDB 文件。Solid 模式只显示编辑域边界。
 
-**Width / Expansion** 调整云团大小与铺开距离，**Noise Scale / Dissolve / Fade** 调整细节、密度侵蚀与消散。选择主层，在侧栏 **Shape / Motion / Material** 中使用 **Dust Rise Height / Dust Roll Speed / Dust Density** 调整抬升、纹理上卷与光学密度。地面薄雾层的 **Fade** 单独控制它的透明消散；它是较弱的辅助层，不替代主体体积。
+**Width / Expansion** 调整云团大小与铺开距离，**Noise Scale / Dissolve / Fade** 调整细节、密度侵蚀与消散。选择主层，在侧栏 **Shape / Motion / Material** 中使用 **Dust Rise Height / Dust Roll Speed / Dust Density** 调整抬升、纹理上卷与光学密度。接触时两侧体积先压低铺开，再抬升翻滚。地面薄雾层的 **Fade** 单独控制它的透明消散；它是较弱的辅助层，不替代主体体积。
 
 三档改变密度网格分辨率、密度团和碎屑数量，体积计算有明显 CPU 成本。已实际查看高清图、全部隔帧样本、三档比较及 Cycles 预览；修复后的矩形伪影未再出现。检查范围、代价和限制见 [烟尘记录](DUST_REVIEW.md)。
 
@@ -146,15 +146,17 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 捕获会求值修改器和形态键，保留原网格、材质、骨架及动画，随后恢复原帧和子帧；不保留运行时源引用。**源动画改变后需要重新捕获。** 参数 JSON 不含姿态网格，请保存完整效果。
 
-透明叠层渲染较贵，旧姿态在远景偏淡；测试镜头末段由跑步切回站姿，衔接仍硬。已查看全部隔帧样本、明暗与远景、三档预览，删除源后的原生播放也通过。见 [残影记录](DASH_REVIEW.md)。
+残影的透明填充先淡，较暗的有色轮廓稍后淡出；**Opacity** 控制整体透明度，**Fade** 控制消退，**Dissolve=1** 隐藏整层。透明叠层有实际渲染开销，旧姿态在远景仍偏弱。冲刺、腾空与落地烟尘的实际镜头及观看边界见 [衔接检查](DASH_LANDING_REVIEW.md)。
 
 ## Calligraphic Magic Circle
 
 主印逐笔形成，符文带反向转动；释放时立体符记升起，地面图案先退去。笔画由本项目生成，不依赖字体、贴图或缓存。
 
-**Radius / Width** 调整尺寸和笔画，颜色与 **Strength** 可分层编辑，**Noise Scale / Dissolve / Fade** 调整侵蚀和消散。侧栏 **Motion → Sigil Spin** 控制各层周期转角；释放层还可用 **Sigil Lift** 调整升起高度。三档改变曲线采样密度，保持同一图案和时序。
+**Radius / Width** 调整尺寸和笔画，颜色与 **Strength** 可分层编辑，**Noise Scale / Dissolve / Fade** 调整侵蚀和消散。侧栏 **Motion → Sigil Spin** 控制各层周期转角；释放层还可用 **Sigil Lift** 调整移动距离，默认向上。三档改变曲线采样密度，保持同一图案和时序。
 
-已查看高清、明暗与远景、全部隔帧样本和三档实际嵌入预览。细符文远景偏弱，画面仍偏干净的线描风格，见 [魔法阵记录](MAGIC_REVIEW.md)。
+要让符记汇聚到角色前方，展开 **Magic • Release**，选中它的网格子对象，在 Geometry Nodes 中调整 **Release Direction** 和 **Release Gather**。例如方向 `(1, 0, 0)`、Gather `1`，配合 **Sigil Lift** 向本地 X 方向收拢移动；Gather `0` 保留分散排列，零方向停止平移。使用 **Save Complete Effect** 保存这些节点编辑。
+
+细符文在远景仍偏弱，默认图案偏线描风格。默认形成与升起见 [魔法阵记录](MAGIC_REVIEW.md)，角色接火焰的空间衔接见 [施法检查](SPELL_TRANSFER_REVIEW.md)。
 
 ## 保存、质量与观看范围
 
