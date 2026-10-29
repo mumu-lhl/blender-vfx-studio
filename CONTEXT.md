@@ -22,7 +22,7 @@ Load VFX with New ID 读取当前选中外部资产的文件路径和集合名�
 **资产预览图** 是完整效果集合中的原生 ImagePreview，供 Asset Browser 显示。它与效果材质的 Image 贴图是两回事，不参与效果播放，也不要求载入插件或原图片文件。
 可选预览不改变集合封装版本；没有预览的旧文件继续使用原生默认图标。导出读源图片像素，只保存最多 256 像素长边的副本。
 
-实例结构版本 `vfx_schema` 当前为 1；各模块生成资产的 `vfx_asset_version` 中，刀光为 5、Burst 为 2，其余为 1。刀光版本 1/2/3/4 和 Burst 版本 1 仍可读取；JSON 参数文件当前为格式 2。格式 1 的旧环形预设可以转换为格式 2，其他未知版本会报错。这三个版本各管一件事，不能互相替代。
+实例、模块生成数据、参数 JSON 和完整效果各有内部格式标识，分别用于识别不同的数据结构。它们不属于用户需要选择的特效版本。开发阶段仅维护当前格式，不承担历史资产迁移。
 
 ## 统一时间
 
@@ -49,7 +49,7 @@ elapsed = (frame - start) * max(speed, 0.001) / max(duration, 1)
 
 Arc Slash 的 Arc 是开口弧线覆盖的度数，居中朝向局部 +X；Spin 是一周期绕局部 Z 旋转的度数。
 Taper 控制两端宽度收窄，中段宽度为 Width，内半径至少为 0.001。它使用参数生成形状，和保存武器采样路径的 Trail 是两种不同创作方式。
-版本 3 的 Contour 在基本半径上添加钩形与缺口；Bank 按半径缩放刀面的深度弯曲，0 为平面；Wake Spread 控制残影的动态角度分离。Fade 控制退场时的分段镂空，Breakup 仍独立控制噪声侵蚀。版本 1/2 保留原参数和节点行为。版本 4 进一步让 Head Bias 将宽度峰值移向前端，给残弧独立的局部年龄，并降低细碎噪声频率；版本 3 的已有参数预设继续重建版本 3。版本 5 的 Afterimage 控制有色残影的面积，两端随片段收尖；版本 4 及更早的 Afterimage 仍控制透明度。
+Contour 在基本半径上添加钩形与缺口；Bank 按半径缩放刀面的深度弯曲，0 为平面；Wake Spread 控制残影的动态角度分离。Head Bias 将宽度峰值移向前端，各条残弧使用独立的局部年龄。Afterimage 控制有色残影的面积，片段两端收尖；Fade 控制退场时的分段镂空，Breakup 控制噪声侵蚀。
 
 护盾的 IOR 是 Fresnel 节点使用的折射率，Rim Power 是输出的幂次，越大则亮边越窄。
 Opacity 和 Fade 控制透明度，Dissolve 为噪声阈值。Flow 是一个周期内四维噪声 W 坐标的变化量，不是运动速度或帧率。
@@ -63,7 +63,7 @@ Opacity 和 Fade 控制透明度，Dissolve 为噪声阈值。Flow 是一个周�
 例如首文件编号 10，First=1 表示使用编号 11 的文件。图片序列与图集共用选帧容差、透明度和生命周期规则。
 序列文件不打包到完整效果资产中，JSON 记录第一张图片路径及数量；分享时需要迁移全部文件。
 
-Burst 粒子整组在 Start 出生，以原生点 Index 作为编号，Seed 决定可重复的随机变化，Count 不超过 2048。版本 1 的 Motion Time = Progress × Motion Seconds；版本 2 可用 Motion Ease 将 Progress 混合为快出慢停的时钟，再乘 Motion Seconds；位置由初速度、初始径向距离和重力公式直接计算。Motion Seconds 表示轨迹中的秒数，Duration 表示播放帧数，修改场景帧率不会自动改变二者。Fade 在粒子模块表示尺寸缩减，不是透明度。一个周期结束后全体消失，循环从出生状态重新开始；不处理碰撞或历史受力。
+Burst 粒子整组在 Start 出生，以原生点 Index 作为编号，Seed 决定可重复的随机变化，Count 不超过 2048。Motion Ease 将 Progress 混合为快出慢停的时钟，再乘 Motion Seconds；位置由初速度、初始径向距离和重力公式直接计算。Motion Seconds 表示轨迹中的秒数，Duration 表示播放帧数，修改场景帧率不会自动改变二者。Fade 在粒子模块表示尺寸缩减，不是透明度。一个周期结束后全体消失，循环从出生状态重新开始；不处理碰撞或历史受力。
 
 连续发射模块 `particle.emitter` 使用每个粒子的独立出生时间和寿命，不使用 Burst 的 Count / Motion Seconds。
 运动时钟为 `Progress × (Emission Seconds + Lifetime)`，出生编号 n 的时间为 `n / Effective Rate`，只接受出生时间小于 Emission Seconds 的粒子；年龄达到 Lifetime 即消失。

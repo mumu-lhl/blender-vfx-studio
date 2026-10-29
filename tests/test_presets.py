@@ -45,20 +45,6 @@ class PresetTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 presets.read(path)
 
-    def test_historical_v1_ring_migrates_without_mutating_input(self):
-        path = Path(__file__).parent / "fixtures/ring-preset-v1.json"
-        historical = json.loads(path.read_text(encoding="utf-8"))
-        before = copy.deepcopy(historical)
-        migrated = presets.validate(historical)
-        self.assertEqual(historical, before)
-        self.assertEqual(migrated["format_version"], 2)
-        self.assertEqual(migrated["assets"], {})
-        self.assertEqual(migrated["parameters"], before["parameters"])
-        self.assertEqual(presets.loads(presets.dumps(migrated)), migrated)
-        historical["module"] = "flipbook.atlas"
-        with self.assertRaisesRegex(ValueError, "legacy"):
-            presets.validate(historical)
-
     def test_flipbook_assets_integer_parameters_and_relative_paths(self):
         data = dict(
             sample(),

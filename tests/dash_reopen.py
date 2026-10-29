@@ -8,6 +8,8 @@ assert not any("blender_vfx_studio" in name for name in sys.modules)
 root = next(o for o in bpy.data.objects if o.get("vfx_module") == "core.composition")
 assert isinstance(root["vfx_capture_source_name"], str)
 assert not any(o.name == "User Animated Mesh" for o in bpy.data.objects)
+assert list(root["vfx_capture_frames"]) == [1, 3.75, 6.5, 9.25, 12]
+assert len(root.children) == 5
 for frame in (14, 0, 7, 31, 14):
     bpy.context.scene.frame_set(frame)
     count = sum(

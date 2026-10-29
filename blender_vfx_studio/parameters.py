@@ -1,6 +1,5 @@
 """Persistent ring parameter metadata; no Blender dependency."""
 
-# key: (default, min, max, description). ID properties survive UI unregistration.
 PARAMETERS = {
     "start": (1.0, -100000.0, 100000.0, "Start frame"),
     "duration": (24.0, 1.0, 100000.0, "Lifetime in frames at speed 1"),
@@ -17,8 +16,6 @@ PARAMETERS = {
     "color_1": (0.5, 0.0, 1.0, "Linear green"),
     "color_2": (1.0, 0.0, 1.0, "Linear blue"),
 }
-
-# Keep the original ring schema unchanged for saved instances and v1 presets.
 COMMON_PARAMETERS = {
     key: PARAMETERS[key]
     for key in (
@@ -48,8 +45,6 @@ FLIPBOOK_PARAMETERS = {
     "height": (2.0, 0.001, 10000.0, "Sprite height"),
     "opacity": (1.0, 0.0, 1.0, "Sprite opacity"),
 }
-
-
 SEQUENCE_PARAMETERS = {
     key: spec for key, spec in FLIPBOOK_PARAMETERS.items() if key not in {"columns", "rows"}
 }
@@ -65,7 +60,6 @@ SEQUENCE_PARAMETERS["first_frame"] = (
     4095,
     "First image index relative to the selected first file",
 )
-
 SCREEN_PARAMETERS = {
     **COMMON_PARAMETERS,
     "duration": (24.0, 1.0, 100000.0, "Flash lifetime in frames at speed 1"),
@@ -79,9 +73,7 @@ SCREEN_PARAMETERS = {
     "glow_size": (0.25, 0.0, 1.0, "Glare size"),
     "flash": (0.0, 0.0, 1.0, "Flash overlay opacity at birth"),
 }
-
-
-PARTICLE_PARAMETERS_V1 = {
+BASE_PARTICLE_PARAMETERS = {
     **COMMON_PARAMETERS,
     "strength": (4.0, 0.0, 1000.0, "Particle emission strength"),
     "color_0": (1.0, 0.0, 1.0, "Linear red"),
@@ -102,11 +94,9 @@ PARTICLE_PARAMETERS_V1 = {
     "spawn_radius": (0.05, 0.0, 1000.0, "Initial radial offset"),
     "size": (0.06, 0.001, 100.0, "Particle radius at birth"),
 }
-
-
 EMITTER_PARAMETERS = {
     key: spec
-    for key, spec in PARTICLE_PARAMETERS_V1.items()
+    for key, spec in BASE_PARTICLE_PARAMETERS.items()
     if key not in {"count", "motion_seconds"}
 }
 EMITTER_PARAMETERS.update(
@@ -123,43 +113,55 @@ EMITTER_PARAMETERS.update(
         "fade": (1.0, 0.0, 1.0, "Size loss over each particle's own lifetime"),
     }
 )
-
-
 PARTICLE_PARAMETERS = {
-    **PARTICLE_PARAMETERS_V1,
+    **BASE_PARTICLE_PARAMETERS,
     "shape": (0, 0, 1, "0: round particle; 1: pointed shard"),
     "stretch": (1.0, 1.0, 24.0, "Shard half-length as a multiple of Size"),
     "planar": (0.0, 0.0, 1.0, "Flatten random directions into local XY before applying Spread"),
     "motion_ease": (0.0, 0.0, 1.0, "Fast initial travel followed by deceleration; zero is linear"),
 }
-
-
 TRAIL_PARAMETERS = {
     **COMMON_PARAMETERS,
     "width": (0.2, 0.001, 100.0, "Full ribbon width"),
     "length": (0.35, 0.001, 1.0, "Visible trailing fraction of the sampled timeline"),
     "fade": (0.0, 0.0, 1.0, "Width loss over lifetime"),
 }
-
-
-SLASH_PARAMETERS_V1 = {
+SLASH_ART_PARAMETERS = {
+    "hook": (1.0, 0.0, 1.0, "Leading hook within Contour; zero removes the extra hook"),
+    "inner_notches": (
+        1.0,
+        0.0,
+        1.0,
+        "Geometric inner-edge openings within Contour; Surface Cuts controls material cuts separately",
+    ),
+    "surface_cuts": (
+        1.0,
+        0.0,
+        1.0,
+        "Open illustrated cuts in the blade and wakes; zero keeps continuous surfaces",
+    ),
+    "fragment_release": (
+        1.0,
+        0.0,
+        1.0,
+        "Release as separate fragments; zero uses smooth opacity fading",
+    ),
+    "blade_color_0": (0.8, 0.0, 1.0, "Linear blade highlight red"),
+    "blade_color_1": (0.9, 0.0, 1.0, "Linear blade highlight green"),
+    "blade_color_2": (1.0, 0.0, 1.0, "Linear blade highlight blue"),
+}
+SLASH_PARAMETERS = {
     **PARAMETERS,
+    **SLASH_ART_PARAMETERS,
     "radius": (1.8, 0.001, 10000.0, "Outer radius at birth"),
-    "width": (0.45, 0.001, 10000.0, "Maximum radial width"),
+    "width": (0.62, 0.001, 10000.0, "Maximum body width"),
     "expansion": (0.2, 0.0, 10000.0, "Added radius over lifetime"),
     "duration": (16.0, 1.0, 100000.0, "Lifetime in frames at speed 1"),
     "dissolve": (0.15, 0.0, 1.0, "Noise cutoff; 1 fully dissolves"),
-    "arc": (150.0, 1.0, 359.0, "Arc angle in degrees, centered on local +X"),
-    "spin": (120.0, -1440.0, 1440.0, "Rotation in degrees over lifetime"),
-    "taper": (0.5, 0.01, 4.0, "Tip narrowing; larger values make a thinner crescent"),
-}
-
-SLASH_PARAMETERS_V2 = {
-    **SLASH_PARAMETERS_V1,
-    "width": (0.62, 0.001, 10000.0, "Maximum body width"),
     "arc": (185.0, 1.0, 359.0, "Sweep angle centered on local +X"),
     "spin": (105.0, -1440.0, 1440.0, "Total sweep rotation"),
-    "strength": (2.2, 0.0, 1000.0, "Blade emission; body and wake stay dimmer"),
+    "taper": (0.5, 0.01, 4.0, "Tip narrowing; larger values make a thinner crescent"),
+    "strength": (1.6, 0.0, 1000.0, "Blade emission; illustrated body stays darker"),
     "color_0": (0.32, 0.0, 1.0, "Linear body red"),
     "color_1": (0.035, 0.0, 1.0, "Linear body green"),
     "color_2": (0.8, 0.0, 1.0, "Linear body blue"),
@@ -167,30 +169,24 @@ SLASH_PARAMETERS_V2 = {
     "motion_ease": (0.85, 0.0, 1.0, "Sweep deceleration; zero gives linear motion"),
     "head_bias": (0.7, 0.0, 1.0, "Move body weight toward the leading tip"),
     "core_width": (0.12, 0.02, 0.4, "Bright blade width relative to body"),
-    "afterimage": (0.28, 0.0, 1.0, "Opacity of two subordinate native wake ribbons"),
+    "afterimage": (0.42, 0.0, 1.0, "Visible area of two tapered colored wake ribbons"),
     "streaks": (0.65, 0.0, 1.0, "Anisotropic filament contrast in the body"),
     "breakup": (0.75, 0.0, 1.0, "Directional noise erosion after the strike"),
-}
-
-SLASH_PARAMETERS_V3 = {
-    **SLASH_PARAMETERS_V2,
-    "strength": (1.6, 0.0, 1000.0, "Blade emission; illustrated body stays darker"),
-    "fade": (1.0, 0.0, 1.0, "Release into separate pieces; noise breakup remains independent"),
-    "contour": (0.65, 0.0, 1.0, "Uneven leading hook and torn inner silhouette"),
+    "fade": (
+        1.0,
+        0.0,
+        1.0,
+        "Release amount; smooth fading or separate pieces according to the style",
+    ),
+    "contour": (
+        0.65,
+        0.0,
+        1.0,
+        "Master extra geometric silhouette strength; zero removes contour shaping",
+    ),
     "bank": (0.22, -1.0, 1.0, "Depth bend relative to radius; zero flattens the blade"),
     "wake_spread": (0.7, 0.0, 1.0, "Wake separation during the sweep and release"),
 }
-
-SLASH_PARAMETERS_V4 = {
-    **SLASH_PARAMETERS_V3,
-    "afterimage": (0.42, 0.0, 1.0, "Opacity of two subordinate native wake ribbons"),
-}
-
-SLASH_PARAMETERS = {
-    **SLASH_PARAMETERS_V4,
-    "afterimage": (0.42, 0.0, 1.0, "Visible area of two tapered colored wake ribbons"),
-}
-
 SHIELD_PARAMETERS = {
     **COMMON_PARAMETERS,
     "loop": (True, None, None, "Repeat shield animation; hidden before start"),
@@ -210,13 +206,11 @@ SHIELD_PARAMETERS = {
     "noise_scale": (6.0, 0.01, 1000.0, "Generated-coordinate noise scale"),
     "flow": (2.0, -100.0, 100.0, "Noise evolution over one lifetime; zero holds still"),
 }
-
 SIMULATION_PARAMETERS = {key: spec for key, spec in COMMON_PARAMETERS.items() if key != "fade"}
-
 GROUP_PARAMETERS = {key: PARAMETERS[key] for key in ("start", "duration", "speed", "loop")}
 
 
-def parameters_for(module, asset_version=None):
+def parameters_for(module):
     if module == "particle.emitter":
         return EMITTER_PARAMETERS
     if module == "flipbook.sequence":
@@ -224,12 +218,7 @@ def parameters_for(module, asset_version=None):
     if module == "shader.shield":
         return SHIELD_PARAMETERS
     if module == "mesh.slash":
-        return {
-            1: SLASH_PARAMETERS_V1,
-            2: SLASH_PARAMETERS_V2,
-            3: SLASH_PARAMETERS_V3,
-            4: SLASH_PARAMETERS_V4,
-        }.get(asset_version, SLASH_PARAMETERS)
+        return SLASH_PARAMETERS
     if module == "simulation.cloth":
         return SIMULATION_PARAMETERS
     if module == "core.composition":
@@ -243,11 +232,9 @@ def parameters_for(module, asset_version=None):
     if module == "screen.glare":
         return SCREEN_PARAMETERS
     if module == "particle.burst":
-        return PARTICLE_PARAMETERS_V1 if asset_version == 1 else PARTICLE_PARAMETERS
+        return PARTICLE_PARAMETERS
     raise ValueError("Unknown VFX module")
 
 
-def preset_parameters_for(module, asset_version=None):
-    return {
-        key: spec for key, spec in parameters_for(module, asset_version).items() if key != "start"
-    }
+def preset_parameters_for(module):
+    return {key: spec for key, spec in parameters_for(module).items() if key != "start"}

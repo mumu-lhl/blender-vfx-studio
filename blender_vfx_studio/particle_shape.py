@@ -1,4 +1,4 @@
-"""Pointed native particle shapes and tip gradients for Burst asset version 2."""
+"""Pointed native particle shapes and tip gradients for Burst particles."""
 
 from .nodes import drive, node
 

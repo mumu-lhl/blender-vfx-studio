@@ -10,6 +10,7 @@ import tempfile
 from pathlib import Path
 
 PROFILES = {
+    "spell": ("spell-settings.json", "frames", "spell", 108),
     "combat": ("render-settings.json", "rendered_frames", "combat", 36),
     "handoff": ("review-settings.json", "frames", "handoff", 60),
     "character": ("character-settings.json", "frames", "character", 96),

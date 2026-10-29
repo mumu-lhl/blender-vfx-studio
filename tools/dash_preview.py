@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import math
 import sys
 import time
 from pathlib import Path
@@ -11,8 +12,9 @@ import bpy
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+from blender_vfx_studio import dash  # noqa: E402
 from tools.character_scene import setup_stage  # noqa: E402
-from tools.dash_asset import create  # noqa: E402
+from tools.dash_asset import create, runner  # noqa: E402
 
 FRAMES = (1, 5, 7, 12, 19, 23, 27, 33, 37, 48)
 
@@ -30,14 +32,22 @@ def hashes():
     }
 
 
-def setup(*, light=True, far=False):
+def setup(*, light=True, far=False, count=None, first=6, last=18, tail=None):
     scene = bpy.context.scene
     scene.render.fps = 24
     scene.frame_start, scene.frame_end = 1, 48
     setup_stage(light=light, far=far, focus=(0, 0, 1), lens=40)
     before = set(scene.objects)
     scene.frame_set(1)
-    root, character = create(bpy.context, keep_character=True)
+    if count is None and (first, last) == (6, 18):
+        root, character = create(bpy.context, keep_character=True)
+    else:
+        character = runner()
+        root = dash.create(bpy.context, character["rig"], first, last, count=count)
+    if tail is not None:
+        dash.set_tail(bpy.context, root, tail)
+    clear_frame = math.ceil(root["start"] + root["duration"] / root["speed"]) + 1
+    scene.frame_end = max(48, clear_frame)
     fx = bpy.data.collections.new("Combat VFX • toggle for comparison")
     scene.collection.children.link(fx)
     for obj in set(scene.objects) - before:
@@ -51,6 +61,8 @@ def setup(*, light=True, far=False):
         "frame": 19,
         "pose": "KayKit Running_A",
         "sample_frames": list(root["vfx_capture_frames"]),
+        "tail_frames": dash.tail_frames(root),
+        "clear_frame": clear_frame,
         "root_motion": "Native keyed dash from X=-2 to X=1.4, frames 1–19",
         "source_actor": character["rig"].name,
     }
@@ -60,18 +72,46 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dark", action="store_true")
     parser.add_argument("--far", action="store_true")
+    parser.add_argument("--echo-count", type=int)
+    parser.add_argument("--capture-first", type=int, default=6)
+    parser.add_argument("--capture-last", type=int, default=18)
+    parser.add_argument(
+        "--tail", type=float, help="Set lifetime after capture; keeps pose entry spacing"
+    )
     parser.add_argument("--sequence", action="store_true")
     parser.add_argument("--frames", nargs="+", type=int)
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
     if not bpy.app.background or "--factory-startup" not in sys.argv or bpy.data.filepath:
         raise RuntimeError("Use a fresh factory background process")
+    if args.echo_count is not None and not 2 <= args.echo_count <= 32:
+        parser.error("Echo count must be within 2–32")
+    if not 1 <= args.capture_first < args.capture_last <= 19:
+        parser.error("This running fixture supports capture within frames 1–19")
+    if args.tail is not None and (not math.isfinite(args.tail) or not 1 <= args.tail <= 100000):
+        parser.error("Tail must be within 1–100000 frames")
     frozen = hashes()
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    contact = setup(light=not args.dark, far=args.far)
+    contact = setup(
+        light=not args.dark,
+        far=args.far,
+        count=args.echo_count,
+        first=args.capture_first,
+        last=args.capture_last,
+        tail=args.tail,
+    )
     folder = (
         ROOT
         / "work/dash-review"
-        / (("dark" if args.dark else "light") + ("-far" if args.far else "-near"))
+        / (
+            ("dark" if args.dark else "light")
+            + ("-far" if args.far else "-near")
+            + (
+                ""
+                if args.echo_count is None and (args.capture_first, args.capture_last) == (6, 18)
+                else f"-echoes-{args.echo_count or 3}-{args.capture_first}-{args.capture_last}"
+            )
+            + (f"-tail-{args.tail:g}" if args.tail is not None else "")
+        )
     )
     folder.mkdir(parents=True, exist_ok=True)
     record = folder / "dash-settings.json"
@@ -81,9 +121,9 @@ def main():
     saved_frame = scene.frame_current
     scene.render.filepath = "//renders/dash-"
     bpy.ops.wm.save_as_mainfile(filepath=str(folder / "dash.blend"))
-    frames = list(range(1, 49)) if args.sequence else args.frames or list(FRAMES)
-    if any(f < 1 or f > 48 for f in frames):
-        raise ValueError("Dash review frames must be within 1–48")
+    frames = list(range(1, scene.frame_end + 1)) if args.sequence else args.frames or list(FRAMES)
+    if any(f < 1 or f > scene.frame_end for f in frames):
+        raise ValueError(f"Dash review frames must be within 1–{scene.frame_end}")
     timings = []
     for frame in frames:
         scene.frame_set(frame)

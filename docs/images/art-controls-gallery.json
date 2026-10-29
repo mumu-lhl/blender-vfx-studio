@@ -1,0 +1,29 @@
+{
+  "workflow_run": 40595259739,
+  "source_commit": "2fcc8293315d381bd6a3372281301400df6caf66",
+  "artifact_id": 12775928235,
+  "artifact_sha256": "81c92abcfb77758d3a9bf87d24ff2ea37e862074b0a68db644be8e0a197d3b95",
+  "images": {
+    "slash-clean.png": {
+      "source": "slash-blender_eevee-light-clean-peak.png",
+      "sha256": "ffa2d2cea0b31bb2870ea5be045b9568f99f107259402a965ec586a18270e0b1",
+      "frame": 5,
+      "resolution": [
+        960,
+        540
+      ]
+    },
+    "slash-warm.png": {
+      "source": "slash-blender_eevee-light-clean-body-1-0.2-0.015-blade-1-0.75-0.08-peak.png",
+      "sha256": "47506abd89c81eb91a35addd4aa1a7d81754dad423fa78fa2fa9e2f25a09580a",
+      "frame": 5,
+      "resolution": [
+        960,
+        540
+      ]
+    }
+  },
+  "modified": false,
+  "bloom": false,
+  "realtime_playback_reviewed": false
+}

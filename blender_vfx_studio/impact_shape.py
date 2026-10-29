@@ -154,14 +154,43 @@ def flash(root):
         face.use_smooth = True
     material = layer.data.materials[0]
     graph = _Nodes(material.node_tree, root)
-    normal = material.node_tree.nodes["Illustrated Light"].outputs["Value"]
-    lit = graph.math("Flat White Face", "GREATER_THAN", normal, 0.48)
+    normal = graph.node("ShaderNodeNewGeometry", "Flash Surface Normal")
+    facing = graph.node("ShaderNodeVectorMath", "Flash Faces The Viewer", operation="DOT_PRODUCT")
+    graph.connect(normal.outputs["Normal"], facing.inputs[0])
+    graph.connect(normal.outputs["Incoming"], facing.inputs[1])
+    front = graph.node(
+        "ShaderNodeMapRange",
+        "Hot Center With A Colored Edge",
+        interpolation_type="SMOOTHSTEP",
+        clamp=True,
+    )
+    graph.connect(
+        graph.math("Two Sided Flash Facing", "ABSOLUTE", facing.outputs["Value"]),
+        front.inputs["Value"],
+    )
+    front.inputs["From Min"].default_value = 0.2
+    front.inputs["From Max"].default_value = 0.75
+    heat = graph.node(
+        "ShaderNodeAttribute", "Flash Center And Spokes", attribute_name="vfx_spark_heat"
+    )
+    core = graph.math("Concentrated Flash Nucleus", "GREATER_THAN", heat.outputs["Fac"], 0.98)
+    hierarchy = graph.math(
+        "Supporting Spoke Light",
+        "ADD",
+        0.35,
+        graph.math("Nucleus Light Priority", "MULTIPLY", core, 0.65),
+    )
+    lit = graph.math("Bright Center Colored Spokes", "MULTIPLY", front.outputs[0], hierarchy)
     tint = material.node_tree.nodes["Editable Particle Color"].outputs[0]
     dark = graph.vector("Warm Shadow", "SCALE", tint, 0.12)
+    hot = graph.node("ShaderNodeMixRGB", "Editable Flash Heat Tint")
+    hot.inputs[0].default_value = 0.8
+    graph.connect(tint, hot.inputs[1])
+    hot.inputs[2].default_value = (1, 0.98, 0.92, 1)
     color = graph.node("ShaderNodeMixRGB", "Illustrated Hit Volume")
     graph.connect(lit, color.inputs[0])
     graph.connect(dark, color.inputs[1])
-    color.inputs[2].default_value = (1, 0.95, 0.8, 1)
+    graph.connect(hot.outputs[0], color.inputs[2])
     graph.connect(color.outputs[0], material.node_tree.nodes["Particle Emission"].inputs["Color"])
     graph, position = _geometry(root, "Hit Compression")
     progress = graph.value("Progress", expression=PROGRESS)
@@ -204,20 +233,21 @@ def jets(root, quality):
                 b = base + i * sides + (j + 1) % sides
                 faces.append((a, b, b + sides, a + sides))
 
-    # Curl a six-sided pressure volume around each turning centerline.
+    # Fold open pressure sheets around turning paths. The raised middle and
+    # uneven free edges give each sheet depth while keeping the contact visible.
     for index, (angle, reach, bend, lift, breadth, depth, birth) in enumerate(
         (
-            (0.75, 1.1, -0.22, 0.25, 0.31, 0.34, 0.0),
-            (3.55, 0.75, 0.25, -0.22, 0.26, 0.30, 0.035),
-            (5.1, 0.9, -0.18, 0.28, 0.24, 0.28, 0.065),
+            (0.75, 0.70, -0.15, 0.25, 0.34, 0.34, 0.0),
+            (3.55, 0.55, 0.18, -0.22, 0.27, 0.30, 0.035),
+            (5.1, 0.62, -0.12, 0.28, 0.29, 0.28, 0.065),
         )
     ):
         direction = Vector((math.cos(angle), math.sin(angle), 0))
         side = Vector((-direction.y, direction.x, 0))
         base = len(vertices)
         rings = {"LOW": 12, "MEDIUM": 21, "HIGH": 28}[quality]
-        sides = 8
-        turn = (0.45, -0.8, 0.65)[index]
+        sides = {"LOW": 7, "MEDIUM": 11, "HIGH": 15}[quality]
+        turn = (1.25, -1.65, 1.4)[index]
         for i in range(rings):
             u = i / (rings - 1)
             phase = turn * u
@@ -226,16 +256,18 @@ def jets(root, quality):
             path += side * (bend * math.sin(math.pi * u))
             path.z = lift * math.sin(math.pi * u)
             local_side = side * math.cos(phase) - direction * math.sin(phase)
-            profile = max(math.sin(math.pi * u ** (1.2 + index * 0.15)), 0) ** 0.7
+            # Pressure occupies the contact rather than beginning as three
+            # empty points. A short curling crown hands off to the long rays.
+            profile = (0.52 + 0.48 * math.sin(math.pi * u**0.85)) * (1 - u) ** 0.55
             for j in range(sides):
-                phi = j / sides * math.tau
+                across = j / (sides - 1) * 2 - 1
                 billow = (
                     1
                     + 0.24 * math.sin(u * 16 + index * 2)
-                    + 0.18 * math.sin(phi * 3 + u * 9 + index)
+                    + 0.18 * math.sin(across * 4 + u * 9 + index)
                 )
-                width = local_side * (math.cos(phi) * breadth * profile * billow)
-                width.z = math.sin(phi) * depth * profile * billow
+                width = local_side * (across * breadth * profile * billow)
+                width.z = depth * profile * (1 - across * across) * billow
                 vertex(
                     path,
                     width,
@@ -244,10 +276,10 @@ def jets(root, quality):
                     index,
                     birth,
                     u,
-                    angle / math.tau + math.cos(phi) * 0.05,
+                    (across + 1) / 2,
                     support=(0, 1, 0.5)[index],
                 )
-        rows(base, rings, sides, closed=True)
+        rows(base, rings, sides)
     fine_steps = {"LOW": 10, "MEDIUM": 16, "HIGH": 24}[quality]
     for index, (angle, reach, bend, lift, breadth, birth) in enumerate(
         (
@@ -355,7 +387,7 @@ def jets(root, quality):
         "Gas Drag Difference",
         "SUBTRACT",
         speed,
-        graph.math("Slower Pressure Body", "MULTIPLY", primary, 0.1),
+        graph.math("Slower Pressure Body", "MULTIPLY", primary, 0.38),
     )
     speed = graph.math("Role Travel Speed", "ADD", speed, 1)
     distance = graph.math("Separate Ejection Speeds", "MULTIPLY", distance, speed)
@@ -460,7 +492,7 @@ def jets(root, quality):
     size = graph.math("Releasing Breadth", "MULTIPLY", size, shrink)
     size = graph.math("Pulsing Breadth", "MULTIPLY", size, pulse)
     fine_width = graph.node("ShaderNodeValue", "Fine Ejection Width")
-    fine_width.outputs[0].default_value = 1.6
+    fine_width.outputs[0].default_value = 1.1
     difference = graph.math("Fine Width Difference", "SUBTRACT", fine_width.outputs[0], 1)
     difference = graph.math("Only Fine Width Changes", "MULTIPLY", difference, fine)
     width_factor = graph.math("Role Width Factor", "ADD", difference, 1)
@@ -519,9 +551,14 @@ def jets(root, quality):
         ),
         flatten.inputs["Z"],
     )
-    graph.connect(
-        graph.vector("Depth Shaped Jets", "MULTIPLY", combined, flatten.outputs[0]), position
+    shaped = graph.vector("Depth Shaped Jets", "MULTIPLY", combined, flatten.outputs[0])
+    surface = graph.node(
+        "ShaderNodeVectorRotate", "Pressure Surface Alignment", rotation_type="EULER_XYZ"
     )
+    graph.connect(shaped, surface.inputs["Vector"])
+    delta = graph.vector("Pressure Surface Change", "SUBTRACT", surface.outputs["Vector"], shaped)
+    delta = graph.vector("Only Align Pressure Sheets", "SCALE", delta, primary)
+    graph.connect(graph.vector("Pressure And Independent Rays", "ADD", shaped, delta), position)
     core = graph.math("Compression Vertices", "LESS_THAN", graph.attribute("impact_u"), 0.22)
     core = graph.math("Only Main Compression", "MULTIPLY", core, primary)
     fade_age = graph.math("Core Life / Fade", "MULTIPLY", local, graph.value("Core Fade", "fade"))
@@ -577,18 +614,24 @@ def _erode(root):
     axes = graph.node("ShaderNodeSeparateXYZ", "Along / Across Jet")
     graph.connect(uv.outputs["UV"], axes.inputs[0])
     normal = graph.node("ShaderNodeNewGeometry", "Pressure Face Normal")
-    facing = graph.node("ShaderNodeVectorMath", "Illustrated Light", operation="DOT_PRODUCT")
-    graph.connect(normal.outputs["Normal"], facing.inputs[0])
-    facing.inputs[1].default_value = (-0.36, -0.48, 0.8)
-    middle = graph.math("Pressure Midtone", "GREATER_THAN", facing.outputs["Value"], 0.25)
-    bright = graph.math("Pressure Lit Face", "GREATER_THAN", facing.outputs["Value"], 0.65)
-    shade = graph.math("Two Lit Pressure Bands", "ADD", middle, bright)
-    shade = graph.math("Pressure Band Range", "MULTIPLY", shade, 0.5)
-    shade = graph.math("Three Illustrated Values", "SUBTRACT", 1, shade)
+    side = graph.math("Pressure Paint Center", "SUBTRACT", axes.outputs["Y"], 0.5)
+    side = graph.math(
+        "Pressure Paint Width",
+        "MULTIPLY",
+        graph.math("Pressure Paint Distance", "ABSOLUTE", side),
+        2,
+    )
+    paint_edge = graph.node(
+        "ShaderNodeMapRange", "Painted Pressure Sides", interpolation_type="SMOOTHSTEP"
+    )
+    graph.connect(side, paint_edge.inputs["Value"])
+    paint_edge.inputs["From Min"].default_value = 0.3
+    paint_edge.inputs["From Max"].default_value = 0.9
+    shade = paint_edge.outputs[0]
     contrast = graph.node("ShaderNodeValue", "Side Contrast")
     contrast.outputs[0].default_value = 0.6
     shadow = graph.math("Editable Shadow Contrast", "MULTIPLY", shade, contrast.outputs[0])
-    dark = graph.vector("Deep Orange Edge", "SCALE", tint.outputs[0], 0.055)
+    dark = graph.vector("Deep Orange Edge", "SCALE", tint.outputs[0], 0.24)
     body = graph.node("ShaderNodeMixRGB", "Two Tone Pressure")
     graph.connect(shadow, body.inputs[0])
     graph.connect(tint.outputs[0], body.inputs[1])
@@ -765,7 +808,7 @@ def _erode(root):
     facing = graph.math("Both Sides Facing", "ABSOLUTE", facing.outputs["Value"])
     band = graph.node("ShaderNodeMapRange", "Rim Width", interpolation_type="SMOOTHSTEP")
     graph.connect(facing, band.inputs["Value"])
-    band.inputs["From Min"].default_value, band.inputs["From Max"].default_value = 0.3, 0.85
+    band.inputs["From Min"].default_value, band.inputs["From Max"].default_value = 0.12, 0.6
     band.inputs["To Min"].default_value, band.inputs["To Max"].default_value = 1, 0
     contrast = graph.node("ShaderNodeValue", "Rim Contrast")
     contrast.outputs[0].default_value = 0.85
@@ -778,14 +821,14 @@ def _erode(root):
     hot = graph.math("Pressure Center Distance", "ABSOLUTE", hot)
     hot = graph.math("Pressure Center Width", "DIVIDE", hot, 0.45)
     hot = graph.math("Inner Pressure Heat", "SUBTRACT", 1, hot, clamp=True)
-    front = graph.math("Pressure Lit Plane", "GREATER_THAN", facing, 0.58)
+    front = graph.math("Heat Follows The Painted Flow", "SUBTRACT", 1, shade)
     hot = graph.math("Warm Facing Volume", "MULTIPLY", hot, front)
     hot = graph.math("Only Pressure Has Warm Interior", "MULTIPLY", hot, primary)
     hot = graph.math("Pressure Interior Weight", "MULTIPLY", hot, 0.5)
     warm = graph.node("ShaderNodeMixRGB", "Editable Tint To Pressure Heat")
     warm.inputs[0].default_value = 0.35
     graph.connect(tint.outputs[0], warm.inputs[1])
-    warm.inputs[2].default_value = (1, 0.94, 0.05, 1)
+    warm.inputs[2].default_value = (1, 0.55, 0.12, 1)
     volume = graph.node("ShaderNodeMixRGB", "Hot Pressure Volume")
     graph.connect(hot, volume.inputs[0])
     graph.connect(outlined.outputs[0], volume.inputs[1])

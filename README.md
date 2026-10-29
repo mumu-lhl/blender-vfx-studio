@@ -4,9 +4,9 @@
 
 目标版本为 **Blender 5.2 LTS**，优先 Eevee，同时兼容 Cycles。效果使用 Blender 原生网格、材质、几何节点和动画，保存后即使没有安装插件，也能继续播放、渲染和编辑。
 
-> 项目仍在开发。当前发布版是 **0.22.2**；main 中的新造型和资产尚未发布，不会自动替换旧文件里的效果。
+> **项目正在开发，尚未正式分发。** 当前功能请使用源码构建，或下载成功的开发构建包。
 
-[下载发布版](https://github.com/mumu-lhl/blender-vfx-studio/releases/latest) · [完整入门库](docs/STARTER_LIBRARY.md) · [详细使用指南](docs/USAGE.md) · [开发进度](ROADMAP.md)
+[下载开发包](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) · [完整入门库](docs/STARTER_LIBRARY.md) · [详细使用指南](docs/USAGE.md) · [开发进度](ROADMAP.md)
 
 ## 可以做什么
 
@@ -24,7 +24,7 @@
 
 ## 下载与安装
 
-发布页的 ZIP 按用途区分：
+开发包的 ZIP 按用途区分：
 
 | 文件 | 用途 |
 | --- | --- |
@@ -32,12 +32,12 @@
 | `blender-vfx-studio-examples-版本.zip` | 完整效果资产库，解压后使用 |
 | `blender-vfx-studio-previews-版本.zip` | 预览图片，解压后浏览，不用于安装 |
 
-1. 从 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases/latest) 下载插件安装包。
+1. 在 [开发构建页面](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 打开最近成功的 main 构建，下载 `blender-vfx-studio-extension` 附件，解压外层 ZIP 后取出插件安装包。
 2. 在 Blender 打开 **Edit → Preferences → Get Extensions**。
 3. 在右上角菜单选择 **Install from Disk**，选中安装包并启用。
 4. 回到 3D 视图，按 **N**，打开 **VFX** 标签页。
 
-GitHub 的源码 ZIP 用于开发；安装请使用发布页中的插件安装包。
+**安装请选择插件 ZIP 本体。** GitHub 的源码 ZIP 和 Actions 附件外层 ZIP 均不能直接作为插件安装。
 
 ## 第一个效果
 
@@ -46,7 +46,7 @@ GitHub 的源码 ZIP 用于开发；安装请使用发布页中的插件安装�
 1. 在 VFX 面板点击 **Create Mesh VFX**。
 2. 选择 **Arc Slash**、**Impact Burst**、**Shockwave** 或 **Energy Ring**，再选择质量。
 3. 切换到 **Material Preview** 或 **Rendered**，播放时间轴。
-4. 修改颜色、尺寸和时间；在参数上右键选择 **Insert Keyframe**，即可制作动画。
+4. 修改颜色、尺寸和时间；数值可右键选择 **Insert Keyframe**，颜色使用选择器旁的插帧按钮插入关键帧。
 
 效果在 **3D Cursor** 处创建，以当前帧开始。移动、旋转或缩放 Empty 控制器，就能变换整个效果；选中网格也能查看所属效果的参数。
 
@@ -65,18 +65,18 @@ GitHub 的源码 ZIP 用于开发；安装请使用发布页中的插件安装�
 
 ## 完整资产库
 
-| 效果 | 主要用途 | 当前状态 |
+| 效果 | 主要用途 | 编辑特点 |
 | --- | --- | --- |
-| Energy Charge | 汇聚、蓄力与释放 | 0.22.2 已包含；main 有新的造型与运动 |
-| Arc Slash | 弧形挥砍与残影 | 0.22.2 已包含；main 有新的造型与残影 |
-| Impact Burst | 命中爆发与冲击扩散 | 0.22.2 已包含；main 有新的分层造型 |
-| Lightning Strike | 分支落雷、短闪和逐次减弱的复击 | 已进入 main，尚未发布 |
-| Dust Impact | 落地、踩踏的体积烟尘与碎屑 | 已进入 main，尚未发布 |
-| Stylized Fire | 点燃、持续燃烧与断燃余烬 | 已进入 main，尚未发布 |
-| Character Dash Echoes | 捕获角色姿态，制作冲刺残影 | 已进入 main，尚未发布 |
-| Calligraphic Magic Circle | 逐笔形成、转动与立体符记释放 | 已进入 main，尚未发布 |
+| Energy Charge | 汇聚、蓄力与释放 | 主体、进流、粒子分层控制 |
+| Arc Slash | 弧形挥砍与残影 | 弧度、宽头尖尾与独立残弧 |
+| Impact Burst | 命中爆发与冲击扩散 | 短闪、压力体积、喷射与余烬分层 |
+| Lightning Strike | 分支落雷、短闪和逐次减弱的复击 | 分支形状、复击时序与线宽 |
+| Dust Impact | 落地、踩踏的体积烟尘与碎屑 | 原生密度场、抬升与扩散 |
+| Stylized Fire | 点燃、持续燃烧与断燃余烬 | 火舌、热色色带与上卷运动 |
+| Character Dash Echoes | 捕获角色姿态，制作冲刺残影 | 捕获自己的角色姿态 |
+| Calligraphic Magic Circle | 逐笔形成、转动与立体符记释放 | 笔画形成、反向转动与符记升起 |
 
-main 现有 **8 种完整效果、18 个资产文件**。原三套保留 Low，新五套各提供 Low / Medium / High；质量文件不作为额外种类。**0.22.2 不包含新五套**，尝试它们请自行构建，或下载成功 Actions 的开发附件。
+main 现有 **8 种完整效果、18 个资产文件**。Energy Charge、Arc Slash、Impact Burst 提供 Low，其余五套各提供 Low / Medium / High；质量文件不作为额外种类。当前源码和开发构建包含这些资产。
 
 新增效果的真实 Eevee 图像见 **[角色镜头图集](docs/LIBRARY_GALLERY.md)**。图集保留实际画面，包括远景弱细节等问题；不代表全部效果已达到商业成片品质。
 
@@ -95,6 +95,8 @@ main 现有 **8 种完整效果、18 个资产文件**。原三套保留 Low，�
 
 例如，Start=1、Duration=24、Speed=1 时，第 1–24 帧可见，第 25 帧隐藏；Speed=2 时，第 13 帧开始隐藏。以上采用默认场景时间映射。
 
+选中效果后，创建入口收在 **Create / Load**，颜色与常用编辑直接可见；**Shape / Motion / Material / Dissolve** 可分别折叠。刀光可切换 **Clean / Stylized**，主体与锋刃可以分别换色；火焰主层提供 **Orange / Blue / Green** 热色色带。
+
 调整面板参数不会重建节点，可以继续编辑网格、Geometry Nodes 和材质。组合中的各层也能单独修改。场景中复制、删除请使用 **VFX Duplicate / Delete**，相关操作支持 Undo。
 
 ## 保存与复用
@@ -102,7 +104,7 @@ main 现有 **8 种完整效果、18 个资产文件**。原三套保留 Low，�
 | 要保留什么 | 使用方式 |
 | --- | --- |
 | 完整造型、节点、参数动画、各层关系、轨迹或已烘焙运动 | **Save Complete Effect**，保存为 `.blend` |
-| 一组参数数值，用于重新创建基础模块 | **Save Preset**，保存为 JSON |
+| 一组参数数值，用于重新创建基础模块 | **Save Parameters (JSON)**，保存为 JSON |
 
 **手动改过节点，或使用完整入门资产时，优先保存完整效果。** 参数 JSON 不包含私有造型、手动节点和关键帧。静态贴图可打包进 `.blend`；图片序列仍需保留外部文件。
 
@@ -128,5 +130,13 @@ blender -b --factory-startup --python-exit-code 1 --python tools/build_examples.
 ```
 
 构建结果在 `dist/`，`BLENDER_BIN` 可指定 Blender 路径。未发布的构建也可从 [Actions](https://github.com/mumu-lhl/blender-vfx-studio/actions/workflows/ci.yml) 成功运行的 `blender-vfx-studio-extension` 附件下载。
+
+开发时使用与 CI 相同的 **Ruff 0.14.1** 检查代码；项目配置会拒绝其他版本，避免格式检查结果不一致：
+
+```sh
+python -m pip install ruff==0.14.1
+ruff check blender_vfx_studio tools tests
+ruff format --check blender_vfx_studio tools tests
+```
 
 许可证：**[GPL-3.0-or-later](LICENSE)**。测试角色的来源和独立许可见 [角色资产说明](assets/character-review/README.md)。

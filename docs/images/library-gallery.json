@@ -1,11 +1,12 @@
 [
   {
     "effect": "lightning-strike",
-    "frame": 4,
+    "frame": 8,
     "file": "images/lightning-strike.png",
-    "sha256": "878b8296b96c2a765277908f12ed2a0d5c31817c5043126ff60c5e569e143a0d",
+    "sha256": "6544f35bad49928e0e72b94479b2a2e66990ba820b9c493b540d2802dad83757",
     "generator": "tools/lightning_preview.py",
-    "workflow_run": 40454784154
+    "generator_commit": "501d3b4db7010a51da5fd93fc6b55625c9ae3a10",
+    "source": "local Eevee character render"
   },
   {
     "effect": "dust-impact",
@@ -19,9 +20,10 @@
     "effect": "stylized-fire",
     "frame": 36,
     "file": "images/stylized-fire.png",
-    "sha256": "f5b89cc738bcb41aae28c5bb376936d1dee1fb0fd904ccedcba0ca5f3055aba1",
+    "sha256": "a1e8d4de97fae9c012dc051f8886434fc3297a93fe765f5cff0e2cc81fd53884",
     "generator": "tools/fire_preview.py",
-    "workflow_run": 40461231445
+    "generator_commit": "22b1c96",
+    "source": "Local Blender 5.2.2 Eevee character render"
   },
   {
     "effect": "dash-echoes",

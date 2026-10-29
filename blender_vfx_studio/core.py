@@ -365,8 +365,7 @@ def preset_snapshot(root):
             "name": root.name[:80],
             "quality": root["vfx_quality"],
             "parameters": {
-                key: root[key]
-                for key in preset_parameters_for(root["vfx_module"], root["vfx_asset_version"])
+                key: root[key] for key in preset_parameters_for(root["vfx_module"]) if key in root
             },
         }
     )
@@ -381,7 +380,7 @@ def create_from_preset(context, data):
     elif data["module"] == "particle.emitter":
         root = create_emitter(context, data["quality"])
     elif data["module"] == "particle.burst":
-        root = create_particle(context, data["quality"], asset_version=data["asset_version"])
+        root = create_particle(context, data["quality"])
     elif data["module"] == "flipbook.sequence":
         root = create_sequence(context, data["assets"]["image"], data["assets"]["frame_count"])
     elif data["module"] == "flipbook.atlas":
@@ -394,7 +393,7 @@ def create_from_preset(context, data):
     elif data["module"] == "mesh.slash":
         from . import slash
 
-        root = slash.create(context, data["quality"], asset_version=data["asset_version"])
+        root = slash.create(context, data["quality"])
     elif data["module"] == "mesh.ring":
         root = create(context, quality=data["quality"])
     else:
@@ -497,12 +496,9 @@ def create_screen(context):
     return screen.create(context)
 
 
-def create_particle(context, quality="LOW", *, asset_version=2):
+def create_particle(context, quality="LOW"):
     from . import particle
-    from .parameters import PARTICLE_PARAMETERS, PARTICLE_PARAMETERS_V1
-
-    if not MODULES["particle.burst"].supports_version(asset_version):
-        raise ValueError("Unsupported particle asset version")
+    from .parameters import PARTICLE_PARAMETERS
 
     if quality not in {"LOW", "MEDIUM", "HIGH"}:
         raise ValueError("Unknown particle quality")
@@ -511,10 +507,9 @@ def create_particle(context, quality="LOW", *, asset_version=2):
         "Particle Burst",
         "particle.burst",
         quality,
-        PARTICLE_PARAMETERS_V1 if asset_version == 1 else PARTICLE_PARAMETERS,
+        PARTICLE_PARAMETERS,
         {},
     )
-    root["vfx_asset_version"] = asset_version
     mesh = bpy.data.meshes.new("VFX • Particle Source")
     _tag(mesh, root["vfx_id"])
     layer = bpy.data.objects.new("VFX • Particle Layer", mesh)

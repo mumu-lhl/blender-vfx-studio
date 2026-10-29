@@ -5,16 +5,21 @@ import math
 import bpy
 
 from . import composition, core
+from .animation import curves
 from .nodes import PROGRESS, TIME_PROPS, drive, node
+from .parameters import GROUP_PARAMETERS
 
 QUALITY_COUNTS = {"LOW": 2, "MEDIUM": 3, "HIGH": 4}
 MAX_CAPTURE_VERTICES = 1_000_000  # Allocation guard, not a performance promise.
 
 
-def sample(context, source, first, last, quality):
-    count = QUALITY_COUNTS.get(quality)
-    if count is None:
+def sample(context, source, first, last, quality, *, count=None):
+    if quality not in QUALITY_COUNTS:
         raise ValueError("Unknown dash quality")
+    if count is None:
+        count = QUALITY_COUNTS[quality]
+    if type(count) is not int or not 2 <= count <= 32:
+        raise ValueError("Echo count must be an integer between 2 and 32")
     if (
         source is None
         or source.name not in context.scene.objects
@@ -22,13 +27,8 @@ def sample(context, source, first, last, quality):
         or core.resolve(source) is not None
     ):
         raise ValueError("Choose a mesh or armature in this scene outside the VFX hierarchy")
-    if (
-        type(first) is not int
-        or type(last) is not int
-        or not -100000 <= first < last <= 100000
-        or (last - first) % (count - 1)
-    ):
-        raise ValueError(f"Use an increasing frame span divisible by {count - 1} for this quality")
+    if type(first) is not int or type(last) is not int or not -100000 <= first < last <= 100000:
+        raise ValueError("Use increasing integer endpoints between -100000 and 100000")
     scene = context.scene
     if scene.render.frame_map_old != scene.render.frame_map_new:
         raise ValueError("Capture with 1:1 Time Remapping; retime the stored echoes afterwards")
@@ -46,8 +46,9 @@ def sample(context, source, first, last, quality):
         origin = source.evaluated_get(
             context.evaluated_depsgraph_get()
         ).matrix_world.translation.copy()
-        for current in range(first, last + 1, (last - first) // (count - 1)):
-            scene.frame_set(current)
+        for index in range(count):
+            current = first + (last - first) * index / (count - 1)
+            scene.frame_set(math.floor(current), subframe=current % 1)
             graph = context.evaluated_depsgraph_get()
             vertices, faces = [], []
             for obj in candidates:
@@ -59,7 +60,7 @@ def sample(context, source, first, last, quality):
                     allocated += len(mesh.vertices)
                     if allocated > MAX_CAPTURE_VERTICES:
                         raise ValueError(
-                            "Capture exceeds one million stored vertices; use Low or select fewer meshes"
+                            "Capture exceeds one million stored vertices; use fewer echoes or meshes"
                         )
                     offset = len(vertices)
                     for vertex in mesh.vertices:
@@ -135,10 +136,10 @@ def _surface(member):
     tree.links.new(mix.outputs[0], emission.inputs["Color"])
 
 
-def create(context, source, first, last, quality="MEDIUM", *, tail=18.0):
+def create(context, source, first, last, quality="MEDIUM", *, tail=18.0, count=None):
     if type(tail) not in (int, float) or not math.isfinite(tail) or not 1 <= tail <= 100000:
         raise ValueError("Echo tail must be between 1 and 100000 frames")
-    origin, samples = sample(context, source, first, last, quality)
+    origin, samples = sample(context, source, first, last, quality, count=count)
     members = []
     try:
         for index, (frame, vertices, faces) in enumerate(samples):
@@ -198,3 +199,84 @@ def create(context, source, first, last, quality="MEDIUM", *, tail=18.0):
             if member.name in bpy.data.objects:
                 core.delete(member)
         raise
+
+
+def _echoes(group):
+    group = core.resolve(group)
+    if group is None or group["vfx_module"] != "core.composition":
+        raise ValueError("Select a captured echo composition")
+    try:
+        frames = list(group.get("vfx_capture_frames", ()))
+    except TypeError:
+        raise ValueError("Repair invalid capture frame metadata") from None
+    children = composition.members(group)
+    if not 2 <= len(frames) == len(children) <= 32 or any(
+        child["vfx_module"] != "shader.shield" or "vfx_capture_frame" not in child
+        for child in children
+    ):
+        raise ValueError("Select an intact captured echo composition; edit mixed layers separately")
+    captured = [child["vfx_capture_frame"] for child in children]
+    if any(type(f) not in (int, float) or not math.isfinite(f) for f in frames + captured):
+        raise ValueError("Repair invalid capture frame metadata")
+    if sorted(frames) != sorted(captured) or len(set(frames)) != len(frames):
+        raise ValueError("Capture frame metadata does not match the pose layers")
+    return group, sorted(children, key=lambda child: child["vfx_capture_frame"])
+
+
+def tail_frames(group):
+    """Current first-pose lifetime before group and layer Speed, for the dialog."""
+    group, children = _echoes(group)
+    return max(1.0, float(group["duration"]) * float(children[0]["vfx_duration_ratio"]))
+
+
+def set_tail(context, group, tail):
+    """Adjust owned timing coefficients, retaining entry spacing and captured data."""
+    if type(tail) not in (int, float) or not math.isfinite(tail) or not 1 <= tail <= 100000:
+        raise ValueError("Echo tail must be between 1 and 100000 frames")
+    group, children = _echoes(group)
+    if any(
+        o.library or o.override_library or o.name not in context.scene.objects
+        for o in [group, *children]
+    ):
+        raise ValueError("Echo timing requires local controllers in the active scene")
+    if any(c.data_path == '["duration"]' for c in curves(group)):
+        raise ValueError("Group Duration is animated; edit its timing channels directly")
+    coefficients = ("vfx_offset_ratio", "vfx_duration_ratio", "vfx_local_speed")
+    for child in children:
+        composition.check_timing(child)
+        if any(c.data_path in {f'["{k}"]' for k in coefficients} for c in curves(child)):
+            raise ValueError("Layer timing ratios or Local Speed are animated; edit them directly")
+    if any(k not in c or type(c[k]) not in (int, float) for c in children for k in coefficients):
+        raise ValueError("Repair invalid echo timing coefficients")
+    if type(group.get("duration")) not in (int, float):
+        raise ValueError("Repair invalid echo group duration")
+    duration = float(group["duration"])
+    previous = [(c, *(float(c[k]) for k in coefficients)) for c in children]
+    if (
+        not math.isfinite(duration)
+        or duration < 1
+        or any(not math.isfinite(value) for row in previous for value in row[1:])
+    ):
+        raise ValueError("Repair invalid echo timing before setting the tail")
+    offsets = [duration * max(row[1], 0) for row in previous]
+    total = max(
+        1.0, *(offset + tail / max(row[3], 0.001) for offset, row in zip(offsets, previous))
+    )
+    if total > GROUP_PARAMETERS["duration"][2]:
+        raise ValueError("Tail would exceed the composition duration limit of 100000 frames")
+    try:
+        for child, offset in zip(children, offsets):
+            child["vfx_offset_ratio"] = offset / total
+            child["vfx_duration_ratio"] = float(tail) / total
+            child.update_tag()
+        group["duration"] = total
+        group.update_tag()
+        context.view_layer.update()
+    except Exception:
+        for child, offset, ratio, _ in previous:
+            child["vfx_offset_ratio"], child["vfx_duration_ratio"] = offset, ratio
+            child.update_tag()
+        group["duration"] = duration
+        group.update_tag()
+        raise
+    return group

@@ -159,7 +159,7 @@ def create_effect(key, *, quality=None):
         particles = configure(
             core.create_emitter(context),
             color,
-            rate=14.0,
+            rate=9.0,
             lifetime=0.8,
             emission_seconds=1.2,
             duration=48.0,

@@ -16,7 +16,7 @@ def material(root):
     for i in range(3):
         drive(emission.inputs["Color"], "default_value", root, "p", {"p": f"color_{i}"}, i)
     drive(emission.inputs["Strength"], "default_value", root, "p", {"p": "strength"})
-    if root["vfx_module"] == "particle.burst" and root["vfx_asset_version"] == 2:
+    if root["vfx_module"] == "particle.burst":
         from .particle_shape import shade
 
         shade(tree, root, emission)
@@ -27,7 +27,7 @@ def material(root):
 def geometry(obj, root, mat, quality, *, emitter=False):
     import bpy
 
-    modern = not emitter and root["vfx_asset_version"] == 2
+    burst = not emitter
     name = "Continuous Emitter" if emitter else "Deterministic Burst"
     tree = bpy.data.node_groups.new("VFX • " + name, "GeometryNodeTree")
     tree["vfx_id"] = root["vfx_id"]
@@ -70,12 +70,12 @@ def geometry(obj, root, mat, quality, *, emitter=False):
     random = node(
         tree, "FunctionNodeRandomValue", "Random Direction", -1200, 400, data_type="FLOAT_VECTOR"
     )
-    next(s for s in random.inputs if s.name == "Min" and s.type == "VECTOR").default_value = (
+    next((s for s in random.inputs if s.name == "Min" and s.type == "VECTOR")).default_value = (
         -1,
         -1,
         -1,
     )
-    next(s for s in random.inputs if s.name == "Max" and s.type == "VECTOR").default_value = (
+    next((s for s in random.inputs if s.name == "Max" and s.type == "VECTOR")).default_value = (
         1,
         1,
         1,
@@ -83,8 +83,8 @@ def geometry(obj, root, mat, quality, *, emitter=False):
     scalar = node(
         tree, "FunctionNodeRandomValue", "Random Variation", -1200, 100, data_type="FLOAT"
     )
-    next(s for s in scalar.inputs if s.name == "Min" and s.type == "VALUE").default_value = 0.5
-    next(s for s in scalar.inputs if s.name == "Max" and s.type == "VALUE").default_value = 1.5
+    next((s for s in scalar.inputs if s.name == "Min" and s.type == "VALUE")).default_value = 0.5
+    next((s for s in scalar.inputs if s.name == "Max" and s.type == "VALUE")).default_value = 1.5
     for n, offset in [(random, 0), (scalar, 17)]:
         link(identity, n.inputs["ID"])
         drive(
@@ -94,8 +94,8 @@ def geometry(obj, root, mat, quality, *, emitter=False):
             f"min(max(floor(p),0),1000000)+{offset}",
             {"p": "seed"},
         )
-    random_direction = next(s for s in random.outputs if s.type == "VECTOR")
-    if modern:
+    random_direction = next((s for s in random.outputs if s.type == "VECTOR"))
+    if burst:
         flatten = node(tree, "ShaderNodeCombineXYZ", "Local Distribution Plane", -1650, 200)
         flatten.inputs["X"].default_value = flatten.inputs["Y"].default_value = 1
         link(
@@ -111,14 +111,7 @@ def geometry(obj, root, mat, quality, *, emitter=False):
             200,
         )
     spread = value("Spread", "spread", -1400, -200)
-    radial = vector(
-        "Spread Direction",
-        "SCALE",
-        random_direction,
-        spread,
-        -900,
-        400,
-    )
+    radial = vector("Spread Direction", "SCALE", random_direction, spread, -900, 400)
     bias = node(tree, "ShaderNodeCombineXYZ", "Up Bias", -900, 100)
     link(math("Up Amount", "SUBTRACT", 1, spread, -1200, -200), bias.inputs["Z"])
     direction = vector(
@@ -133,7 +126,7 @@ def geometry(obj, root, mat, quality, *, emitter=False):
     random_offset = math(
         "Variation Offset",
         "SUBTRACT",
-        next(s for s in scalar.outputs if s.type == "VALUE"),
+        next((s for s in scalar.outputs if s.type == "VALUE")),
         1,
         -900,
         -450,
@@ -150,7 +143,7 @@ def geometry(obj, root, mat, quality, *, emitter=False):
         progress = value("Progress", None, -1200, -700, PROGRESS, TIME_PROPS)
         seconds = value("Motion Seconds", "motion_seconds", -1200, -900)
         clock = progress
-        if modern:
+        if burst:
             left = math("Time Remaining", "SUBTRACT", 1, progress, -1900, -800)
             cube = math("Ease Cube", "POWER", left, 3, -1700, -800)
             eased = math("Fast Travel", "SUBTRACT", 1, cube, -1500, -800)
@@ -224,11 +217,10 @@ def geometry(obj, root, mat, quality, *, emitter=False):
     instance = node(tree, "GeometryNodeInstanceOnPoints", "Particle Instances", 1200, 800)
     link(points, instance.inputs["Points"])
     if emitter:
-        # Selection evaluates on the original pool: deleting points first would renumber Index.
         link(selection, instance.inputs["Selection"])
     link(material_node.outputs["Geometry"], instance.inputs["Instance"])
     link(scale, instance.inputs["Scale"])
-    if modern:
+    if burst:
         from .particle_shape import geometry as shape_geometry
 
         velocity_vector = vector("Radial Velocity", "SCALE", direction, speed, 1800, 500)
@@ -243,7 +235,7 @@ def geometry(obj, root, mat, quality, *, emitter=False):
             tree, "ShaderNodeVectorMath", "Tangent Length", 2000, 200, operation="LENGTH"
         )
         link(tangent, magnitude.inputs[0])
-        moving = math("Is Moving", "GREATER_THAN", magnitude.outputs["Value"], 0.000001, 2200, 200)
+        moving = math("Is Moving", "GREATER_THAN", magnitude.outputs["Value"], 1e-06, 2200, 200)
         orientation = node(
             tree,
             "GeometryNodeSwitch",

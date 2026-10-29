@@ -16,10 +16,8 @@ from blender_vfx_studio import core, slash  # noqa: E402
 
 def setup(
     *,
-    legacy=False,
     engine="CYCLES",
     light=False,
-    asset_version=None,
     angled=False,
     far=False,
     pale=False,
@@ -27,11 +25,7 @@ def setup(
 ):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
-    root = (
-        slash.create(bpy.context, asset_version=1 if legacy else asset_version)
-        if legacy or asset_version is not None
-        else core.create(bpy.context, "ARC_SLASH")
-    )
+    root = core.create(bpy.context, "ARC_SLASH")
     root["duration"], root["loop"] = 18.0, False
     root.update_tag()
     camera = bpy.data.objects.new("Acceptance Camera", bpy.data.cameras.new("Acceptance Camera"))
@@ -78,23 +72,33 @@ def setup(
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--legacy", action="store_true")
     parser.add_argument("--light", action="store_true")
     parser.add_argument("--pale", action="store_true", help="Near-white background instead of gray")
     parser.add_argument("--view-transform", choices=("Standard", "AgX"), default="Standard")
     parser.add_argument("--engine", choices=("CYCLES", "BLENDER_EEVEE"), default="CYCLES")
-    parser.add_argument("--asset-version", type=int, choices=(1, 2, 3, 4, 5))
     parser.add_argument("--sampled", action="store_true", help="Render every other frame plus peak")
     parser.add_argument("--frames", type=int, nargs="+")
     parser.add_argument("--angled", action="store_true", help="Review the native blade depth")
     parser.add_argument("--far", action="store_true")
+    parser.add_argument("--style", choices=("DEFAULT", "CLEAN", "STYLIZED"), default="DEFAULT")
+    parser.add_argument("--body-color", type=float, nargs=3, metavar=("R", "G", "B"))
+    parser.add_argument("--blade-color", type=float, nargs=3, metavar=("R", "G", "B"))
+    parser.add_argument("--contour", type=float)
+    parser.add_argument("--hook", type=float)
+    parser.add_argument("--inner-notches", type=float)
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
     if not bpy.app.background or "--factory-startup" not in sys.argv or bpy.data.filepath:
         raise RuntimeError("Use a fresh background process with --factory-startup and no project")
-    if (args.sampled and args.frames) or (args.legacy and args.asset_version):
-        parser.error("Choose one frame selection and one asset version")
+    if args.sampled and args.frames:
+        parser.error("Choose either sampled playback or explicit frames")
     if args.frames and min(args.frames) < 1:
         parser.error("Frames must be positive")
+    for color in (args.body_color, args.blade_color):
+        if color is not None and any(not 0 <= c <= 1 for c in color):
+            parser.error("Color channels must be within 0–1")
+    shape_values = {"contour": args.contour, "hook": args.hook, "inner_notches": args.inner_notches}
+    if any(value is not None and not 0 <= value <= 1 for value in shape_values.values()):
+        parser.error("Contour, Hook and Inner Notches must be within 0–1")
     sources = [
         "blender_vfx_studio/" + name + ".py"
         for name in ("slash", "slash_shape", "slash_shader", "parameters", "registry")
@@ -106,24 +110,38 @@ def main():
 
     source_hashes = hashes()
     root = setup(
-        legacy=args.legacy,
         engine=args.engine,
         light=args.light,
-        asset_version=args.asset_version,
         angled=args.angled,
         far=args.far,
         pale=args.pale,
         view_transform=args.view_transform,
     )
+    if args.style != "DEFAULT":
+        slash.apply_style(root, args.style)
+    for key, value in shape_values.items():
+        if value is not None:
+            root[key] = value
+    for prefix, color in (("color", args.body_color), ("blade_color", args.blade_color)):
+        if color is not None:
+            for i, channel in enumerate(color):
+                root[f"{prefix}_{i}"] = channel
+    root.update_tag()
     folder = ROOT / "work/visual-slash"
     folder.mkdir(parents=True, exist_ok=True)
-    prefix = "legacy" if args.legacy else args.engine.lower()
+    prefix = args.engine.lower()
     prefix += "-light" if args.light else ""
-    prefix += f"-v{args.asset_version}" if args.asset_version else ""
     prefix += "-angled" if args.angled else ""
     prefix += "-far" if args.far else ""
     prefix += "-pale" if args.pale else ""
     prefix += "-agx" if args.view_transform == "AgX" else ""
+    prefix += "" if args.style == "DEFAULT" else "-" + args.style.lower()
+    for key, value in shape_values.items():
+        if value is not None:
+            prefix += f"-{key}-{value:g}"
+    for label, color in (("body", args.body_color), ("blade", args.blade_color)):
+        if color is not None:
+            prefix += "-" + label + "-" + "-".join(f"{c:g}" for c in color)
     stages = [("appear", 2), ("peak", 5), ("decay", 11)]
     if args.sampled or args.frames:
         frames = sorted(set(range(1, 20, 2)) | {2, 5}) if args.sampled else sorted(set(args.frames))
@@ -141,6 +159,10 @@ def main():
         json.dumps(
             {
                 "asset_version": root["vfx_asset_version"],
+                "style": args.style,
+                "shape_values": {key: root[key] for key in shape_values},
+                "body_color": [root[f"color_{i}"] for i in range(3)],
+                "blade_color": [root[f"blade_color_{i}"] for i in range(3)],
                 "engine": args.engine,
                 "light_background": args.light or args.pale,
                 "background_color": list(

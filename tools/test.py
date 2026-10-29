@@ -124,8 +124,23 @@ subprocess.run(base + ["--python", "tests/test_dash_blender.py"], check=True)
 subprocess.run(
     base + [str(ROOT / "work/dash-test.blend"), "--python", "tests/dash_reopen.py"], check=True
 )
+subprocess.run(
+    base + [str(ROOT / "work/dash-tail-native.blend"), "--python", "tests/dash_tail_reopen.py"],
+    check=True,
+)
 
 subprocess.run(base + ["--python", "tests/test_magic_blender.py"], check=True)
 subprocess.run(
     base + [str(ROOT / "work/magic-test.blend"), "--python", "tests/magic_reopen.py"], check=True
+)
+
+subprocess.run(base + ["--python", "tests/test_art_controls_blender.py"], check=True)
+subprocess.run(
+    base + [str(ROOT / "work/art-controls.blend"), "--python", "tests/art_controls_reopen.py"],
+    check=True,
+)
+
+subprocess.run(base + ["--python", "tests/test_spell_scene.py"], check=True)
+subprocess.run(
+    base + [str(ROOT / "work/spell-test.blend"), "--python", "tests/spell_reopen.py"], check=True
 )

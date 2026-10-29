@@ -75,6 +75,41 @@ class DustTests(unittest.TestCase):
             create(bpy.context, "INVALID")
         self.assertEqual(set(bpy.data.objects), before)
 
+    def test_ground_veil_fade_changes_rendered_opacity(self):
+        root = create(bpy.context, "LOW")
+        veil = next(m for m in composition.members(root) if "Ground Veil" in m.name)
+        for member in composition.members(root):
+            if member != veil:
+                for obj in member.children_recursive:
+                    obj.hide_render = True
+        scene = bpy.context.scene
+        scene.render.engine = "CYCLES"
+        scene.cycles.device, scene.cycles.samples = "CPU", 32
+        scene.cycles.use_denoising = False
+        scene.render.resolution_x = scene.render.resolution_y = 64
+        scene.render.resolution_percentage = 100
+        scene.render.film_transparent = True
+        scene.render.image_settings.file_format = "PNG"
+        scene.render.image_settings.color_mode = "RGBA"
+        camera = bpy.data.objects.new("Fade Check", bpy.data.cameras.new("Fade Check"))
+        scene.collection.objects.link(camera)
+        camera.location = (0, 0, 5)
+        camera.data.type, camera.data.ortho_scale = "ORTHO", 4
+        scene.camera = camera
+        scene.frame_set(21)
+        opacities = []
+        for amount in (0.0, 1.0):
+            veil["fade"] = amount
+            veil.update_tag()
+            path = ROOT / f"work/dust-fade-test-{int(amount)}.png"
+            scene.render.filepath = str(path)
+            bpy.ops.render.render(write_still=True)
+            image = bpy.data.images.load(str(path), check_existing=False)
+            opacities.append(sum(image.pixels[3::4]))
+            bpy.data.images.remove(image)
+        self.assertGreater(opacities[0], 10)
+        self.assertLess(opacities[1], opacities[0] * 0.8)
+
     def test_complete_save_clone_and_safe_delete(self):
         bpy.ops.mesh.primitive_cube_add()
         user = bpy.context.object

@@ -1,11 +1,294 @@
 """Blender UI delegates lifecycle operations to core."""
 
 import bpy
-from bpy.props import BoolProperty, EnumProperty, IntProperty, StringProperty
+from bpy.props import (
+    BoolProperty,
+    EnumProperty,
+    FloatProperty,
+    FloatVectorProperty,
+    IntProperty,
+    StringProperty,
+)
 from bpy_extras.io_utils import ExportHelper, ImportHelper
 
-from . import core, presets
+from . import core, palettes, presets
 from .registry import PRESETS
+
+
+def _read_color(owner, prefix, fallback):
+    return tuple(float(owner.get(f"{prefix}_{i}", fallback[i])) for i in range(3))
+
+
+def _write_color(owner, values, prefix):
+    for i, value in enumerate(values):
+        owner[f"{prefix}_{i}"] = float(value)
+    owner.update_tag()
+
+
+_ART_GROUPS = (
+    (
+        "Shape",
+        (
+            "radius",
+            "width",
+            "height",
+            "arc",
+            "taper",
+            "head_bias",
+            "contour",
+            "hook",
+            "inner_notches",
+            "bank",
+            "size",
+            "shape",
+            "stretch",
+            "planar",
+            "columns",
+            "rows",
+            "Fire Height",
+            "Fire Curl",
+            "Dust Rise Height",
+        ),
+    ),
+    (
+        "Motion",
+        (
+            "attack",
+            "spin",
+            "expansion",
+            "motion_seconds",
+            "velocity",
+            "gravity",
+            "spread",
+            "randomness",
+            "spawn_radius",
+            "rate",
+            "emission_seconds",
+            "lifetime",
+            "count",
+            "motion_ease",
+            "afterimage",
+            "wake_spread",
+            "flow",
+            "first_frame",
+            "last_frame",
+            "length",
+            "Fire Flow Speed",
+            "Dust Roll Speed",
+            "Sigil Spin",
+            "Sigil Lift",
+        ),
+    ),
+    (
+        "Material",
+        (
+            "strength",
+            "opacity",
+            "ior",
+            "rim_power",
+            "core_width",
+            "streaks",
+            "surface_cuts",
+            "noise_scale",
+            "threshold",
+            "glow_size",
+            "flash",
+            "Dust Density",
+        ),
+    ),
+    ("Dissolve", ("dissolve", "fade", "breakup", "fragment_release")),
+)
+_ART_LABELS = {
+    "bank": "Depth Bend (0 = Flat)",
+    "head_bias": "Leading Weight",
+    "core_width": "Blade Width",
+    "afterimage": "Wake Amount",
+    "streaks": "Brush Detail",
+    "breakup": "Noise Erosion",
+    "motion_ease": "Deceleration",
+}
+_EXTRA_ART_KEYS = {
+    "Fire Height",
+    "Fire Flow Speed",
+    "Fire Curl",
+    "Dust Rise Height",
+    "Dust Roll Speed",
+    "Dust Density",
+    "Sigil Spin",
+    "Sigil Lift",
+}
+
+# These existing constant nodes already author the complete assets. Edit their
+# native sockets directly instead of adding a second controller value/driver.
+_NATIVE_SHAPE_VALUES = (
+    ("Nucleus Stored Size", "Stored Core Size", False),
+    ("Nucleus Compression", "Compression (0–0.85)", False),
+    ("Release Stretch", "Release Stretch", False),
+    ("Intake Weight", "Intake Weight (0–1)", False),
+    ("Pressure Unfurl", "Body Curl", False),
+    ("Fine Ejection Width", "Fine Jet Width", False),
+    ("Pressure Crest Height", "Wave Height", False),
+    ("Pressure Fracture", "Early Body Breakup", True),
+    ("Pressure Support Value", "Support Tone (0–1)", True),
+    ("Bolt Length", "Bolt Length", False),
+    ("Branch Reach", "Branch Reach", False),
+    ("Nucleus Seed Size", "Initial Core Size", True),
+    ("Release Pinch", "Release Pinch (0–1)", True),
+)
+
+
+def _nested_trees(trees):
+    pending, seen = list(trees), set()
+    while pending:
+        tree = pending.pop()
+        if tree is None or tree in seen:
+            continue
+        seen.add(tree)
+        yield tree
+        pending.extend(n.node_tree for n in tree.nodes if getattr(n, "node_tree", None))
+
+
+def _native_shape_values(root):
+    found = {}
+    for child in root.children:
+        if child.get("vfx_role") != "layer" or child.get("vfx_id") != root["vfx_id"]:
+            continue
+        trees = [m.node_tree for m in getattr(child.data, "materials", ()) if m and m.node_tree]
+        # _nested_trees visits the last seed first: prefer the layer's geometry
+        # controls if an artist gives a shader value the same name.
+        trees.extend(m.node_group for m in child.modifiers if m.type == "NODES" and m.node_group)
+        for tree in _nested_trees(trees):
+            driven = (
+                {c.data_path for c in tree.animation_data.drivers} if tree.animation_data else set()
+            )
+            for name, label, advanced in _NATIVE_SHAPE_VALUES:
+                node = tree.nodes.get(name)
+                if node is None or node.type != "VALUE" or not node.outputs[0].is_linked:
+                    continue
+                socket = node.outputs[0]
+                if socket.path_from_id("default_value") not in driven:
+                    found.setdefault(name, (label, socket, advanced))
+    return found
+
+
+def _driven_parameters(root):
+    """Read actual native driver references without changing a saved graph."""
+    trees = []
+    owners = [root]
+    for obj in root.children:
+        owners.append(obj)
+        if obj.type != "MESH":
+            continue
+        owners.extend([obj.data, obj.data.shape_keys])
+        trees += [m.node_group for m in obj.modifiers if m.type == "NODES" and m.node_group]
+        trees += [m.node_tree for m in obj.data.materials if m and m.node_tree]
+    paths = set()
+    owners.extend(_nested_trees(trees))
+    for owner in owners:
+        animation = getattr(owner, "animation_data", None)
+        if animation:
+            for curve in animation.drivers:
+                if curve.mute:
+                    continue
+                for variable in curve.driver.variables:
+                    for target in variable.targets:
+                        if target.id == root:
+                            paths.add(target.data_path)
+    return {key for key in root.keys() if f'["{key}"]' in paths}
+
+
+def _draw_art_parameters(layout, context, root, keys):
+    driven = _driven_parameters(root)
+    remaining = {key for key in keys if key in root}
+    if root.get("vfx_parameter_keys"):
+        remaining.intersection_update(driven)
+    remaining |= driven & _EXTRA_ART_KEYS
+    for title, candidates in _ART_GROUPS:
+        shown = [key for key in candidates if key in remaining]
+        if not shown:
+            continue
+        header, body = layout.panel(f"vfx_art_{title.lower()}", default_closed=title != "Shape")
+        header.label(text=title)
+        if body is not None:
+            for key in shown:
+                body.prop(
+                    root, f'["{key}"]', text=_ART_LABELS.get(key, key.replace("_", " ").title())
+                )
+        remaining.difference_update(shown)
+    if remaining:
+        layout.prop(context.window_manager, "vfx_advanced_controls", text="Advanced")
+        if context.window_manager.vfx_advanced_controls:
+            box = layout.box()
+            for key in sorted(remaining):
+                box.prop(root, f'["{key}"]', text=key.replace("_", " ").title())
+
+
+class VFX_OT_key_color(bpy.types.Operator):
+    bl_idname = "vfx_studio.key_color"
+    bl_label = "Keyframe Color"
+    bl_description = (
+        "Insert native keyframes on the stored RGB channels; playback needs no extension"
+    )
+    bl_options = {"REGISTER", "UNDO"}
+    palette: EnumProperty(items=(("BODY", "Color", ""), ("BLADE", "Blade", "")), default="BODY")
+
+    def execute(self, context):
+        root = core.resolve(context.object)
+        prefix = "blade_color" if self.palette == "BLADE" else "color"
+        if root is None or not all(f"{prefix}_{i}" in root for i in range(3)):
+            self.report({"ERROR"}, "Select an effect with these color controls")
+            return {"CANCELLED"}
+        for i in range(3):
+            root.keyframe_insert(data_path=f'["{prefix}_{i}"]')
+        return {"FINISHED"}
+
+
+class VFX_OT_fire_palette(bpy.types.Operator):
+    bl_idname = "vfx_studio.fire_palette"
+    bl_label = "Set Fire Palette"
+    bl_description = (
+        "Set native heat-ramp colors and neutral tint, keeping nodes, positions and animation"
+    )
+    bl_options = {"REGISTER", "UNDO"}
+    palette: EnumProperty(
+        items=(("ORANGE", "Orange", ""), ("BLUE", "Blue", ""), ("GREEN", "Green", "")),
+        default="ORANGE",
+    )
+
+    def execute(self, context):
+        root = core.resolve(context.object)
+        try:
+            if root is None:
+                raise ValueError("Select a fire layer")
+            palettes.apply_fire(root, self.palette)
+        except ValueError as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+
+class VFX_OT_slash_style(bpy.types.Operator):
+    bl_idname = "vfx_studio.slash_style"
+    bl_label = "Apply Slash Style"
+    bl_description = "Set shape and surface controls while keeping palette, timing and edited nodes"
+    bl_options = {"REGISTER", "UNDO"}
+    style: EnumProperty(
+        items=(
+            ("CLEAN", "Clean", "Planar, continuous blade"),
+            ("STYLIZED", "Stylized", "Sculpted silhouette and separate colored wakes"),
+        ),
+        default="STYLIZED",
+    )
+
+    def execute(self, context):
+        from . import slash
+
+        try:
+            slash.apply_style(context.object, self.style)
+        except ValueError as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
 
 
 class VFX_OT_create(bpy.types.Operator):
@@ -187,6 +470,48 @@ class VFX_OT_create_trail(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self)
 
 
+class VFX_OT_set_echo_tail(bpy.types.Operator):
+    bl_idname = "vfx_studio.set_echo_tail"
+    bl_label = "Set Echo Tail"
+    bl_description = (
+        "Adjust every captured pose's lifetime, keeping entry spacing and captured meshes"
+    )
+    bl_options = {"REGISTER", "UNDO"}
+
+    tail: FloatProperty(
+        name="Tail (Frames)",
+        default=18,
+        min=1,
+        max=100000,
+        description="Lifetime before group and layer Speed; updates group duration without recapturing",
+    )
+
+    def execute(self, context):
+        from . import dash
+
+        try:
+            dash.set_tail(context, context.object, self.tail)
+        except (ValueError, RuntimeError) as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        from . import dash
+
+        try:
+            self.tail = dash.tail_frames(context.object)
+        except (ValueError, RuntimeError) as error:
+            self.report({"ERROR"}, str(error))
+            return {"CANCELLED"}
+        return context.window_manager.invoke_props_dialog(self, width=360)
+
+    def draw(self, context):
+        self.layout.prop(self, "tail")
+        self.layout.label(text="Before group / layer Speed")
+        self.layout.label(text="Keeps pose entry spacing and captured meshes")
+
+
 class VFX_OT_capture_dash(bpy.types.Operator):
     bl_idname = "vfx_studio.capture_dash"
     bl_label = "Capture Dash Echoes"
@@ -196,14 +521,12 @@ class VFX_OT_capture_dash(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
     first: IntProperty(name="First Frame", default=1, min=-100000, max=100000)
     last: IntProperty(name="Last Frame", default=13, min=-100000, max=100000)
-    quality: EnumProperty(
-        name="Quality",
-        items=[
-            ("LOW", "Low · 2 poses", ""),
-            ("MEDIUM", "Medium · 3 poses", ""),
-            ("HIGH", "High · 4 poses", ""),
-        ],
-        default="MEDIUM",
+    count: IntProperty(
+        name="Echo Count",
+        description="Evenly sample this many poses, including both endpoints; keeps source mesh detail",
+        default=3,
+        min=2,
+        max=32,
     )
     tail: IntProperty(name="Echo Tail (Frames)", default=18, min=1, max=100000)
 
@@ -212,12 +535,24 @@ class VFX_OT_capture_dash(bpy.types.Operator):
 
         try:
             dash.create(
-                context, context.object, self.first, self.last, self.quality, tail=self.tail
+                context, context.object, self.first, self.last, tail=self.tail, count=self.count
             )
         except (ValueError, RuntimeError) as error:
             self.report({"ERROR"}, str(error))
             return {"CANCELLED"}
         return {"FINISHED"}
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "first")
+        layout.prop(self, "last")
+        layout.prop(self, "count")
+        layout.prop(self, "tail")
+        if self.last > self.first:
+            spacing = (self.last - self.first) / (self.count - 1)
+            layout.label(text=f"Pose spacing: {spacing:g} frames (subframes supported)")
+        layout.label(text="Keeps source mesh detail", icon="INFO")
+        layout.label(text="More echoes increase render cost")
 
     def invoke(self, context, event):
         self.last = context.scene.frame_current
@@ -517,7 +852,7 @@ class VFX_OT_export_preset(bpy.types.Operator, ExportHelper):
     bl_description = (
         "Save current parameter values to JSON; use Save Complete Effect for edited nodes or paths"
     )
-    bl_label = "Save VFX Preset"
+    bl_label = "Save Parameters (JSON)"
     filename_ext = ".json"
     filter_glob: StringProperty(default="*.json", options={"HIDDEN"})
 
@@ -533,7 +868,7 @@ class VFX_OT_export_preset(bpy.types.Operator, ExportHelper):
 class VFX_OT_import_preset(bpy.types.Operator, ImportHelper):
     bl_idname = "vfx_studio.import_preset"
     bl_description = "Create an independent effect from a validated parameter JSON file"
-    bl_label = "Load VFX Preset"
+    bl_label = "Load Parameters (JSON)"
     bl_options = {"REGISTER", "UNDO"}
     filename_ext = ".json"
     filter_glob: StringProperty(default="*.json", options={"HIDDEN"})
@@ -607,35 +942,46 @@ class VFX_PT_main(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator("vfx_studio.create", text="Create Mesh VFX", icon="ADD")
-        layout.operator("vfx_studio.create_flipbook", text="Create Flipbook", icon="IMAGE_DATA")
-        layout.operator(
-            "vfx_studio.create_sequence", text="Create Image Sequence", icon="FILE_IMAGE"
-        )
-        layout.operator(
-            "vfx_studio.create_particle", text="Create Particle Burst", icon="PARTICLES"
-        )
-        layout.operator(
-            "vfx_studio.create_emitter", text="Create Continuous Emitter", icon="PARTICLES"
-        )
-        layout.operator("vfx_studio.create_screen", text="Add Screen VFX", icon="RENDERLAYERS")
-        layout.operator(
-            "vfx_studio.create_shield", text="Create Energy Shield", icon="SHADING_RENDERED"
-        )
-        layout.operator(
-            "vfx_studio.create_simulation", text="Create Cloth Simulation", icon="MOD_CLOTH"
-        )
-        layout.operator("vfx_studio.create_trail", text="Bake Ribbon Trail", icon="CURVE_PATH")
-        layout.operator("vfx_studio.capture_dash", text="Capture Dash Echoes", icon="MOD_TIME")
-        layout.operator(
-            "vfx_studio.compose", text="Compose Selected VFX", icon="OUTLINER_COLLECTION"
-        )
-        layout.operator("vfx_studio.import_preset", text="Load Preset", icon="IMPORT")
-        layout.operator("vfx_studio.import_asset", text="Load Complete Effect", icon="APPEND_BLEND")
+        error = None
         try:
             root = core.resolve(context.object)
-        except ValueError as error:
-            layout.label(text=str(error), icon="ERROR")
+        except ValueError as exc:
+            root, error = None, str(exc)
+        header, body = layout.panel(
+            "vfx_create_selected" if root is not None else "vfx_create_empty",
+            default_closed=root is not None,
+        )
+        header.label(text="Create / Load")
+        if body is not None:
+            body.operator("vfx_studio.create", text="Create Mesh VFX", icon="ADD")
+            body.operator("vfx_studio.create_flipbook", text="Create Flipbook", icon="IMAGE_DATA")
+            body.operator(
+                "vfx_studio.create_sequence", text="Create Image Sequence", icon="FILE_IMAGE"
+            )
+            body.operator(
+                "vfx_studio.create_particle", text="Create Particle Burst", icon="PARTICLES"
+            )
+            body.operator(
+                "vfx_studio.create_emitter", text="Create Continuous Emitter", icon="PARTICLES"
+            )
+            body.operator("vfx_studio.create_screen", text="Add Screen VFX", icon="RENDERLAYERS")
+            body.operator(
+                "vfx_studio.create_shield", text="Create Energy Shield", icon="SHADING_RENDERED"
+            )
+            body.operator(
+                "vfx_studio.create_simulation", text="Create Cloth Simulation", icon="MOD_CLOTH"
+            )
+            body.operator("vfx_studio.create_trail", text="Bake Ribbon Trail", icon="CURVE_PATH")
+            body.operator("vfx_studio.capture_dash", text="Capture Dash Echoes", icon="MOD_TIME")
+            body.operator(
+                "vfx_studio.compose", text="Compose Selected VFX", icon="OUTLINER_COLLECTION"
+            )
+            body.operator("vfx_studio.import_preset", text="Load Parameters (JSON)", icon="IMPORT")
+            body.operator(
+                "vfx_studio.import_asset", text="Load Complete Effect", icon="APPEND_BLEND"
+            )
+        if error:
+            layout.label(text=error, icon="ERROR")
             return
         if root is None:
             layout.label(text="Select a VFX controller or layer")
@@ -646,9 +992,11 @@ class VFX_PT_main(bpy.types.Panel):
                 "vfx_studio.export_asset", text="Save Complete Effect", icon="FILE_BLEND"
             )
         if root["vfx_module"] not in {"trail.ribbon", "core.composition", "simulation.cloth"}:
-            layout.operator("vfx_studio.export_preset", text="Save Preset", icon="EXPORT")
+            layout.operator(
+                "vfx_studio.export_preset", text="Save Parameters (JSON)", icon="EXPORT"
+            )
         else:
-            layout.label(text="Reuse with Duplicate or Save Complete Effect")
+            layout.label(text="Reuse: Save Complete Effect")
         row = layout.row(align=True)
         row.operator("vfx_studio.duplicate", text="Duplicate", icon="DUPLICATE")
         row.operator("vfx_studio.delete", text="Delete", icon="TRASH")
@@ -682,6 +1030,8 @@ class VFX_PT_main(bpy.types.Panel):
             except ValueError as error:
                 layout.label(text=str(error), icon="ERROR")
                 return
+            if "vfx_capture_frames" in root:
+                layout.operator("vfx_studio.set_echo_tail", icon="MOD_TIME")
             layout.label(text=f"{len(children)} spatial layers")
             layout.operator("vfx_studio.ungroup_all", icon="UNLINKED")
             for child in children:
@@ -707,11 +1057,11 @@ class VFX_PT_main(bpy.types.Panel):
                 "fade",
             )
         elif root["vfx_module"] == "mesh.slash":
-            layout.label(
-                text="Layered arc slash"
-                if root["vfx_asset_version"] >= 2
-                else "Legacy crescent slash"
-            )
+            layout.label(text="Arc Slash")
+            if "surface_cuts" in root and "fragment_release" in root:
+                row = layout.row(align=True)
+                row.operator("vfx_studio.slash_style", text="Clean").style = "CLEAN"
+                row.operator("vfx_studio.slash_style", text="Stylized").style = "STYLIZED"
             keys = (
                 "radius",
                 "width",
@@ -724,18 +1074,24 @@ class VFX_PT_main(bpy.types.Panel):
                 "noise_scale",
                 "fade",
             )
-            if root["vfx_asset_version"] >= 2:
-                keys += (
-                    "attack",
-                    "motion_ease",
-                    "head_bias",
-                    "core_width",
-                    "afterimage",
-                    "streaks",
-                    "breakup",
-                )
-            if root["vfx_asset_version"] >= 3:
-                keys += ("contour", "bank", "wake_spread")
+            keys += (
+                "attack",
+                "motion_ease",
+                "head_bias",
+                "core_width",
+                "afterimage",
+                "streaks",
+                "breakup",
+            )
+            keys += (
+                "contour",
+                "hook",
+                "inner_notches",
+                "bank",
+                "wake_spread",
+                "surface_cuts",
+                "fragment_release",
+            )
         elif root["vfx_module"] == "simulation.cloth":
             from . import simulation
 
@@ -766,7 +1122,7 @@ class VFX_PT_main(bpy.types.Panel):
                 row.enabled = bool(root.get("vfx_bone"))
                 row.prop(root, '["vfx_bone_tail"]', text="Use Bone Tail")
             else:
-                layout.label(text="Legacy ribbon · samples bone head")
+                layout.label(text="Ribbon · samples bone head")
             for key in ("vfx_bake_first", "vfx_bake_last", "vfx_bake_step"):
                 layout.prop(root, f'["{key}"]', text=key.removeprefix("vfx_bake_").title())
             layout.label(text=f"{root['vfx_samples']} baked samples; source edits need Rebake")
@@ -813,10 +1169,9 @@ class VFX_PT_main(bpy.types.Panel):
                 "fade",
                 "strength",
             )
-            if root["vfx_asset_version"] == 2:
-                if not root.get("vfx_parameter_keys"):
-                    layout.label(text="Shape: 0 Round / 1 Shard")
-                keys += ("shape", "stretch", "planar", "motion_ease")
+            if not root.get("vfx_parameter_keys"):
+                layout.label(text="Shape: 0 Round / 1 Shard")
+            keys += ("shape", "stretch", "planar", "motion_ease")
         elif root["vfx_module"] == "screen.glare":
             layout.label(text="Screen · scene compositor")
             keys = ("strength", "threshold", "glow_size", "flash", "fade")
@@ -849,15 +1204,65 @@ class VFX_PT_main(bpy.types.Panel):
         if isinstance(profile, str):
             visible = {key.strip() for key in profile.split(",")}
             keys = tuple(key for key in keys if key in visible)
-        for key in keys:
-            layout.prop(root, f'["{key}"]', text=key.replace("_", " ").title())
-        for i, color in enumerate(("Red", "Green", "Blue")):
-            layout.prop(root, f'["color_{i}"]', text=color)
-        layout.label(text="Right-click controls to insert keyframes")
-        layout.label(text="Material Preview / Rendered shows shader")
+        color_box = layout.box()
+        color_box.label(text="Color")
+        row = color_box.row(align=True)
+        row.prop(
+            root,
+            "vfx_primary_color",
+            text="Body"
+            if root["vfx_module"] == "mesh.slash"
+            else "Heat Tint"
+            if palettes.fire_ramp(root)
+            else "Color",
+        )
+        row.operator("vfx_studio.key_color", text="", icon="KEY_HLT").palette = "BODY"
+        if all(f"blade_color_{i}" in root for i in range(3)):
+            row = color_box.row(align=True)
+            row.prop(root, "vfx_blade_color", text="Blade")
+            row.operator("vfx_studio.key_color", text="", icon="KEY_HLT").palette = "BLADE"
+        heat_ramp = palettes.fire_ramp(root)
+        if heat_ramp is not None:
+            palette_box = layout.box()
+            palette_box.label(text="Heat Palette")
+            if len(heat_ramp.color_ramp.elements) == 5:
+                row = palette_box.row(align=True)
+                for choice in ("ORANGE", "BLUE", "GREEN"):
+                    row.operator("vfx_studio.fire_palette", text=choice.title()).palette = choice
+            palette_box.prop(context.window_manager, "vfx_advanced_controls", text="Edit Heat Ramp")
+            if context.window_manager.vfx_advanced_controls:
+                palette_box.template_color_ramp(heat_ramp, "color_ramp")
+        native_values = _native_shape_values(root)
+        if native_values:
+            box = layout.box()
+            box.label(
+                text="Bolt Shape"
+                if {"Bolt Length", "Branch Reach"} & native_values.keys()
+                else "Impact Shape"
+                if {"Pressure Unfurl", "Fine Ejection Width", "Pressure Crest Height"}
+                & native_values.keys()
+                else "Core Focus"
+                if "Nucleus Stored Size" in native_values
+                else "Intake"
+            )
+            for label, socket, advanced in native_values.values():
+                if not advanced or context.window_manager.vfx_advanced_controls:
+                    box.prop(socket, "default_value", text=label)
+            if any(v[2] for v in native_values.values()):
+                box.prop(context.window_manager, "vfx_advanced_controls", text="Advanced Shape")
+        _draw_art_parameters(layout, context, root, keys)
+        if root.get("vfx_parameter_keys"):
+            layout.label(text="Nodes need Complete Effect", icon="INFO")
+            layout.label(text="JSON saves parameters only")
+        layout.label(text="Key buttons: insert color keys")
+        layout.label(text="Other controls: right-click")
+        layout.label(text="Preview: Material / Rendered")
 
 
 CLASSES = (
+    VFX_OT_key_color,
+    VFX_OT_slash_style,
+    VFX_OT_fire_palette,
     VFX_OT_create,
     VFX_OT_create_flipbook,
     VFX_OT_create_sequence,
@@ -867,6 +1272,7 @@ CLASSES = (
     VFX_OT_create_shield,
     VFX_OT_create_trail,
     VFX_OT_capture_dash,
+    VFX_OT_set_echo_tail,
     VFX_OT_rebake_trail,
     VFX_OT_bind,
     VFX_OT_unbind,
@@ -889,10 +1295,37 @@ CLASSES = (
 
 
 def register():
+    bpy.types.WindowManager.vfx_advanced_controls = BoolProperty(
+        name="Advanced", default=False, options={"SKIP_SAVE"}
+    )
+    # These editing proxies never store animation; the key button targets native RGB ID properties.
+    bpy.types.Object.vfx_primary_color = FloatVectorProperty(
+        name="Color",
+        subtype="COLOR",
+        size=3,
+        min=0,
+        max=1,
+        options=set(),
+        get=lambda o: _read_color(o, "color", (0.08, 0.5, 1)),
+        set=lambda o, v: _write_color(o, v, "color"),
+    )
+    bpy.types.Object.vfx_blade_color = FloatVectorProperty(
+        name="Blade Color",
+        subtype="COLOR",
+        size=3,
+        min=0,
+        max=1,
+        options=set(),
+        get=lambda o: _read_color(o, "blade_color", (0.8, 0.9, 1)),
+        set=lambda o, v: _write_color(o, v, "blade_color"),
+    )
     for cls in CLASSES:
         bpy.utils.register_class(cls)
 
 
 def unregister():
+    del bpy.types.WindowManager.vfx_advanced_controls
+    del bpy.types.Object.vfx_primary_color
+    del bpy.types.Object.vfx_blade_color
     for cls in reversed(CLASSES):
         bpy.utils.unregister_class(cls)

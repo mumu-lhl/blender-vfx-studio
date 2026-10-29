@@ -9,23 +9,22 @@ class Module:
     label: str
     asset_version: int
     stateful: bool = False
-    legacy_versions: tuple[int, ...] = ()
 
     def supports_version(self, version):
-        return type(version) is int and version in (self.asset_version, *self.legacy_versions)
+        return type(version) is int and version == self.asset_version
 
 
 MODULES = {
     "particle.emitter": Module("particle.emitter", "Continuous Particle Emitter", 1),
     "flipbook.sequence": Module("flipbook.sequence", "Image Sequence Sprite", 1),
     "shader.shield": Module("shader.shield", "Fresnel Energy Shield", 1),
-    "mesh.slash": Module("mesh.slash", "Arc Slash", 5, legacy_versions=(1, 2, 3, 4)),
+    "mesh.slash": Module("mesh.slash", "Arc Slash", 5),
     "simulation.cloth": Module("simulation.cloth", "Cloth Energy Sheet", 1, stateful=True),
     "core.composition": Module("core.composition", "VFX Composition", 1),
     "trail.ribbon": Module("trail.ribbon", "Sampled Ribbon Trail", 1),
     "mesh.ring": Module("mesh.ring", "Procedural Ring", 1),
     "flipbook.atlas": Module("flipbook.atlas", "Flipbook Atlas", 1),
-    "particle.burst": Module("particle.burst", "Particle Burst", 2, legacy_versions=(1,)),
+    "particle.burst": Module("particle.burst", "Particle Burst", 2),
     "screen.glare": Module("screen.glare", "Screen Glare + Flash", 1),
 }
 PRESETS = {

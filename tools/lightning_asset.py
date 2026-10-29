@@ -309,6 +309,169 @@ def _material(root):
     g.link(emission.outputs[0], out.inputs["Surface"])
 
 
+def _contact_corona(root, quality):
+    """Grounded, connected return paths repeat with the main discharge clock."""
+    layer, g, geometry = _geometry(root, "Branching Contact Return")
+    arms, steps = {"LOW": (3, 4), "MEDIUM": (5, 7), "HIGH": (7, 10)}[quality]
+    randomizer = random.Random(83)
+    paths = []
+    for index in range(arms):
+        angle = index * 2.399963 + 0.3
+        radial = Vector((math.cos(angle), math.sin(angle), 0))
+        lateral = Vector((-radial.y, radial.x, 0))
+        reach = randomizer.uniform(0.75, 1.2)
+        points = []
+        for step in range(steps + 1):
+            t = step / steps
+            point = radial * (reach * t)
+            point += lateral * (randomizer.uniform(-0.16, 0.16) * math.sin(math.pi * t))
+            point.z = 0.04 + 0.08 * math.sin(math.pi * t)
+            points.append(point)
+        paths.append((points, 0))
+        junction = steps // 2
+        start = points[junction]
+        end = start + radial * 0.24 + lateral * (0.28 if index % 2 else -0.28)
+        end.z = 0.04
+        paths.append(([start, start.lerp(end, 0.5) + lateral * 0.07, end], 1))
+
+    vertices, faces, offsets = [], [], []
+    attrs = {name: [] for name in ("bolt_side", "bolt_branch", "contact_width", "contact_along")}
+    for points, branch in paths:
+        for plane in range(2):
+            base = len(vertices)
+            for index, point in enumerate(points):
+                tangent = (
+                    points[min(index + 1, len(points) - 1)] - points[max(index - 1, 0)]
+                ).normalized()
+                across = tangent.cross(Vector((0, 0, 1))).normalized()
+                up = tangent.cross(across).normalized()
+                side = across if plane == 0 else up
+                t = index / (len(points) - 1)
+                for sign in (-1, 1):
+                    offset = side * sign
+                    vertices.append(tuple(point + offset))
+                    offsets.append(offset)
+                    for name, value in zip(
+                        attrs,
+                        (sign, branch, (0.65 if branch else 1) * (1 - t) ** 0.65 + 0.02, t),
+                    ):
+                        attrs[name].append(value)
+            for index in range(len(points) - 1):
+                a = base + index * 2
+                faces.append((a, a + 1, a + 3, a + 2))
+    _mesh(layer, vertices, faces, attrs)
+    attribute = layer.data.attributes.new("contact_offset", "FLOAT_VECTOR", "POINT")
+    for item, value in zip(attribute.data, offsets):
+        item.vector = value
+
+    p = g.value("Contact Discharge Clock", expression=PROGRESS)
+    pulse = _pulse(g, p)
+    # Restart propagation at each discharge rather than letting one ring grow
+    # continuously underneath the later strikes. Each fork stays at its junction.
+    age = g.m(
+        "First Or Second Contact Age",
+        "SUBTRACT",
+        p,
+        g.m(
+            "Second Contact Start",
+            "MULTIPLY",
+            g.m("After Second Contact", "GREATER_THAN", p, 0.30),
+            0.30,
+        ),
+    )
+    age = g.m(
+        "Current Contact Age",
+        "SUBTRACT",
+        age,
+        g.m(
+            "Third Contact Start",
+            "MULTIPLY",
+            g.m("After Third Contact", "GREATER_THAN", p, 0.57),
+            0.27,
+        ),
+    )
+    # The later pulse peaks last less than two frames. Reach outside the
+    # contact footprint before they narrow, instead of expanding after the hit.
+    travel = g.stage("Ground Return Spreads", age, 0, 0.06)
+    radius = g.m(
+        "Contact Footprint",
+        "ADD",
+        g.value("Contact Radius", prop="radius"),
+        g.m("Ground Reach", "MULTIPLY", travel, g.value("Ground Expansion", prop="expansion")),
+    )
+    position = g.n("GeometryNodeInputPosition", "Editable Contact Paths")
+    offset = g.attr("contact_offset", "FLOAT_VECTOR")
+    center = g.v("Contact Centerlines", "SUBTRACT", position.outputs[0], offset)
+    center = g.v(
+        "Radial Ground Spread", "MULTIPLY", center, g.xyz("Ground Dimensions", radius, radius, 1)
+    )
+    root_width = g.value("Return Width", prop="width")
+    width = g.m("Contact Width", "MULTIPLY", root_width, g.attr("contact_width"))
+    width = g.m("Contact Pulse Width", "MULTIPLY", width, pulse)
+    width = g.m(
+        "Main Strike Reaches Contact",
+        "MULTIPLY",
+        width,
+        g.stage("First Ground Arrival", p, 0.08, 0.12),
+    )
+    shaped = g.n("GeometryNodeSetPosition", "Native Ground Return Shape")
+    g.link(geometry, shaped.inputs["Geometry"])
+    g.link(
+        g.v(
+            "Connected Contact Ribbons",
+            "ADD",
+            center,
+            g.v("Crossed Contact Width", "SCALE", offset, width),
+        ),
+        shaped.inputs["Position"],
+    )
+    off = g.m("Between Contact Discharges", "LESS_THAN", pulse, 0.06)
+    off = g.m(
+        "Before Or Between Contacts", "MAXIMUM", off, g.m("Not Yet Grounded", "LESS_THAN", p, 0.08)
+    )
+    off = g.m(
+        "Contact Disabled Or Between Pulses",
+        "MAXIMUM",
+        off,
+        g.m("Zero Return Width", "LESS_THAN", root_width, 1e-8),
+    )
+    inactive = g.m(
+        "Outside Contact Lifetime", "LESS_THAN", g.value("Contact Active", expression=ACTIVE), 0.5
+    )
+    tip = g.m(
+        "Contact Tips Erode",
+        "GREATER_THAN",
+        g.attr("contact_along"),
+        g.m("Remaining Contact Reach", "SUBTRACT", 1, g.value("Contact Dissolve", prop="dissolve")),
+    )
+    tip = g.m(
+        "Contact Dissolved",
+        "MAXIMUM",
+        tip,
+        g.m(
+            "Fully Dissolved Contact",
+            "GREATER_THAN",
+            g.value("Full Contact Dissolve", prop="dissolve"),
+            0.9999,
+        ),
+    )
+    hide = g.n("GeometryNodeDeleteGeometry", "Only Live Contact Returns", domain="POINT")
+    g.link(shaped.outputs[0], hide.inputs["Geometry"])
+    g.link(
+        g.m(
+            "Hidden Contact",
+            "MAXIMUM",
+            off,
+            g.m("Contact Inactive Or Eroded", "MAXIMUM", inactive, tip),
+        ),
+        hide.inputs["Selection"],
+    )
+    out = g.n("NodeGroupOutput", "Output")
+    g.link(hide.outputs[0], out.inputs["Geometry"])
+    root["vfx_parameter_keys"] = "radius,expansion,width,strength,dissolve"
+    _material(root)
+
+
 def create(context, quality="MEDIUM"):
     if quality not in {"LOW", "MEDIUM", "HIGH"}:
         raise ValueError("Unknown lightning quality")
@@ -352,10 +515,10 @@ def create(context, quality="MEDIUM"):
     sparks.name = "Lightning • Contact Sparks"
     wave = core.create(context, "SHOCKWAVE", quality)
     for key, value in dict(
-        start=start + 2,
-        duration=10.0,
+        start=start,
+        duration=18.0,
         radius=0.06,
-        width=0.035,
+        width=0.065,
         expansion=0.75,
         strength=0.65,
         dissolve=0.15,
@@ -366,6 +529,7 @@ def create(context, quality="MEDIUM"):
     for i, value in enumerate((0.025, 0.18, 1.0)):
         wave[f"color_{i}"] = value
     wave.name = "Lightning • Contact Corona"
+    _contact_corona(wave, quality)
     flash = core.create_particle(context, quality)
     for key, value in dict(
         start=start + 2,
