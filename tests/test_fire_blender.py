@@ -100,6 +100,42 @@ class FireTests(unittest.TestCase):
         held = render_pixels(44)
         self.assertGreater(sum(held[0::4]), sum(faded[0::4]) * 1.5)
 
+    def test_native_fork_reach_preserves_the_shared_foot(self):
+        member = main_member(create(bpy.context))
+        layer = member.children[0]
+        field = layer.modifiers[0].node_group.nodes["Fork Spread"].outputs[0]
+        fork = layer.data.attributes["fire_fork"].data
+        branched = points(member, 20)
+        field.default_value = 0
+        collapsed = points(member, 20)
+        deltas = [(Vector(a) - Vector(b)).length for a, b in zip(branched, collapsed)]
+        self.assertGreater(max(deltas), 0.15)
+        self.assertTrue(all(d < 1e-6 for d, f in zip(deltas, fork) if f.vector.length == 0))
+        field.default_value = 1
+        self.assertEqual(points(member, 20), branched)
+
+    def test_internal_heat_channels_change_the_render_without_new_geometry(self):
+        root = create(bpy.context)
+        member = main_member(root)
+        for other in composition.members(root):
+            other.children[0].hide_render = other != member
+        camera()
+        scene = bpy.context.scene
+        scene.camera.location = (4, -6, 3.5)
+        scene.camera.rotation_euler = (
+            (Vector((0, 0, 1)) - scene.camera.location).to_track_quat("-Z", "Y").to_euler()
+        )
+        scene.camera.data.ortho_scale = 4
+        scene.render.resolution_x = scene.render.resolution_y = 96
+        scene.render.dither_intensity = 0
+        before_geometry = points(member, 20)
+        before = render_pixels(20)
+        contrast = member.children[0].data.materials[0].node_tree.nodes["Flow Seam Contrast"]
+        contrast.outputs[0].default_value = 0
+        after = render_pixels(20)
+        self.assertGreater(sum(abs(a - b) for a, b in zip(before, after)), 1)
+        self.assertEqual(points(member, 20), before_geometry)
+
     def test_quality_and_no_mutation_on_invalid_quality(self):
         counts = []
         for quality in ("LOW", "MEDIUM", "HIGH"):
@@ -119,6 +155,9 @@ class FireTests(unittest.TestCase):
         user = bpy.context.object
         root = create(bpy.context)
         flame = main_member(root)
+        flame.children[0].modifiers[0].node_group.nodes["Fork Spread"].outputs[
+            0
+        ].default_value = 0.7
         flame["Fire Curl"] = 0.9
         flame.update_tag()
         expected = points(flame, 12)

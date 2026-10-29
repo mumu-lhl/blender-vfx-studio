@@ -11,8 +11,10 @@ from tools.charge_design import _Fields, _geometry, _mesh
 def _flames(root, quality):
     layer, g, geometry = _geometry(root, "Rising Sculpted Flame")
     rows, sides = {"LOW": (14, 8), "MEDIUM": (22, 12), "HIGH": (30, 16)}[quality]
-    vertices, faces, centers = [], [], []
-    attributes = {k: [] for k in ("fire_u", "fire_lobe", "fire_inner")}
+    vertices, faces, centers, forks = [], [], [], []
+    attributes = {
+        k: [] for k in ("fire_u", "fire_lobe", "fire_inner", "fire_side_sin", "fire_side_cos")
+    }
     # Unequal outer lobes and a smaller forward hot tongue share a grounded base.
     for index, (x, y, height, breadth, bend, inner) in enumerate(
         (
@@ -23,35 +25,63 @@ def _flames(root, quality):
             (0.06, 0.26, 0.44, 0.22, -0.14, 1),
         )
     ):
-        base = len(vertices)
-        for row in range(rows + 1):
-            u = row / rows
-            radius = max(0.002, (0.6 + 0.4 * math.sin(math.pi * u)) * (1 - u) ** 0.85 * breadth)
-            cx = x * (1 - u) + bend * math.sin(math.pi * u) + 0.22 * math.sin(u * 5) * u
-            cy = y * (1 - u * 0.5) + 0.13 * math.sin(u * 4 + index) * u
-            for side in range(sides):
-                a = side / sides * math.tau
-                fold = 1 + 0.15 * math.sin(3 * a + u * 8 + index)
-                vertices.append(
-                    (
-                        cx + math.cos(a) * radius * fold,
-                        cy + math.sin(a) * radius * 0.65 * fold,
-                        u * height,
+        split = {0: 0.48, 1: 0.55}.get(index)
+        # A shared lower tongue feeds two unequal shoots. Their short overlap
+        # keeps the junction filled without booleans or frame-by-frame rebuilding.
+        sections = (
+            [(0, 1, 0)] if split is None else [(0, split + 0.1, 0), (split, 1, -1), (split, 1, 1)]
+        )
+        for first, last, branch in sections:
+            base = len(vertices)
+            segment_rows = max(4, math.ceil(rows * (last - first)))
+            for row in range(segment_rows + 1):
+                u = first + (last - first) * row / segment_rows
+                radius = max(0.002, (0.6 + 0.4 * math.sin(math.pi * u)) * (1 - u) ** 0.85 * breadth)
+                cx = x * (1 - u) + bend * math.sin(math.pi * u) + 0.22 * math.sin(u * 5) * u
+                cy = y * (1 - u * 0.5) + 0.13 * math.sin(u * 4 + index) * u
+                fork = (0, 0, 0)
+                z = u * height
+                if split is not None:
+                    if branch:
+                        t = (u - split) / (1 - split)
+                        reach = (0.27 if index == 0 else 0.19) * t**1.3
+                        fork = (branch * reach, branch * reach * 0.25, 0)
+                        radius *= 0.82 if branch < 0 else 0.64
+                        if branch > 0:
+                            z -= 0.17 * height * t**1.5
+                    elif u > split:
+                        radius *= max(0.002, (last - u) / (last - split))
+                center = (cx + fork[0], cy + fork[1], z)
+                for side in range(sides):
+                    a = side / sides * math.tau
+                    fold = 1 + 0.15 * math.sin(3 * a + u * 8 + index)
+                    vertices.append(
+                        (
+                            center[0] + math.cos(a) * radius * fold,
+                            center[1] + math.sin(a) * radius * 0.65 * fold,
+                            z,
+                        )
                     )
-                )
-                centers.append((cx, cy, u * height))
-                for key, value in zip(attributes, (u, index, inner)):
-                    attributes[key].append(value)
-        faces.append(tuple(base + side for side in reversed(range(sides))))
-        for row in range(rows):
-            for side in range(sides):
-                a = base + row * sides + side
-                b = base + row * sides + (side + 1) % sides
-                faces.append((a, b, b + sides, a + sides))
+                    centers.append(center)
+                    forks.append(fork)
+                    for key, value in zip(
+                        attributes, (u, index, inner, math.sin(2 * a), math.cos(2 * a))
+                    ):
+                        attributes[key].append(value)
+            if first == 0:
+                faces.append(tuple(base + side for side in reversed(range(sides))))
+            for row in range(segment_rows):
+                for side in range(sides):
+                    a = base + row * sides + side
+                    b = base + row * sides + (side + 1) % sides
+                    faces.append((a, b, b + sides, a + sides))
     _mesh(layer, vertices, faces, attributes)
     rest = layer.data.attributes.new("fire_center", "FLOAT_VECTOR", "POINT")
     for item, center in zip(rest.data, centers):
         item.vector = center
+    fork_attr = layer.data.attributes.new("fire_fork", "FLOAT_VECTOR", "POINT")
+    for item, fork in zip(fork_attr.data, forks):
+        item.vector = fork
     for face in layer.data.polygons:
         face.use_smooth = True
     p = g.value("Fire Clock", expression=PROGRESS)
@@ -99,6 +129,22 @@ def _flames(root, quality):
     section = g.v("Section Around Its Own Rising Path", "SUBTRACT", pos.outputs[0], center)
     section = g.v("Moving Bulges And Narrow Necks", "SCALE", section, pulse)
     rest_position = g.v("Connected Unequal Flame Streams", "ADD", center, section)
+    fork_breath = g.m(
+        "Living Fork Reach", "MULTIPLY_ADD", g.m("Forks Follow The Updraft", "SINE", phase), 0.18
+    )
+    fork_breath.node.inputs[2].default_value = 1
+    fork_spread = g.m("Editable Fork Reach", "MULTIPLY", fork_breath, g.value("Fork Spread", 1))
+    rest_position = g.v(
+        "Shoots Separate Above Their Shared Foot",
+        "ADD",
+        rest_position,
+        g.v(
+            "Native Fork Offset",
+            "SCALE",
+            g.attr("fire_fork", "FLOAT_VECTOR"),
+            g.m("Fork Offset From Rest", "SUBTRACT", fork_spread, 1),
+        ),
+    )
     g.link(rest_position, axes.inputs[0])
     width = g.value("Width", prop="width")
     width = g.m(
@@ -233,6 +279,50 @@ def _material(root):
             "MULTIPLY",
             g.m("Cool Clefts And Hot Streams", "SUBTRACT", noise.outputs["Fac"], 0.5),
             0.5,
+        ),
+    )
+    # Periodic rest-section attributes avoid an angular seam at the closed ring.
+    # The cool channel winds upward with the same editable flow clock.
+    side_sin = g.n(
+        "ShaderNodeAttribute", "Across Flame Sine", attribute_name="fire_side_sin"
+    ).outputs["Fac"]
+    side_cos = g.n(
+        "ShaderNodeAttribute", "Across Flame Cosine", attribute_name="fire_side_cos"
+    ).outputs["Fac"]
+    lobe_phase = g.n(
+        "ShaderNodeAttribute", "Heat Stream Phase", attribute_name="fire_lobe"
+    ).outputs["Fac"]
+    stream_phase = g.m(
+        "Heat Streams Rise",
+        "SUBTRACT",
+        g.m("Heat Stream Height", "MULTIPLY", u, 8),
+        g.m("Heat Stream Advection", "MULTIPLY", clock, 0.7),
+    )
+    stream_phase = g.m(
+        "Each Tongue Carries Its Own Heat",
+        "ADD",
+        stream_phase,
+        g.m("Heat Phase Offset", "MULTIPLY", lobe_phase, 1.9),
+    )
+    channel = g.m(
+        "Winding Cool Channel",
+        "ADD",
+        g.m("Section Sine", "MULTIPLY", side_sin, g.m("Stream Cosine", "COSINE", stream_phase)),
+        g.m("Section Cosine", "MULTIPLY", side_cos, g.m("Stream Sine", "SINE", stream_phase)),
+    )
+    channel = g.stage("Narrow Cool Flow Between Hot Streams", channel, 0.35, 0.9)
+    channel = g.m(
+        "Keep The Hot Foot Together",
+        "MULTIPLY",
+        channel,
+        g.stage("Flow Separation Above Ground", u, 0.08, 0.4),
+    )
+    heat = g.m(
+        "Heat Has Flowing Internal Structure",
+        "SUBTRACT",
+        heat,
+        g.m(
+            "Editable Flow Seam Contrast", "MULTIPLY", channel, g.value("Flow Seam Contrast", 0.22)
         ),
     )
     heat = g.m("Inner Core Heat", "ADD", heat, g.m("Core Accent", "MULTIPLY", inner, 0.12))
