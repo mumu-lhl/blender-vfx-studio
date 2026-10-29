@@ -22,14 +22,31 @@
 
 ![暗背景与远景的三个阶段](images/release-contact-context.png)
 
-**取舍与未解决问题：** 第 47 帧保留的宽卷片比原先长针更遮挡手部；原充能仍像较实的弯片。第 49 帧的释放尖端伸出受击者外侧，蓝色细线也增加了局部重叠。远景细尾和次级碎片偏弱，命中主体的体积表现仍不足。这次改善只限于能量传递的时机和方向，不能宣布整体艺术品质通过。尚未查看这份修复的完整动作隔帧或实时视频。
+**取舍与未解决问题：** 第 47 帧保留的宽卷片比原先长针更遮挡手部；原充能仍像较实的弯片。第 49 帧的释放尖端伸出受击者外侧，蓝色细线也增加了局部重叠。远景细尾和次级碎片偏弱，命中主体的体积表现仍不足。这次改善只限于能量传递的时机和方向，不能宣布整体艺术品质通过。另已实际查看这份修复整段动作的 48 张原生隔帧；未观看实时视频。
 
 ## 功能验证与复现
 
-新增回归先在 main 复现提前释放，再验证修复。检查 Geometry Nodes 与 Shader Nodes 在接触时进入同一释放阶段，接触前尚未完成释放，第 47–51 帧释放轴与真实剑刃一致，角色轨迹未被改动。保存场景在新进程关闭自动执行、未加载插件时，阶段、方向和第 96 帧清场检查通过，正常退出。Ruff 0.14.1 全库 lint 与格式检查通过。高清原生像素复现及 CI 尚在执行，不计作已完成。
+新增回归先在 main 复现提前释放，再验证修复。检查 Geometry Nodes 与 Shader Nodes 在接触时进入同一释放阶段，接触前尚未完成释放，第 47–51 帧释放轴与真实剑刃一致，角色轨迹未被改动。保存场景在新进程关闭自动执行、未加载插件时，阶段、方向和第 96 帧清场检查通过，正常退出。Ruff 0.14.1 全库 lint 与格式检查通过。另一个无插件新进程按 51→47→49 倒序重渲染，三张 960×540 PNG 的全部 RGBA 像素一致，角色动画及第 96 帧清场检查通过，正常退出。完整动作的 48 张原生隔帧也已全部查看，渲染进程正常退出；CI 尚在执行，不计作已完成。
 
 ```sh
 LP_NUM_THREADS=2 MESA_SHADER_CACHE_DISABLE=true blender -b -t 2 --factory-startup --disable-autoexec --python-exit-code 1 --python tools/character_combat.py -- --frames 45 47 48 49 51 55 80
 ```
 
 加 `--dark` 或 `--far` 检查对应条件。修改前基线为 `7cce589`，修复功能源码为 `d1695f7`；每批源码摘要、实际帧号和图片摘要见[检查清单](images/release-contact-samples.json)。这项镜头安排不增加几何或材质，但不同阶段的求值与渲染成本仍会变化；没有以节点数量或单张耗时证明实时性能。
+
+
+## 整段原生隔帧
+
+从同一保存场景关闭自动执行、未加载插件，以原生动画渲染取第 1–95 帧的全部奇数帧。每张为 480×270、16 samples，相邻样本间隔 1/12 秒；48 张已逐页实际读取，不是由关键帧插值生成，也不是视频解码。第 96 帧清场另由高清原生检查确认。完整样本见：
+
+[1–11](images/release-contact-motion-01.png) · [13–23](images/release-contact-motion-02.png) · [25–35](images/release-contact-motion-03.png) · [37–47](images/release-contact-motion-04.png) · [49–59](images/release-contact-motion-05.png) · [61–71](images/release-contact-motion-06.png) · [73–83](images/release-contact-motion-07.png) · [85–95](images/release-contact-motion-08.png)。
+
+![从命中到余烬的实际原生抽帧](images/release-contact-motion-05.png)
+
+隔帧确认第 47 帧保留积蓄、第 49 帧释放接触、第 51 帧蓝色收尾，随后橙色压力与余烬消散；第 73–95 帧恢复干净。未发现延后释放造成的新大面拖尾，但前奏中中心仍小，外围碎片较抢眼，角色大部分时间保持待机，命中后段层次仍稀疏。这些问题继续保留；时序修复不能代替中心设计或动作蓄势，也不能凭隔帧宣布实时速度感通过。
+
+原生抽帧命令（先用上面的生成器得到场景）：
+
+```sh
+LP_NUM_THREADS=2 MESA_SHADER_CACHE_DISABLE=true blender -b work/character-combat/light-near/character.blend -t 2 --disable-autoexec --python-expr "import bpy; bpy.context.scene.render.resolution_percentage=50" -s 1 -e 95 -j 2 -o //samples/character-#### -F PNG -a
+```
