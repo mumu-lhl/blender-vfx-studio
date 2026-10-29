@@ -4,7 +4,7 @@ import math
 import random
 
 from blender_vfx_studio import composition, core
-from blender_vfx_studio.nodes import ACTIVE, PROGRESS, drive
+from blender_vfx_studio.nodes import ACTIVE, PROGRESS, drive, node
 from tools.charge_design import _Fields, _geometry, _mesh
 
 
@@ -54,7 +54,7 @@ def _diffuse(root, *, haze=False, grit=False):
             g.m(
                 "Veil Lifetime",
                 "MULTIPLY",
-                g.stage("Veil Ignites", p, 0, 0.12),
+                g.stage("Veil Ignites", p, 0, 0.035),
                 g.m(
                     "Veil Dissipates",
                     "SUBTRACT",
@@ -404,6 +404,15 @@ def create(context, quality="MEDIUM"):
     haze.name = "Dust • Ground Veil"
     haze["vfx_parameter_keys"] = "radius,width,expansion,noise_scale,fade"
     _diffuse(haze, haze=True)
+    # The low ground kick arrives before the slower rolling banks. Preserve
+    # the ordinary radius/expansion controls and the final footprint.
+    tree = haze.children[0].modifiers[0].node_group
+    travel = node(
+        tree, "ShaderNodeMath", "Fast Ground Contact Spread", -470, -100, operation="POWER"
+    )
+    travel.inputs[1].default_value = 0.5
+    tree.links.new(tree.nodes["Ring Controls"].outputs["Progress"], travel.inputs[0])
+    tree.links.new(travel.outputs[0], tree.nodes["Expansion Over Life"].inputs[1])
     grit = core.create_particle(context, quality)
     for key, value in dict(
         start=start,

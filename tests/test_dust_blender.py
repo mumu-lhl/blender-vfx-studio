@@ -96,6 +96,17 @@ class DustTests(unittest.TestCase):
         camera.location = (0, 0, 5)
         camera.data.type, camera.data.ortho_scale = "ORTHO", 4
         scene.camera = camera
+        # A ground contact must register before the rolling volume fills in.
+        early_opacity = []
+        for frame in (1, 2):
+            scene.frame_set(frame)
+            scene.render.filepath = str(ROOT / f"work/dust-contact-test-{frame}.png")
+            bpy.ops.render.render(write_still=True)
+            image = bpy.data.images.load(scene.render.filepath, check_existing=False)
+            early_opacity.append(sum(image.pixels[3::4]))
+            bpy.data.images.remove(image)
+        self.assertEqual(early_opacity[0], 0)
+        self.assertGreater(early_opacity[1], 1)
         scene.frame_set(21)
         opacities = []
         for amount in (0.0, 1.0):

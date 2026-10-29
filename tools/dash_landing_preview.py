@@ -93,7 +93,9 @@ def setup(*, light=True, far=False):
     scene.eevee.taa_render_samples = 32
     before = set(scene.objects)
     scene.frame_set(1)
-    echoes = dash.create(bpy.context, rig, 6, 24)
+    # Keep the last airborne memory until ground contact hands off to dust.
+    # The same editable Echo Tail is available to artists after capture.
+    echoes = dash.create(bpy.context, rig, 6, 24, tail=float(contact - 24), count=3)
     echoes.name = "Dash Landing • Echoes"
     scene.frame_set(contact)
     dust = create_dust(bpy.context)
@@ -122,6 +124,7 @@ def setup(*, light=True, far=False):
         "foot_trace": trace,
         "pose": "KayKit Running_A / Jump_Full_Short / idle",
         "sample_frames": list(echoes["vfx_capture_frames"]),
+        "echo_tail": float(contact - 24),
         "root_motion": "Native X travel -2.6 to 1.75; 0.75 m jump arc, frames 22–44",
     }
 
