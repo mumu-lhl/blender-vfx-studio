@@ -825,16 +825,16 @@ def core_shape(root):
     # Their planes cross in depth; they do not orbit as three regular rings.
     lens = ((-1, 0), (-0.65, 0.7), (0.65, 0.7), (1, 0), (0.65, -0.7), (-0.65, -0.7))
     petals = (
-        (0.0, -0.12, 0.07, 0.62, 0.19),
-        (1.75, 0.11, 0.06, 0.46, 0.07),
-        (0.12, 0.025, 0.015, 0.35, 0.10),
+        (0.0, -0.16, 0.07, 0.52, 0.30),
+        (1.75, 0.11, 0.06, 0.40, 0.07),
+        (0.12, 0.025, 0.015, 0.30, 0.21),
     )
     for lobe, (phase, bend, reach, rise, breadth) in enumerate(petals):
         base, steps, sides = len(vertices), 19, len(lens)
 
         def center(t):
             curl = bend * math.sin(math.pi * t) + reach * math.sin(t * math.tau) * t
-            return Vector((math.cos(phase) * curl, math.sin(phase) * curl, t * rise - 0.22))
+            return Vector((math.cos(phase) * curl, math.sin(phase) * curl, t * rise - 0.10))
 
         for j in range(steps):
             t = j / (steps - 1)
@@ -848,7 +848,7 @@ def core_shape(root):
             if lobe == 2:
                 # The short hot tongue sits above the main lobe's surface.
                 # Coincident bases otherwise bury its white face in the body.
-                point += normal * 0.065 * (1 - t)
+                point += normal * 0.12 * (1 - t)
             for k, (across, depth) in enumerate(lens):
                 offset = profile * (radial * breadth * across + normal * 0.055 * depth)
                 vertices.append(tuple(point + offset))
