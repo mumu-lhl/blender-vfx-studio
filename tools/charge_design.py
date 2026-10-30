@@ -569,6 +569,34 @@ def _surface(root, *, core=False, ground=False):
         rough = g.m("Unequal Plasma Edge", "MULTIPLY_ADD", flow.outputs["Fac"], 0.28)
         rough.node.inputs[2].default_value = -0.14
         r = g.m("Flow Bends The Focus Boundary", "ADD", radius.outputs["Value"], rough)
+        angle = g.m("Plasma Flow Angle", "ARCTAN2", y, x)
+        turn = g.m("Three Broad Plasma Curls", "MULTIPLY", angle, 3)
+        turn = g.m(
+            "Unequal Plasma Curl Phase",
+            "ADD",
+            turn,
+            g.m("Crossed Field Phase", "MULTIPLY", lane, 3.2),
+        )
+        turn = g.m(
+            "Curls Spiral Into The Focus",
+            "ADD",
+            turn,
+            g.m("Plasma Spiral Pitch", "MULTIPLY", radius.outputs["Value"], 3),
+        )
+        turn = g.m(
+            "Accelerating Plasma Turn",
+            "SUBTRACT",
+            turn,
+            g.m("Plasma Curl Clock", "MULTIPLY", g.m("Plasma Curl Time", "MULTIPLY", p, p), 12),
+        )
+        curl = g.m("Plasma Curl Reach", "MULTIPLY", g.m("Plasma Curl Wave", "SINE", turn), 0.18)
+        curl = g.m(
+            "Curls Leave A Coherent Heart",
+            "MULTIPLY",
+            curl,
+            g.stage("Only The Outer Field Curls", radius.outputs["Value"], 0.3, 0.9),
+        )
+        r = g.m("Curled Plasma Silhouette", "ADD", r, curl)
         mask = g.m("Soft Plasma Boundary", "SUBTRACT", 1, g.stage("Plasma Rim Feather", r, 0.72, 1))
         view = g.stage(
             "Edge On Plasma Fields Fade",
