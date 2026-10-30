@@ -47,6 +47,23 @@ class CharacterTimingTests(unittest.TestCase):
             socket = bpy.data.objects["Charge socket • world up"].evaluated_get(graph)
             aim = (socket.matrix_world.to_3x3() @ Vector((0, 0, 1))).normalized()
             self.assertGreater(aim.dot(direction), 0.999999)
+            slash = bpy.data.objects["Combat • Arc Slash"].children[0].evaluated_get(graph)
+            data = slash.data
+            phase = (frame - slash.parent["start"]) / slash.parent["duration"]
+            front = min(phase / slash.parent["attack"], 1)
+            edge = [
+                slash.matrix_world @ v.co
+                for v in data.vertices
+                if data.attributes["vfx_wake"].data[v.index].value < 0.01
+                and data.attributes["vfx_inner"].data[v.index].value < 0.001
+                and abs(data.attributes["vfx_arc"].data[v.index].value - front) < 0.04
+            ]
+            tip = Vector(sample["tip"])
+            self.assertLess(
+                min((p - tip).length for p in edge),
+                0.07 if front < 1 else 1e-5,
+                f"Slash front must meet the real blade at frame {frame}",
+            )
         scene["timing_contact"] = hit
         scene["timing_peak"] = peak
         scene["timing_weapon"] = fixture["caster"]["weapon"].name
