@@ -584,7 +584,12 @@ def _surface(root, *, core=False, ground=False):
     if core:
         # Paint energy across each lobe, rather than lighting a hard shell by
         # its facing normal. The moving front modulates a coherent hot center.
-        side = g.m("Flare Distance From Midline", "ABSOLUTE", attribute("charge_filament_side"))
+        side = g.m(
+            "Focus Distance From Its Face",
+            "SUBTRACT",
+            1,
+            g.m("Two Sided Focus Facing", "ABSOLUTE", facing.outputs["Value"]),
+        )
         center = g.m("Flare Heat Across Its Width", "SUBTRACT", 1, side)
         center = g.m("Broad Connected Heat", "SQRT", center)
         height_heat = g.m(
@@ -758,47 +763,29 @@ def core_shape(root):
                 next_k = (k // 3) * 3 + (k + 1) % 3 if primary else (k + 1) % sides
                 a, b = base + j * sides + k, base + j * sides + next_k
                 faces.append((a, b, b + sides, a + sides))
-    # Two broad, unequal flame lobes and a short hot tongue form one focus.
-    # Their planes cross in depth; they do not orbit as three regular rings.
-    lens = ((-1, 0), (-0.65, 0.7), (0.65, 0.7), (1, 0), (0.65, -0.7), (-0.65, -0.7))
-    petals = (
-        (0.0, -0.16, 0.07, 0.52, 0.30),
-        (1.75, 0.11, 0.06, 0.40, 0.07),
-        (0.12, 0.025, 0.015, 0.30, 0.21),
-    )
-    for lobe, (phase, bend, reach, rise, breadth) in enumerate(petals):
-        base, steps, sides = len(vertices), 19, len(lens)
-
-        def center(t):
-            curl = bend * math.sin(math.pi * t) + reach * math.sin(t * math.tau) * t
-            return Vector((math.cos(phase) * curl, math.sin(phase) * curl, t * rise - 0.10))
-
-        for j in range(steps):
-            t = j / (steps - 1)
-            profile = (0.55 + 0.45 * math.sin(math.pi * t)) * (1 - t) ** 0.75
-            profile *= 1 + 0.22 * math.sin(t * 15 + lobe) * math.sin(math.pi * t)
-            angle = phase + 0.45 * math.sin(t * math.pi)
-            radial = Vector((math.cos(angle), math.sin(angle), 0))
-            tangent = (center(min(t + 0.001, 1)) - center(max(t - 0.001, 0))).normalized()
-            normal = tangent.cross(radial).normalized()
-            point = center(t)
-            if lobe == 2:
-                # The short hot tongue sits above the main lobe's surface.
-                # Coincident bases otherwise bury its white face in the body.
-                point += normal * 0.12 * (1 - t)
-            for k, (across, depth) in enumerate(lens):
-                offset = profile * (radial * breadth * across + normal * 0.055 * depth)
-                vertices.append(tuple(point + offset))
-                cross_sections.append((0, 0, 0))
-                a = k * math.tau / sides
-                for name, value in zip(
-                    core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0, lobe * 0.25, across)
-                ):
-                    core_attrs[name].append(value)
-        for j in range(steps - 1):
-            for k in range(sides):
-                a, b = base + j * sides + k, base + j * sides + (k + 1) % sides
-                faces.append((a, b, b + sides, a + sides))
+    # A compact, irregular mass stays readable when the weapon turns. Unequal
+    # shoulders and a pointed cap avoid a perfect orb or intersecting sheets.
+    base, rings, sides = len(vertices), 15, 16
+    for j in range(rings):
+        latitude = -math.pi / 2 + math.pi * j / (rings - 1)
+        u = j / (rings - 1)
+        for k in range(sides):
+            a = k * math.tau / sides
+            shoulder = 1 + 0.16 * math.sin(3 * a + 0.7) * math.cos(latitude)
+            tuft = 0.12 * max(math.cos(a - 0.4), 0) ** 8
+            tuft *= max(math.cos(latitude - 0.45), 0) ** 8
+            radius = math.cos(latitude) * (0.22 * shoulder + tuft)
+            z = 0.25 * math.sin(latitude)
+            z += 0.05 * math.cos(latitude) ** 2 * math.sin(2 * a + 0.3)
+            point = (radius * math.cos(a), radius * math.sin(a), z)
+            vertices.append(point)
+            cross_sections.append((0, 0, 0))
+            for name, value in zip(core_attrs, (u, math.sin(a), math.cos(a), 1.0, 6.0, 0.5, 0.0)):
+                core_attrs[name].append(value)
+    for j in range(rings - 1):
+        for k in range(sides):
+            a, b = base + j * sides + k, base + j * sides + (k + 1) % sides
+            faces.append((a, b, b + sides, a + sides))
     _mesh(layer, vertices, faces, core_attrs)
     cross = layer.data.attributes.new("charge_cross", "FLOAT_VECTOR", "POINT")
     for slot, value in zip(cross.data, cross_sections):
