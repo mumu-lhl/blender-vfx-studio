@@ -585,7 +585,7 @@ def _surface(root, *, core=False, ground=False):
         )
         turn = g.m(
             "Accelerating Plasma Turn",
-            "SUBTRACT",
+            "ADD",
             turn,
             g.m("Plasma Curl Clock", "MULTIPLY", g.m("Plasma Curl Time", "MULTIPLY", p, p), 12),
         )
@@ -597,7 +597,9 @@ def _surface(root, *, core=False, ground=False):
             g.stage("Only The Outer Field Curls", radius.outputs["Value"], 0.3, 0.9),
         )
         r = g.m("Curled Plasma Silhouette", "ADD", r, curl)
-        mask = g.m("Soft Plasma Boundary", "SUBTRACT", 1, g.stage("Plasma Rim Feather", r, 0.72, 1))
+        mask = g.m(
+            "Soft Plasma Boundary", "SUBTRACT", 1, g.stage("Plasma Rim Feather", r, 0.82, 0.98)
+        )
         view = g.stage(
             "Edge On Plasma Fields Fade",
             g.m("Plasma Field Facing", "ABSOLUTE", facing.outputs["Value"]),
@@ -633,8 +635,26 @@ def _surface(root, *, core=False, ground=False):
             g.m("Plasma Heat Transition", "ADD", white_threshold, 0.2),
             white.node.inputs["From Max"],
         )
+        spent = g.m(
+            "Heat Hands Over To The Hit",
+            "MULTIPLY",
+            g.stage("Plasma Heat Release", p, 0.88, 0.96),
+            g.value("Plasma Fade", prop="fade"),
+        )
+        white = g.m(
+            "Release Spends The Hot Heart",
+            "MULTIPLY",
+            white,
+            g.m("Remaining Plasma Heat", "SUBTRACT", 1, spent),
+        )
         tone = g.m("Plasma Body Values", "MULTIPLY_ADD", heat, 0.7)
         g.link(g.value("Nucleus Blue Depth", 0.27), tone.node.inputs[2])
+        flow_band = g.stage(
+            "Broad Inward Plasma Bands", g.m("Plasma Band Wave", "SINE", turn), -0.2, 0.4
+        )
+        flow_band = g.m("Plasma Band Contrast", "MULTIPLY_ADD", flow_band, 0.55)
+        flow_band.node.inputs[2].default_value = 0.45
+        tone = g.m("Flow Values Around The Heart", "MULTIPLY", tone, flow_band)
         painted = g.n("ShaderNodeMixRGB", "Plasma Body And Hot Heart")
         g.link(white, painted.inputs[0])
         g.link(g.v("Editable Plasma Body", "SCALE", color.outputs[0], tone), painted.inputs[1])
