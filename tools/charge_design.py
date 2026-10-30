@@ -651,9 +651,7 @@ def _surface(root, *, core=False, ground=False):
         # its facing normal. The moving front modulates a coherent hot center.
         side = g.m("Flare Distance From Midline", "ABSOLUTE", attribute("charge_filament_side"))
         center = g.m("Flare Heat Across Its Width", "SUBTRACT", 1, side)
-        height_heat = g.m(
-            "Flare Heat Along Its Length", "SINE", g.m("Flare Length Phase", "MULTIPLY", u, math.pi)
-        )
+        height_heat = g.m("Flare Shared Hot Base", "SUBTRACT", 1, u)
         heat = g.m("Flare Painted Heat", "MULTIPLY", center, height_heat)
         travel = g.m("Flare Moving Heat", "MULTIPLY_ADD", nucleus_front, 0.25)
         travel.node.inputs[2].default_value = 0.75
@@ -668,7 +666,9 @@ def _surface(root, *, core=False, ground=False):
         tone = g.m("Flare Body Values", "MULTIPLY_ADD", heat, 0.65)
         g.link(g.tree.nodes["Nucleus Blue Depth"].outputs[0], tone.node.inputs[2])
         painted = g.n("ShaderNodeMixRGB", "Flare Body To Hot Core")
-        g.link(white, painted.inputs[0])
+        hot_weight = g.m("Main And Core Heat Hierarchy", "MULTIPLY_ADD", lane, 1.1)
+        hot_weight.node.inputs[2].default_value = 0.45
+        g.link(g.m("Short Core Carries White", "MULTIPLY", white, hot_weight), painted.inputs[0])
         g.link(g.v("Flare Editable Body", "SCALE", color.outputs[0], tone), painted.inputs[1])
         painted.inputs[2].default_value = (0.85, 0.98, 1, 1)
         edge = g.stage("Thin Flare Boundary", side, 0.83, 0.99)
@@ -820,20 +820,20 @@ def core_shape(root):
     # Their planes cross in depth; they do not orbit as three regular rings.
     lens = ((-1, 0), (-0.65, 0.7), (0.65, 0.7), (1, 0), (0.65, -0.7), (-0.65, -0.7))
     petals = (
-        (0.0, -0.16, 0.10, 0.78, 0.22),
-        (1.75, 0.14, 0.08, 0.62, 0.18),
-        (0.8, 0.035, 0.025, 0.44, 0.135),
+        (0.0, -0.12, 0.07, 0.62, 0.19),
+        (1.75, 0.11, 0.06, 0.46, 0.07),
+        (0.12, 0.025, 0.015, 0.35, 0.10),
     )
     for lobe, (phase, bend, reach, rise, breadth) in enumerate(petals):
         base, steps, sides = len(vertices), 19, len(lens)
 
         def center(t):
             curl = bend * math.sin(math.pi * t) + reach * math.sin(t * math.tau) * t
-            return Vector((math.cos(phase) * curl, math.sin(phase) * curl, (t - 0.43) * rise))
+            return Vector((math.cos(phase) * curl, math.sin(phase) * curl, t * rise - 0.22))
 
         for j in range(steps):
             t = j / (steps - 1)
-            profile = max(math.sin(math.pi * t), 0) ** 0.8
+            profile = (0.55 + 0.45 * math.sin(math.pi * t)) * (1 - t) ** 0.75
             profile *= 1 + 0.22 * math.sin(t * 15 + lobe) * math.sin(math.pi * t)
             angle = phase + 0.45 * math.sin(t * math.pi)
             radial = Vector((math.cos(angle), math.sin(angle), 0))
@@ -1109,9 +1109,7 @@ def core_shape(root):
         ),
     )
     position = g.v("Stored Energy Volume", "SCALE", position, growth)
-    # The stored volume flattens while the intake paths keep moving. Expanding
-    # its cross section compensates for the lost height, then discharge turns
-    # that compact shape into a needle without changing the outer strands.
+    # Stored flame mass tightens inward instead of spreading into a flat fan.
     compression = g.m(
         "Bound Nucleus Compression",
         "MINIMUM",
@@ -1129,39 +1127,30 @@ def core_shape(root):
             g.stage("Nucleus Unloads Compression", p, 0.84, 0.88),
         ),
     )
-    compressed_height = g.m(
-        "Stored Height Loss",
+    compact = g.m(
+        "Stored Flame Tightens Inward",
         "SUBTRACT",
         1,
-        g.m("Compression Tracks Stored Energy", "MULTIPLY", stored_tension, compression),
-    )
-    compressed_width = g.m(
-        "Stored Volume Width", "SQRT", g.m("Keep Stored Volume", "DIVIDE", 1, compressed_height)
+        g.m(
+            "Stored Flame Contraction",
+            "MULTIPLY",
+            g.m("Compression Tracks Stored Energy", "MULTIPLY", stored_tension, compression),
+            0.7,
+        ),
     )
     nucleus = g.attr("charge_inner")
-    sideways = g.m(
-        "Nucleus Expands Sideways",
+    compact = g.m(
+        "Only The Focus Condenses",
         "ADD",
         1,
         g.m(
-            "Only Nucleus Width Expands",
+            "Focus Contraction",
             "MULTIPLY",
             nucleus,
-            g.m("Extra Stored Width", "SUBTRACT", compressed_width, 1),
+            g.m("Contraction From Rest", "SUBTRACT", compact, 1),
         ),
     )
-    vertical = g.m(
-        "Nucleus Compacts Vertically",
-        "ADD",
-        1,
-        g.m(
-            "Only Nucleus Height Compacts",
-            "MULTIPLY",
-            nucleus,
-            g.m("Lost Stored Height", "SUBTRACT", compressed_height, 1),
-        ),
-    )
-    compression_axes = g.xyz("Nucleus Compression Proportions", sideways, sideways, vertical)
+    compression_axes = g.xyz("Nucleus Compression Proportions", compact, compact, compact)
     position = g.v(
         "Incoming Energy Pressurizes The Nucleus", "MULTIPLY", position, compression_axes
     )
@@ -1179,7 +1168,7 @@ def core_shape(root):
         g.m("Release Width Pinch", "MULTIPLY", pulse, g.value("Release Pinch", 0.55)),
     )
     stretch = g.m(
-        "Nucleus Height During Discharge", "MULTIPLY_ADD", pulse, g.value("Release Stretch", 1.4)
+        "Nucleus Height During Discharge", "MULTIPLY_ADD", pulse, g.value("Release Stretch", 0.55)
     )
     stretch.node.inputs[2].default_value = 1
     discharge_axes = g.xyz("Nucleus Discharge Proportions", pinch, pinch, stretch)

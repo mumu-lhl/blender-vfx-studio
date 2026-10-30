@@ -294,12 +294,11 @@ class StarterTests(unittest.TestCase):
         control.default_value = 0
         relaxed, unchanged, _ = shape(37)
         self.assertEqual(outside, unchanged)
-        self.assertLess(compressed[2], relaxed[2] * 0.6)
-        self.assertGreater(compressed[0], relaxed[0] * 1.3)
+        self.assertTrue(all(c < r * 0.8 for c, r in zip(compressed, relaxed)))
         volume_ratio = (compressed[0] * compressed[1] * compressed[2]) / (
             relaxed[0] * relaxed[1] * relaxed[2]
         )
-        self.assertAlmostEqual(volume_ratio, 1, places=4)
+        self.assertLess(volume_ratio, 0.5)
         self.assertEqual(early, shape(13))
         self.assertEqual(discharged, shape(45))
         control.default_value = 0.6
