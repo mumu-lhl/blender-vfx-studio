@@ -540,5 +540,15 @@
     "charge-plasma-motion-04.png": "224ac149d824788fae70c81249dbe68a61a1758800aef0105cdb58cdf8fc4b95",
     "charge-plasma-motion-05.png": "134b16ae13a07bcf0eb4c54bfdb22cefd2d926e52e2f98178b5ed00ebf6140c6",
     "charge-plasma-reverse-43.png": "eccc769eb34d8887818f2111bf804106ace0ec2641c0893e2916b9b04a71dc22"
+  },
+  "ci_artifact": {
+    "run_id": 41080052069,
+    "artifact_id": 12989689658,
+    "artifact_sha256": "b694c7a1428776448be4e6b91d3fb48a686c0164f9f65cd446c58cedb1414208",
+    "complete_assets": 18,
+    "addon_python_files_match_source": 32,
+    "energy_asset_sha256": "bd47b6646821727fb68a770b032fb2d48a13665d424103b93ff5d087913f4b47",
+    "native_checked": true,
+    "embedded_preview_viewed": true
   }
 }
