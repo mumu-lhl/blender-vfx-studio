@@ -8,6 +8,14 @@
 
 艺术表现仍是首要目标。允许有价值的几何、材质和粒子增加开销，用质量选择和实测成本说明取舍，不设统一低成本或顶点上限。复杂骨架、跨平台 GUI 扩展和新的模拟类型暂缓。
 
+## 当前艺术判断
+
+接触时序已由 [#188](https://github.com/mumu-lhl/blender-vfx-studio/pull/188) 合入；17 张高清、48 张整段原生隔帧及无插件三阶段像素复现已检查，功能源码 CI 十二项成功。分叉火焰在完整施法中的 54 张视频隔帧也已补查。它们不代表整库已达到成熟游戏品质，未观看实时视频。
+
+**Energy Charge 的主体仍未达到目标。** [#186](https://github.com/mumu-lhl/blender-vfx-studio/pull/186) 的压力核、流动曲面与密度方案没有形成清楚的聚能主体，密度原型还会在 Cycles 检查中崩溃，已关闭而不合入。源码、失败实图和复现见[独立归档](https://github.com/mumu-lhl/blender-vfx-studio/blob/c57df84977dd1d02ced5e67bac1849fd18ec9cb8/docs/experiments/CHARGE_DENSITY.md)，这些失败不属于 main 的可用功能。
+
+[#190](https://github.com/mumu-lhl/blender-vfx-studio/pull/190) 的预备动作与剑柄交接完成高清明暗／远景、22 张前奏隔帧及无插件复现，但中心可读性没有明确优于主线，继续保持草稿。下一步先重新确定主能量团、少量汇聚流和释放形态，在完整角色构图中筛选有明确收益的主形；不再围绕同一硬壳微调，也不为未证明的画质收益扩展体积框架。
+
 ## 已有功能与边界
 
 | 阶段 | 已能使用 | 当前边界 |
