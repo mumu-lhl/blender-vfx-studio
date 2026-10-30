@@ -704,22 +704,12 @@ def _surface(root, *, core=False, ground=False):
         support = g.m("Support Is Visible", "GREATER_THAN", support, 0)
     alpha = g.m("Supporting Layer Opacity", "MULTIPLY", alpha, support)
     if core:
-        # A permanently filled dark shell reads as armor around the weapon.
-        # Keep solid, moving plasma sections with real gaps between fronts;
-        # this is a cutout rather than uniformly transparent ghost geometry.
-        visible_front = g.m("Solid Traveling Knot Front", "GREATER_THAN", nucleus_front, 0.24)
-        coverage = g.m(
-            "Keep The Existing Intake Surfaces",
-            "ADD",
-            1,
-            g.m(
-                "Only The Knot Opens Between Fronts",
-                "MULTIPLY",
-                heart,
-                g.m("Gaps Between Stored Fronts", "SUBTRACT", visible_front, 1),
-            ),
+        alpha = g.m(
+            "No Opaque Surface Around Stored Density",
+            "MULTIPLY",
+            alpha,
+            g.m("Only Intake And Curled Surfaces", "SUBTRACT", 1, heart),
         )
-        alpha = g.m("Open Coiling Plasma Surface", "MULTIPLY", alpha, coverage)
     emission = g.n("ShaderNodeEmission", "Native Energy Surface")
     g.link(surface_color, emission.inputs["Color"])
     radiance = g.value("Emission", prop="strength")
@@ -1406,6 +1396,9 @@ def core_shape(root):
     g.link(invisible, hide.inputs["Selection"])
     _finish(g, _support_weight(g, hide.outputs[0]))
     _surface(root, core=True)
+    from tools.charge_volume import add_density_core
+
+    add_density_core(root)
     root["vfx_parameter_keys"] = "radius,expansion,opacity,strength,dissolve,noise_scale,fade"
 
 
