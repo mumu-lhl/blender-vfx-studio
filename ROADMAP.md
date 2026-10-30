@@ -14,9 +14,9 @@
 
 **Energy Charge 的主体仍未达到目标。** [#186](https://github.com/mumu-lhl/blender-vfx-studio/pull/186) 的压力核、流动曲面与密度方案没有形成清楚的聚能主体，密度原型还会在 Cycles 检查中崩溃，已关闭而不合入。源码、失败实图和复现见[独立归档](https://github.com/mumu-lhl/blender-vfx-studio/blob/c57df84977dd1d02ced5e67bac1849fd18ec9cb8/docs/experiments/CHARGE_DENSITY.md)，这些失败不属于 main 的可用功能。
 
-[#190](https://github.com/mumu-lhl/blender-vfx-studio/pull/190) 的预备动作与剑柄交接完成高清明暗／远景、22 张前奏隔帧及无插件复现，但中心可读性没有明确优于主线，继续保持草稿。下一步先重新确定主能量团、少量汇聚流和释放形态，在完整角色构图中筛选有明确收益的主形；不再围绕同一硬壳微调，也不为未证明的画质收益扩展体积框架。
+[#190](https://github.com/mumu-lhl/blender-vfx-studio/pull/190) 的预备动作与剑柄交接完成高清明暗／远景、22 张前奏隔帧及无插件复现，但中心可读性没有明确优于主线，继续保持草稿。新能量场已改善手边焦点，但原生下劈开头的复查仍存在回落再后摆、身体压重不足的问题；[新实图与原生轨迹检查](https://github.com/mumu-lhl/blender-vfx-studio/blob/45b05e1/docs/experiments/WINDUP_FIELD.md)继续保持草稿。后续以完整动作的连续性判断取舍，不因姿态变多就宣布力量感通过。
 
-[#193](https://github.com/mumu-lhl/blender-vfx-studio/pull/193) 修复角色刀光在中间转向帧偏离剑刃平面的问题。16 张高清对照、48 张整段原生隔帧与三个阶段无插件高清像素复现已检查；头部的大蓝片错位消除，多层重叠仍存在。功能源码 `639edfc` 的 CI 已完成全部 12 项并成功，详见[空间对齐](docs/SLASH_PLANE_REVIEW.md)。充能的火瓣和实体候选均已拒绝并[独立归档](https://github.com/mumu-lhl/blender-vfx-studio/blob/9474a9b/docs/experiments/CHARGE_FLARE.md)；[#194](https://github.com/mumu-lhl/blender-vfx-studio/pull/194) 的程序化能量场已完成 16 张新版高清图、28 张充能周期原生隔帧、22 项入门库、无插件高清复现与完整资产预览检查；中心清晰度改善，前段和背侧遮挡仍有限制。CI 已完成全部 12 项并成功，另已读完实际 CI 视频的 48 张隔帧，待合入，见[能量场检查](docs/CHARGE_PLASMA_REVIEW.md)。
+[#193](https://github.com/mumu-lhl/blender-vfx-studio/pull/193) 修复角色刀光在中间转向帧偏离剑刃平面的问题。16 张高清对照、48 张整段原生隔帧与三个阶段无插件高清像素复现已检查；头部的大蓝片错位消除，多层重叠仍存在。功能源码 `639edfc` 的 CI 已完成全部 12 项并成功，详见[空间对齐](docs/SLASH_PLANE_REVIEW.md)。充能的火瓣和实体候选均已拒绝并[独立归档](https://github.com/mumu-lhl/blender-vfx-studio/blob/9474a9b/docs/experiments/CHARGE_FLARE.md)；[#194](https://github.com/mumu-lhl/blender-vfx-studio/pull/194) 的程序化能量场已完成 16 张新版高清图、28 张充能周期原生隔帧、22 项入门库、无插件高清复现与完整资产预览检查；中心清晰度改善，前段和背侧遮挡仍有限制。CI 已完成全部 12 项并成功，另已读完实际 CI 视频的 48 张隔帧，已合入，见[能量场检查](docs/CHARGE_PLASMA_REVIEW.md)。
 
 ## 已有功能与边界
 
@@ -88,8 +88,10 @@ PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 4070072
 ## 下一步
 
 1. 当前重点转向实际画面。[#174](https://github.com/mumu-lhl/blender-vfx-studio/issues/174) 修正刀光深度收尖，并按真实挥剑轨迹连接充能与释放；同帧角色图、连续隔帧、明暗／远景与原生复现已检查，方向衔接和遮挡改善，反向命中仍被角色遮住。实测成本和艺术边界见 [衔接检查](docs/COMBAT_HANDOFF_REVIEW.md)。
-2. [#176](https://github.com/mumu-lhl/blender-vfx-studio/issues/176) 的持续火焰已完成角色多阶段、两组各 11 张持续燃烧抽帧、明暗／远景与无插件高清复现。轮廓与退场改善，局部鼓包、色块和细节仍弱；见 [流动检查](docs/FIRE_FLOW_REVIEW.md)。命中主体、接触闪电和冲刺落地的首轮改动已合入；施法空间交接及错相分叉火舌已合入，并补查完整施法隔帧。下一优先项是充能中心与动作蓄势的主次关系，再依据完整镜头处理火焰底部团块和仍弱的远景层次。暂缓继续整理参数。
+2. [#176](https://github.com/mumu-lhl/blender-vfx-studio/issues/176) 的持续火焰已完成角色多阶段、两组各 11 张持续燃烧抽帧、明暗／远景与无插件高清复现。轮廓与退场改善，局部鼓包、色块和细节仍弱；见 [流动检查](docs/FIRE_FLOW_REVIEW.md)。命中主体、接触闪电和冲刺落地的首轮改动已合入；施法空间交接及错相分叉火舌已合入，并补查完整施法隔帧。充能焦点的首轮能量场改动已合入；下一优先项是早段中心与进流的主次、独立释放的交叉白带及动作蓄势的连续性，再依据完整镜头处理火焰底部团块和仍弱的远景层次。暂缓继续整理参数。
 3. 保留质量选择，在可用设备测量有／无特效成本；需要更高复杂度时以画面收益判断，不用低顶点数代替性能证据。
 4. 处理发布所需的实际问题并检查安装附件；完成必要视觉与使用验证后再准备首次正式分发，不急于新增仅换色的第九套。
 
 历史提交、发布和详细检查见 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases)、GitHub Issues 与上述记录；使用和结构见 [README](README.md)、[DESIGN](DESIGN.md) 与 [CONTEXT](CONTEXT.md)。
+
+当前 main 的开发包构建 [41091740203](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41091740203) 正在运行；新能量场功能源码的 PR 构建已完成全部 12 项并成功，18 个示例的实际附件已下载并原生核对。本轮没有发布正式版本。
