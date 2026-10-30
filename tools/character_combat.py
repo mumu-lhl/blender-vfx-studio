@@ -24,6 +24,7 @@ def source_hashes():
             "character_combat.py",
             "build_examples.py",
             "charge_design.py",
+            "charge_volume.py",
         )
     ]
     paths += sorted((ROOT / "assets/character-review/kaykit").iterdir())

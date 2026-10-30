@@ -40,7 +40,12 @@ def main():
     if not bpy.app.background or "--factory-startup" not in sys.argv or bpy.data.filepath:
         raise RuntimeError("Use a fresh background process with --factory-startup and no project")
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    sources = ("tools/build_examples.py", "tools/charge_design.py", "tools/charge_preview.py")
+    sources = (
+        "tools/build_examples.py",
+        "tools/charge_design.py",
+        "tools/charge_volume.py",
+        "tools/charge_preview.py",
+    )
     source_hashes = {
         name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in sources
     }

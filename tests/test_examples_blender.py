@@ -249,6 +249,42 @@ class StarterTests(unittest.TestCase):
         self.assertLess(sum(abs(a - b) for a, b in zip(no_white, white_off)), 0.01)
         self.assertGreater(sum(abs(a - b) for a, b in zip(before, no_white)), 1)
 
+    def test_density_material_controls_follow_edits_and_duplicate_independently(self):
+        charge = create_effect("energy-charge")
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+        layer = member.children[0]
+        surface = layer.data.materials[0].node_tree
+        density = layer.data.materials[1].node_tree
+        bpy.context.scene.frame_set(37)
+        self.assertTrue(all(c.driver.is_valid for c in density.animation_data.drivers))
+        self.assertAlmostEqual(
+            density.nodes["Stored White Threshold"].outputs[0].default_value, 0.35
+        )
+        self.assertAlmostEqual(density.nodes["Stored Light Contrast"].outputs[0].default_value, 1.4)
+        self.assertAlmostEqual(density.nodes["Stored Light Bias"].outputs[0].default_value, 0.25)
+        surface.nodes["Nucleus White Threshold"].outputs[0].default_value = 0.7
+        bpy.context.scene.frame_set(38)
+        self.assertAlmostEqual(
+            density.nodes["Stored White Threshold"].outputs[0].default_value, 0.7
+        )
+        duplicate = core.duplicate(bpy.context, charge)
+        copied = next(
+            r for r in composition.members(duplicate) if r["vfx_module"] == "shader.shield"
+        )
+        surface.nodes["Nucleus White Threshold"].outputs[0].default_value = 0.12
+        bpy.context.scene.frame_set(39)
+        self.assertAlmostEqual(
+            density.nodes["Stored White Threshold"].outputs[0].default_value, 0.12
+        )
+        self.assertAlmostEqual(
+            copied.children[0]
+            .data.materials[1]
+            .node_tree.nodes["Stored White Threshold"]
+            .outputs[0]
+            .default_value,
+            0.7,
+        )
+
     def test_auxiliary_intake_width_preserves_main_paths_and_survives_assets(self):
         charge = create_effect("energy-charge")
         core_member = next(

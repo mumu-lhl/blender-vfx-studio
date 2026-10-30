@@ -43,6 +43,7 @@ def hashes():
             "native_shape_preview.py",
             "build_examples.py",
             "charge_design.py",
+            "charge_volume.py",
             "character_scene.py",
             "lightning_asset.py",
         )

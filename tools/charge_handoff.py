@@ -30,6 +30,7 @@ def main():
         for name in (
             "build_examples.py",
             "charge_design.py",
+            "charge_volume.py",
             "combat_preview.py",
             "charge_handoff.py",
         )
