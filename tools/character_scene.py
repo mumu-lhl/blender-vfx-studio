@@ -188,7 +188,7 @@ def add_effects(fixture):
     midpoint = bpy.data.objects.new("Charge socket • blade midpoint", None)
     scene.collection.objects.link(midpoint)
     midpoint.parent = weapon
-    midpoint.location = tip * 0.5
+    midpoint.location = tip * 0.65
     socket = bpy.data.objects.new("Charge socket • world up", None)
     scene.collection.objects.link(socket)
     follow = socket.constraints.new("COPY_LOCATION")

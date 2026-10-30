@@ -488,24 +488,6 @@ def _surface(root, *, core=False, ground=False):
         leading_color.inputs[2].default_value = (0.8, 0.98, 1, 1)
         g.link(leading_color.outputs[0], center_mix.inputs[2])
         surface_color = center_mix.outputs[0]
-        kernel_color = g.n("ShaderNodeMixRGB", "Concentrated Inner Light")
-        stored = g.stage("Stored Energy Concentration", p, 0.30, 0.84)
-        brightness = g.m("Inner Compression Brightness", "MULTIPLY_ADD", stored, 0.77)
-        brightness.node.inputs[2].default_value = 0.08
-        g.link(
-            g.m(
-                "Spend Inner White During Release",
-                "MULTIPLY",
-                brightness,
-                g.m(
-                    "Nucleus Energy Remaining",
-                    "SUBTRACT",
-                    1,
-                    g.stage("Nucleus Hands Off Energy", p, 0.88, 0.96),
-                ),
-            ),
-            kernel_color.inputs[0],
-        )
         # A traveling light front follows each curved sheet, rather than painting
         # a fixed white patch on its facing normals.
         nucleus_phase = g.m(
@@ -539,53 +521,6 @@ def _surface(root, *, core=False, ground=False):
                 g.stage("Stored Front Passes", nucleus_phase, 0.55, 0.78),
             ),
         )
-        kernel_face = g.m(
-            "Nucleus White Face",
-            "GREATER_THAN",
-            g.m("Nucleus Facing Magnitude", "ABSOLUTE", facing.outputs["Value"]),
-            g.value("Nucleus White Threshold", 0.35),
-        )
-        vein = g.m(
-            "Narrow Vein Across Curled Sheets",
-            "SUBTRACT",
-            1,
-            g.stage(
-                "Stored Vein Edges",
-                g.m("Distance From Stored Vein", "ABSOLUTE", attribute("charge_filament_side")),
-                0.15,
-                0.5,
-            ),
-        )
-        flow = g.m("Connected Vein With A Moving Front", "MULTIPLY_ADD", nucleus_front, 0.75)
-        flow.node.inputs[2].default_value = 0.25
-        kernel_face = g.m(
-            "Nucleus White Patch",
-            "MULTIPLY",
-            kernel_face,
-            g.m("Stored Vein And Front", "MULTIPLY", vein, flow),
-        )
-        white_amount = kernel_color.inputs[0].links[0].from_socket
-        g.link(
-            g.m("Restricted Nucleus White", "MULTIPLY", white_amount, kernel_face),
-            kernel_color.inputs[0],
-        )
-        kernel_body = g.m(
-            "Nucleus Blue Faces",
-            "MULTIPLY_ADD",
-            g.m("Nucleus Midtone Face", "GREATER_THAN", facing.outputs["Value"], 0.08),
-            0.5,
-        )
-        g.link(g.value("Nucleus Blue Depth", 0.27), kernel_body.node.inputs[2])
-        g.link(
-            g.v("Nucleus Colored Pressure Body", "SCALE", color.outputs[0], kernel_body),
-            kernel_color.inputs[1],
-        )
-        kernel_color.inputs[2].default_value = (0.9, 0.98, 1, 1)
-        core_mix = g.n("ShaderNodeMixRGB", "Light Beneath Broken Shell")
-        g.link(inner, core_mix.inputs[0])
-        g.link(surface_color, core_mix.inputs[1])
-        g.link(kernel_color.outputs[0], core_mix.inputs[2])
-        surface_color = core_mix.outputs[0]
         edge = g.m(
             "Core Silhouette Boundary",
             "SUBTRACT",
@@ -651,6 +586,7 @@ def _surface(root, *, core=False, ground=False):
         # its facing normal. The moving front modulates a coherent hot center.
         side = g.m("Flare Distance From Midline", "ABSOLUTE", attribute("charge_filament_side"))
         center = g.m("Flare Heat Across Its Width", "SUBTRACT", 1, side)
+        center = g.m("Broad Connected Heat", "SQRT", center)
         height_heat = g.m(
             "Flare Shared Hot Base",
             "SUBTRACT",
@@ -661,18 +597,19 @@ def _surface(root, *, core=False, ground=False):
         travel = g.m("Flare Moving Heat", "MULTIPLY_ADD", nucleus_front, 0.25)
         travel.node.inputs[2].default_value = 0.75
         heat = g.m("Heat Flows Through The Mass", "MULTIPLY", heat, travel)
-        white_threshold = g.tree.nodes["Nucleus White Threshold"].outputs[0]
-        white_threshold.default_value = 0.35
+        white_threshold = g.value("Nucleus White Threshold", 0.35)
         white = g.stage("Flare Hot Center", heat, 0.35, 0.55)
         g.link(white_threshold, white.node.inputs["From Min"])
         g.link(
             g.m("Flare Hot Transition", "ADD", white_threshold, 0.2), white.node.inputs["From Max"]
         )
         tone = g.m("Flare Body Values", "MULTIPLY_ADD", heat, 0.65)
-        g.link(g.tree.nodes["Nucleus Blue Depth"].outputs[0], tone.node.inputs[2])
+        g.link(g.value("Nucleus Blue Depth", 0.27), tone.node.inputs[2])
         painted = g.n("ShaderNodeMixRGB", "Flare Body To Hot Core")
         hot_weight = g.m("Main And Core Heat Hierarchy", "MULTIPLY_ADD", lane, 1.1)
-        hot_weight.node.inputs[2].default_value = 0.65
+        hot_weight.node.inputs[2].default_value = 0.9
+        stored = g.stage("Heat Accumulates In The Focus", p, 0.18, 0.78)
+        white = g.m("Stored Energy Expands The Hot Face", "MULTIPLY", white, stored)
         g.link(g.m("Short Core Carries White", "MULTIPLY", white, hot_weight), painted.inputs[0])
         g.link(g.v("Flare Editable Body", "SCALE", color.outputs[0], tone), painted.inputs[1])
         painted.inputs[2].default_value = (0.85, 0.98, 1, 1)
@@ -944,7 +881,7 @@ def core_shape(root):
         "Bound Intake Width Weight",
         "MINIMUM",
         1,
-        g.m("Nonnegative Intake Width Weight", "MAXIMUM", g.value("Intake Weight", 0.6), 0),
+        g.m("Nonnegative Intake Width Weight", "MAXIMUM", g.value("Intake Weight", 0.4), 0),
     )
     intake_weight = g.m(
         "Intake Gives Way To Stored Energy",
@@ -1196,7 +1133,7 @@ def core_shape(root):
                 "Release Travel",
                 "MULTIPLY",
                 pulse,
-                g.m("Radius Relative Travel", "MULTIPLY", radius, 0.8),
+                g.m("Radius Relative Travel", "MULTIPLY", radius, 0.3),
             ),
         ),
     )
