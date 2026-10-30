@@ -574,5 +574,11 @@
     "slash-plane-motion-06.png": "d184c33638e7806060d04b8b129b1d6b210c0b6efe2f242c5174f83857c5ac8e",
     "slash-plane-motion-07.png": "977ebc236a2d2cbe0687b8ba6aa3ad444b20090f3ccfcf82c33217ab528d43e4",
     "slash-plane-motion-08.png": "af40d133e9f6954a2a9658a14058b028ecf35e18c4abaa761459f93dc94377e4"
+  },
+  "ci": {
+    "run_id": 41074038788,
+    "functional_commit": "639edfc3b84669c8fae11e5a6ff6ceac7150689d",
+    "conclusion": "success",
+    "successful_jobs": 12
   }
 }

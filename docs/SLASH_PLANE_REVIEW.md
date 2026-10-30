@@ -54,3 +54,5 @@ LP_NUM_THREADS=2 MESA_SHADER_CACHE_DISABLE=true blender -b -t 2 --factory-startu
 这四张诊断图关闭其他效果层，用于确定画面来源，没有当作完整效果验收。转剑时的大弯片主要属于内核；进流仅留少量碎线，头部的长片则属于刀光。因此本次修复刀光平面，没有为进流增加独立转向框架。
 
 源码、16 张高清图、48 张隔帧、三阶段原生复现及成本原始数据见[检查清单](images/slash-plane-samples.json)。
+
+功能源码 `639edfc` 的 [CI 41074038788](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41074038788) 已完成全部 12 项并成功；后续提交只补文档和实图。
