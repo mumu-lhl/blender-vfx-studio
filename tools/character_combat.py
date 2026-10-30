@@ -103,6 +103,7 @@ def main():
                 "camera_location": list(scene.camera.location),
                 "camera_lens_mm": scene.camera.data.lens,
                 "contact": fixture["contact"],
+                "charge_release": fixture["charge_release"],
                 "blade_trace": fixture["trace"],
                 "source_sha256": frozen,
                 "render_timings": timings,

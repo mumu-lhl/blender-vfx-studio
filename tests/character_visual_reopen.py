@@ -24,7 +24,7 @@ frames = args.frames
 if len(set(frames)) < 2:
     parser.error("Use at least two distinct sampled frames to check native animation")
 scene = bpy.context.scene
-for frame in (47, 49, 51):
+for frame in range(47, 52):
     scene.frame_set(frame)
     graph = bpy.context.evaluated_depsgraph_get()
     socket = bpy.data.objects["Charge socket • world up"].evaluated_get(graph)
