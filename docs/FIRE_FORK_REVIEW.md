@@ -50,3 +50,16 @@ LP_NUM_THREADS=2 blender -b -t 2 --factory-startup --disable-autoexec --python-e
 ```
 
 使用 `--dark`、`--far` 对照，或 `--sequence` 渲染全部 72 帧。完整施法使用 `tools/spell_preview.py`。图像、批次与源码摘要见 [检查清单](images/fire-forks-samples.json)。工作由 [#184](https://github.com/mumu-lhl/blender-vfx-studio/issues/184) 跟踪，整体品质见 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89)。
+
+
+## 完整施法镜头的补查
+
+另读取 CI 同一功能源码生成的完整施法视频：108 帧、960×540、24 fps、4.5 秒。源码摘要全部匹配分叉生成器；实际解码并查看第 1–107 帧的全部 54 张隔帧，九页排列图见下。这里只缩小排列、标注时间，没有修改原画面；未观看视频实时播放。
+
+[1–11](images/fire-spell-motion-01.png) · [13–23](images/fire-spell-motion-02.png) · [25–35](images/fire-spell-motion-03.png) · [37–47](images/fire-spell-motion-04.png) · [49–59](images/fire-spell-motion-05.png) · [61–71](images/fire-spell-motion-06.png) · [73–83](images/fire-spell-motion-07.png) · [85–95](images/fire-spell-motion-08.png) · [97–107](images/fire-spell-motion-09.png)。
+
+![点燃至分叉生长的实际隔帧](images/fire-spell-motion-06.png)
+
+符记在第 53–59 帧向剑前聚集，第 61 帧开始接上火焰；第 65–89 帧的轮廓交替分叉、抬升，局部尖端脱离；第 91–99 帧由下向上断开，恢复阶段干净。分叉和断开确实进入完整角色镜头，但底部持续呈较圆的团块，释放符记相对角色偏小，角色准备阶段也缺少明显蓄势。空间衔接和火舌轮廓的收益保留，整段释放力度仍未通过艺术验收。该补查不增加节点或参数，后续应依据完整构图处理这些问题。
+
+视频来源、54 张样本与图片摘要见 [补查清单](images/fire-spell-motion-samples.json)。这批资料与上面的独立火焰抽帧分开记录。
