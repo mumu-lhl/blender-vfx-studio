@@ -196,7 +196,7 @@ def add_effects(fixture):
     midpoint = bpy.data.objects.new("Charge socket • blade midpoint", None)
     scene.collection.objects.link(midpoint)
     midpoint.parent = weapon
-    for frame, reach in ((1, 0.2), (37, 0.2), (43, 0.5)):
+    for frame, reach in ((1, 0.35), (37, 0.35), (43, 0.5)):
         midpoint.location = tip * reach
         midpoint.keyframe_insert(data_path="location", frame=frame)
     for curve in curves(midpoint):
