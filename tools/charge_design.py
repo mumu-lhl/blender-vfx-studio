@@ -488,104 +488,6 @@ def _surface(root, *, core=False, ground=False):
         leading_color.inputs[2].default_value = (0.8, 0.98, 1, 1)
         g.link(leading_color.outputs[0], center_mix.inputs[2])
         surface_color = center_mix.outputs[0]
-        kernel_color = g.n("ShaderNodeMixRGB", "Concentrated Inner Light")
-        stored = g.stage("Stored Energy Concentration", p, 0.30, 0.84)
-        brightness = g.m("Inner Compression Brightness", "MULTIPLY_ADD", stored, 0.77)
-        brightness.node.inputs[2].default_value = 0.08
-        g.link(
-            g.m(
-                "Spend Inner White During Release",
-                "MULTIPLY",
-                brightness,
-                g.m(
-                    "Nucleus Energy Remaining",
-                    "SUBTRACT",
-                    1,
-                    g.stage("Nucleus Hands Off Energy", p, 0.88, 0.96),
-                ),
-            ),
-            kernel_color.inputs[0],
-        )
-        # A traveling light front follows each curved sheet, rather than painting
-        # a fixed white patch on its facing normals.
-        nucleus_phase = g.m(
-            "Stored Energy Flow Phase",
-            "FRACT",
-            g.m(
-                "Energy Travels Into The Focus",
-                "SUBTRACT",
-                g.m(
-                    "Unequal Stored Front Phase",
-                    "ADD",
-                    u,
-                    g.m("Stored Sheet Phase", "MULTIPLY", attribute("charge_filament"), 0.65),
-                ),
-                g.m(
-                    "Stored Flow Accelerates",
-                    "MULTIPLY",
-                    g.m("Stored Flow Time", "MULTIPLY", p, p),
-                    3.5,
-                ),
-            ),
-        )
-        nucleus_front = g.m(
-            "Narrow Stored Energy Front",
-            "MULTIPLY",
-            g.stage("Stored Front Arrives", nucleus_phase, 0.25, 0.5),
-            g.m(
-                "Stored Front Tapers",
-                "SUBTRACT",
-                1,
-                g.stage("Stored Front Passes", nucleus_phase, 0.55, 0.78),
-            ),
-        )
-        kernel_face = g.m(
-            "Nucleus White Face",
-            "GREATER_THAN",
-            g.m("Nucleus Facing Magnitude", "ABSOLUTE", facing.outputs["Value"]),
-            g.value("Nucleus White Threshold", 0.35),
-        )
-        vein = g.m(
-            "Narrow Vein Across Curled Sheets",
-            "SUBTRACT",
-            1,
-            g.stage(
-                "Stored Vein Edges",
-                g.m("Distance From Stored Vein", "ABSOLUTE", attribute("charge_filament_side")),
-                0.15,
-                0.5,
-            ),
-        )
-        flow = g.m("Connected Vein With A Moving Front", "MULTIPLY_ADD", nucleus_front, 0.75)
-        flow.node.inputs[2].default_value = 0.25
-        kernel_face = g.m(
-            "Nucleus White Patch",
-            "MULTIPLY",
-            kernel_face,
-            g.m("Stored Vein And Front", "MULTIPLY", vein, flow),
-        )
-        white_amount = kernel_color.inputs[0].links[0].from_socket
-        g.link(
-            g.m("Restricted Nucleus White", "MULTIPLY", white_amount, kernel_face),
-            kernel_color.inputs[0],
-        )
-        kernel_body = g.m(
-            "Nucleus Blue Faces",
-            "MULTIPLY_ADD",
-            g.m("Nucleus Midtone Face", "GREATER_THAN", facing.outputs["Value"], 0.08),
-            0.5,
-        )
-        g.link(g.value("Nucleus Blue Depth", 0.27), kernel_body.node.inputs[2])
-        g.link(
-            g.v("Nucleus Colored Pressure Body", "SCALE", color.outputs[0], kernel_body),
-            kernel_color.inputs[1],
-        )
-        kernel_color.inputs[2].default_value = (0.9, 0.98, 1, 1)
-        core_mix = g.n("ShaderNodeMixRGB", "Light Beneath Broken Shell")
-        g.link(inner, core_mix.inputs[0])
-        g.link(surface_color, core_mix.inputs[1])
-        g.link(kernel_color.outputs[0], core_mix.inputs[2])
-        surface_color = core_mix.outputs[0]
         edge = g.m(
             "Core Silhouette Boundary",
             "SUBTRACT",
@@ -646,6 +548,84 @@ def _surface(root, *, core=False, ground=False):
         surface_color = g.v(
             "Primary And Supporting Filament Color", "SCALE", edge_mix.outputs[0], hierarchy
         )
+    if core:
+        # The focal shape lives in a flowing opacity field, not in a lit shell.
+        x = attribute("charge_filament_side")
+        y = g.m("Plasma Vertical Coordinate", "MULTIPLY_ADD", u, 2)
+        y.node.inputs[2].default_value = -1
+        uv = g.xyz("Native Plasma Coordinates", x, y, 0)
+        radius = g.n("ShaderNodeVectorMath", "Distance From Plasma Focus", operation="LENGTH")
+        g.link(uv, radius.inputs[0])
+        flow = g.n("ShaderNodeTexNoise", "Flowing Plasma Boundary", noise_dimensions="4D")
+        g.link(uv, flow.inputs["Vector"])
+        g.link(g.value("Plasma Detail", prop="noise_scale"), flow.inputs["Scale"])
+        flow.inputs["Detail"].default_value = 2
+        g.link(
+            g.m(
+                "Plasma Flow Accelerates", "MULTIPLY", g.m("Plasma Flow Clock", "MULTIPLY", p, p), 4
+            ),
+            flow.inputs["W"],
+        )
+        rough = g.m("Unequal Plasma Edge", "MULTIPLY_ADD", flow.outputs["Fac"], 0.28)
+        rough.node.inputs[2].default_value = -0.14
+        r = g.m("Flow Bends The Focus Boundary", "ADD", radius.outputs["Value"], rough)
+        mask = g.m("Soft Plasma Boundary", "SUBTRACT", 1, g.stage("Plasma Rim Feather", r, 0.72, 1))
+        view = g.stage(
+            "Edge On Plasma Fields Fade",
+            g.m("Plasma Field Facing", "ABSOLUTE", facing.outputs["Value"]),
+            0.15,
+            0.65,
+        )
+        mask = g.m("Visible Plasma Field", "MULTIPLY", mask, view)
+        alpha = g.m(
+            "Focus Opacity Field",
+            "MULTIPLY",
+            alpha,
+            g.m(
+                "Keep Intake Opacity",
+                "ADD",
+                1,
+                g.m(
+                    "Only The Focus Uses The Mask",
+                    "MULTIPLY",
+                    inner,
+                    g.m("Plasma Mask Difference", "SUBTRACT", mask, 1),
+                ),
+            ),
+        )
+        heat = g.m("Connected Plasma Heat", "SUBTRACT", 1, radius.outputs["Value"])
+        stored = g.stage("Heat Accumulates In The Focus", p, 0.18, 0.78)
+        charge_heat = g.m("Stored Heat Concentration", "MULTIPLY_ADD", stored, 0.8)
+        charge_heat.node.inputs[2].default_value = 0.2
+        heat = g.m("Focus Stores Heat", "MULTIPLY", heat, charge_heat)
+        white_threshold = g.value("Nucleus White Threshold", 0.35)
+        white = g.stage("Coherent Plasma Heart", heat, 0.35, 0.55)
+        g.link(white_threshold, white.node.inputs["From Min"])
+        g.link(
+            g.m("Plasma Heat Transition", "ADD", white_threshold, 0.2),
+            white.node.inputs["From Max"],
+        )
+        tone = g.m("Plasma Body Values", "MULTIPLY_ADD", heat, 0.7)
+        g.link(g.value("Nucleus Blue Depth", 0.27), tone.node.inputs[2])
+        painted = g.n("ShaderNodeMixRGB", "Plasma Body And Hot Heart")
+        g.link(white, painted.inputs[0])
+        g.link(g.v("Editable Plasma Body", "SCALE", color.outputs[0], tone), painted.inputs[1])
+        painted.inputs[2].default_value = (0.85, 0.98, 1, 1)
+        edge = g.m(
+            "Editable Plasma Boundary",
+            "MULTIPLY",
+            g.stage("Plasma Colored Rim", r, 0.55, 0.9),
+            g.tree.nodes["Core Edge Contrast"].outputs[0],
+        )
+        rim = g.n("ShaderNodeMixRGB", "Plasma Rim Against Light Backgrounds")
+        g.link(edge, rim.inputs[0])
+        g.link(painted.outputs[0], rim.inputs[1])
+        g.link(g.v("Plasma Edge Tint", "SCALE", color.outputs[0], 0.055), rim.inputs[2])
+        finish = g.n("ShaderNodeMixRGB", "Plasma Focus Over Supporting Intake")
+        g.link(inner, finish.inputs[0])
+        g.link(surface_color, finish.inputs[1])
+        g.link(rim.outputs[0], finish.inputs[2])
+        surface_color = finish.outputs[0]
     support = attribute("charge_support_weight")
     if core:
         support = g.m(
@@ -666,7 +646,13 @@ def _surface(root, *, core=False, ground=False):
     alpha = g.m("Supporting Layer Opacity", "MULTIPLY", alpha, support)
     emission = g.n("ShaderNodeEmission", "Native Energy Surface")
     g.link(surface_color, emission.inputs["Color"])
-    g.link(g.value("Emission", prop="strength"), emission.inputs["Strength"])
+    strength = g.value("Emission", prop="strength")
+    if core:
+        radiance = g.m("Heat Radiates From The Stored Focus", "MULTIPLY", inner, white)
+        radiance = g.m("Stored Plasma Radiance", "MULTIPLY_ADD", radiance, 4)
+        radiance.node.inputs[2].default_value = 1
+        strength = g.m("Editable Plasma Radiance", "MULTIPLY", strength, radiance)
+    g.link(strength, emission.inputs["Strength"])
     transparent = g.n("ShaderNodeBsdfTransparent", "Transparent")
     surface = g.n("ShaderNodeMixShader", "Ignite And Dissipate")
     g.link(alpha, surface.inputs[0])
@@ -778,43 +764,26 @@ def core_shape(root):
                 next_k = (k // 3) * 3 + (k + 1) % 3 if primary else (k + 1) % sides
                 a, b = base + j * sides + k, base + j * sides + next_k
                 faces.append((a, b, b + sides, a + sides))
-    # Curled, unequal energy sheets leave real gaps around a shared focus.
-    # Rounded lens sections provide depth from side views without solid leaf faces.
-    lens = ((-1, 0), (-0.65, 0.7), (0.65, 0.7), (1, 0), (0.65, -0.7), (-0.65, -0.7))
-    petals = (
-        (0.0, 2.8, 0.19, 0.64, 0.09),
-        (2.05, 3.3, 0.16, 0.53, 0.075),
-        (4.55, 2.2, 0.12, 0.43, 0.045),
-    )
-    for lobe, (phase, turn, reach, rise, breadth) in enumerate(petals):
-        base, steps, sides = len(vertices), 19, len(lens)
-
-        def center(t):
-            angle = phase + turn * t
-            radius = reach * (0.22 + 0.78 * (1 - t) ** 0.7)
-            return Vector((math.cos(angle) * radius, math.sin(angle) * radius, (t - 0.5) * rise))
-
-        for j in range(steps):
-            t = j / (steps - 1)
-            profile = max(math.sin(math.pi * t), 0) ** 0.7
-            angle = phase + turn * t
-            radial = Vector((math.cos(angle), math.sin(angle), 0))
-            tangent = (center(min(t + 0.001, 1)) - center(max(t - 0.001, 0))).normalized()
-            normal = tangent.cross(radial).normalized()
-            point = center(t)
-            for k, (across, depth) in enumerate(lens):
-                offset = profile * (radial * breadth * across + normal * 0.018 * depth)
-                vertices.append(tuple(point + offset))
+    # Three crossed, subdivided fields carry a procedural plasma mask. Each
+    # view sees a broad field, while edge-on planes fade in the material.
+    steps = 8
+    for plane in range(3):
+        base = len(vertices)
+        for j in range(steps + 1):
+            y = j / steps * 2 - 1
+            for k in range(steps + 1):
+                x = k / steps * 2 - 1
+                point = ((x, 0, y), (0, x, y), (x, y, 0))[plane]
+                vertices.append(tuple(v * 0.28 for v in point))
                 cross_sections.append((0, 0, 0))
-                a = k * math.tau / sides
                 for name, value in zip(
-                    core_attrs, (t, math.sin(a), math.cos(a), 1.0, 6.0, lobe * 0.25, across)
+                    core_attrs, ((y + 1) / 2, 0.0, 1.0, 1.0, 6.0, plane * 0.25, x)
                 ):
                     core_attrs[name].append(value)
-        for j in range(steps - 1):
-            for k in range(sides):
-                a, b = base + j * sides + k, base + j * sides + (k + 1) % sides
-                faces.append((a, b, b + sides, a + sides))
+        for j in range(steps):
+            for k in range(steps):
+                a = base + j * (steps + 1) + k
+                faces.append((a, a + 1, a + steps + 2, a + steps + 1))
     _mesh(layer, vertices, faces, core_attrs)
     cross = layer.data.attributes.new("charge_cross", "FLOAT_VECTOR", "POINT")
     for slot, value in zip(cross.data, cross_sections):
@@ -897,7 +866,7 @@ def core_shape(root):
         "Bound Intake Width Weight",
         "MINIMUM",
         1,
-        g.m("Nonnegative Intake Width Weight", "MAXIMUM", g.value("Intake Weight", 0.6), 0),
+        g.m("Nonnegative Intake Width Weight", "MAXIMUM", g.value("Intake Weight", 0.4), 0),
     )
     intake_weight = g.m(
         "Intake Gives Way To Stored Energy",
@@ -1071,9 +1040,7 @@ def core_shape(root):
         ),
     )
     position = g.v("Stored Energy Volume", "SCALE", position, growth)
-    # The stored volume flattens while the intake paths keep moving. Expanding
-    # its cross section compensates for the lost height, then discharge turns
-    # that compact shape into a needle without changing the outer strands.
+    # Stored flame mass tightens inward instead of spreading into a flat fan.
     compression = g.m(
         "Bound Nucleus Compression",
         "MINIMUM",
@@ -1091,39 +1058,30 @@ def core_shape(root):
             g.stage("Nucleus Unloads Compression", p, 0.84, 0.88),
         ),
     )
-    compressed_height = g.m(
-        "Stored Height Loss",
+    compact = g.m(
+        "Stored Flame Tightens Inward",
         "SUBTRACT",
         1,
-        g.m("Compression Tracks Stored Energy", "MULTIPLY", stored_tension, compression),
-    )
-    compressed_width = g.m(
-        "Stored Volume Width", "SQRT", g.m("Keep Stored Volume", "DIVIDE", 1, compressed_height)
+        g.m(
+            "Stored Flame Contraction",
+            "MULTIPLY",
+            g.m("Compression Tracks Stored Energy", "MULTIPLY", stored_tension, compression),
+            0.7,
+        ),
     )
     nucleus = g.attr("charge_inner")
-    sideways = g.m(
-        "Nucleus Expands Sideways",
+    compact = g.m(
+        "Only The Focus Condenses",
         "ADD",
         1,
         g.m(
-            "Only Nucleus Width Expands",
+            "Focus Contraction",
             "MULTIPLY",
             nucleus,
-            g.m("Extra Stored Width", "SUBTRACT", compressed_width, 1),
+            g.m("Contraction From Rest", "SUBTRACT", compact, 1),
         ),
     )
-    vertical = g.m(
-        "Nucleus Compacts Vertically",
-        "ADD",
-        1,
-        g.m(
-            "Only Nucleus Height Compacts",
-            "MULTIPLY",
-            nucleus,
-            g.m("Lost Stored Height", "SUBTRACT", compressed_height, 1),
-        ),
-    )
-    compression_axes = g.xyz("Nucleus Compression Proportions", sideways, sideways, vertical)
+    compression_axes = g.xyz("Nucleus Compression Proportions", compact, compact, compact)
     position = g.v(
         "Incoming Energy Pressurizes The Nucleus", "MULTIPLY", position, compression_axes
     )
@@ -1141,7 +1099,7 @@ def core_shape(root):
         g.m("Release Width Pinch", "MULTIPLY", pulse, g.value("Release Pinch", 0.55)),
     )
     stretch = g.m(
-        "Nucleus Height During Discharge", "MULTIPLY_ADD", pulse, g.value("Release Stretch", 1.4)
+        "Nucleus Height During Discharge", "MULTIPLY_ADD", pulse, g.value("Release Stretch", 0.55)
     )
     stretch.node.inputs[2].default_value = 1
     discharge_axes = g.xyz("Nucleus Discharge Proportions", pinch, pinch, stretch)
@@ -1160,7 +1118,7 @@ def core_shape(root):
                 "Release Travel",
                 "MULTIPLY",
                 pulse,
-                g.m("Radius Relative Travel", "MULTIPLY", radius, 0.8),
+                g.m("Radius Relative Travel", "MULTIPLY", radius, 0.3),
             ),
         ),
     )
