@@ -32,6 +32,9 @@ for frame in range(47, 52):
     direction = (Vector(blade["tip"]) - Vector(blade["hilt"])).normalized()
     self_direction = (socket.matrix_world.to_3x3() @ Vector((0, 0, 1))).normalized()
     assert self_direction.dot(direction) > 0.999, "Native charge release must aim along the blade"
+    slash_root = bpy.data.objects["Combat • Arc Slash"].evaluated_get(graph)
+    slash_normal = (slash_root.matrix_world.to_3x3() @ Vector((0, 0, 1))).normalized()
+    assert abs(slash_normal.dot(direction)) < 1e-5, "The slash plane must contain the real blade"
 scene.frame_set(47)
 core = bpy.data.objects["Charge • Compressed Core"].children[0]
 assert core.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices, (

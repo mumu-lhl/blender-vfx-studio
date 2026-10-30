@@ -258,7 +258,16 @@ def add_effects(fixture):
     for frame in range(hit_frame - 2, hit_frame + 9):
         scene.frame_set(frame)
         matrix = weapon.evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world
-        radial = plane.inverted() @ (matrix @ tip - matrix.translation)
+        blade = matrix @ tip - matrix.translation
+        direction = blade.normalized()
+        # The stroke is not planar: projecting every blade into the fixed
+        # reference plane lifts the slash off the sword during contact.
+        # Keep the nearest plane that actually contains this frame's blade.
+        frame_normal = normal - direction * normal.dot(direction)
+        if frame_normal.length < 1e-6:
+            raise RuntimeError("Cannot fit the slash plane to this blade direction")
+        slash_plane = Vector((0, 0, 1)).rotation_difference(frame_normal.normalized())
+        radial = slash_plane.inverted() @ blade
         progress = min(max((frame - slash["start"]) / slash["duration"], 0), 1)
         front = min(progress / slash["attack"], 1)
         clock = progress + slash["motion_ease"] * (1 - (1 - progress) ** 3 - progress)
@@ -269,7 +278,7 @@ def add_effects(fixture):
             - (front - 0.5) * math.radians(slash["arc"])
             - math.radians(slash["spin"]) * clock
         )
-        rotation = plane @ Quaternion((0, 0, 1), angle)
+        rotation = slash_plane @ Quaternion((0, 0, 1), angle)
         if previous is not None:
             rotation.make_compatible(previous)
         previous = rotation.copy()

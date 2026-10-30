@@ -26,6 +26,9 @@ for frame in range(hit - 2, hit + 3):
     socket = bpy.data.objects["Charge socket • world up"].evaluated_get(graph)
     aim = (socket.matrix_world.to_3x3() @ Vector((0, 0, 1))).normalized()
     assert aim.dot(direction) > 0.999999, f"Charge leaves the blade direction at {frame}"
+    slash = bpy.data.objects["Combat • Arc Slash"].evaluated_get(graph)
+    normal = (slash.matrix_world.to_3x3() @ Vector((0, 0, 1))).normalized()
+    assert abs(normal.dot(direction)) < 1e-5, "Native slash plane must contain the blade"
 scene.frame_set(96)
 assert not any(
     obj.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices
