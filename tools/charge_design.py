@@ -667,8 +667,8 @@ def _surface(root, *, core=False, ground=False):
                 g.m("Remaining Support Weight", "SUBTRACT", 1, support),
             ),
         )
-    # Eevee's dithered core needs solid moving sections. Reduce their cross
-    # section in Geometry Nodes; only fully hidden support is cut out here.
+    # Intake weight changes the path's section in Geometry Nodes. Only fully
+    # hidden support is cut out here; the nucleus has its own soft mask.
     if core:
         support = g.m("Support Is Visible", "GREATER_THAN", support, 0)
     alpha = g.m("Supporting Layer Opacity", "MULTIPLY", alpha, support)
@@ -691,7 +691,7 @@ def _surface(root, *, core=False, ground=False):
 
 
 def core_shape(root):
-    layer, g, geometry = _geometry(root, "Compressed Flame Core")
+    layer, g, geometry = _geometry(root, "Compressed Plasma Focus")
     vertices, faces, cross_sections = [], [], []
     core_attrs = {
         k: []
@@ -1217,7 +1217,7 @@ def core_shape(root):
         cut.inputs["Selection"],
     )
 
-    # Invisible nested shells can exhaust Cycles' default transparent bounce budget.
+    # Invisible internal fields still consume Cycles' transparent bounce budget.
     # Remove their evaluated geometry once hidden or collapsed; keep the editable mesh.
     transparent = g.m(
         "Core Opacity Off", "LESS_THAN", g.value("Visibility Opacity", prop="opacity"), 1e-6

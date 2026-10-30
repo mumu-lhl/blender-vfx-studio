@@ -180,8 +180,8 @@ def create_effect(key, *, quality=None):
         spiral_motes(particles)
         for member in (outer, inner, shield):
             member.children[0].data.materials[0].surface_render_method = "BLENDED"
-        # Depth-correct cutouts keep the inner nucleus behind the outer shell in Eevee.
-        shield.children[0].data.materials[0].surface_render_method = "DITHERED"
+        # The plasma fields use soft opacity; blending avoids a stippled rim
+        # at the preview's normal Eevee sample count.
         root = composition.create(context, [outer, inner, shield, particles])
         root.name = "Energy Charge"
     elif key == "magic-circle":
