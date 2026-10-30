@@ -1,0 +1,544 @@
+{
+  "baseline_functional_commit": "639edfc3b84669c8fae11e5a6ff6ceac7150689d",
+  "functional_commit": "9264a02b1e1c13b974d086ff573acba53b36ff1d",
+  "source_sha256": {
+    "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+    "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+    "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+    "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+    "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+    "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+    "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+    "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+    "blender_vfx_studio/dash.py": "cae04666618b5af84c54595c49e29c4f06c2295d1743f11584fda1d186c2afa1",
+    "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+    "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+    "blender_vfx_studio/impact.py": "c7718004d7a04e08de232b688f57fe9c140d8a87db5b286f934e15bca0029921",
+    "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+    "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+    "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+    "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+    "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+    "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+    "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+    "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+    "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+    "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+    "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+    "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+    "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+    "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+    "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+    "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+    "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+    "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+    "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+    "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+    "tools/character_scene.py": "48ecae8e01f86bbf554bf5f71c0ef987f9dc33311623ae7ec2658ac3de07b827",
+    "tools/character_combat.py": "e2e98cc4970a7f8fe73e9bb8693e3adf49765ef7cf98653c83072adf4660866c",
+    "tools/build_examples.py": "6d32fc3a62a25e31ac4210558027fa9b1314de9035dc3d10dcad765a0560dfb5",
+    "tools/charge_design.py": "dd869b6620e73ad801c5c847e7d1e21bfa729b532349b10a9f7a5b6472c2af51",
+    "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+    "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+    "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+    "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+  },
+  "engine": "BLENDER_EEVEE",
+  "blender_version": "5.2.2 LTS",
+  "resolution": [
+    960,
+    540
+  ],
+  "samples": 16,
+  "hd_viewed": [
+    {
+      "variant": "flow",
+      "frame": 16,
+      "sha256": "712b75aa6df67ceba1bed7abc2ce801320cdefae03bf351791d1030f0b453a18"
+    },
+    {
+      "variant": "flow",
+      "frame": 32,
+      "sha256": "6fe8abded8eb1e404db94839869ae413d4f6c44eb0034d303300231668ad1f85"
+    },
+    {
+      "variant": "flow",
+      "frame": 43,
+      "sha256": "1b46018e6577542d65fcc7421a16ba2bd4d77dcacc4e275e7ecea73702f3469c"
+    },
+    {
+      "variant": "flow",
+      "frame": 49,
+      "sha256": "778c127177df357bb8d998251830e8635b419adabf4c0df92446d2dbe500a8e8"
+    },
+    {
+      "variant": "flow",
+      "frame": 51,
+      "sha256": "7b56fee9120f1cb12fa6495811f320c0300a6c1fdff71ca58640e53cdc6c0c2b"
+    },
+    {
+      "variant": "dark",
+      "frame": 16,
+      "sha256": "cf7a6f12fa3f8246a07dfcced75e5a5c8d35a098273b4e2f55f30360e6d63578"
+    },
+    {
+      "variant": "dark",
+      "frame": 32,
+      "sha256": "6b1d99eb2094fd6b439fa3a715abf99d6e912d58974422f99d0034e97f926ee7"
+    },
+    {
+      "variant": "dark",
+      "frame": 43,
+      "sha256": "fb7fe9a230d6abb91df7bc203026ffbfde1f1039482e6660c7de0d7f80cdedee"
+    },
+    {
+      "variant": "dark",
+      "frame": 49,
+      "sha256": "6f76c3d53bc15d196f942a3979a6dd9574d87c8b1ead00cfc478bb4de2eba32d"
+    },
+    {
+      "variant": "dark",
+      "frame": 51,
+      "sha256": "308e853a29518f04cf254fa40c3f7a33273f7b73e90d56555888dda0d819f7d9"
+    },
+    {
+      "variant": "far",
+      "frame": 32,
+      "sha256": "e0ec81916bdacc66bc58913df9bd52397ea250a0f008bf16a6d154013464c13e"
+    },
+    {
+      "variant": "far",
+      "frame": 43,
+      "sha256": "8debc5369137d56c5964ac9cd016917f5e4b02ee6e98459ae3ae09b969baa367"
+    },
+    {
+      "variant": "far",
+      "frame": 49,
+      "sha256": "48d24afadfa6395aac4b355e35ff8363a55058c77eba8b0392201bf49d43b062"
+    },
+    {
+      "variant": "far",
+      "frame": 51,
+      "sha256": "03f3ba02491afafcf838530e3950e6a5a702d1afadef4505880f643e0d53805c"
+    },
+    {
+      "variant": "reverse",
+      "frame": 32,
+      "sha256": "a581599f22c28a2112216ec5194076f1ffc96e5435c9196b7c329501d763ce17"
+    },
+    {
+      "variant": "reverse",
+      "frame": 43,
+      "sha256": "eccc769eb34d8887818f2111bf804106ace0ec2641c0893e2916b9b04a71dc22"
+    },
+    {
+      "variant": "before/light",
+      "frame": 16,
+      "sha256": "7e60434e1088b76546e77aeb14961e18ff7e2923d97e2c1d2f3b2eb08315345f"
+    },
+    {
+      "variant": "before/light",
+      "frame": 32,
+      "sha256": "491446e666ff6dc12c0db293f5299382000f8b8b3ae4b2a09793ed88f5a50be6"
+    },
+    {
+      "variant": "before/light",
+      "frame": 43,
+      "sha256": "c3281fa3230dbdcddb8d6a845e312b89fe5ef0ef9e3b046c209f4a02f11395c7"
+    },
+    {
+      "variant": "before/dark",
+      "frame": 32,
+      "sha256": "d819c2edc939cd0e565ef2d650e1432a2252a105805c40b69471a96e08dc1de1"
+    },
+    {
+      "variant": "before/far",
+      "frame": 32,
+      "sha256": "b7258f10bb17d328d9bab2bd616e96fc70c6cda32f2220b28c14bed1f1e7f097"
+    }
+  ],
+  "motion_viewed": [
+    {
+      "frame": 1,
+      "sha256": "d1798702143ec5199bd1fa427f4b1aef2cadb51e460a3a0d96065588eac1651c"
+    },
+    {
+      "frame": 3,
+      "sha256": "a6ede381fcff4a89d4992ec34d1f594390a26037e3f3c1a9df3c9baf81bc6a9f"
+    },
+    {
+      "frame": 5,
+      "sha256": "566578a5c7f07ed10a8307431f3688e0901809ffba03c220699d2ad3a445f825"
+    },
+    {
+      "frame": 7,
+      "sha256": "e00686fe9e2820e5e82bff97a7defe9e3922de6373fe43ec566605ed6cb363f3"
+    },
+    {
+      "frame": 9,
+      "sha256": "437db32d97f8482d8c03571b1d5a508e52d11f0423a91775879db7d3b82833de"
+    },
+    {
+      "frame": 11,
+      "sha256": "620480d2e1428a7f6e766d3ad3b686fa7b49287deabfa13aaa0d4ff720a68b4c"
+    },
+    {
+      "frame": 13,
+      "sha256": "9245c906d5deb27e47a5b098bbdf70bd0598a9da6c54eab2336add0f2fc7065f"
+    },
+    {
+      "frame": 15,
+      "sha256": "72957479ab05b8e211f904e446b801da15438ae3355e719ba1f2465bc2d729f3"
+    },
+    {
+      "frame": 17,
+      "sha256": "c4867f459640e42fc62dd991ac5af7ecd57fe6dc19037661309b521e00cdedf0"
+    },
+    {
+      "frame": 19,
+      "sha256": "9e183348eb3565bfa2a75fdf7d699345e325096f5476f507e262b756470d619b"
+    },
+    {
+      "frame": 21,
+      "sha256": "90cbf8e6e44b8de25c7eef902a5bab33fb2f7bee3bf5abec2e195c2b7f3d7a94"
+    },
+    {
+      "frame": 23,
+      "sha256": "6c248f83d43b834a2d91a6abbe48eae898692bc4a29cddbdfe460c79e6867aff"
+    },
+    {
+      "frame": 25,
+      "sha256": "07bb44034e7905c1b51abd5835075b6e861d1655f732c1450b3dabfbf5bd2235"
+    },
+    {
+      "frame": 27,
+      "sha256": "42c95a294bd1ece6342e1e34d03b16dea93a3921157c0cf7729d864f780747a1"
+    },
+    {
+      "frame": 29,
+      "sha256": "45d600740a0cb37540926fd8c1039ceeae3817e836b494787b59a494c0d7228e"
+    },
+    {
+      "frame": 31,
+      "sha256": "bf7c4649f63b80260b7e1717b61713a2b00dd9ecc3c42d68e4e515e351b8e67a"
+    },
+    {
+      "frame": 33,
+      "sha256": "b8153d72bd65215d8f69f03392566cab4c1fc4321f8d48c4827ecf08397b556a"
+    },
+    {
+      "frame": 35,
+      "sha256": "ae6cd43b46e923bec3e68893ef372d34e30e311dbfe602550105af65e8ca6269"
+    },
+    {
+      "frame": 37,
+      "sha256": "bf8775753bf9237a08a684f191786deff58169f0f293384b7e68a6791c8acec2"
+    },
+    {
+      "frame": 39,
+      "sha256": "37f1d53ed7f8103c254f26495456a77710eca8363a869c7e348bad68bd3d08b2"
+    },
+    {
+      "frame": 41,
+      "sha256": "f4084d7c69c4925ec7e3770c0daf6ad878c9dac9d16f9dc80a3b1a8f07d9ee98"
+    },
+    {
+      "frame": 43,
+      "sha256": "fed3a4597d5ef63360a3d7945cadd913dd12c96027fe17a0d791391438b8a269"
+    },
+    {
+      "frame": 45,
+      "sha256": "2b9383397037343cd7cb22c37088307842ee1aac89164947a1f61c5701b9d69b"
+    },
+    {
+      "frame": 47,
+      "sha256": "947873b1fdb1891c133f91fdd66e3d36f5d366c2a0e07d975c518051de4bbe25"
+    },
+    {
+      "frame": 49,
+      "sha256": "4accc164a62d9343b8d934915fa63b758c0129a203c547a780ce37c673a8c356"
+    },
+    {
+      "frame": 51,
+      "sha256": "f2b6f7c6cbb9f0b0a36092af96e3c50d7ed2a5d48ba6be3051bbe81ab2b1c231"
+    },
+    {
+      "frame": 53,
+      "sha256": "93a79d906fb144be1f14d1b4b70f555351613cfb8a1560106e2b0e9fa0aaf97f"
+    },
+    {
+      "frame": 55,
+      "sha256": "5ada65a59e402fbcf15e2eb2597b2be27aa7a2fe69de11abe232813b907ad7cf"
+    }
+  ],
+  "motion_resolution": [
+    480,
+    270
+  ],
+  "motion_scope": "Native every-other-frame PNGs from saved scene, 1\u201355; no addon",
+  "realtime_playback_reviewed": false,
+  "native_hd": {
+    "native_render_verified": true,
+    "frames": [
+      51,
+      32,
+      49
+    ],
+    "clear_frame": 96,
+    "scene_sha256": "48c09ca44c4dcb7522050a3a429e7bf45fe3af971d60f1aac41bf9777417e511",
+    "source_frame_sha256": {
+      "character-0051.png": "7b56fee9120f1cb12fa6495811f320c0300a6c1fdff71ca58640e53cdc6c0c2b",
+      "character-0032.png": "6fe8abded8eb1e404db94839869ae413d4f6c44eb0034d303300231668ad1f85",
+      "character-0049.png": "778c127177df357bb8d998251830e8635b419adabf4c0df92446d2dbe500a8e8"
+    }
+  },
+  "performance": {
+    "blender": "5.2.2 LTS",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "cpu_quota": "200000 100000",
+    "blender_threads": 2,
+    "lp_num_threads": "2",
+    "software_gl_requested": false,
+    "gl": {
+      "vendor": "Mesa",
+      "renderer": "llvmpipe (LLVM 19.1.7, 256 bits)",
+      "version": "4.5 (Core Profile) Mesa 25.0.7-2+deb13u1"
+    },
+    "engine": "BLENDER_EEVEE",
+    "resolution": [
+      960,
+      540
+    ],
+    "samples": 16,
+    "evaluation": [
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 32,
+        "milliseconds": 0.7494210003642365
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 32,
+        "milliseconds": 0.5733549996875809
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 32,
+        "milliseconds": 0.5187220003790571
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 0.5456039998534834
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 0.6163300004118355
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 0.6813989994043368
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 0.5689290001100744
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 0.5588629992416827
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 0.5857639998794184
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 0.6703720000587055
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 0.6319539998003165
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 0.5345370000213734
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 32,
+        "milliseconds": 11.433796000346774
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 32,
+        "milliseconds": 11.398591999750352
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 32,
+        "milliseconds": 10.820084999977553
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 9.324182000455039
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 10.559212000771367
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 11.748406999686267
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 10.435076000248955
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 10.568245999820647
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 9.958614999959536
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 9.750782000082836
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 10.271878999446926
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 32,
+        "milliseconds": 9.525553000457876
+      }
+    ],
+    "evaluation_summary": {
+      "bare": {
+        "scene_evaluation_median_ms": 0.5857639998794184,
+        "scene_evaluation_p95_ms": 0.6703720000587055,
+        "measured_samples": 9
+      },
+      "fx": {
+        "scene_evaluation_median_ms": 10.271878999446926,
+        "scene_evaluation_p95_ms": 10.568245999820647,
+        "measured_samples": 9
+      }
+    },
+    "renders": [
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 32,
+        "seconds": 53.36822448699968
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 32,
+        "seconds": 13.731246456000008
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 32,
+        "seconds": 12.43106902800082
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 32,
+        "seconds": 28.32039549000001
+      }
+    ],
+    "limits": [
+      "Headless scene evaluation and render wall time, not viewport FPS",
+      "Two warmup renders and 1 matched frame pairs; too few for a render p95",
+      "The same saved scene is used; only its VFX collection is excluded",
+      "Evaluation excludes the collection from the viewport dependency graph; render comparison only excludes it from rendering"
+    ]
+  },
+  "asset": {
+    "sha256": "951648cc4f006db6e22ee95c594f48cf5878d28192f29fc1d52b5195b2a52463",
+    "preview_sha256": "da485958c47340daeee5d6732bbf91dd1117ba8f7aebd9601a578550f7de7a44",
+    "preview_size": [
+      256,
+      256
+    ],
+    "native_seek_frames": [
+      37,
+      13,
+      37
+    ],
+    "native_seek_verified": true
+  },
+  "occlusion_diagnostic": {
+    "frame": 43,
+    "view": "reverse",
+    "intersections": [
+      "Knight_Helmet",
+      "Knight_Head",
+      "2H_Sword"
+    ],
+    "focus_distance": 8.452150581311109,
+    "readability_accepted": false
+  },
+  "docs_images": {
+    "charge-plasma-after-32.png": "6fe8abded8eb1e404db94839869ae413d4f6c44eb0034d303300231668ad1f85",
+    "charge-plasma-after-43.png": "1b46018e6577542d65fcc7421a16ba2bd4d77dcacc4e275e7ecea73702f3469c",
+    "charge-plasma-asset-preview.png": "da485958c47340daeee5d6732bbf91dd1117ba8f7aebd9601a578550f7de7a44",
+    "charge-plasma-before-32.png": "491446e666ff6dc12c0db293f5299382000f8b8b3ae4b2a09793ed88f5a50be6",
+    "charge-plasma-before-43.png": "c3281fa3230dbdcddb8d6a845e312b89fe5ef0ef9e3b046c209f4a02f11395c7",
+    "charge-plasma-comparison.png": "8cf9406cbad35078b3b74b3fce11d67f400da0faaf8203e61e34ea6bdbfe13a1",
+    "charge-plasma-context.png": "948480840797387bfaa606029bc3eb9238ecf0edb1b65899081be748d90abddb",
+    "charge-plasma-motion-01.png": "0b421df7067c92fdea8fe60d13e2dfe6601d9fa8883e50a4e81cdbe33a6e700b",
+    "charge-plasma-motion-02.png": "83fef8eefa8fe76763378d8d163903705333d39cec06fdef62427b949f5f91ff",
+    "charge-plasma-motion-03.png": "f3238337241fd601ed80f27e28cf28f9a6c8509b0ac764123465ee1fc25d915c",
+    "charge-plasma-motion-04.png": "224ac149d824788fae70c81249dbe68a61a1758800aef0105cdb58cdf8fc4b95",
+    "charge-plasma-motion-05.png": "134b16ae13a07bcf0eb4c54bfdb22cefd2d926e52e2f98178b5ed00ebf6140c6",
+    "charge-plasma-reverse-43.png": "eccc769eb34d8887818f2111bf804106ace0ec2641c0893e2916b9b04a71dc22"
+  }
+}

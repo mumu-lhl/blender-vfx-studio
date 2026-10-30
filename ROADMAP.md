@@ -16,7 +16,7 @@
 
 [#190](https://github.com/mumu-lhl/blender-vfx-studio/pull/190) 的预备动作与剑柄交接完成高清明暗／远景、22 张前奏隔帧及无插件复现，但中心可读性没有明确优于主线，继续保持草稿。下一步先重新确定主能量团、少量汇聚流和释放形态，在完整角色构图中筛选有明确收益的主形；不再围绕同一硬壳微调，也不为未证明的画质收益扩展体积框架。
 
-[#193](https://github.com/mumu-lhl/blender-vfx-studio/pull/193) 修复角色刀光在中间转向帧偏离剑刃平面的问题。16 张高清对照、48 张整段原生隔帧与三个阶段无插件高清像素复现已检查；头部的大蓝片错位消除，多层重叠仍存在。功能源码 `639edfc` 的 CI 已完成全部 12 项并成功，详见[空间对齐](docs/SLASH_PLANE_REVIEW.md)。充能的火瓣和实体候选均已拒绝并[独立归档](https://github.com/mumu-lhl/blender-vfx-studio/blob/9474a9b/docs/experiments/CHARGE_FLARE.md)；程序化遮罩原型另在分支验证，没有替换主线资产。
+[#193](https://github.com/mumu-lhl/blender-vfx-studio/pull/193) 修复角色刀光在中间转向帧偏离剑刃平面的问题。16 张高清对照、48 张整段原生隔帧与三个阶段无插件高清像素复现已检查；头部的大蓝片错位消除，多层重叠仍存在。功能源码 `639edfc` 的 CI 已完成全部 12 项并成功，详见[空间对齐](docs/SLASH_PLANE_REVIEW.md)。充能的火瓣和实体候选均已拒绝并[独立归档](https://github.com/mumu-lhl/blender-vfx-studio/blob/9474a9b/docs/experiments/CHARGE_FLARE.md)；[#194](https://github.com/mumu-lhl/blender-vfx-studio/pull/194) 的程序化能量场已完成 16 张新版高清图、28 张充能周期原生隔帧、22 项入门库、无插件高清复现与完整资产预览检查；中心清晰度改善，前段和背侧遮挡仍有限制。CI 正在运行，尚未合入，见[能量场检查](docs/CHARGE_PLASMA_REVIEW.md)。
 
 ## 已有功能与边界
 
