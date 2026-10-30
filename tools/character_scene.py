@@ -94,6 +94,14 @@ def setup_base(*, light=True, far=False, view="front", engine="BLENDER_EEVEE"):
     scene.frame_start, scene.frame_end = 1, FRAMES
     caster = actor("Knight", "Caster • Knight", (-0.8, 0), math.pi / 2, sword=True)
     defender = actor("Rogue", "Defender • Rogue", (0.8, 0.08), -math.pi / 2)
+    preparation = clip(caster["rig"], caster["actions"]["2H_Melee_Attack_Chop"], 1, 41)
+    preparation.action_frame_end = (
+        preparation.action_frame_start
+        + (preparation.action_frame_end - preparation.action_frame_start) * 0.18
+    )
+    preparation.scale = 40 / (preparation.action_frame_end - preparation.action_frame_start)
+    preparation.blend_in, preparation.blend_out = 12, 4
+    preparation.name = "Charge preparation • native chop opening"
     clip(caster["rig"], caster["actions"]["2H_Melee_Attack_Slice"], 37, 69, blend=4)
     # The actual blade trace determines contact; the reaction begins there.
     weapon = caster["weapon"]
@@ -188,7 +196,12 @@ def add_effects(fixture):
     midpoint = bpy.data.objects.new("Charge socket • blade midpoint", None)
     scene.collection.objects.link(midpoint)
     midpoint.parent = weapon
-    midpoint.location = tip * 0.5
+    for frame, reach in ((1, 0.2), (37, 0.2), (43, 0.5)):
+        midpoint.location = tip * reach
+        midpoint.keyframe_insert(data_path="location", frame=frame)
+    for curve in curves(midpoint):
+        for key in curve.keyframe_points:
+            key.interpolation = "LINEAR"
     socket = bpy.data.objects.new("Charge socket • world up", None)
     scene.collection.objects.link(socket)
     follow = socket.constraints.new("COPY_LOCATION")
