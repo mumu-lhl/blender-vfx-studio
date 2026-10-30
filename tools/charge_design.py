@@ -651,14 +651,19 @@ def _surface(root, *, core=False, ground=False):
         # its facing normal. The moving front modulates a coherent hot center.
         side = g.m("Flare Distance From Midline", "ABSOLUTE", attribute("charge_filament_side"))
         center = g.m("Flare Heat Across Its Width", "SUBTRACT", 1, side)
-        height_heat = g.m("Flare Shared Hot Base", "SUBTRACT", 1, u)
+        height_heat = g.m(
+            "Flare Shared Hot Base",
+            "SUBTRACT",
+            1,
+            g.m("Heat Reaches Into The Flame", "MULTIPLY", u, 0.65),
+        )
         heat = g.m("Flare Painted Heat", "MULTIPLY", center, height_heat)
         travel = g.m("Flare Moving Heat", "MULTIPLY_ADD", nucleus_front, 0.25)
         travel.node.inputs[2].default_value = 0.75
         heat = g.m("Heat Flows Through The Mass", "MULTIPLY", heat, travel)
         white_threshold = g.tree.nodes["Nucleus White Threshold"].outputs[0]
-        white_threshold.default_value = 0.64
-        white = g.stage("Flare Hot Center", heat, 0.64, 0.84)
+        white_threshold.default_value = 0.35
+        white = g.stage("Flare Hot Center", heat, 0.35, 0.55)
         g.link(white_threshold, white.node.inputs["From Min"])
         g.link(
             g.m("Flare Hot Transition", "ADD", white_threshold, 0.2), white.node.inputs["From Max"]
@@ -667,7 +672,7 @@ def _surface(root, *, core=False, ground=False):
         g.link(g.tree.nodes["Nucleus Blue Depth"].outputs[0], tone.node.inputs[2])
         painted = g.n("ShaderNodeMixRGB", "Flare Body To Hot Core")
         hot_weight = g.m("Main And Core Heat Hierarchy", "MULTIPLY_ADD", lane, 1.1)
-        hot_weight.node.inputs[2].default_value = 0.45
+        hot_weight.node.inputs[2].default_value = 0.65
         g.link(g.m("Short Core Carries White", "MULTIPLY", white, hot_weight), painted.inputs[0])
         g.link(g.v("Flare Editable Body", "SCALE", color.outputs[0], tone), painted.inputs[1])
         painted.inputs[2].default_value = (0.85, 0.98, 1, 1)
@@ -840,6 +845,10 @@ def core_shape(root):
             tangent = (center(min(t + 0.001, 1)) - center(max(t - 0.001, 0))).normalized()
             normal = tangent.cross(radial).normalized()
             point = center(t)
+            if lobe == 2:
+                # The short hot tongue sits above the main lobe's surface.
+                # Coincident bases otherwise bury its white face in the body.
+                point += normal * 0.065 * (1 - t)
             for k, (across, depth) in enumerate(lens):
                 offset = profile * (radial * breadth * across + normal * 0.055 * depth)
                 vertices.append(tuple(point + offset))
