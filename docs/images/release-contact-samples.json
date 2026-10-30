@@ -1899,5 +1899,6 @@
     "addon_loaded": false,
     "method": "Native CLI animation render, every other frame of the full 1–96 shot; all eight contact pages viewed. Not decoded video or realtime viewing.",
     "scene_sha256": "37fa0131e907587a05b09c4607049fad6403a4e4129cc61b7b3f546bc57e22b1"
-  }
+  },
+  "ci_result": "all 12 jobs successful; source d1695f7d57e6c713f09fb77ece8b6edc29de5cbc"
 }

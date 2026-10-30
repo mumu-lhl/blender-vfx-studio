@@ -26,7 +26,7 @@
 
 ## 功能验证与复现
 
-新增回归先在 main 复现提前释放，再验证修复。检查 Geometry Nodes 与 Shader Nodes 在接触时进入同一释放阶段，接触前尚未完成释放，第 47–51 帧释放轴与真实剑刃一致，角色轨迹未被改动。保存场景在新进程关闭自动执行、未加载插件时，阶段、方向和第 96 帧清场检查通过，正常退出。Ruff 0.14.1 全库 lint 与格式检查通过。另一个无插件新进程按 51→47→49 倒序重渲染，三张 960×540 PNG 的全部 RGBA 像素一致，角色动画及第 96 帧清场检查通过，正常退出。完整动作的 48 张原生隔帧也已全部查看，渲染进程正常退出；CI 尚在执行，不计作已完成。
+新增回归先在 main 复现提前释放，再验证修复。检查 Geometry Nodes 与 Shader Nodes 在接触时进入同一释放阶段，接触前尚未完成释放，第 47–51 帧释放轴与真实剑刃一致，角色轨迹未被改动。保存场景在新进程关闭自动执行、未加载插件时，阶段、方向和第 96 帧清场检查通过，正常退出。Ruff 0.14.1 全库 lint 与格式检查通过。另一个无插件新进程按 51→47→49 倒序重渲染，三张 960×540 PNG 的全部 RGBA 像素一致，角色动画及第 96 帧清场检查通过，正常退出。完整动作的 48 张原生隔帧也已全部查看，渲染进程正常退出；CI [40970236738](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40970236738) 已完成全部 12 项并成功，功能源码为 `d1695f7`。
 
 ```sh
 LP_NUM_THREADS=2 MESA_SHADER_CACHE_DISABLE=true blender -b -t 2 --factory-startup --disable-autoexec --python-exit-code 1 --python tools/character_combat.py -- --frames 45 47 48 49 51 55 80

@@ -1,6 +1,6 @@
 # 开发进度与后续计划
 
-更新：2026-10-29（UTC）。目标 **Blender 5.2 LTS**，优先 Eevee，兼容 Cycles。**项目尚未正式分发，仅提供开发构建。** 当前实现可以调整，过时生成器和兼容性专用代码无需保留。
+更新：2026-10-30（UTC）。目标 **Blender 5.2 LTS**，优先 Eevee，兼容 Cycles。**项目尚未正式分发，仅提供开发构建。** 当前实现可以调整，过时生成器和兼容性专用代码无需保留。
 
 ## 当前重点
 
@@ -73,7 +73,7 @@ PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 4070072
 
 [#184](https://github.com/mumu-lhl/blender-vfx-studio/issues/184)／[PR #185](https://github.com/mumu-lhl/blender-vfx-studio/pull/185) 已合入共享下部、错相生长的分叉火舌和沿流向的热色冷缝。已读取 14 张高清明暗／远景及施法阶段、36 张原生隔帧和三档完整资产预览；无插件高清像素一致，实测成本已记录。CI 全部 12 项成功；底部团块、局部薄边与实时播放判断的艺术限制仍保留。见 [分叉检查](docs/FIRE_FORK_REVIEW.md)。
 
-[#187](https://github.com/mumu-lhl/blender-vfx-studio/issues/187)／[PR #188](https://github.com/mumu-lhl/blender-vfx-studio/pull/188) 正在把充能释放对齐真实接触帧，并补齐快速转剑关键帧。17 张同机位、明暗与远景高清图，以及完整动作的 48 张原生隔帧均已实际读取；时序、无插件参数和三阶段高清全通道像素复现通过，CI 尚在执行。卷片遮手和整体艺术问题仍保留，见[接触时序](docs/CHARGE_CONTACT_REVIEW.md)。另补查分叉火焰进入完整施法的 54 张视频隔帧，底部团块和角色蓄势仍弱。
+[#187](https://github.com/mumu-lhl/blender-vfx-studio/issues/187)／[PR #188](https://github.com/mumu-lhl/blender-vfx-studio/pull/188) 已把充能释放对齐真实接触帧，并补齐快速转剑关键帧。17 张同机位、明暗与远景高清图，以及完整动作的 48 张原生隔帧均已实际读取；时序、无插件参数和三阶段高清全通道像素复现通过，CI 全部 12 项成功。卷片遮手和整体艺术问题仍保留，见[接触时序](docs/CHARGE_CONTACT_REVIEW.md)。另补查分叉火焰进入完整施法的 54 张视频隔帧，底部团块和角色蓄势仍弱。
 
 ## 下一步
 
