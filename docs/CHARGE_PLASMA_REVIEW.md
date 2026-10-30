@@ -52,7 +52,7 @@
 LP_NUM_THREADS=2 MESA_SHADER_CACHE_DISABLE=true blender -b -t 2 --factory-startup --disable-autoexec --python-exit-code 1 --python tools/character_combat.py -- --frames 16 32 43 49 51
 ```
 
-加 `--dark`、`--far` 或 `--reverse` 检查对应条件。基线功能源码为 `639edfc`，新能量场功能源码为 `9264a02`，对应草稿 PR #194。本地动画、缩略图和原生检查已完成，CI 仍在运行；整体艺术问题继续由 #137／#89 跟踪。
+加 `--dark`、`--far` 或 `--reverse` 检查对应条件。基线功能源码为 `639edfc`，新能量场功能源码为 `9264a02`，对应草稿 PR #194。本地动画、缩略图和原生检查已完成，CI 全部 12 项已成功；整体艺术问题继续由 #137／#89 跟踪。
 
 
 ## 充能周期隔帧与完整资产
@@ -72,3 +72,18 @@ LP_NUM_THREADS=2 MESA_SHADER_CACHE_DISABLE=true blender -b -t 2 --factory-startu
 源码摘要、已查看帧、原生复现、完整资产与成本原始数据见[检查清单](images/charge-plasma-samples.json)。
 
 已下载 CI `41080052069` 的实际安装附件 `12989689658` 并验证 SHA256，内含插件与 18 个完整示例的两个 ZIP。插件的 32 个 Python 文件与源码一致；直接打开 ZIP 内的 Energy Charge，在未加载插件的进程核对新能量场节点、混合透明、0.6 压缩值、37→13→37 原生跳帧，以及嵌入的 256×256 自定义预览；导出预览后已实际读取，进程正常退出。该资产 SHA256 为 `bd47b6646821727fb68a770b032fb2d48a13665d424103b93ff5d087913f4b47`。这不是发布新版本。
+
+
+## 独立资产与实际 CI 视频
+
+另已读取修改前后独立资产的 13／31／43／46 帧，共八张 960×540 Eevee 图。默认资产采用 48 帧周期，帧号与角色镜头的接触时序不同。积蓄焦点和收束在空场景中也成立；独立释放能看到横向白带，交叉能量面还需要减少这类痕迹，未作为已解决问题。
+
+![独立资产的出现、积蓄、释放与退出](images/charge-plasma-standalone.png)
+
+还下载了 CI 的实际角色附件 `12993130054`，视频为 960×540、24 fps、96 帧。核对源码摘要与本地一致后，每隔一帧解码，48 张 PNG 均已实际读取。完整动作的联系表为 JPEG，仅缩小、压缩并加帧号，没有调色或重绘：
+
+[1–11](images/charge-plasma-ci-motion-01.jpg) · [13–23](images/charge-plasma-ci-motion-02.jpg) · [25–35](images/charge-plasma-ci-motion-03.jpg) · [37–47](images/charge-plasma-ci-motion-04.jpg) · [49–59](images/charge-plasma-ci-motion-05.jpg) · [61–71](images/charge-plasma-ci-motion-06.jpg) · [73–83](images/charge-plasma-ci-motion-07.jpg) · [85–95](images/charge-plasma-ci-motion-08.jpg)。
+
+整体衔接与本地原生隔帧一致：前半段仍偏待机，第 49 帧释放接入命中，第 51–61 帧交给橙色压力面和余烬，第 73–95 帧恢复干净。未观看实时播放，不用解码取样宣称实时速度感已通过。
+
+功能源码 `9264a02` 的 [CI 41080052069](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41080052069) 已完成全部 12 项并成功；后续提交只同步已验证主线和补充文档／实图。

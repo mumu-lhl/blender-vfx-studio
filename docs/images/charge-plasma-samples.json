@@ -532,6 +532,14 @@
     "charge-plasma-asset-preview.png": "da485958c47340daeee5d6732bbf91dd1117ba8f7aebd9601a578550f7de7a44",
     "charge-plasma-before-32.png": "491446e666ff6dc12c0db293f5299382000f8b8b3ae4b2a09793ed88f5a50be6",
     "charge-plasma-before-43.png": "c3281fa3230dbdcddb8d6a845e312b89fe5ef0ef9e3b046c209f4a02f11395c7",
+    "charge-plasma-ci-motion-01.jpg": "382c18859ef536a8d835e112c339eacd75bb368041d81a6f20b87c47f25dd408",
+    "charge-plasma-ci-motion-02.jpg": "ecac65018b086d275ed3a6501f4dee7ecd536205482c8ef29bc89f77515e2c22",
+    "charge-plasma-ci-motion-03.jpg": "1a40806e0c3667b47bd6b0f9d8589a54a154f3e8e4251d74127d2553e9ede275",
+    "charge-plasma-ci-motion-04.jpg": "21941c3d0969b03f24c7508f912ce9924cbcddd781846ae81606b136651724cb",
+    "charge-plasma-ci-motion-05.jpg": "35e1d4a9384013d59f7b7b33ac7ca3955a2bfb5e6741a3e544934ab8c204dbe4",
+    "charge-plasma-ci-motion-06.jpg": "51323a9b623ec966689fb501e0c0946e3c6060382b6224a54a41725a4a0382b3",
+    "charge-plasma-ci-motion-07.jpg": "2c57db95ed773ecdfd4c44ade667873d6ec996956ff65af51a3e826650f41135",
+    "charge-plasma-ci-motion-08.jpg": "f7734a9dd725e6114e2f26b12a9a7cc553e0be38e129bb2150b02b9b9cb0f819",
     "charge-plasma-comparison.png": "8cf9406cbad35078b3b74b3fce11d67f400da0faaf8203e61e34ea6bdbfe13a1",
     "charge-plasma-context.png": "948480840797387bfaa606029bc3eb9238ecf0edb1b65899081be748d90abddb",
     "charge-plasma-motion-01.png": "0b421df7067c92fdea8fe60d13e2dfe6601d9fa8883e50a4e81cdbe33a6e700b",
@@ -539,7 +547,8 @@
     "charge-plasma-motion-03.png": "f3238337241fd601ed80f27e28cf28f9a6c8509b0ac764123465ee1fc25d915c",
     "charge-plasma-motion-04.png": "224ac149d824788fae70c81249dbe68a61a1758800aef0105cdb58cdf8fc4b95",
     "charge-plasma-motion-05.png": "134b16ae13a07bcf0eb4c54bfdb22cefd2d926e52e2f98178b5ed00ebf6140c6",
-    "charge-plasma-reverse-43.png": "eccc769eb34d8887818f2111bf804106ace0ec2641c0893e2916b9b04a71dc22"
+    "charge-plasma-reverse-43.png": "eccc769eb34d8887818f2111bf804106ace0ec2641c0893e2916b9b04a71dc22",
+    "charge-plasma-standalone.png": "ba7a0d154ca2f9c9d602884b2f5fab0bf976fce5c79ea0884799d72182be60d2"
   },
   "ci_artifact": {
     "run_id": 41080052069,
@@ -550,5 +559,261 @@
     "energy_asset_sha256": "bd47b6646821727fb68a770b032fb2d48a13665d424103b93ff5d087913f4b47",
     "native_checked": true,
     "embedded_preview_viewed": true
-  }
+  },
+  "ci": {
+    "run_id": 41080052069,
+    "functional_commit": "9264a02b1e1c13b974d086ff573acba53b36ff1d",
+    "conclusion": "success",
+    "successful_jobs": 12
+  },
+  "ci_video": {
+    "artifact_id": 12993130054,
+    "artifact_sha256": "5cefcdbadd41f797b75f2a1bfeac28c66b1274949f19d22a70e7f5f69ecedcb5",
+    "video_sha256": "42ed0a2e403e8c84980cec9de6f659f86557f21065b989ad4975a48c8b9cabe3",
+    "resolution": [
+      960,
+      540
+    ],
+    "fps": 24,
+    "frame_count": 96,
+    "source_sha256_matched": true,
+    "all_48_decoded_samples_viewed": [
+      {
+        "source_frame": 1,
+        "sha256": "cb3828e348cdfe284192662ac176cbd1c4b02bd79f13ac08f2facb49119bd39e"
+      },
+      {
+        "source_frame": 3,
+        "sha256": "763c45a345b737d6247e29bc74e4fd42e661ad9c3c5feb44287a69297eefd8b0"
+      },
+      {
+        "source_frame": 5,
+        "sha256": "3759ba57c04a80838f527167a9ca784a889b7463603dd145c5ce3e31c1e66ba6"
+      },
+      {
+        "source_frame": 7,
+        "sha256": "42a240d9f5b6594b0d97e583008f304fc43189579140e4c6170a5fcb08a96a15"
+      },
+      {
+        "source_frame": 9,
+        "sha256": "984c1753035d122adfb63bf375ac1823210b6bb7c7fd71fb533c6a23011b7e95"
+      },
+      {
+        "source_frame": 11,
+        "sha256": "6db563e4b91aeabf1b8b49147bd7bfc61a08a5bb22d1cd24c8d2b90e2bfa539d"
+      },
+      {
+        "source_frame": 13,
+        "sha256": "4f4bcec2abd331f3e5f8969bd5e6a70de0368e66395d54cbc540b87ea4dbc7c4"
+      },
+      {
+        "source_frame": 15,
+        "sha256": "c43c359370cc85ac5266661faa64f84ee0992f27c7fe1b3d37b915ff1f94e52c"
+      },
+      {
+        "source_frame": 17,
+        "sha256": "1fb978604ce1313856c847e2c3745fffad7257521123d624e4dec59d2fa9cdd5"
+      },
+      {
+        "source_frame": 19,
+        "sha256": "b3f57e1c6e3f3500922813a432f1dfd508a73ea798ffe11249ef658612af899e"
+      },
+      {
+        "source_frame": 21,
+        "sha256": "3de8ea2dd86964953c2b352a1080510bef0e29ac591d2eaedc572afa0a2f52b7"
+      },
+      {
+        "source_frame": 23,
+        "sha256": "2128c9851c216d4c1ac9d4421586345f922dbf79370f8fb5163abe1b2a7c27f9"
+      },
+      {
+        "source_frame": 25,
+        "sha256": "b332870a9d8f9bfd4c7459a6581aa8ff4a5ff406013c4a8ce21a95c5b7cd189b"
+      },
+      {
+        "source_frame": 27,
+        "sha256": "7a38c22c34ecc9cae2d5949a869caca117f841fba7c4a7e9b07994ff68180ba0"
+      },
+      {
+        "source_frame": 29,
+        "sha256": "528fb2788680feee675f42bfe03a962efea9d811be585feffdc5bfd9a49f163e"
+      },
+      {
+        "source_frame": 31,
+        "sha256": "545ae1c6a3c9cea495cd44acfed7d6ca88b862fbde6fdd14305a0587c7950dd1"
+      },
+      {
+        "source_frame": 33,
+        "sha256": "fa4b62d104fc272bb2ff7f127f869c33aa051f10efb50c8dfeb4d00f427352d9"
+      },
+      {
+        "source_frame": 35,
+        "sha256": "eba8cdf48ac13b0b88ef8e58057184291e6706dfaa4f01540516471d10c0abdb"
+      },
+      {
+        "source_frame": 37,
+        "sha256": "24432373203101177311cc6d0c73d427e58d81f73f0a8c6b5fe55a14abb402c6"
+      },
+      {
+        "source_frame": 39,
+        "sha256": "8c0a7ce08526ebee8087f5c22031d1466b1e1b8d5071b81d3a9085eb3d5a684c"
+      },
+      {
+        "source_frame": 41,
+        "sha256": "2c47df8da365da81ec8120b97fd927d33fabe7f3e74c6e8711f1567281d42416"
+      },
+      {
+        "source_frame": 43,
+        "sha256": "f3604e2c366b1e6130a18d37a5cfac26cf7d3ffdf8b5604bb91a5f80c1391d67"
+      },
+      {
+        "source_frame": 45,
+        "sha256": "a181c2a835e6d1f5795e147f10bbb2a6b51ff5bebe9b6ef2b9217b3979659a47"
+      },
+      {
+        "source_frame": 47,
+        "sha256": "5cb05376b3689b3b1e361467771bf5ef3850457e9c35e17c6e856837d8cb2faf"
+      },
+      {
+        "source_frame": 49,
+        "sha256": "af069e90748d33eddcae2b092709bb94db836135b3a5c96691e10e9f918ac0d4"
+      },
+      {
+        "source_frame": 51,
+        "sha256": "ccdac6b06a751fb74d155a71003ebe01d44cfb3ff5fc50f64d10e8fa6392abd9"
+      },
+      {
+        "source_frame": 53,
+        "sha256": "a2d80ba8ff12212e3efc67a0abc4d3cb94467de04e8166552f3b5d9c9b6e9504"
+      },
+      {
+        "source_frame": 55,
+        "sha256": "f8400e67549a4fac8cd3cc253ac288f06f03ccb96a3d30d2d38d644ace53fd2c"
+      },
+      {
+        "source_frame": 57,
+        "sha256": "8a235daf3d2b34321c40d9ff274b79a6e6529241a1ff48fbe01361449ff8a043"
+      },
+      {
+        "source_frame": 59,
+        "sha256": "8934292fedadea9d9383fe64be9dc4ace49be85e0aed903412a16228cab6886b"
+      },
+      {
+        "source_frame": 61,
+        "sha256": "0766b9224d627006c49568a4ecde151c323299f76f5df8684237576edf6297ae"
+      },
+      {
+        "source_frame": 63,
+        "sha256": "266e6c7436a084eddf66570c510e61af7177604fdaea15671cf0f8d7df15264c"
+      },
+      {
+        "source_frame": 65,
+        "sha256": "e0cc10bae8068fc228c041bb85538c4baf1710b63cafa073f9fc1f45b7268101"
+      },
+      {
+        "source_frame": 67,
+        "sha256": "78e50c0a63a4c8e55e72b7523613c3db693dba0c8d8081120e92f9a43b2fe936"
+      },
+      {
+        "source_frame": 69,
+        "sha256": "be959f62cb01c89a558668a3a1345eb72027772d87112424621b6c139da5ea0d"
+      },
+      {
+        "source_frame": 71,
+        "sha256": "473acc399415cc3e2e1d00fb21b7615353523b235cae5d96bd568f3435b0887f"
+      },
+      {
+        "source_frame": 73,
+        "sha256": "28fbc370b255b4d24b8fce3c0b4bbd0139617674fe1213f72a72e58924a8b178"
+      },
+      {
+        "source_frame": 75,
+        "sha256": "6896be2701958d0bb6f3d129ea9fa9bcb7fb5cef64b4f641e7854d47de41e63d"
+      },
+      {
+        "source_frame": 77,
+        "sha256": "d8cc66d270d7424868f3d287c6adeefd13539785c79a9cee0c773ffeb729727a"
+      },
+      {
+        "source_frame": 79,
+        "sha256": "7a0e7fe39a38a0e6774e3c97bb90da3bf0d0da8d00ee9fdb4b0047fb845f4792"
+      },
+      {
+        "source_frame": 81,
+        "sha256": "29fac89013d9769cf6f95a95defa66f0ef6732d953aeb576faceb75e8d60fd59"
+      },
+      {
+        "source_frame": 83,
+        "sha256": "49eabc4c7e2384a0fbef48d23e1ed3462e378cada930b8491adf9eb77826dcaf"
+      },
+      {
+        "source_frame": 85,
+        "sha256": "87659a7ff16b04a566ce9b78457d0ab128234632252e541f177a1881b5a2f805"
+      },
+      {
+        "source_frame": 87,
+        "sha256": "9a7c71465687bbf5e4b4be2b5779e9ddc278062578892daf10a7120b67fe5c09"
+      },
+      {
+        "source_frame": 89,
+        "sha256": "2c2dc5a29037db39bc4f40732981c92c528348c68c117611ce25afc846957998"
+      },
+      {
+        "source_frame": 91,
+        "sha256": "467a196c1e1d02f26e0fdaeb4f97348e9ccd3207d3c12aa2590cf26cce97630d"
+      },
+      {
+        "source_frame": 93,
+        "sha256": "b3093d2dc1aafbcf54c5bd2db16775213dc8033da34f55bacaf936d8f542b49b"
+      },
+      {
+        "source_frame": 95,
+        "sha256": "aac8053c090865fa30feccbb3a3b2633b9d107aee5f4aa6d1cf907748ded08c3"
+      }
+    ],
+    "contact_sheets": "JPEG quality 92, resized and labelled; no retouching",
+    "realtime_playback_reviewed": false
+  },
+  "standalone_viewed": [
+    {
+      "variant": "before",
+      "frame": 13,
+      "sha256": "48b0ece5f60289fc96a565d80d6c00a81e8535d23f1ab2eced48057b79f1b70a"
+    },
+    {
+      "variant": "before",
+      "frame": 31,
+      "sha256": "484a735a7894ce2eb0c1cc8ca6f98e68c181d4388a0c76b4515ab78aef6de7bf"
+    },
+    {
+      "variant": "before",
+      "frame": 43,
+      "sha256": "ceb557a999720c9aa43a028baa149c7a1f648a37f8f90681f723f1e6750dc587"
+    },
+    {
+      "variant": "before",
+      "frame": 46,
+      "sha256": "09458532b22a043e91f55a230dfe5800f10a9646cf44dea7d027b2c5e3ec9551"
+    },
+    {
+      "variant": "after",
+      "frame": 13,
+      "sha256": "683eb0b82020485d579ea59826ac71dd27f2110754537a499db497ef9c6f5bf1"
+    },
+    {
+      "variant": "after",
+      "frame": 31,
+      "sha256": "79683d982075fd77f3bbe216d7089e9df141000fefdbd86f0144ccc6a3443310"
+    },
+    {
+      "variant": "after",
+      "frame": 43,
+      "sha256": "91ffd453f95c7cef8ce865e8d91602648b4f16543608d6766dbceb9ff8de1ca9"
+    },
+    {
+      "variant": "after",
+      "frame": 46,
+      "sha256": "0b7d42a3a455a9598ab6934f24a4caa5711a2a32a806059413f568044c0180f6"
+    }
+  ]
 }
