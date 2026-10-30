@@ -10,6 +10,12 @@
 
 卷曲能量片积蓄后转向剑刃释放，外围进流和粒子承担汇聚方向。第 **36 帧**，本地角色镜头；[编辑与衔接检查](COMBAT_HANDOFF_REVIEW.md)。末段仍偏片状，未观看实时播放。
 
+## Arc Slash
+
+![Arc Slash 与命中：第 49 帧](images/slash-plane-after-49.png)
+
+刀光跟随当前剑刃所在的平面，保留主体与独立残影；此图同时包含充能释放和白色命中核。第 **49 帧**，本地角色镜头；[空间对齐与实际观看范围](SLASH_PLANE_REVIEW.md)。多层蓝片仍有明显重叠，未观看实时播放。
+
 ## Impact Burst
 
 ![Impact Burst：第 53 帧](images/impact-focus-after-53.png)
