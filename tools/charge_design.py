@@ -646,6 +646,44 @@ def _surface(root, *, core=False, ground=False):
         surface_color = g.v(
             "Primary And Supporting Filament Color", "SCALE", edge_mix.outputs[0], hierarchy
         )
+    if core:
+        # Paint energy across each lobe, rather than lighting a hard shell by
+        # its facing normal. The moving front modulates a coherent hot center.
+        side = g.m("Flare Distance From Midline", "ABSOLUTE", attribute("charge_filament_side"))
+        center = g.m("Flare Heat Across Its Width", "SUBTRACT", 1, side)
+        height_heat = g.m(
+            "Flare Heat Along Its Length", "SINE", g.m("Flare Length Phase", "MULTIPLY", u, math.pi)
+        )
+        heat = g.m("Flare Painted Heat", "MULTIPLY", center, height_heat)
+        travel = g.m("Flare Moving Heat", "MULTIPLY_ADD", nucleus_front, 0.25)
+        travel.node.inputs[2].default_value = 0.75
+        heat = g.m("Heat Flows Through The Mass", "MULTIPLY", heat, travel)
+        white_threshold = g.tree.nodes["Nucleus White Threshold"].outputs[0]
+        white_threshold.default_value = 0.64
+        white = g.stage("Flare Hot Center", heat, 0.64, 0.84)
+        g.link(white_threshold, white.node.inputs["From Min"])
+        g.link(
+            g.m("Flare Hot Transition", "ADD", white_threshold, 0.2), white.node.inputs["From Max"]
+        )
+        tone = g.m("Flare Body Values", "MULTIPLY_ADD", heat, 0.65)
+        g.link(g.tree.nodes["Nucleus Blue Depth"].outputs[0], tone.node.inputs[2])
+        painted = g.n("ShaderNodeMixRGB", "Flare Body To Hot Core")
+        g.link(white, painted.inputs[0])
+        g.link(g.v("Flare Editable Body", "SCALE", color.outputs[0], tone), painted.inputs[1])
+        painted.inputs[2].default_value = (0.85, 0.98, 1, 1)
+        edge = g.stage("Thin Flare Boundary", side, 0.83, 0.99)
+        edge = g.m(
+            "Editable Flare Edge", "MULTIPLY", edge, g.tree.nodes["Core Edge Contrast"].outputs[0]
+        )
+        rim = g.n("ShaderNodeMixRGB", "Flare Edge Against Light Backgrounds")
+        g.link(edge, rim.inputs[0])
+        g.link(painted.outputs[0], rim.inputs[1])
+        g.link(g.v("Flare Edge Tint", "SCALE", color.outputs[0], 0.055), rim.inputs[2])
+        finish = g.n("ShaderNodeMixRGB", "Flare Focus Over Supporting Intake")
+        g.link(inner, finish.inputs[0])
+        g.link(surface_color, finish.inputs[1])
+        g.link(rim.outputs[0], finish.inputs[2])
+        surface_color = finish.outputs[0]
     support = attribute("charge_support_weight")
     if core:
         support = g.m(
@@ -778,32 +816,32 @@ def core_shape(root):
                 next_k = (k // 3) * 3 + (k + 1) % 3 if primary else (k + 1) % sides
                 a, b = base + j * sides + k, base + j * sides + next_k
                 faces.append((a, b, b + sides, a + sides))
-    # Curled, unequal energy sheets leave real gaps around a shared focus.
-    # Rounded lens sections provide depth from side views without solid leaf faces.
+    # Two broad, unequal flame lobes and a short hot tongue form one focus.
+    # Their planes cross in depth; they do not orbit as three regular rings.
     lens = ((-1, 0), (-0.65, 0.7), (0.65, 0.7), (1, 0), (0.65, -0.7), (-0.65, -0.7))
     petals = (
-        (0.0, 2.8, 0.19, 0.64, 0.09),
-        (2.05, 3.3, 0.16, 0.53, 0.075),
-        (4.55, 2.2, 0.12, 0.43, 0.045),
+        (0.0, -0.16, 0.10, 0.78, 0.22),
+        (1.75, 0.14, 0.08, 0.62, 0.18),
+        (0.8, 0.035, 0.025, 0.44, 0.135),
     )
-    for lobe, (phase, turn, reach, rise, breadth) in enumerate(petals):
+    for lobe, (phase, bend, reach, rise, breadth) in enumerate(petals):
         base, steps, sides = len(vertices), 19, len(lens)
 
         def center(t):
-            angle = phase + turn * t
-            radius = reach * (0.22 + 0.78 * (1 - t) ** 0.7)
-            return Vector((math.cos(angle) * radius, math.sin(angle) * radius, (t - 0.5) * rise))
+            curl = bend * math.sin(math.pi * t) + reach * math.sin(t * math.tau) * t
+            return Vector((math.cos(phase) * curl, math.sin(phase) * curl, (t - 0.43) * rise))
 
         for j in range(steps):
             t = j / (steps - 1)
-            profile = max(math.sin(math.pi * t), 0) ** 0.7
-            angle = phase + turn * t
+            profile = max(math.sin(math.pi * t), 0) ** 0.8
+            profile *= 1 + 0.22 * math.sin(t * 15 + lobe) * math.sin(math.pi * t)
+            angle = phase + 0.45 * math.sin(t * math.pi)
             radial = Vector((math.cos(angle), math.sin(angle), 0))
             tangent = (center(min(t + 0.001, 1)) - center(max(t - 0.001, 0))).normalized()
             normal = tangent.cross(radial).normalized()
             point = center(t)
             for k, (across, depth) in enumerate(lens):
-                offset = profile * (radial * breadth * across + normal * 0.018 * depth)
+                offset = profile * (radial * breadth * across + normal * 0.055 * depth)
                 vertices.append(tuple(point + offset))
                 cross_sections.append((0, 0, 0))
                 a = k * math.tau / sides
