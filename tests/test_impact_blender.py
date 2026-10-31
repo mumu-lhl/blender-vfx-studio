@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 
 import bpy
+from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -35,7 +36,7 @@ class ImpactTests(unittest.TestCase):
     def setUp(self):
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
-    def test_four_layers_and_cursor_placement_with_staggered_lifetimes(self):
+    def test_layers_and_cursor_placement_with_staggered_lifetimes(self):
         bpy.context.scene.cursor.location = (2, 3, 4)
         root = core.create(bpy.context, "IMPACT_BURST", "LOW")
         self.assertEqual(root["vfx_module"], "core.composition")
@@ -43,18 +44,19 @@ class ImpactTests(unittest.TestCase):
         self.assertEqual(root["duration"], 24.0)
         self.assertFalse(root["loop"])
         children = composition.members(root)
-        self.assertEqual(len(children), 4)
+        self.assertEqual(len(children), 5)
         self.assertTrue(all(child["vfx_quality"] == "LOW" for child in children))
         wave = next(child for child in children if child["vfx_module"] == "mesh.ring")
         self.assertAlmostEqual(wave.matrix_world.translation.z, 3.95, places=5)
         self.assertTrue(all(abs(child.matrix_world.translation.x - 2) < 1e-5 for child in children))
         for frame, active in (
             (0, 0),
-            (1, 2),
-            (2, 3),
-            (3, 4),
-            (4, 3),
-            (8, 3),
+            (1, 3),
+            (2, 4),
+            (3, 5),
+            (4, 4),
+            (8, 4),
+            (9, 3),
             (19, 2),
             (20, 1),
             (25, 0),
@@ -65,7 +67,71 @@ class ImpactTests(unittest.TestCase):
         self.assertEqual(sum(bool(p) for p in geometry(root, 5).values()), 3)
         self.assertFalse(any(geometry(root, 13).values()))
         update(root, loop=True)
-        self.assertEqual(sum(bool(p) for p in geometry(root, 13).values()), 2)
+        self.assertEqual(sum(bool(p) for p in geometry(root, 13).values()), 3)
+
+    def test_burst_core_plays_through_flash_handoff_and_retimes(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        burst = next(m for m in composition.members(root) if m.name.endswith("Burst Core"))
+        key = burst["vfx_id"]
+
+        for member in composition.members(root):
+            member.children[0].hide_render = member != burst
+        camera()
+        bpy.context.scene.camera.data.ortho_scale = 1.5
+        bpy.context.scene.render.dither_intensity = 0
+        early, peak = render_pixels(1), render_pixels(3)
+        self.assertGreater(sum(peak[0::4]), sum(early[0::4]) * 2)
+        after_flash = geometry(root, 5)[key]
+        self.assertTrue(after_flash)
+        self.assertFalse(geometry(root, 9)[key])
+        update(root, duration=48.0)
+        self.assertEqual(geometry(root, 9)[key], after_flash)
+        retimed = render_pixels(5)
+        self.assertLess(max(abs(a - b) for a, b in zip(peak, retimed)), 1 / 255 + 1e-6)
+        update(root, duration=24.0)
+        self.assertEqual(geometry(root, 5)[key], after_flash)
+        before = max(point[0] for point in geometry(root, 3)[key])
+        update(burst, width=burst["width"] * 2)
+        self.assertAlmostEqual(
+            max(point[0] for point in geometry(root, 3)[key]), before * 2, places=5
+        )
+
+    def test_burst_sprite_faces_camera_without_exporting_camera_data(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        burst = next(m for m in composition.members(root) if m.name.endswith("Burst Core"))
+        camera()
+        view = bpy.context.scene.camera
+        view.location = (3, -5, 4)
+        view.rotation_euler = (-view.location).to_track_quat("-Z", "Y").to_euler()
+        root.rotation_euler = (0.3, 0.7, 1.1)
+        geometry(root, 3)
+        layer = burst.children[0].evaluated_get(bpy.context.evaluated_depsgraph_get())
+        normal = layer.matrix_world.to_3x3().inverted().transposed() @ layer.data.polygons[0].normal
+        expected = view.matrix_world.to_3x3() @ Vector((0, 0, 1))
+        self.assertGreater(normal.normalized().dot(expected.normalized()), 0.9999)
+        path = ROOT / "work/impact-billboard.blend"
+        assets.write(path, root)
+        with bpy.data.libraries.load(str(path), link=False) as (available, requested):
+            self.assertFalse(available.cameras)
+            self.assertFalse(available.scenes)
+
+    def test_burst_core_color_and_strength_change_actual_pixels(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        burst = next(m for m in composition.members(root) if m.name.endswith("Burst Core"))
+        for member in composition.members(root):
+            member.children[0].hide_render = member != burst
+        camera()
+        bpy.context.scene.camera.data.ortho_scale = 1.5
+        bpy.context.scene.render.dither_intensity = 0
+        warm = render_pixels(3)
+        self.assertGreater(sum(warm[0::4]), sum(warm[2::4]))
+        update(burst, color_0=0.015, color_1=0.05, color_2=1.0)
+        blue = render_pixels(3)
+        self.assertGreater(sum(blue[2::4]), sum(blue[0::4]))
+        self.assertGreater(max(abs(a - b) for a, b in zip(warm, blue)), 0.1)
+        update(burst, strength=0.0)
+        dark = render_pixels(3)
+        self.assertLess(max(v for i, v in enumerate(dark) if i % 4 != 3), 1e-5)
 
     def test_wave_erosion_tracks_group_time_instead_of_absolute_keyframes(self):
         root = core.create(bpy.context, "IMPACT_BURST", "LOW")
@@ -98,7 +164,7 @@ class ImpactTests(unittest.TestCase):
         core.delete(root)
         children, retained = composition.ungroup_all(bpy.context, clone)
         self.assertFalse(retained)
-        self.assertEqual(len(children), 4)
+        self.assertEqual(len(children), 5)
         self.assertTrue(all(child.parent is None for child in children))
         for child in children:
             core.delete(child)
@@ -485,12 +551,12 @@ if not result.wasSuccessful():
 bpy.ops.wm.read_factory_settings(use_empty=True)
 root = core.create(bpy.context, "IMPACT_BURST", "LOW")
 root.name = "Persisted Impact"
+camera()
+bpy.context.scene.camera.data.ortho_scale = 5.5
 for frame in (2, 5, 14):
     state = geometry(root, frame)
     for child in composition.members(root):
         child[f"expected_shape_{frame}"] = [c for v in state[child["vfx_id"]] for c in v]
-camera()
-bpy.context.scene.camera.data.ortho_scale = 5.5
 for frame in (2, 5, 9, 11, 14):
     root[f"expected_pixels_{frame}"] = render_pixels(frame)
 addon.unregister()

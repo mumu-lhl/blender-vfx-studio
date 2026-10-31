@@ -1,0 +1,2071 @@
+{
+  "realtime_playback_reviewed": false,
+  "source_branch": "art/impact-burning-core",
+  "artwork_sha256": "c69a4801b217428d1740ae6d82c57ae612430f92ba4904208ee131f273adb5e4",
+  "notes": [
+    "Contact sheets only resize and arrange actual PNGs; HD images are unmodified copies.",
+    "Character and performance source records predate adding PNG fingerprinting; artwork hash is recorded separately here and in later standalone records.",
+    "Character scene retains main Slice action timing; PR #202 preparation is reviewed separately.",
+    "Before/after hides only the new gas layer in the same saved scene.",
+    "Original generated artwork is committed; rebuilding does not require image generation."
+  ],
+  "committed_images": {
+    "impact-burning-comparison.png": "d7f3c8f471ce3c286c99701bd604267e17be33dd78f1680d1cdaa0cb59d6c3d1",
+    "impact-burning-motion.png": "1ba4f547689dca292ca00b285bb1948d9e0a23d04eb1b098496a3d40d7da386e",
+    "impact-burning-context.png": "8707b9cf24978e643f1eba097683ae4f79c2b9319bc0b60c0ca44c5b8d4b21da",
+    "impact-burning-stages.png": "f9a085e40d67d8f3da6d2c89fc5e0647696bde1d0a33e1da1f3bf2739599952c",
+    "impact-burning-after-51.png": "ab23ac13920eeaea5a8d66576d0c8542c8e75df50baa957f8718fc2e4514fd19",
+    "impact-burning-after-53.png": "fd84f5559ade412cd1bc6bdd47df6ed63aa044a4bd1f026002197bcd557ae280",
+    "impact-burning-preview.png": "fa72bc4dbb8d8a756939733a87a5de715b06bc2550da9c237c349489278e6e08",
+    "impact-burning-reverse-51.png": "caa2bc6135892e9904d3d51065b99439c6c0c31311a9c99a0accd830a98d80d3",
+    "impact-burning-reverse-53.png": "7c5f773aff32f1fb93e2b8c13c5e27ffca0cac52f33660b4ec8d12851894a1b9"
+  },
+  "records": {
+    "character_light": {
+      "engine": "BLENDER_EEVEE",
+      "blender_version": "5.2.2 LTS",
+      "resolution": [
+        960,
+        540
+      ],
+      "samples": 16,
+      "fps": 24,
+      "fps_base": 1.0,
+      "frames": [
+        49,
+        51,
+        53,
+        55,
+        57
+      ],
+      "dark": false,
+      "far": false,
+      "reverse": false,
+      "no_fx": false,
+      "view_transform": "AgX",
+      "look": "None",
+      "bloom": false,
+      "camera_location": [
+        0.0,
+        7.0,
+        4.150000095367432
+      ],
+      "camera_lens_mm": 50.0,
+      "contact": {
+        "frame": 49,
+        "hilt": [
+          -0.5040510296821594,
+          -0.10794141888618469,
+          0.5526474118232727
+        ],
+        "tip": [
+          0.9185565114021301,
+          0.4261956810951233,
+          0.8506161570549011
+        ],
+        "hits": [
+          {
+            "position": [
+              0.7292304039001465,
+              0.35511070489883423,
+              0.8109614253044128
+            ],
+            "normal": [
+              -0.744300365447998,
+              0.31550633907318115,
+              -0.5886193513870239
+            ],
+            "mesh": "Rogue_ArmRight",
+            "distance": 1.3424330068278896
+          }
+        ],
+        "verified_intersection": true
+      },
+      "charge_release": {
+        "frame": 49,
+        "phase": 0.8799999952316284,
+        "duration": 54.54545484101477
+      },
+      "blade_trace": [
+        {
+          "frame": 41,
+          "hilt": [
+            -0.5252982378005981,
+            -0.05422717705368996,
+            0.5589168071746826
+          ],
+          "tip": [
+            -0.24550466239452362,
+            1.3545249700546265,
+            1.137739658355713
+          ],
+          "hits": []
+        },
+        {
+          "frame": 42,
+          "hilt": [
+            -0.5332520604133606,
+            -0.0016502588987350464,
+            0.5619307160377502
+          ],
+          "tip": [
+            -0.502615213394165,
+            1.4342421293258667,
+            1.1408743858337402
+          ],
+          "hits": []
+        },
+        {
+          "frame": 43,
+          "hilt": [
+            -0.5405353903770447,
+            0.04624258726835251,
+            0.5651320815086365
+          ],
+          "tip": [
+            -0.7558630108833313,
+            1.4662196636199951,
+            1.1440973281860352
+          ],
+          "hits": []
+        },
+        {
+          "frame": 44,
+          "hilt": [
+            -0.5458655953407288,
+            0.08635561168193817,
+            0.5677602887153625
+          ],
+          "tip": [
+            -0.9737163186073303,
+            1.4573824405670166,
+            1.1466654539108276
+          ],
+          "hits": []
+        },
+        {
+          "frame": 45,
+          "hilt": [
+            -0.548975944519043,
+            0.11642760783433914,
+            0.5694602131843567
+          ],
+          "tip": [
+            -1.134333848953247,
+            1.4279676675796509,
+            1.1483566761016846
+          ],
+          "hits": []
+        },
+        {
+          "frame": 46,
+          "hilt": [
+            -0.5503388047218323,
+            0.13419687747955322,
+            0.5702810287475586
+          ],
+          "tip": [
+            -1.2259764671325684,
+            1.4015636444091797,
+            1.1492431163787842
+          ],
+          "hits": []
+        },
+        {
+          "frame": 47,
+          "hilt": [
+            -0.5445151329040527,
+            0.12125632166862488,
+            0.5695549249649048
+          ],
+          "tip": [
+            -1.0548776388168335,
+            1.4672297239303589,
+            1.140332818031311
+          ],
+          "hits": []
+        },
+        {
+          "frame": 48,
+          "hilt": [
+            -0.5120673775672913,
+            0.029847092926502228,
+            0.5664984583854675
+          ],
+          "tip": [
+            -0.030819101259112358,
+            1.4127216339111328,
+            1.0704399347305298
+          ],
+          "hits": []
+        },
+        {
+          "frame": 49,
+          "hilt": [
+            -0.5040510296821594,
+            -0.10794141888618469,
+            0.5526474118232727
+          ],
+          "tip": [
+            0.9185565114021301,
+            0.4261956810951233,
+            0.8506161570549011
+          ],
+          "hits": [
+            {
+              "position": [
+                0.7292304039001465,
+                0.35511070489883423,
+                0.8109614253044128
+              ],
+              "normal": [
+                -0.744300365447998,
+                0.31550633907318115,
+                -0.5886193513870239
+              ],
+              "mesh": "Rogue_ArmRight",
+              "distance": 1.3424330068278896
+            }
+          ],
+          "verified_intersection": true
+        },
+        {
+          "frame": 50,
+          "hilt": [
+            -0.5340469479560852,
+            -0.18351757526397705,
+            0.5484862327575684
+          ],
+          "tip": [
+            0.9929772615432739,
+            -0.29270613193511963,
+            0.7812432050704956
+          ],
+          "hits": [
+            {
+              "position": [
+                0.7974489331245422,
+                -0.2787250578403473,
+                0.7514398097991943
+              ],
+              "normal": [
+                -0.8638401031494141,
+                0.48778945207595825,
+                0.12586423754692078
+              ],
+              "mesh": "Rogue_ArmLeft",
+              "distance": 1.3502354939547772
+            }
+          ]
+        },
+        {
+          "frame": 51,
+          "hilt": [
+            -0.5672783255577087,
+            -0.1908901035785675,
+            0.546071469783783
+          ],
+          "tip": [
+            0.9236587882041931,
+            -0.5427681803703308,
+            0.7723243236541748
+          ],
+          "hits": []
+        },
+        {
+          "frame": 52,
+          "hilt": [
+            -0.5982235670089722,
+            -0.1968894749879837,
+            0.5435767769813538
+          ],
+          "tip": [
+            0.837814450263977,
+            -0.7323629260063171,
+            0.7648566961288452
+          ],
+          "hits": []
+        },
+        {
+          "frame": 53,
+          "hilt": [
+            -0.6262171864509583,
+            -0.20112019777297974,
+            0.5412814617156982
+          ],
+          "tip": [
+            0.7528285384178162,
+            -0.8704903721809387,
+            0.7605490684509277
+          ],
+          "hits": []
+        },
+        {
+          "frame": 54,
+          "hilt": [
+            -0.6506569385528564,
+            -0.20358934998512268,
+            0.539355456829071
+          ],
+          "tip": [
+            0.6782221794128418,
+            -0.9674490094184875,
+            0.7595838904380798
+          ],
+          "hits": []
+        },
+        {
+          "frame": 55,
+          "hilt": [
+            -0.6710495352745056,
+            -0.2045443058013916,
+            0.5378965139389038
+          ],
+          "tip": [
+            0.6182531118392944,
+            -1.0326060056686401,
+            0.7613122463226318
+          ],
+          "hits": []
+        },
+        {
+          "frame": 56,
+          "hilt": [
+            -0.6870144605636597,
+            -0.20436152815818787,
+            0.5369590520858765
+          ],
+          "tip": [
+            0.5739403963088989,
+            -1.073864459991455,
+            0.764689564704895
+          ],
+          "hits": []
+        }
+      ],
+      "source_sha256": {
+        "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+        "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+        "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+        "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+        "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+        "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+        "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+        "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+        "blender_vfx_studio/dash.py": "cae04666618b5af84c54595c49e29c4f06c2295d1743f11584fda1d186c2afa1",
+        "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+        "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+        "blender_vfx_studio/impact.py": "a83bafc048945f16667fe197c94b2ea75d748e08965e64134442a84613d0eac4",
+        "blender_vfx_studio/impact_gas.py": "2317cfb38c41addb0b80e9ec515c288ac4a72deab8d71050dbed6a1a16089398",
+        "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+        "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+        "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+        "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+        "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+        "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+        "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+        "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+        "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+        "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+        "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+        "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+        "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+        "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+        "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+        "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+        "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+        "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+        "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+        "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+        "tools/character_scene.py": "4fcee968f50136a78ac785f82f02f092c1165e4affb3fa0656d5017c6e379120",
+        "tools/character_combat.py": "e2e98cc4970a7f8fe73e9bb8693e3adf49765ef7cf98653c83072adf4660866c",
+        "tools/build_examples.py": "6d32fc3a62a25e31ac4210558027fa9b1314de9035dc3d10dcad765a0560dfb5",
+        "tools/charge_design.py": "b54106f67f5bca3854fc1536a7f6af020b24825ac1e63dcefab4904ca187401d",
+        "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+        "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+        "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+        "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+      },
+      "render_timings": [
+        {
+          "frame": 49,
+          "render_wall_seconds": 50.788135512000736
+        },
+        {
+          "frame": 51,
+          "render_wall_seconds": 21.863653897002223
+        },
+        {
+          "frame": 53,
+          "render_wall_seconds": 24.36937920499986
+        },
+        {
+          "frame": 55,
+          "render_wall_seconds": 24.605316524000955
+        },
+        {
+          "frame": 57,
+          "render_wall_seconds": 28.07263543299996
+        }
+      ],
+      "cpu_quota": "200000 100000",
+      "blender_threads": 2,
+      "software_gl_requested": false,
+      "lp_num_threads": "2",
+      "saved_frame": 49,
+      "portable_render_path": "//renders/character-",
+      "method": "PNG frames; realtime playback unreviewed",
+      "realtime_playback_reviewed": false,
+      "limits": [
+        "Stylized CC0 low-poly characters, not a production anime rig",
+        "Headless render wall time is not interactive viewport FPS",
+        "Timing, transforms and existing artistic values are fitted to this sword stroke"
+      ]
+    },
+    "character_dark": {
+      "engine": "BLENDER_EEVEE",
+      "blender_version": "5.2.2 LTS",
+      "resolution": [
+        960,
+        540
+      ],
+      "samples": 16,
+      "fps": 24,
+      "fps_base": 1.0,
+      "frames": [
+        51,
+        53
+      ],
+      "dark": true,
+      "far": false,
+      "reverse": false,
+      "no_fx": false,
+      "view_transform": "AgX",
+      "look": "None",
+      "bloom": false,
+      "camera_location": [
+        0.0,
+        7.0,
+        4.150000095367432
+      ],
+      "camera_lens_mm": 50.0,
+      "contact": {
+        "frame": 49,
+        "hilt": [
+          -0.5040510296821594,
+          -0.10794141888618469,
+          0.5526474118232727
+        ],
+        "tip": [
+          0.9185565114021301,
+          0.4261956810951233,
+          0.8506161570549011
+        ],
+        "hits": [
+          {
+            "position": [
+              0.7292304039001465,
+              0.35511070489883423,
+              0.8109614253044128
+            ],
+            "normal": [
+              -0.744300365447998,
+              0.31550633907318115,
+              -0.5886193513870239
+            ],
+            "mesh": "Rogue_ArmRight",
+            "distance": 1.3424330068278896
+          }
+        ],
+        "verified_intersection": true
+      },
+      "charge_release": {
+        "frame": 49,
+        "phase": 0.8799999952316284,
+        "duration": 54.54545484101477
+      },
+      "blade_trace": [
+        {
+          "frame": 41,
+          "hilt": [
+            -0.5252982378005981,
+            -0.05422717705368996,
+            0.5589168071746826
+          ],
+          "tip": [
+            -0.24550466239452362,
+            1.3545249700546265,
+            1.137739658355713
+          ],
+          "hits": []
+        },
+        {
+          "frame": 42,
+          "hilt": [
+            -0.5332520604133606,
+            -0.0016502588987350464,
+            0.5619307160377502
+          ],
+          "tip": [
+            -0.502615213394165,
+            1.4342421293258667,
+            1.1408743858337402
+          ],
+          "hits": []
+        },
+        {
+          "frame": 43,
+          "hilt": [
+            -0.5405353903770447,
+            0.04624258726835251,
+            0.5651320815086365
+          ],
+          "tip": [
+            -0.7558630108833313,
+            1.4662196636199951,
+            1.1440973281860352
+          ],
+          "hits": []
+        },
+        {
+          "frame": 44,
+          "hilt": [
+            -0.5458655953407288,
+            0.08635561168193817,
+            0.5677602887153625
+          ],
+          "tip": [
+            -0.9737163186073303,
+            1.4573824405670166,
+            1.1466654539108276
+          ],
+          "hits": []
+        },
+        {
+          "frame": 45,
+          "hilt": [
+            -0.548975944519043,
+            0.11642760783433914,
+            0.5694602131843567
+          ],
+          "tip": [
+            -1.134333848953247,
+            1.4279676675796509,
+            1.1483566761016846
+          ],
+          "hits": []
+        },
+        {
+          "frame": 46,
+          "hilt": [
+            -0.5503388047218323,
+            0.13419687747955322,
+            0.5702810287475586
+          ],
+          "tip": [
+            -1.2259764671325684,
+            1.4015636444091797,
+            1.1492431163787842
+          ],
+          "hits": []
+        },
+        {
+          "frame": 47,
+          "hilt": [
+            -0.5445151329040527,
+            0.12125632166862488,
+            0.5695549249649048
+          ],
+          "tip": [
+            -1.0548776388168335,
+            1.4672297239303589,
+            1.140332818031311
+          ],
+          "hits": []
+        },
+        {
+          "frame": 48,
+          "hilt": [
+            -0.5120673775672913,
+            0.029847092926502228,
+            0.5664984583854675
+          ],
+          "tip": [
+            -0.030819101259112358,
+            1.4127216339111328,
+            1.0704399347305298
+          ],
+          "hits": []
+        },
+        {
+          "frame": 49,
+          "hilt": [
+            -0.5040510296821594,
+            -0.10794141888618469,
+            0.5526474118232727
+          ],
+          "tip": [
+            0.9185565114021301,
+            0.4261956810951233,
+            0.8506161570549011
+          ],
+          "hits": [
+            {
+              "position": [
+                0.7292304039001465,
+                0.35511070489883423,
+                0.8109614253044128
+              ],
+              "normal": [
+                -0.744300365447998,
+                0.31550633907318115,
+                -0.5886193513870239
+              ],
+              "mesh": "Rogue_ArmRight",
+              "distance": 1.3424330068278896
+            }
+          ],
+          "verified_intersection": true
+        },
+        {
+          "frame": 50,
+          "hilt": [
+            -0.5340469479560852,
+            -0.18351757526397705,
+            0.5484862327575684
+          ],
+          "tip": [
+            0.9929772615432739,
+            -0.29270613193511963,
+            0.7812432050704956
+          ],
+          "hits": [
+            {
+              "position": [
+                0.7974489331245422,
+                -0.2787250578403473,
+                0.7514398097991943
+              ],
+              "normal": [
+                -0.8638401031494141,
+                0.48778945207595825,
+                0.12586423754692078
+              ],
+              "mesh": "Rogue_ArmLeft",
+              "distance": 1.3502354939547772
+            }
+          ]
+        },
+        {
+          "frame": 51,
+          "hilt": [
+            -0.5672783255577087,
+            -0.1908901035785675,
+            0.546071469783783
+          ],
+          "tip": [
+            0.9236587882041931,
+            -0.5427681803703308,
+            0.7723243236541748
+          ],
+          "hits": []
+        },
+        {
+          "frame": 52,
+          "hilt": [
+            -0.5982235670089722,
+            -0.1968894749879837,
+            0.5435767769813538
+          ],
+          "tip": [
+            0.837814450263977,
+            -0.7323629260063171,
+            0.7648566961288452
+          ],
+          "hits": []
+        },
+        {
+          "frame": 53,
+          "hilt": [
+            -0.6262171864509583,
+            -0.20112019777297974,
+            0.5412814617156982
+          ],
+          "tip": [
+            0.7528285384178162,
+            -0.8704903721809387,
+            0.7605490684509277
+          ],
+          "hits": []
+        },
+        {
+          "frame": 54,
+          "hilt": [
+            -0.6506569385528564,
+            -0.20358934998512268,
+            0.539355456829071
+          ],
+          "tip": [
+            0.6782221794128418,
+            -0.9674490094184875,
+            0.7595838904380798
+          ],
+          "hits": []
+        },
+        {
+          "frame": 55,
+          "hilt": [
+            -0.6710495352745056,
+            -0.2045443058013916,
+            0.5378965139389038
+          ],
+          "tip": [
+            0.6182531118392944,
+            -1.0326060056686401,
+            0.7613122463226318
+          ],
+          "hits": []
+        },
+        {
+          "frame": 56,
+          "hilt": [
+            -0.6870144605636597,
+            -0.20436152815818787,
+            0.5369590520858765
+          ],
+          "tip": [
+            0.5739403963088989,
+            -1.073864459991455,
+            0.764689564704895
+          ],
+          "hits": []
+        }
+      ],
+      "source_sha256": {
+        "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+        "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+        "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+        "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+        "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+        "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+        "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+        "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+        "blender_vfx_studio/dash.py": "cae04666618b5af84c54595c49e29c4f06c2295d1743f11584fda1d186c2afa1",
+        "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+        "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+        "blender_vfx_studio/impact.py": "a83bafc048945f16667fe197c94b2ea75d748e08965e64134442a84613d0eac4",
+        "blender_vfx_studio/impact_gas.py": "2317cfb38c41addb0b80e9ec515c288ac4a72deab8d71050dbed6a1a16089398",
+        "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+        "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+        "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+        "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+        "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+        "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+        "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+        "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+        "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+        "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+        "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+        "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+        "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+        "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+        "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+        "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+        "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+        "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+        "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+        "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+        "tools/character_scene.py": "4fcee968f50136a78ac785f82f02f092c1165e4affb3fa0656d5017c6e379120",
+        "tools/character_combat.py": "e2e98cc4970a7f8fe73e9bb8693e3adf49765ef7cf98653c83072adf4660866c",
+        "tools/build_examples.py": "6d32fc3a62a25e31ac4210558027fa9b1314de9035dc3d10dcad765a0560dfb5",
+        "tools/charge_design.py": "b54106f67f5bca3854fc1536a7f6af020b24825ac1e63dcefab4904ca187401d",
+        "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+        "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+        "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+        "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+      },
+      "render_timings": [
+        {
+          "frame": 51,
+          "render_wall_seconds": 48.90140156900088
+        },
+        {
+          "frame": 53,
+          "render_wall_seconds": 23.536972763999074
+        }
+      ],
+      "cpu_quota": "200000 100000",
+      "blender_threads": 2,
+      "software_gl_requested": false,
+      "lp_num_threads": "2",
+      "saved_frame": 49,
+      "portable_render_path": "//renders/character-",
+      "method": "PNG frames; realtime playback unreviewed",
+      "realtime_playback_reviewed": false,
+      "limits": [
+        "Stylized CC0 low-poly characters, not a production anime rig",
+        "Headless render wall time is not interactive viewport FPS",
+        "Timing, transforms and existing artistic values are fitted to this sword stroke"
+      ]
+    },
+    "character_far": {
+      "engine": "BLENDER_EEVEE",
+      "blender_version": "5.2.2 LTS",
+      "resolution": [
+        960,
+        540
+      ],
+      "samples": 16,
+      "fps": 24,
+      "fps_base": 1.0,
+      "frames": [
+        51,
+        53
+      ],
+      "dark": false,
+      "far": true,
+      "reverse": false,
+      "no_fx": false,
+      "view_transform": "AgX",
+      "look": "None",
+      "bloom": false,
+      "camera_location": [
+        0.0,
+        14.0,
+        7.349999904632568
+      ],
+      "camera_lens_mm": 50.0,
+      "contact": {
+        "frame": 49,
+        "hilt": [
+          -0.5040510296821594,
+          -0.10794141888618469,
+          0.5526474118232727
+        ],
+        "tip": [
+          0.9185565114021301,
+          0.4261956810951233,
+          0.8506161570549011
+        ],
+        "hits": [
+          {
+            "position": [
+              0.7292304039001465,
+              0.35511070489883423,
+              0.8109614253044128
+            ],
+            "normal": [
+              -0.744300365447998,
+              0.31550633907318115,
+              -0.5886193513870239
+            ],
+            "mesh": "Rogue_ArmRight",
+            "distance": 1.3424330068278896
+          }
+        ],
+        "verified_intersection": true
+      },
+      "charge_release": {
+        "frame": 49,
+        "phase": 0.8799999952316284,
+        "duration": 54.54545484101477
+      },
+      "blade_trace": [
+        {
+          "frame": 41,
+          "hilt": [
+            -0.5252982378005981,
+            -0.05422717705368996,
+            0.5589168071746826
+          ],
+          "tip": [
+            -0.24550466239452362,
+            1.3545249700546265,
+            1.137739658355713
+          ],
+          "hits": []
+        },
+        {
+          "frame": 42,
+          "hilt": [
+            -0.5332520604133606,
+            -0.0016502588987350464,
+            0.5619307160377502
+          ],
+          "tip": [
+            -0.502615213394165,
+            1.4342421293258667,
+            1.1408743858337402
+          ],
+          "hits": []
+        },
+        {
+          "frame": 43,
+          "hilt": [
+            -0.5405353903770447,
+            0.04624258726835251,
+            0.5651320815086365
+          ],
+          "tip": [
+            -0.7558630108833313,
+            1.4662196636199951,
+            1.1440973281860352
+          ],
+          "hits": []
+        },
+        {
+          "frame": 44,
+          "hilt": [
+            -0.5458655953407288,
+            0.08635561168193817,
+            0.5677602887153625
+          ],
+          "tip": [
+            -0.9737163186073303,
+            1.4573824405670166,
+            1.1466654539108276
+          ],
+          "hits": []
+        },
+        {
+          "frame": 45,
+          "hilt": [
+            -0.548975944519043,
+            0.11642760783433914,
+            0.5694602131843567
+          ],
+          "tip": [
+            -1.134333848953247,
+            1.4279676675796509,
+            1.1483566761016846
+          ],
+          "hits": []
+        },
+        {
+          "frame": 46,
+          "hilt": [
+            -0.5503388047218323,
+            0.13419687747955322,
+            0.5702810287475586
+          ],
+          "tip": [
+            -1.2259764671325684,
+            1.4015636444091797,
+            1.1492431163787842
+          ],
+          "hits": []
+        },
+        {
+          "frame": 47,
+          "hilt": [
+            -0.5445151329040527,
+            0.12125632166862488,
+            0.5695549249649048
+          ],
+          "tip": [
+            -1.0548776388168335,
+            1.4672297239303589,
+            1.140332818031311
+          ],
+          "hits": []
+        },
+        {
+          "frame": 48,
+          "hilt": [
+            -0.5120673775672913,
+            0.029847092926502228,
+            0.5664984583854675
+          ],
+          "tip": [
+            -0.030819101259112358,
+            1.4127216339111328,
+            1.0704399347305298
+          ],
+          "hits": []
+        },
+        {
+          "frame": 49,
+          "hilt": [
+            -0.5040510296821594,
+            -0.10794141888618469,
+            0.5526474118232727
+          ],
+          "tip": [
+            0.9185565114021301,
+            0.4261956810951233,
+            0.8506161570549011
+          ],
+          "hits": [
+            {
+              "position": [
+                0.7292304039001465,
+                0.35511070489883423,
+                0.8109614253044128
+              ],
+              "normal": [
+                -0.744300365447998,
+                0.31550633907318115,
+                -0.5886193513870239
+              ],
+              "mesh": "Rogue_ArmRight",
+              "distance": 1.3424330068278896
+            }
+          ],
+          "verified_intersection": true
+        },
+        {
+          "frame": 50,
+          "hilt": [
+            -0.5340469479560852,
+            -0.18351757526397705,
+            0.5484862327575684
+          ],
+          "tip": [
+            0.9929772615432739,
+            -0.29270613193511963,
+            0.7812432050704956
+          ],
+          "hits": [
+            {
+              "position": [
+                0.7974489331245422,
+                -0.2787250578403473,
+                0.7514398097991943
+              ],
+              "normal": [
+                -0.8638401031494141,
+                0.48778945207595825,
+                0.12586423754692078
+              ],
+              "mesh": "Rogue_ArmLeft",
+              "distance": 1.3502354939547772
+            }
+          ]
+        },
+        {
+          "frame": 51,
+          "hilt": [
+            -0.5672783255577087,
+            -0.1908901035785675,
+            0.546071469783783
+          ],
+          "tip": [
+            0.9236587882041931,
+            -0.5427681803703308,
+            0.7723243236541748
+          ],
+          "hits": []
+        },
+        {
+          "frame": 52,
+          "hilt": [
+            -0.5982235670089722,
+            -0.1968894749879837,
+            0.5435767769813538
+          ],
+          "tip": [
+            0.837814450263977,
+            -0.7323629260063171,
+            0.7648566961288452
+          ],
+          "hits": []
+        },
+        {
+          "frame": 53,
+          "hilt": [
+            -0.6262171864509583,
+            -0.20112019777297974,
+            0.5412814617156982
+          ],
+          "tip": [
+            0.7528285384178162,
+            -0.8704903721809387,
+            0.7605490684509277
+          ],
+          "hits": []
+        },
+        {
+          "frame": 54,
+          "hilt": [
+            -0.6506569385528564,
+            -0.20358934998512268,
+            0.539355456829071
+          ],
+          "tip": [
+            0.6782221794128418,
+            -0.9674490094184875,
+            0.7595838904380798
+          ],
+          "hits": []
+        },
+        {
+          "frame": 55,
+          "hilt": [
+            -0.6710495352745056,
+            -0.2045443058013916,
+            0.5378965139389038
+          ],
+          "tip": [
+            0.6182531118392944,
+            -1.0326060056686401,
+            0.7613122463226318
+          ],
+          "hits": []
+        },
+        {
+          "frame": 56,
+          "hilt": [
+            -0.6870144605636597,
+            -0.20436152815818787,
+            0.5369590520858765
+          ],
+          "tip": [
+            0.5739403963088989,
+            -1.073864459991455,
+            0.764689564704895
+          ],
+          "hits": []
+        }
+      ],
+      "source_sha256": {
+        "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+        "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+        "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+        "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+        "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+        "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+        "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+        "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+        "blender_vfx_studio/dash.py": "cae04666618b5af84c54595c49e29c4f06c2295d1743f11584fda1d186c2afa1",
+        "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+        "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+        "blender_vfx_studio/impact.py": "a83bafc048945f16667fe197c94b2ea75d748e08965e64134442a84613d0eac4",
+        "blender_vfx_studio/impact_gas.py": "2317cfb38c41addb0b80e9ec515c288ac4a72deab8d71050dbed6a1a16089398",
+        "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+        "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+        "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+        "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+        "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+        "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+        "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+        "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+        "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+        "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+        "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+        "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+        "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+        "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+        "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+        "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+        "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+        "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+        "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+        "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+        "tools/character_scene.py": "4fcee968f50136a78ac785f82f02f092c1165e4affb3fa0656d5017c6e379120",
+        "tools/character_combat.py": "e2e98cc4970a7f8fe73e9bb8693e3adf49765ef7cf98653c83072adf4660866c",
+        "tools/build_examples.py": "6d32fc3a62a25e31ac4210558027fa9b1314de9035dc3d10dcad765a0560dfb5",
+        "tools/charge_design.py": "b54106f67f5bca3854fc1536a7f6af020b24825ac1e63dcefab4904ca187401d",
+        "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+        "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+        "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+        "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+      },
+      "render_timings": [
+        {
+          "frame": 51,
+          "render_wall_seconds": 44.82432257599794
+        },
+        {
+          "frame": 53,
+          "render_wall_seconds": 18.557514249001542
+        }
+      ],
+      "cpu_quota": "200000 100000",
+      "blender_threads": 2,
+      "software_gl_requested": false,
+      "lp_num_threads": "2",
+      "saved_frame": 49,
+      "portable_render_path": "//renders/character-",
+      "method": "PNG frames; realtime playback unreviewed",
+      "realtime_playback_reviewed": false,
+      "limits": [
+        "Stylized CC0 low-poly characters, not a production anime rig",
+        "Headless render wall time is not interactive viewport FPS",
+        "Timing, transforms and existing artistic values are fitted to this sword stroke"
+      ]
+    },
+    "native_hd": {
+      "native_render_verified": true,
+      "frames": [
+        53,
+        51,
+        55
+      ],
+      "clear_frame": 96,
+      "scene_sha256": "a10da317ab88b157c10df2688a55c6a6b63e9c77c113b4dee4b3031d1af15abc",
+      "source_frame_sha256": {
+        "character-0053.png": "fd84f5559ade412cd1bc6bdd47df6ed63aa044a4bd1f026002197bcd557ae280",
+        "character-0051.png": "ab23ac13920eeaea5a8d66576d0c8542c8e75df50baa957f8718fc2e4514fd19",
+        "character-0055.png": "e7fa97f292f4aa80eb383a52d4c61cd425d6354ec150fedf8b4973d0cd1b3969"
+      }
+    },
+    "ablation": {
+      "samples": [
+        {
+          "frame": 51,
+          "gas": false,
+          "sha256": "9a14a6491f862b6b789a47610b01c6ffdb73b7261bb419322d82871f843b6798"
+        },
+        {
+          "frame": 51,
+          "gas": true,
+          "sha256": "bc5bd9c10533a5e92f4b9613d4f7b2e1b20eee4fe07a0c66683b69769bb891df"
+        },
+        {
+          "frame": 53,
+          "gas": false,
+          "sha256": "67d92e837814a1da16f2eff1d624824c03a78015e5e1626a964db09ee5d2fcd7"
+        },
+        {
+          "frame": 53,
+          "gas": true,
+          "sha256": "b794511d07470fcf94f776aacf6f034c507ebe8671b996b3e4e3fda532ec9ec6"
+        },
+        {
+          "frame": 55,
+          "gas": false,
+          "sha256": "4c4f7dcb21c3faf1ffe37c5209bb7ffb2b2b3beeb30b59005c78a44db009c26c"
+        },
+        {
+          "frame": 55,
+          "gas": true,
+          "sha256": "6ab81cc8d1e378ba2f9e55c6a36d385647dafea31dd4da4f41d411bf1c444c8c"
+        }
+      ],
+      "native_after_rgba_identical": true,
+      "realtime_playback_reviewed": false
+    },
+    "motion": {
+      "samples": [
+        {
+          "frame": 49,
+          "sha256": "0cd62e65c2cbdf5e101353b3fc3c59f8a6672b6c3f2efef34f3e75a7a1a880c6"
+        },
+        {
+          "frame": 50,
+          "sha256": "083597ce14acd2b478816428ca85a44928ae3b5c504f362258bd3540bb2101c9"
+        },
+        {
+          "frame": 51,
+          "sha256": "18bb2c9729e0018e13987fd7dbcac0dcfb1b13b86da86bbda9dbf18d064b30bf"
+        },
+        {
+          "frame": 52,
+          "sha256": "4633373c7894e0463aaf0aef68241827703071b11a5f3d39711092a075ebd9bd"
+        },
+        {
+          "frame": 53,
+          "sha256": "9ecdce6683eff8782fc834cffafd815670016c18af070c0346982737de67494e"
+        },
+        {
+          "frame": 54,
+          "sha256": "9c3b8be5ede5550b2a1b762a5410d64810d1e3e9e3070618360ef8dae4ba19f7"
+        },
+        {
+          "frame": 55,
+          "sha256": "64c2590de6edfc3ac558bad1e02dc3e50de8736295fbca6c11ff9f43e2138e97"
+        },
+        {
+          "frame": 56,
+          "sha256": "0909fd9fd754895d67589f524764bc40fd6450c337bc20f90f5adc20c0873cf2"
+        },
+        {
+          "frame": 57,
+          "sha256": "be1ed97864b1b3561f985f3f298fa6da26aebacef71b87db15e981267ca74803"
+        }
+      ],
+      "resolution": [
+        480,
+        270
+      ],
+      "fps": 24,
+      "realtime_playback_reviewed": false
+    },
+    "native_asset": {
+      "addon_loaded": false,
+      "members": 5,
+      "packed_image_sha256": "c69a4801b217428d1740ae6d82c57ae612430f92ba4904208ee131f273adb5e4",
+      "states": {
+        "3": {
+          "Impact • Burst Core": 4,
+          "Impact • Core Flash": 60,
+          "Impact • Embers": 180,
+          "Impact • Main Shards": 488,
+          "Impact • Shockwave": 96
+        },
+        "9": {
+          "Impact • Burst Core": 0,
+          "Impact • Core Flash": 0,
+          "Impact • Embers": 180,
+          "Impact • Main Shards": 488,
+          "Impact • Shockwave": 96
+        },
+        "1": {
+          "Impact • Burst Core": 4,
+          "Impact • Core Flash": 60,
+          "Impact • Embers": 0,
+          "Impact • Main Shards": 488,
+          "Impact • Shockwave": 0
+        },
+        "25": {
+          "Impact • Burst Core": 0,
+          "Impact • Core Flash": 0,
+          "Impact • Embers": 0,
+          "Impact • Main Shards": 0,
+          "Impact • Shockwave": 0
+        }
+      },
+      "preview_size": [
+        256,
+        256
+      ]
+    },
+    "performance": {
+      "blender": "5.2.2 LTS",
+      "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+      "cpu_quota": "200000 100000",
+      "blender_threads": 2,
+      "lp_num_threads": "2",
+      "software_gl_requested": false,
+      "gl": {
+        "vendor": "Mesa",
+        "renderer": "llvmpipe (LLVM 19.1.7, 256 bits)",
+        "version": "4.5 (Core Profile) Mesa 25.0.7-2+deb13u1"
+      },
+      "engine": "BLENDER_EEVEE",
+      "resolution": [
+        960,
+        540
+      ],
+      "samples": 16,
+      "source_sha256": {
+        "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+        "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+        "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+        "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+        "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+        "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+        "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+        "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+        "blender_vfx_studio/dash.py": "cae04666618b5af84c54595c49e29c4f06c2295d1743f11584fda1d186c2afa1",
+        "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+        "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+        "blender_vfx_studio/impact.py": "a83bafc048945f16667fe197c94b2ea75d748e08965e64134442a84613d0eac4",
+        "blender_vfx_studio/impact_gas.py": "2317cfb38c41addb0b80e9ec515c288ac4a72deab8d71050dbed6a1a16089398",
+        "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+        "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+        "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+        "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+        "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+        "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+        "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+        "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+        "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+        "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+        "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+        "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+        "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+        "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+        "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+        "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+        "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+        "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+        "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+        "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+        "tools/character_scene.py": "4fcee968f50136a78ac785f82f02f092c1165e4affb3fa0656d5017c6e379120",
+        "tools/character_combat.py": "e2e98cc4970a7f8fe73e9bb8693e3adf49765ef7cf98653c83072adf4660866c",
+        "tools/build_examples.py": "6d32fc3a62a25e31ac4210558027fa9b1314de9035dc3d10dcad765a0560dfb5",
+        "tools/charge_design.py": "b54106f67f5bca3854fc1536a7f6af020b24825ac1e63dcefab4904ca187401d",
+        "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+        "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+        "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+        "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+      },
+      "evaluation": [
+        {
+          "fx": false,
+          "warmup": true,
+          "frame": 51,
+          "milliseconds": 0.7169079981395043
+        },
+        {
+          "fx": false,
+          "warmup": true,
+          "frame": 51,
+          "milliseconds": 0.6054409968783148
+        },
+        {
+          "fx": false,
+          "warmup": true,
+          "frame": 51,
+          "milliseconds": 0.5915500005357899
+        },
+        {
+          "fx": false,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 0.6779299983463716
+        },
+        {
+          "fx": false,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 0.591509000514634
+        },
+        {
+          "fx": false,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 0.5702369999198709
+        },
+        {
+          "fx": false,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 0.5877639996469952
+        },
+        {
+          "fx": false,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 0.7391420003841631
+        },
+        {
+          "fx": false,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 0.6446289989980869
+        },
+        {
+          "fx": false,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 0.5668720004905481
+        },
+        {
+          "fx": false,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 0.5536530006793328
+        },
+        {
+          "fx": false,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 0.571529999433551
+        },
+        {
+          "fx": true,
+          "warmup": true,
+          "frame": 51,
+          "milliseconds": 8.111197999824071
+        },
+        {
+          "fx": true,
+          "warmup": true,
+          "frame": 51,
+          "milliseconds": 8.976580000307877
+        },
+        {
+          "fx": true,
+          "warmup": true,
+          "frame": 51,
+          "milliseconds": 9.265133998269448
+        },
+        {
+          "fx": true,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 8.598051997978473
+        },
+        {
+          "fx": true,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 8.849519002978923
+        },
+        {
+          "fx": true,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 8.484360001602909
+        },
+        {
+          "fx": true,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 8.891851997759659
+        },
+        {
+          "fx": true,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 10.023834998719394
+        },
+        {
+          "fx": true,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 10.349725002015475
+        },
+        {
+          "fx": true,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 9.236390000296524
+        },
+        {
+          "fx": true,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 9.368808998260647
+        },
+        {
+          "fx": true,
+          "warmup": false,
+          "frame": 51,
+          "milliseconds": 8.830110000417335
+        }
+      ],
+      "evaluation_summary": {
+        "bare": {
+          "scene_evaluation_median_ms": 0.5877639996469952,
+          "scene_evaluation_p95_ms": 0.6779299983463716,
+          "measured_samples": 9
+        },
+        "fx": {
+          "scene_evaluation_median_ms": 8.891851997759659,
+          "scene_evaluation_p95_ms": 10.023834998719394,
+          "measured_samples": 9
+        }
+      },
+      "renders": [
+        {
+          "fx": true,
+          "warmup": true,
+          "frame": 51,
+          "seconds": 49.811122233997594
+        },
+        {
+          "fx": false,
+          "warmup": true,
+          "frame": 51,
+          "seconds": 11.19585650099907
+        },
+        {
+          "fx": false,
+          "warmup": false,
+          "frame": 51,
+          "seconds": 10.933154774000286
+        },
+        {
+          "fx": true,
+          "warmup": false,
+          "frame": 51,
+          "seconds": 21.08017888500035
+        }
+      ],
+      "limits": [
+        "Headless scene evaluation and render wall time, not viewport FPS",
+        "Two warmup renders and 1 matched frame pairs; too few for a render p95",
+        "The same saved scene is used; only its VFX collection is excluded",
+        "Evaluation excludes the collection from the viewport dependency graph; render comparison only excludes it from rendering"
+      ]
+    },
+    "standalone_dark": {
+      "effect": "impact-burst",
+      "engine": "BLENDER_EEVEE",
+      "frames": [
+        1,
+        3,
+        6,
+        14
+      ],
+      "images": {
+        "1": "impact-blender_eevee-agx-0001.png",
+        "3": "impact-blender_eevee-agx-0003.png",
+        "6": "impact-blender_eevee-agx-0006.png",
+        "14": "impact-blender_eevee-agx-0014.png"
+      },
+      "source_sha256": {
+        "blender_vfx_studio/impact.py": "a83bafc048945f16667fe197c94b2ea75d748e08965e64134442a84613d0eac4",
+        "blender_vfx_studio/impact_gas.py": "2317cfb38c41addb0b80e9ec515c288ac4a72deab8d71050dbed6a1a16089398",
+        "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+        "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+        "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+        "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+        "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+        "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+        "blender_vfx_studio/assets/burst_heat.png": "c69a4801b217428d1740ae6d82c57ae612430f92ba4904208ee131f273adb5e4",
+        "tools/impact_preview.py": "9385ed2261908e14e793158392cd115b2eee2e3f26441d8623fb4824a08224b2"
+      },
+      "baseline_sha256": null,
+      "resolution": [
+        960,
+        540
+      ],
+      "fps": 24,
+      "fps_base": 1.0,
+      "saved_frame": 5,
+      "camera_location": [
+        3.0,
+        -5.0,
+        6.0
+      ],
+      "view": "default",
+      "ortho_scale": 8.199999809265137,
+      "background_color": [
+        0.00800000037997961,
+        0.012000000104308128,
+        0.019999999552965164,
+        1.0
+      ],
+      "view_transform": "AgX",
+      "realtime_playback_reviewed": false
+    },
+    "standalone_pale": {
+      "effect": "impact-burst",
+      "engine": "BLENDER_EEVEE",
+      "frames": [
+        3,
+        6
+      ],
+      "images": {
+        "3": "impact-blender_eevee-pale-agx-0003.png",
+        "6": "impact-blender_eevee-pale-agx-0006.png"
+      },
+      "source_sha256": {
+        "blender_vfx_studio/impact.py": "a83bafc048945f16667fe197c94b2ea75d748e08965e64134442a84613d0eac4",
+        "blender_vfx_studio/impact_gas.py": "2317cfb38c41addb0b80e9ec515c288ac4a72deab8d71050dbed6a1a16089398",
+        "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+        "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+        "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+        "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+        "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+        "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+        "blender_vfx_studio/assets/burst_heat.png": "c69a4801b217428d1740ae6d82c57ae612430f92ba4904208ee131f273adb5e4",
+        "tools/impact_preview.py": "9385ed2261908e14e793158392cd115b2eee2e3f26441d8623fb4824a08224b2"
+      },
+      "baseline_sha256": null,
+      "resolution": [
+        960,
+        540
+      ],
+      "fps": 24,
+      "fps_base": 1.0,
+      "saved_frame": 5,
+      "camera_location": [
+        3.0,
+        -5.0,
+        6.0
+      ],
+      "view": "default",
+      "ortho_scale": 8.199999809265137,
+      "background_color": [
+        0.7200000286102295,
+        0.7599999904632568,
+        0.800000011920929,
+        1.0
+      ],
+      "view_transform": "AgX",
+      "realtime_playback_reviewed": false
+    },
+    "character_reverse": {
+      "engine": "BLENDER_EEVEE",
+      "blender_version": "5.2.2 LTS",
+      "resolution": [
+        960,
+        540
+      ],
+      "samples": 16,
+      "fps": 24,
+      "fps_base": 1.0,
+      "frames": [
+        51,
+        53
+      ],
+      "dark": false,
+      "far": false,
+      "reverse": true,
+      "no_fx": false,
+      "view_transform": "AgX",
+      "look": "None",
+      "bloom": false,
+      "camera_location": [
+        0.0,
+        -7.0,
+        4.150000095367432
+      ],
+      "camera_lens_mm": 50.0,
+      "contact": {
+        "frame": 49,
+        "hilt": [
+          -0.5040510296821594,
+          -0.10794141888618469,
+          0.5526474118232727
+        ],
+        "tip": [
+          0.9185565114021301,
+          0.4261956810951233,
+          0.8506161570549011
+        ],
+        "hits": [
+          {
+            "position": [
+              0.7292304039001465,
+              0.35511070489883423,
+              0.8109614253044128
+            ],
+            "normal": [
+              -0.744300365447998,
+              0.31550633907318115,
+              -0.5886193513870239
+            ],
+            "mesh": "Rogue_ArmRight",
+            "distance": 1.3424330068278896
+          }
+        ],
+        "verified_intersection": true
+      },
+      "charge_release": {
+        "frame": 49,
+        "phase": 0.8799999952316284,
+        "duration": 54.54545484101477
+      },
+      "blade_trace": [
+        {
+          "frame": 41,
+          "hilt": [
+            -0.5252982378005981,
+            -0.05422717705368996,
+            0.5589168071746826
+          ],
+          "tip": [
+            -0.24550466239452362,
+            1.3545249700546265,
+            1.137739658355713
+          ],
+          "hits": []
+        },
+        {
+          "frame": 42,
+          "hilt": [
+            -0.5332520604133606,
+            -0.0016502588987350464,
+            0.5619307160377502
+          ],
+          "tip": [
+            -0.502615213394165,
+            1.4342421293258667,
+            1.1408743858337402
+          ],
+          "hits": []
+        },
+        {
+          "frame": 43,
+          "hilt": [
+            -0.5405353903770447,
+            0.04624258726835251,
+            0.5651320815086365
+          ],
+          "tip": [
+            -0.7558630108833313,
+            1.4662196636199951,
+            1.1440973281860352
+          ],
+          "hits": []
+        },
+        {
+          "frame": 44,
+          "hilt": [
+            -0.5458655953407288,
+            0.08635561168193817,
+            0.5677602887153625
+          ],
+          "tip": [
+            -0.9737163186073303,
+            1.4573824405670166,
+            1.1466654539108276
+          ],
+          "hits": []
+        },
+        {
+          "frame": 45,
+          "hilt": [
+            -0.548975944519043,
+            0.11642760783433914,
+            0.5694602131843567
+          ],
+          "tip": [
+            -1.134333848953247,
+            1.4279676675796509,
+            1.1483566761016846
+          ],
+          "hits": []
+        },
+        {
+          "frame": 46,
+          "hilt": [
+            -0.5503388047218323,
+            0.13419687747955322,
+            0.5702810287475586
+          ],
+          "tip": [
+            -1.2259764671325684,
+            1.4015636444091797,
+            1.1492431163787842
+          ],
+          "hits": []
+        },
+        {
+          "frame": 47,
+          "hilt": [
+            -0.5445151329040527,
+            0.12125632166862488,
+            0.5695549249649048
+          ],
+          "tip": [
+            -1.0548776388168335,
+            1.4672297239303589,
+            1.140332818031311
+          ],
+          "hits": []
+        },
+        {
+          "frame": 48,
+          "hilt": [
+            -0.5120673775672913,
+            0.029847092926502228,
+            0.5664984583854675
+          ],
+          "tip": [
+            -0.030819101259112358,
+            1.4127216339111328,
+            1.0704399347305298
+          ],
+          "hits": []
+        },
+        {
+          "frame": 49,
+          "hilt": [
+            -0.5040510296821594,
+            -0.10794141888618469,
+            0.5526474118232727
+          ],
+          "tip": [
+            0.9185565114021301,
+            0.4261956810951233,
+            0.8506161570549011
+          ],
+          "hits": [
+            {
+              "position": [
+                0.7292304039001465,
+                0.35511070489883423,
+                0.8109614253044128
+              ],
+              "normal": [
+                -0.744300365447998,
+                0.31550633907318115,
+                -0.5886193513870239
+              ],
+              "mesh": "Rogue_ArmRight",
+              "distance": 1.3424330068278896
+            }
+          ],
+          "verified_intersection": true
+        },
+        {
+          "frame": 50,
+          "hilt": [
+            -0.5340469479560852,
+            -0.18351757526397705,
+            0.5484862327575684
+          ],
+          "tip": [
+            0.9929772615432739,
+            -0.29270613193511963,
+            0.7812432050704956
+          ],
+          "hits": [
+            {
+              "position": [
+                0.7974489331245422,
+                -0.2787250578403473,
+                0.7514398097991943
+              ],
+              "normal": [
+                -0.8638401031494141,
+                0.48778945207595825,
+                0.12586423754692078
+              ],
+              "mesh": "Rogue_ArmLeft",
+              "distance": 1.3502354939547772
+            }
+          ]
+        },
+        {
+          "frame": 51,
+          "hilt": [
+            -0.5672783255577087,
+            -0.1908901035785675,
+            0.546071469783783
+          ],
+          "tip": [
+            0.9236587882041931,
+            -0.5427681803703308,
+            0.7723243236541748
+          ],
+          "hits": []
+        },
+        {
+          "frame": 52,
+          "hilt": [
+            -0.5982235670089722,
+            -0.1968894749879837,
+            0.5435767769813538
+          ],
+          "tip": [
+            0.837814450263977,
+            -0.7323629260063171,
+            0.7648566961288452
+          ],
+          "hits": []
+        },
+        {
+          "frame": 53,
+          "hilt": [
+            -0.6262171864509583,
+            -0.20112019777297974,
+            0.5412814617156982
+          ],
+          "tip": [
+            0.7528285384178162,
+            -0.8704903721809387,
+            0.7605490684509277
+          ],
+          "hits": []
+        },
+        {
+          "frame": 54,
+          "hilt": [
+            -0.6506569385528564,
+            -0.20358934998512268,
+            0.539355456829071
+          ],
+          "tip": [
+            0.6782221794128418,
+            -0.9674490094184875,
+            0.7595838904380798
+          ],
+          "hits": []
+        },
+        {
+          "frame": 55,
+          "hilt": [
+            -0.6710495352745056,
+            -0.2045443058013916,
+            0.5378965139389038
+          ],
+          "tip": [
+            0.6182531118392944,
+            -1.0326060056686401,
+            0.7613122463226318
+          ],
+          "hits": []
+        },
+        {
+          "frame": 56,
+          "hilt": [
+            -0.6870144605636597,
+            -0.20436152815818787,
+            0.5369590520858765
+          ],
+          "tip": [
+            0.5739403963088989,
+            -1.073864459991455,
+            0.764689564704895
+          ],
+          "hits": []
+        }
+      ],
+      "source_sha256": {
+        "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+        "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+        "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+        "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+        "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+        "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+        "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+        "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+        "blender_vfx_studio/dash.py": "cae04666618b5af84c54595c49e29c4f06c2295d1743f11584fda1d186c2afa1",
+        "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+        "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+        "blender_vfx_studio/impact.py": "a83bafc048945f16667fe197c94b2ea75d748e08965e64134442a84613d0eac4",
+        "blender_vfx_studio/impact_gas.py": "2317cfb38c41addb0b80e9ec515c288ac4a72deab8d71050dbed6a1a16089398",
+        "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+        "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+        "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+        "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+        "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+        "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+        "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+        "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+        "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+        "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+        "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+        "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+        "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+        "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+        "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+        "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+        "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+        "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+        "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+        "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+        "blender_vfx_studio/assets/burst_heat.png": "c69a4801b217428d1740ae6d82c57ae612430f92ba4904208ee131f273adb5e4",
+        "tools/character_scene.py": "4fcee968f50136a78ac785f82f02f092c1165e4affb3fa0656d5017c6e379120",
+        "tools/character_combat.py": "9234275622d093df5300c261a22c70fd4d3ffdef5e199bfb16d01c1544142901",
+        "tools/build_examples.py": "6d32fc3a62a25e31ac4210558027fa9b1314de9035dc3d10dcad765a0560dfb5",
+        "tools/charge_design.py": "b54106f67f5bca3854fc1536a7f6af020b24825ac1e63dcefab4904ca187401d",
+        "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+        "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+        "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+        "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+      },
+      "render_timings": [
+        {
+          "frame": 51,
+          "render_wall_seconds": 50.278556441000546
+        },
+        {
+          "frame": 53,
+          "render_wall_seconds": 22.526228025002638
+        }
+      ],
+      "cpu_quota": "200000 100000",
+      "blender_threads": 2,
+      "software_gl_requested": false,
+      "lp_num_threads": "2",
+      "saved_frame": 49,
+      "portable_render_path": "//renders/character-",
+      "method": "PNG frames; realtime playback unreviewed",
+      "realtime_playback_reviewed": false,
+      "limits": [
+        "Stylized CC0 low-poly characters, not a production anime rig",
+        "Headless render wall time is not interactive viewport FPS",
+        "Timing, transforms and existing artistic values are fitted to this sword stroke"
+      ]
+    }
+  }
+}

@@ -36,7 +36,11 @@ with tempfile.TemporaryDirectory(prefix="install-", dir=ROOT / "work") as tempor
         "--python-expr",
         "import bpy; assert 'bl_ext.user_default.blender_vfx_studio' in bpy.context.preferences.addons; "
         "assert bpy.ops.vfx_studio.create()=={'FINISHED'}; "
-        "assert bpy.context.object['vfx_module']=='mesh.ring'; print('INSTALLED_ENABLED_OK')",
+        "assert bpy.context.object['vfx_module']=='mesh.ring'; "
+        "assert bpy.ops.vfx_studio.create(preset='IMPACT_BURST')=={'FINISHED'}; "
+        "assert bpy.context.object['vfx_module']=='core.composition'; "
+        "assert any(i.get('vfx_burst_heat') and i.packed_file for i in bpy.data.images); "
+        "print('INSTALLED_ENABLED_WITH_BUNDLED_TEXTURE_OK')",
     )
     run("--command", "extension", "remove", "blender_vfx_studio")
     run(
