@@ -1,4 +1,4 @@
-"""Charge discharge follows real blade contact without changing the actor's motion."""
+"""Native preparation preserves the original cut, contact and VFX alignment."""
 
 import sys
 import unittest
@@ -13,6 +13,48 @@ from tools.character_scene import add_effects, setup_base  # noqa: E402
 
 
 class CharacterTimingTests(unittest.TestCase):
+    def test_preparation_preserves_the_original_cut_and_recovery(self):
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        fixture = setup_base()
+        scene = bpy.context.scene
+        caster = fixture["caster"]
+        strip = next(
+            strip
+            for track in caster["rig"].animation_data.nla_tracks
+            for strip in track.strips
+            if "2H_Melee_Attack_Slice" in strip.name
+        )
+        frames = (16, 32, 43, 47, 49, 51, 57, 65, 69)
+
+        def blade_poses():
+            matrices = {}
+            for frame in frames:
+                scene.frame_set(frame)
+                graph = bpy.context.evaluated_depsgraph_get()
+                matrices[frame] = caster["weapon"].evaluated_get(graph).matrix_world.copy()
+            return matrices
+
+        prepared = blade_poses()
+        # Compare with the original cut using the same rig, action and idle.
+        strip.use_animated_time = False
+        strip.blend_in = 4
+        strip.frame_start = 37
+        strip.scale = 32 / (strip.action_frame_end - strip.action_frame_start)
+        original = blade_poses()
+        errors = {
+            frame: max(
+                abs(prepared[frame][row][column] - original[frame][row][column])
+                for row in range(4)
+                for column in range(4)
+            )
+            for frame in frames
+        }
+        self.assertGreater(errors[32], 0.05, "Preparation must actually move the blade")
+        for frame in frames:
+            if frame >= 43:
+                self.assertLess(errors[frame], 1e-5, f"The original cut changed at {frame}")
+        self.assertEqual(fixture["contact"]["frame"], 49)
+
     def test_discharge_peak_and_fast_blade_direction_match_contact(self):
         bpy.ops.wm.read_factory_settings(use_empty=True)
         fixture = add_effects(setup_base())
