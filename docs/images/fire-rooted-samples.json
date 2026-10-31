@@ -772,6 +772,47 @@
   ],
   "pr": 199,
   "issue": 198,
-  "ci_pending": "https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41192883592",
-  "integrated_source": "5ccc86f800c3a69903617f6ba5598fc6c2dd12e0"
+  "integrated_source": "5ccc86f800c3a69903617f6ba5598fc6c2dd12e0",
+  "ci": {
+    "url": "https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41192883592",
+    "required_success": 12,
+    "release_job": "skipped",
+    "merged": true,
+    "merge_sha": "309065312dccd9de1c1375cbe85bb12e37adc8fe"
+  },
+  "ci_package": {
+    "artifact_id": 13040391360,
+    "run_id": 41192883592,
+    "sha256": "a4e0ee3366947675e5c561e2ad33c87dc13923f7535ca59f9d8debb91accc1d1",
+    "bytes": 4509797,
+    "packages": [
+      "blender-vfx-studio-0.22.3.zip",
+      "blender-vfx-studio-examples-0.22.3.zip"
+    ],
+    "fire_assets": {
+      "stylized-fire.blend": "7138a36e6c5a5d7970e70fa25417ffdc6f75dc7b924c2d4c4047c10812ee7f06",
+      "stylized-fire-low.blend": "6c1c178c54284b3fb9bf98e9c18b4b9e4c9f8a6de830b441905f33a17818aee5",
+      "stylized-fire-high.blend": "7bc3b080e6aa28100c5cb70145ce796dfd764ff40519d5f7cdbe0936b52be944"
+    },
+    "plugin_python_files_identical": 32,
+    "blend_count": 18,
+    "native_qualities_verified": [
+      "LOW",
+      "MEDIUM",
+      "HIGH"
+    ],
+    "custom_previews_actually_viewed": true,
+    "native_seek_frames": [
+      8,
+      20,
+      8
+    ],
+    "clear_frame": 53
+  },
+  "combined_motes_validation": {
+    "source": "99ebb992864656a5f69a975be9a73a95334c8058",
+    "library_tests": 25,
+    "fire_tests": 8,
+    "native_reopen": true
+  }
 }
