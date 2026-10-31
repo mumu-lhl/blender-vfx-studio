@@ -2066,6 +2066,34 @@
         "Headless render wall time is not interactive viewport FPS",
         "Timing, transforms and existing artistic values are fitted to this sword stroke"
       ]
+    },
+    "complete_package": {
+      "example_count": 18,
+      "package_sha256": "1b02dd955bc719b78f1b7fa9012f7cff046dd3217be902258cb52fddcdd0e5db",
+      "package_bytes": 5448093,
+      "asset_bytes": {
+        "energy-charge.blend": 292500,
+        "impact-burst.blend": 1327194,
+        "arc-slash.blend": 190578,
+        "lightning-strike.blend": 219860,
+        "dust-impact.blend": 219620,
+        "stylized-fire.blend": 218441,
+        "dash-echoes.blend": 331476,
+        "magic-circle.blend": 216465,
+        "quality/lightning-strike-low.blend": 205396,
+        "quality/lightning-strike-high.blend": 239307,
+        "quality/dust-impact-low.blend": 207594,
+        "quality/dust-impact-high.blend": 239408,
+        "quality/stylized-fire-low.blend": 188976,
+        "quality/stylized-fire-high.blend": 258127,
+        "quality/dash-echoes-low.blend": 287398,
+        "quality/dash-echoes-high.blend": 375203,
+        "quality/magic-circle-low.blend": 202215,
+        "quality/magic-circle-high.blend": 234778
+      },
+      "native_validation_exit": 0,
+      "installation_exit": 0,
+      "runtime_source_commit": "b145afbe4ef58b2e7a905e0faff6002e4b7446c0"
     }
   }
 }
