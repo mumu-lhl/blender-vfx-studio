@@ -50,11 +50,11 @@ def _flames(root, quality):
             (0.06, 0.13, 0.60, 0.13, -0.14, 1),
         )
     ):
-        split = {0: 0.28, 1: 0.38}.get(index)
-        # A shared lower tongue feeds two unequal shoots. Their short overlap
-        # keeps the junction filled without booleans or frame-by-frame rebuilding.
+        split = {0: 0.08, 1: 0.11}.get(index)
+        # A low fuel bed feeds the whole rising shoots. Keeping a large static
+        # lower trunk would leave an orange bulb while only its tips regrow.
         sections = (
-            [(0, 1, 0)] if split is None else [(0, split + 0.1, 0), (split, 1, -1), (split, 1, 1)]
+            [(0, 1, 0)] if split is None else [(0, split + 0.04, 0), (split, 1, -1), (split, 1, 1)]
         )
         for first, last, branch in sections:
             base = len(vertices)
