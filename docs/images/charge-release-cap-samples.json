@@ -229,5 +229,11 @@
     "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
   },
   "main_baseline_ci": "https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41091740203",
-  "pr_ci_pending": "https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41188164918"
+  "ci": {
+    "run_id": 41188164918,
+    "conclusion": "success",
+    "successful_checks": 12,
+    "source_sha": "61a6186a2b357fa4935328fbdf6e3d1567381b4c"
+  },
+  "merged_main_sha": "33789976186de4cc43041848a08ed6ab6e8d671b"
 }

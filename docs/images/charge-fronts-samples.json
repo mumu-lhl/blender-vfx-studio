@@ -634,5 +634,37 @@
     "No matched old/new performance claim"
   ],
   "pr": 197,
-  "ci_pending": "https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41189505385"
+  "actual_ci_package": {
+    "artifact_id": 13038493685,
+    "run_id": 41189505385,
+    "sha256": "2114d88eb8242e3b39175e8c387aaaf65fc31aa867e0a64f7f36b567cafc5b6b",
+    "bytes": 4507317,
+    "packages": [
+      "blender-vfx-studio-0.22.3.zip",
+      "blender-vfx-studio-examples-0.22.3.zip"
+    ],
+    "blend_count": 18,
+    "energy_charge_sha256": "832edd3aede41b19c1444fb122bcf7e5eb2cdf157e68ffab969d686a1bd98d8c",
+    "plugin_python_files_identical": 32,
+    "native_reopen": true,
+    "checked_seed_size": 0.78,
+    "checked_intake_retention": 0.08,
+    "checked_cap_facing_power": 4,
+    "preview_viewed": true,
+    "preview_export": "Embedded RGBA8, flipped from Blender bottom-up storage to PNG rows"
+  },
+  "combined_source_validation": {
+    "branch": "review/charge-fire",
+    "sha": "193af24abee630b7d3afd4f6993fbc141d774a05",
+    "starter_library": 24,
+    "fire": 8,
+    "native_reopen": true
+  },
+  "ci": {
+    "run_id": 41189505385,
+    "conclusion": "success",
+    "successful_checks": 12,
+    "source_sha": "248c15fd65c9b33d60a163ee1a485b800b5c5030"
+  },
+  "merged_main_sha": "f3b93ad6d8ebfb40a04ebd0f7d309460484af619"
 }
