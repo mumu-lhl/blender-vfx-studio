@@ -16,8 +16,18 @@ Blender 的 NLA 可以用一条时间曲线控制动画片段的播放进度。S
 
 保存场景后，在关闭自动执行、未加载插件的新进程中按 49→16→32 重渲染，三张高清 PNG 与保存前 RGBA 完全一致；角色姿态改变，第 96 帧效果几何清场。原有接触与刀光方向检查也通过。
 
-## 尚待检查
+## 运动与不同背景
 
-35 张第 1–69 帧的原生奇数帧正在生成，目前只实际读取 1–11 帧。暗背景、远景和新增原动作对照回归尚未完成。未观看实时播放，不宣布速度感或整体艺术验收通过。
+35 张第 1–69 帧的原生奇数帧已全部实际读取，480×270、16 samples：
 
-方案保留为 [PR #202](https://github.com/mumu-lhl/blender-vfx-studio/pull/202) 草稿，跟踪 [#189](https://github.com/mumu-lhl/blender-vfx-studio/issues/189)。充能进流和外围粒子的整体艺术问题继续由原问题跟踪，本实验不代替真实生成器的改进。
+[1–11](../images/slice-preparation-motion-01.png) · [13–23](../images/slice-preparation-motion-02.png) · [25–35](../images/slice-preparation-motion-03.png) · [37–47](../images/slice-preparation-motion-04.png) · [49–59](../images/slice-preparation-motion-05.png) · [61–69](../images/slice-preparation-motion-06.png)。
+
+前段从待机逐渐进入收剑，中段屈膝、热芯靠近持剑侧；后段接回原挥斩，命中后收招，未出现先下落再重新后摆的重复预备。命中压力层仍偏薄、碎，这次没有改动其生成器。
+
+![收剑到快速出刀的原生隔帧](../images/slice-preparation-motion-04.png)
+
+第 32 帧的[暗背景](../images/slice-preparation-dark-32.png)和[远景](../images/slice-preparation-far-32.png)高清也已实际读取：两者仍能找到热芯，远景无法读清进流细节。新增原动作对照与既有接触／出刃检查共两项测试、原生重开通过，全库 Ruff 检查通过。没有重新测量性能，也没有观看实时播放；不宣布实时速度感、身体力量或整体艺术验收通过。
+
+图像、源码摘要与原生检查见[检查清单](../images/slice-preparation-samples.json)。
+
+方案由 [PR #202](https://github.com/mumu-lhl/blender-vfx-studio/pull/202) 提交，远端检查仍在运行；跟踪 [#189](https://github.com/mumu-lhl/blender-vfx-studio/issues/189)。充能进流和外围粒子的整体艺术问题继续由原问题跟踪，本实验不代替真实生成器的改进。
