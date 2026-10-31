@@ -1,6 +1,7 @@
-"""Editable four-layer hit: short flash, pressure body, broken wave and embers."""
+"""Editable hit with distinct compression, burning core, pressure and embers."""
 
 from . import composition, core
+from .impact_core import build as burst_core
 from .impact_shape import flash as flash_shape
 from .impact_shape import jets
 from .impact_shape import wave as wave_shape
@@ -43,6 +44,16 @@ def create(context, quality="LOW"):
         seed=31,
     )
     flash_shape(flash)
+    burst = configure(
+        core.create_particle(context, quality),
+        "Impact • Burst Core",
+        (1.0, 0.22, 0.025),
+        duration=8.0,
+        size=0.35,
+        fade=1.0,
+        strength=1.5,
+    )
+    burst_core(burst, quality)
     shards = configure(
         core.create_particle(context, quality),
         "Impact • Main Shards",
@@ -116,10 +127,11 @@ def create(context, quality="LOW"):
     embers.children[0].modifiers[0].node_group.nodes["Shard Narrowing"].inputs[
         1
     ].default_value = -0.5
-    group = composition.create(context, [flash, shards, wave, embers])
+    members = [flash, burst, shards, wave, embers]
+    group = composition.create(context, members)
     group.name = "Impact Burst"
     # Keep the composition origin at the cursor while preserving every member's pose.
-    worlds = {root: root.matrix_world.copy() for root in (flash, shards, wave, embers)}
+    worlds = {root: root.matrix_world.copy() for root in members}
     group.location = origin
     context.view_layer.update()
     for root, world in worlds.items():
