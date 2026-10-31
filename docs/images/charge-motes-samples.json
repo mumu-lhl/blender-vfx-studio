@@ -466,5 +466,11 @@
     },
     "image_sha256": "c9da43bb5440f124bde01755b5c2c236d0173fbe588d3dbbfc0971ca14d2a09d"
   },
-  "ci_pending": "https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41193749586"
+  "ci_pending": "https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41193749586",
+  "ci": {
+    "run_id": 41193749586,
+    "required_success": 12,
+    "merged": true,
+    "merge_sha": "b875f662ca26f80a906f4cc3e22eb54e06b6ab3f"
+  }
 }
