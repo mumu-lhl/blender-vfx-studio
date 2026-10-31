@@ -10,6 +10,13 @@ scene = bpy.context.scene
 hit, peak = scene["timing_contact"], scene["timing_peak"]
 core = bpy.data.objects["Charge • Compressed Core"].children[0]
 tree = core.modifiers[0].node_group
+for frame, height in ((49, 0), (16, 0.12), (43, 0.048), (37, 0.12), (47, 0)):
+    scene.frame_set(frame)
+    graph = bpy.context.evaluated_depsgraph_get()
+    socket = bpy.data.objects["Charge socket • world up"].evaluated_get(graph)
+    midpoint = bpy.data.objects["Charge socket • blade midpoint"].evaluated_get(graph)
+    offset = socket.matrix_world.translation - midpoint.matrix_world.translation
+    assert (offset - Vector((0, 0, height))).length < 1e-6
 scene.frame_set(hit - 2)
 assert tree.nodes["Charge Clock"].outputs[0].default_value < peak - 0.02
 scene.frame_set(hit)

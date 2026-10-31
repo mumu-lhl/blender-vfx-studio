@@ -674,8 +674,8 @@ def _surface(root, *, core=False, ground=False):
         )
         heat = g.m("Connected Plasma Heat", "SUBTRACT", 1, radius.outputs["Value"])
         stored = g.stage("Heat Accumulates In The Focus", p, 0.18, 0.78)
-        charge_heat = g.m("Stored Heat Concentration", "MULTIPLY_ADD", stored, 0.62)
-        charge_heat.node.inputs[2].default_value = 0.38
+        charge_heat = g.m("Stored Heat Concentration", "MULTIPLY_ADD", stored, 0.35)
+        charge_heat.node.inputs[2].default_value = 0.65
         heat = g.m("Focus Stores Heat", "MULTIPLY", heat, charge_heat)
         white_threshold = g.value("Nucleus White Threshold", 0.35)
         white = g.stage("Coherent Plasma Heart", heat, 0.35, 0.55)
