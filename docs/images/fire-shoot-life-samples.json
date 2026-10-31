@@ -903,5 +903,15 @@
     "Visible paper-like tongues and rapid collapse remain.",
     "HD shots and cost use default Medium; three small previews do not prove HD quality or cost for every tier.",
     "One matched render pair is not a render p95 or viewport FPS."
-  ]
+  ],
+  "integration_with_impact": {
+    "main": "5dd92a52dac59ac3042512d3614c3328a6140901",
+    "fire_source_unchanged": true,
+    "used_character_fixture_functions_unchanged": [
+      "actor",
+      "clip",
+      "setup_stage"
+    ],
+    "ci_note": "A new combined CI replaces the in-progress pre-integration run; no old run is counted as a pass."
+  }
 }

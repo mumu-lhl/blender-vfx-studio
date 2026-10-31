@@ -1,0 +1,667 @@
+{
+  "runtime_union_commit": "ef55e3faf3cb46050a529eef9581efb889b6dea0",
+  "components": [
+    "PR #202 native Slice preparation",
+    "PR #205 software renderer environment",
+    "PR #206 rolling impact heat"
+  ],
+  "realtime_playback_reviewed": false,
+  "all_47_samples_viewed": true,
+  "native_batch_exit": 0,
+  "records": {
+    "character": {
+      "engine": "BLENDER_EEVEE",
+      "blender_version": "5.2.2 LTS",
+      "resolution": [
+        960,
+        540
+      ],
+      "samples": 16,
+      "fps": 24,
+      "fps_base": 1.0,
+      "frames": [
+        16,
+        32,
+        43,
+        47,
+        49,
+        51,
+        53,
+        61,
+        80
+      ],
+      "dark": false,
+      "far": false,
+      "reverse": false,
+      "no_fx": false,
+      "view_transform": "AgX",
+      "look": "None",
+      "bloom": false,
+      "camera_location": [
+        0.0,
+        7.0,
+        4.150000095367432
+      ],
+      "camera_lens_mm": 50.0,
+      "contact": {
+        "frame": 49,
+        "hilt": [
+          -0.5040510296821594,
+          -0.1079416424036026,
+          0.5526473522186279
+        ],
+        "tip": [
+          0.9185568690299988,
+          0.4261942207813263,
+          0.850615918636322
+        ],
+        "hits": [
+          {
+            "position": [
+              0.7292299866676331,
+              0.3551091253757477,
+              0.8109609484672546
+            ],
+            "normal": [
+              -0.744300365447998,
+              0.31550633907318115,
+              -0.5886193513870239
+            ],
+            "mesh": "Rogue_ArmRight",
+            "distance": 1.3424321104932777
+          }
+        ],
+        "verified_intersection": true
+      },
+      "charge_release": {
+        "frame": 49,
+        "phase": 0.8799999952316284,
+        "duration": 54.54545484101477
+      },
+      "blade_trace": [
+        {
+          "frame": 41,
+          "hilt": [
+            -0.5368996858596802,
+            0.02394147217273712,
+            0.5635502934455872
+          ],
+          "tip": [
+            -0.6359516978263855,
+            1.456756353378296,
+            1.142456293106079
+          ],
+          "hits": []
+        },
+        {
+          "frame": 42,
+          "hilt": [
+            -0.5382159352302551,
+            0.03066301718354225,
+            0.5640528202056885
+          ],
+          "tip": [
+            -0.671862781047821,
+            1.460651159286499,
+            1.1429953575134277
+          ],
+          "hits": []
+        },
+        {
+          "frame": 43,
+          "hilt": [
+            -0.5405353903770447,
+            0.046242713928222656,
+            0.5651320815086365
+          ],
+          "tip": [
+            -0.7558634877204895,
+            1.4662201404571533,
+            1.1440973281860352
+          ],
+          "hits": []
+        },
+        {
+          "frame": 44,
+          "hilt": [
+            -0.545865535736084,
+            0.08635565638542175,
+            0.5677602887153625
+          ],
+          "tip": [
+            -0.973716676235199,
+            1.4573827981948853,
+            1.1466654539108276
+          ],
+          "hits": []
+        },
+        {
+          "frame": 45,
+          "hilt": [
+            -0.5489760041236877,
+            0.11642763763666153,
+            0.5694602131843567
+          ],
+          "tip": [
+            -1.1343342065811157,
+            1.4279673099517822,
+            1.1483566761016846
+          ],
+          "hits": []
+        },
+        {
+          "frame": 46,
+          "hilt": [
+            -0.5503388047218323,
+            0.13419677317142487,
+            0.5702810883522034
+          ],
+          "tip": [
+            -1.2259761095046997,
+            1.4015636444091797,
+            1.1492427587509155
+          ],
+          "hits": []
+        },
+        {
+          "frame": 47,
+          "hilt": [
+            -0.5445150136947632,
+            0.12125616520643234,
+            0.5695549249649048
+          ],
+          "tip": [
+            -1.054876685142517,
+            1.4672296047210693,
+            1.140332579612732
+          ],
+          "hits": []
+        },
+        {
+          "frame": 48,
+          "hilt": [
+            -0.5120672583580017,
+            0.0298469178378582,
+            0.5664984583854675
+          ],
+          "tip": [
+            -0.030817311257123947,
+            1.412721037864685,
+            1.0704396963119507
+          ],
+          "hits": []
+        },
+        {
+          "frame": 49,
+          "hilt": [
+            -0.5040510296821594,
+            -0.1079416424036026,
+            0.5526473522186279
+          ],
+          "tip": [
+            0.9185568690299988,
+            0.4261942207813263,
+            0.850615918636322
+          ],
+          "hits": [
+            {
+              "position": [
+                0.7292299866676331,
+                0.3551091253757477,
+                0.8109609484672546
+              ],
+              "normal": [
+                -0.744300365447998,
+                0.31550633907318115,
+                -0.5886193513870239
+              ],
+              "mesh": "Rogue_ArmRight",
+              "distance": 1.3424321104932777
+            }
+          ],
+          "verified_intersection": true
+        },
+        {
+          "frame": 50,
+          "hilt": [
+            -0.5340470671653748,
+            -0.1835176795721054,
+            0.5484861135482788
+          ],
+          "tip": [
+            0.9929769039154053,
+            -0.29270651936531067,
+            0.781243085861206
+          ],
+          "hits": [
+            {
+              "position": [
+                0.7974486351013184,
+                -0.27872538566589355,
+                0.7514397501945496
+              ],
+              "normal": [
+                -0.8638401031494141,
+                0.48778945207595825,
+                0.12586423754692078
+              ],
+              "mesh": "Rogue_ArmLeft",
+              "distance": 1.350235385664297
+            }
+          ]
+        },
+        {
+          "frame": 51,
+          "hilt": [
+            -0.5672783255577087,
+            -0.1908901035785675,
+            0.546071469783783
+          ],
+          "tip": [
+            0.9236587882041931,
+            -0.5427681803703308,
+            0.7723243236541748
+          ],
+          "hits": []
+        },
+        {
+          "frame": 52,
+          "hilt": [
+            -0.5982236266136169,
+            -0.1968894600868225,
+            0.5435767769813538
+          ],
+          "tip": [
+            0.8378141522407532,
+            -0.7323634624481201,
+            0.76485675573349
+          ],
+          "hits": []
+        },
+        {
+          "frame": 53,
+          "hilt": [
+            -0.6262171864509583,
+            -0.20112019777297974,
+            0.5412814617156982
+          ],
+          "tip": [
+            0.7528285384178162,
+            -0.8704903721809387,
+            0.7605490684509277
+          ],
+          "hits": []
+        },
+        {
+          "frame": 54,
+          "hilt": [
+            -0.6506569385528564,
+            -0.20358934998512268,
+            0.539355456829071
+          ],
+          "tip": [
+            0.6782220602035522,
+            -0.9674490094184875,
+            0.7595839500427246
+          ],
+          "hits": []
+        },
+        {
+          "frame": 55,
+          "hilt": [
+            -0.6710494160652161,
+            -0.20454424619674683,
+            0.537896454334259
+          ],
+          "tip": [
+            0.6182533502578735,
+            -1.0326058864593506,
+            0.7613121867179871
+          ],
+          "hits": []
+        },
+        {
+          "frame": 56,
+          "hilt": [
+            -0.6870144605636597,
+            -0.20436152815818787,
+            0.5369590520858765
+          ],
+          "tip": [
+            0.5739403963088989,
+            -1.073864459991455,
+            0.764689564704895
+          ],
+          "hits": []
+        }
+      ],
+      "source_sha256": {
+        "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+        "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+        "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+        "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+        "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+        "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+        "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+        "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+        "blender_vfx_studio/dash.py": "cae04666618b5af84c54595c49e29c4f06c2295d1743f11584fda1d186c2afa1",
+        "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+        "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+        "blender_vfx_studio/impact.py": "a83bafc048945f16667fe197c94b2ea75d748e08965e64134442a84613d0eac4",
+        "blender_vfx_studio/impact_gas.py": "2317cfb38c41addb0b80e9ec515c288ac4a72deab8d71050dbed6a1a16089398",
+        "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+        "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+        "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+        "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+        "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+        "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+        "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+        "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+        "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+        "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+        "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+        "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+        "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+        "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+        "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+        "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+        "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+        "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+        "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+        "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+        "blender_vfx_studio/assets/burst_heat.png": "c69a4801b217428d1740ae6d82c57ae612430f92ba4904208ee131f273adb5e4",
+        "tools/character_scene.py": "5326cc327739c73d595b77ecf621d758c7bbb05635123fe7f5f17fc40d67bb2b",
+        "tools/character_combat.py": "9234275622d093df5300c261a22c70fd4d3ffdef5e199bfb16d01c1544142901",
+        "tools/build_examples.py": "6d32fc3a62a25e31ac4210558027fa9b1314de9035dc3d10dcad765a0560dfb5",
+        "tools/charge_design.py": "b54106f67f5bca3854fc1536a7f6af020b24825ac1e63dcefab4904ca187401d",
+        "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+        "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+        "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+        "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+      },
+      "render_timings": [
+        {
+          "frame": 16,
+          "render_wall_seconds": 45.72235046900096
+        },
+        {
+          "frame": 32,
+          "render_wall_seconds": 23.11578940199979
+        },
+        {
+          "frame": 43,
+          "render_wall_seconds": 21.711240314998577
+        },
+        {
+          "frame": 47,
+          "render_wall_seconds": 25.3321898389986
+        },
+        {
+          "frame": 49,
+          "render_wall_seconds": 26.364282706999802
+        },
+        {
+          "frame": 51,
+          "render_wall_seconds": 21.812802660999296
+        },
+        {
+          "frame": 53,
+          "render_wall_seconds": 23.514312104001874
+        },
+        {
+          "frame": 61,
+          "render_wall_seconds": 25.829732333997526
+        },
+        {
+          "frame": 80,
+          "render_wall_seconds": 14.151473434001673
+        }
+      ],
+      "cpu_quota": "200000 100000",
+      "blender_threads": 2,
+      "software_gl_requested": false,
+      "lp_num_threads": "2",
+      "saved_frame": 49,
+      "portable_render_path": "//renders/character-",
+      "method": "PNG frames; realtime playback unreviewed",
+      "realtime_playback_reviewed": false,
+      "limits": [
+        "Stylized CC0 low-poly characters, not a production anime rig",
+        "Headless render wall time is not interactive viewport FPS",
+        "Timing, transforms and existing artistic values are fitted to this sword stroke"
+      ]
+    },
+    "native_hd": {
+      "native_render_verified": true,
+      "frames": [
+        32,
+        49,
+        53
+      ],
+      "clear_frame": 96,
+      "scene_sha256": "a6c9586a9bae18e820e1eb5253831aa466e6f4a82b524a66064544d50d910ac3",
+      "source_frame_sha256": {
+        "character-0032.png": "4d1bbaaa23a22c77d5e4a47a42e0ab152486a06f2f5e05d78392489f2e5b864b",
+        "character-0049.png": "588ab277c0cadcc00103d7c61539d4e12bdefa9dea26cfbf19b87210f779b2e2",
+        "character-0053.png": "320116454ad6ba4e15d618e3cc6991e597f1a9f2fd29f42889e07b1839410614"
+      }
+    },
+    "motion": {
+      "samples": [
+        {
+          "frame": 1,
+          "sha256": "e8ce2d2cfce41af945935ee0a3acb59196de890afb62837410e5c2f169396a93"
+        },
+        {
+          "frame": 3,
+          "sha256": "f59040a8d0e22ccacd3cdb66a70ff7df82d6fb8e8ac918f9bab257eafaaef4cd"
+        },
+        {
+          "frame": 5,
+          "sha256": "5de30a0a44589d6a2c1433ccb5a894121a0ba00146c4429d7dbc5ff221274d8d"
+        },
+        {
+          "frame": 7,
+          "sha256": "74f5da366fd6153566d7ea444c974230400e2adb2f51d06961811c626d8588f6"
+        },
+        {
+          "frame": 9,
+          "sha256": "b66f3bfae67f60720038ebc2c6f1cbef1658c84633472af7e48598a558ae3506"
+        },
+        {
+          "frame": 11,
+          "sha256": "51ba2927a36586ae047703aef521b77cd480489499f8ee45590d19c10afe61ad"
+        },
+        {
+          "frame": 13,
+          "sha256": "c71d8f9b5a651e751695f1d744eecd338fd5c9cf771915f2cc38a17e22379cff"
+        },
+        {
+          "frame": 15,
+          "sha256": "d9e629e960e1fdbc9ae00f1daa2c1c1e471cd69b728e8e538758340a3572d1c6"
+        },
+        {
+          "frame": 17,
+          "sha256": "7b2524a4c5d24ba4185bd9048d49538b134f4336d2060dfecdb14667082abee9"
+        },
+        {
+          "frame": 19,
+          "sha256": "3d93208cfebba428baf23eb6571b2d1e9aee5e435c8cebe8c1740734115501ab"
+        },
+        {
+          "frame": 21,
+          "sha256": "945a8faad89d124be0d9d6fb1c3098a853c616c9b4a8841ecf00b389816d09c2"
+        },
+        {
+          "frame": 23,
+          "sha256": "e1897aa4c0513b7f9782aa8673a34e3cdcb9ec5d7fd9fbd8ebcadee04df65ac6"
+        },
+        {
+          "frame": 25,
+          "sha256": "1d053a0237e66b9f337a25c2076777feedb4f02738d903a21938ee5611c1d030"
+        },
+        {
+          "frame": 27,
+          "sha256": "008019118bed5eaea9f4c30897f381847d3971d9e1e276370fc53679ebb0580c"
+        },
+        {
+          "frame": 29,
+          "sha256": "fa954dba3c851a110ebcecbff4cb4807d33f2c95abe52e316848661f50085b4a"
+        },
+        {
+          "frame": 31,
+          "sha256": "618d9533f6d0e46615d2c19add0ea9277bd11c833ab86e5e57eacbc02cf4aad4"
+        },
+        {
+          "frame": 33,
+          "sha256": "eb817fb3e023ff335e8fdf881833ae4a565abc13bb6c3bf13f59e387884cba56"
+        },
+        {
+          "frame": 35,
+          "sha256": "79bcad0945b985a012aa58748aea178ce045ead753bc09cec22125f93a70ee81"
+        },
+        {
+          "frame": 37,
+          "sha256": "8783176734276a11463bbf4e91298aafcd41e4518e339a2ef5ebaf7abfed5065"
+        },
+        {
+          "frame": 39,
+          "sha256": "3ff25edf651efa24965594d1a1ad82e6f396fc7d09c4f1fd51957ffd557f6d78"
+        },
+        {
+          "frame": 41,
+          "sha256": "ac576f719b83fbf8020c1b80744e3187f5a1615f2968824240033cd3c9cff0ca"
+        },
+        {
+          "frame": 43,
+          "sha256": "eda7b193ea2013cd94a79a6942e591314e482910e9d27226f091f81d8aea668c"
+        },
+        {
+          "frame": 45,
+          "sha256": "7fff3a75fc036eec2117745cf91e26c44251a551250227509d20479c3d2164f8"
+        },
+        {
+          "frame": 47,
+          "sha256": "ae90f30345d9983374a7a39a74111657d1914c8556ff614e28b7e0cc5e3313a9"
+        },
+        {
+          "frame": 48,
+          "sha256": "6a29ed01131e2456c5ff2fabbe38758f4b03a1abdb16f6d618bf227514d2e22c"
+        },
+        {
+          "frame": 49,
+          "sha256": "5c377da97f1d27ddf6ef86f3626bf6e99f4907139b3f1e496140de46d981e1c0"
+        },
+        {
+          "frame": 50,
+          "sha256": "a40119d0e787fab80311b10c04e7299e2ca91ca289fd8cec75e5659cb153b9d9"
+        },
+        {
+          "frame": 51,
+          "sha256": "82b1cebe3ce99305ddc0d1ff9c5dda9836d9fbb98badf124a98fb2b142c6b336"
+        },
+        {
+          "frame": 52,
+          "sha256": "47014da038dbbd374c2ecb8036d676388e6a4b8530c547c645d67fa04fe85cf4"
+        },
+        {
+          "frame": 53,
+          "sha256": "d53f8bf4da99c50a9ec17d4d04ff13a3763b8702d3bb0cc437f3bf0cbc47fd25"
+        },
+        {
+          "frame": 54,
+          "sha256": "af9500ecd4bb52f5a987c59b213188822e2c844ff5e20873e7fad33238d793c5"
+        },
+        {
+          "frame": 55,
+          "sha256": "17996bb7623f995f5645f7109b942cafbe34839efb0a1d0c329bd7fa7d9ea0f8"
+        },
+        {
+          "frame": 56,
+          "sha256": "28a92510ad769b3aba02d71001c2db36778213511aef3534e6e22c7813928109"
+        },
+        {
+          "frame": 57,
+          "sha256": "7b9f990a6c65e413399fd27922256428f0848a3ca2b857ce062e20714f2ca9ba"
+        },
+        {
+          "frame": 59,
+          "sha256": "dddb86fd68acbb17d50393abda20ad99e26c9683e6b1f11e9584f6f6505203a5"
+        },
+        {
+          "frame": 61,
+          "sha256": "5a32539147ba3aed44b5168fed52c3ae142ddd29548537e8edb6a90e13ee513b"
+        },
+        {
+          "frame": 63,
+          "sha256": "413683f8e36d48f3b92dabd0baeb4d294631e9ce91e28acebf7afa7a07b45c33"
+        },
+        {
+          "frame": 65,
+          "sha256": "f12149320b6cb60468bfbd1c24689258d5a9d2bf893fb7e497a54e41f052f557"
+        },
+        {
+          "frame": 67,
+          "sha256": "280c18926a9c53d2793ca1ed8cc502806bab4b9f6d06c59bf684c962c698369b"
+        },
+        {
+          "frame": 69,
+          "sha256": "8486289dab2ed54eb8bde3c47d796d9fd359d37f8b5a91a5090f02bff7dd2c3c"
+        },
+        {
+          "frame": 71,
+          "sha256": "afcc2b85bedfbd31f54eea7341d2533eec9044d725af4b254f832fd14b61d823"
+        },
+        {
+          "frame": 73,
+          "sha256": "0549602e46adac77b579ba47d5ed83bb692bba555fb7ac15093e3fbcae3cc234"
+        },
+        {
+          "frame": 75,
+          "sha256": "90600873f0ded7659e4b627fc99dd58c107201a67d6959b71c7e5df1536b6d87"
+        },
+        {
+          "frame": 77,
+          "sha256": "7139e508315c28d3141c5596d688fd65548e83c79c37cb79cc45c6ed48173785"
+        },
+        {
+          "frame": 79,
+          "sha256": "30dce4483686a2ed42a90823f82336f52bea5b046a4d8c018b1bc269f3db2709"
+        },
+        {
+          "frame": 81,
+          "sha256": "3d028b8ba924ad9b2aefd328e3dcb26928d78c9d33e53501b929366c90b55251"
+        },
+        {
+          "frame": 96,
+          "sha256": "3f5073aa3e3c1fc4b73af3e1510cf6bf720c139f4a39250e71b594711dfeffe9"
+        }
+      ],
+      "resolution": [
+        480,
+        270
+      ],
+      "fps": 24,
+      "realtime_playback_reviewed": false
+    }
+  },
+  "committed_images": {
+    "combat-combined-motion-01.png": "e761586825e39e8b22b3df1a4d87d9b14265b65aaea3890b0af17e4fe504f8a4",
+    "combat-combined-motion-02.png": "a00793e4e87075746b8292da6ce2136f440070ce5cf8e5a68382927f0f6cce81",
+    "combat-combined-motion-03.png": "ee54a776c223906b93fbd702baa4a3bf0d23c996426098b8c80f88601fac6643",
+    "combat-combined-motion-04.png": "50ef3897c54b09faa891364ae181e408b24ddd88c35fa53b3f41f4679d4c4879",
+    "combat-combined-motion-05.png": "e6c60797dd91a867c96770d50b46f728731b861f6ee7a98adae856157d471567",
+    "combat-combined-motion-06.png": "f284f1b7eb2fe4880990184f98fffefd54f4094c5ef966088d97e6bf5f787b71",
+    "combat-combined-motion-07.png": "105f43ad658fcfc7eb2d8f48b637e4f24ca300da677dbc911d587e3c3b19847b",
+    "combat-combined-motion-08.png": "5bfca02d439a9a4604f241e3ff53e61733f2ae81d9c4193768a0871925357e6e",
+    "combat-combined-stages.png": "4f6f0469c030671648406811747e158b97dc6accd5911ed3d5fafa475de8f8b8",
+    "combat-combined-16.png": "a37369099421e6a39ed112d3246a17a82459903485890ced4f1e3b0f2d4831ba",
+    "combat-combined-47.png": "9e23b71da9ea5718964c9f249d5de0f7bd0fbb2ed2f3ba2429b4bf31041966e1",
+    "combat-combined-51.png": "3b6e865cc53eb3f16e4abe97dc434f569e02c271e9626985c75d530aa4de3bd7"
+  },
+  "limits": [
+    "Native ordered PNG samples, not realtime video playback.",
+    "Light near view only in this integration batch; separate component reviews record other views.",
+    "Body preparation, hard charge surfaces and reverse occlusion remain art issues."
+  ]
+}

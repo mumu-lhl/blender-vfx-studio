@@ -720,7 +720,7 @@ class StarterTests(unittest.TestCase):
     def test_builders_have_native_timing_and_explicit_quality(self):
         for key, layers, duration, quality in zip(
             EXAMPLES,
-            (4, 4, 1, 4, 3, 2, 3, 3),
+            (4, 5, 1, 4, 3, 2, 3, 3),
             (48, 24, 18, 18, 32, 52, 30, 72),
             ("LOW", "LOW", "LOW", "MEDIUM", "MEDIUM", "MEDIUM", "MEDIUM", "MEDIUM"),
             strict=True,
@@ -768,7 +768,8 @@ class StarterTests(unittest.TestCase):
             with bpy.data.libraries.load(str(file)) as (available, _):
                 self.assertEqual(available.cameras, [])
                 self.assertEqual(available.scenes, [])
-                self.assertEqual(available.images, [])
+                self.assertNotIn(image.name, available.images)
+                self.assertEqual(len(available.images), 1 if key == "impact-burst" else 0)
                 self.assertEqual(available.worlds, [])
             a, b = assets.load(bpy.context, file), assets.load(bpy.context, file)
             self.assertEqual(len({root["vfx_id"], a["vfx_id"], b["vfx_id"]}), 3)
