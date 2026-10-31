@@ -96,6 +96,7 @@ class ImpactTests(unittest.TestCase):
             member.children[0].hide_render = member != burst
         camera()
         bpy.context.scene.camera.data.ortho_scale = 1.5
+        bpy.context.scene.render.dither_intensity = 0
         warm = render_pixels(3)
         self.assertGreater(sum(warm[0::4]), sum(warm[2::4]))
         update(burst, color_0=0.015, color_1=0.05, color_2=1.0)
