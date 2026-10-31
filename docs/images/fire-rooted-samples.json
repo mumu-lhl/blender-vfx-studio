@@ -1,0 +1,818 @@
+{
+  "functional_source": "e5d93ccf76dc81cf0611899245acaf313c186e57",
+  "native_review_tool_source": "136f76e16d2812d3956c6eaadf4045716b9686cd",
+  "baseline": {
+    "base": "038d279af62154e44c1e587de52f9095412421d1",
+    "fire_asset_sha256": "3472a30d8fe69bb00471297a93cd78ad4b1e8d13daddb504813c580fdde68a90"
+  },
+  "baseline_ci_fire_source_verified": true,
+  "blender": "5.2.2 LTS",
+  "engine": "BLENDER_EEVEE",
+  "resolution": [
+    960,
+    540
+  ],
+  "samples": 16,
+  "view_transform": "AgX",
+  "realtime_playback_reviewed": false,
+  "hd_fire_viewed": [
+    {
+      "path": "work/fire-review/light-near/fire-0025.png",
+      "sha256": "2c056694390cca3dd169aa774da5d4dbc139602448090e851575a2a9fce26119",
+      "variant": "light-near",
+      "frame": 25
+    },
+    {
+      "path": "work/fire-review/light-near/fire-0036.png",
+      "sha256": "3784c8eef300fad4d730a6f9f7d164d4c31f7ec4b0d9866cc32e3623455559e6",
+      "variant": "light-near",
+      "frame": 36
+    },
+    {
+      "path": "work/fire-review/light-near/fire-0040.png",
+      "sha256": "5037299ea6dc0dd64803f9bca6b6fa8e378f6273cfb8fb32004d9af72b2d6982",
+      "variant": "light-near",
+      "frame": 40
+    },
+    {
+      "path": "work/fire-review/light-near/fire-0048.png",
+      "sha256": "87444d80f0c474d38a74e288368abfc6120fd4f8f7f681e071536532f9a1718b",
+      "variant": "light-near",
+      "frame": 48
+    },
+    {
+      "path": "work/fire-review/light-near/fire-0060.png",
+      "sha256": "9c59b327b8ad0a10517ce08fe55656c8de118e55a1f915da8b1ec699d6b58be3",
+      "variant": "light-near",
+      "frame": 60
+    },
+    {
+      "path": "work/fire-review/light-near/fire-0069.png",
+      "sha256": "e7c6af04589a9926b59519f0384b2f113a0152f992839b996d436c594c8e5b0a",
+      "variant": "light-near",
+      "frame": 69
+    },
+    {
+      "path": "work/fire-review/dark-near/fire-0036.png",
+      "sha256": "7ff72c18241f7947d3f008e14b43b9663a2cd5c896dcf9c5418da95377f96eaa",
+      "variant": "dark-near",
+      "frame": 36
+    },
+    {
+      "path": "work/fire-review/dark-near/fire-0040.png",
+      "sha256": "dcc51f3753534531b2fd45f3722f10b53a5640d84d58e323f56566081d9d7bee",
+      "variant": "dark-near",
+      "frame": 40
+    },
+    {
+      "path": "work/fire-review/light-far/fire-0036.png",
+      "sha256": "f0df14bcd7ed5b74cf2de805539199996dff186a7e6e68c4d2b3ea77a13d293f",
+      "variant": "light-far",
+      "frame": 36
+    },
+    {
+      "path": "work/fire-review/light-far/fire-0040.png",
+      "sha256": "ea2662909ac4a13f8fa9813c8869212e37340df10417a186e7ede9cec57fdf25",
+      "variant": "light-far",
+      "frame": 40
+    },
+    {
+      "path": "work/fire-review/light-near-blue/fire-0036.png",
+      "sha256": "edca6b8b72eb3bb06d1fb4cc0ebf0a09fa2134d87c2546c0699a6736f8a3279b",
+      "variant": "light-near-blue",
+      "frame": 36
+    },
+    {
+      "path": "work/fire-review/light-near-green/fire-0036.png",
+      "sha256": "4ff8cdd349e1555d4e41bf06f37efbfa8fe69497be0de9bc57bc04bccba73c19",
+      "variant": "light-near-green",
+      "frame": 36
+    }
+  ],
+  "hd_spell_viewed": [
+    {
+      "path": "work/spell-review/light-near/spell-0064.png",
+      "sha256": "605d8162cf2d899272115fc585969599616ead5edab7c3840ea948f861f572a5",
+      "frame": 64
+    },
+    {
+      "path": "work/spell-review/light-near/spell-0076.png",
+      "sha256": "10d34d62253e02caa47ba38c59989ff8434b8027cdf07d1030606ad39595dac5",
+      "frame": 76
+    },
+    {
+      "path": "work/spell-review/light-near/spell-0092.png",
+      "sha256": "a1cff4523a2249a44680bee95daf21e568fa98f874b8c93fefe870ec6f2ee32d",
+      "frame": 92
+    },
+    {
+      "path": "work/spell-review/light-near/spell-0104.png",
+      "sha256": "b97a12a9e3fce050b98aa52434438c1251efde1b7e70baca4a2b2ea0c3d0cdd9",
+      "frame": 104
+    }
+  ],
+  "native_fire_hd": {
+    "native_render_verified": true,
+    "frames": [
+      48,
+      36,
+      40
+    ],
+    "clear_frame": 70,
+    "scene_sha256": "c6ad4e71a66f108c5421368b21f9d9e0d8fba4916d759556222584bab4cb7881"
+  },
+  "native_spell_hd": {
+    "native_render_verified": true,
+    "frames": [
+      92,
+      64,
+      76
+    ],
+    "clear_frame": 104,
+    "scene_sha256": "fb067be29e8b946c65bdba9ca71f366d9c21e27c22a0e4cde55bb2f73228b067"
+  },
+  "native_fire_motion_viewed": {
+    "profile": "fire",
+    "frames": [
+      {
+        "frame": 1,
+        "sha256": "f986abe3cc663adf66a2aa86b09bbf44b7bc98083e89e3d00647839570ffdc3f"
+      },
+      {
+        "frame": 3,
+        "sha256": "f006327f82e0a0c2ed25444f65e3ccac74efdfc4bf96336f2796125a2c9857ad"
+      },
+      {
+        "frame": 5,
+        "sha256": "2ad6a86474a0339e02cb1395a0d066a9c0aaf35ac2214e66eae0c1c723505cb1"
+      },
+      {
+        "frame": 7,
+        "sha256": "87d72a05184b9035093dd8a10dc758a9768fdeb7e4630074bd6286feaf26bcf2"
+      },
+      {
+        "frame": 9,
+        "sha256": "fc8ceddc50d4362e60a77aed976978005667e96d01f76c125f3c381abb4917e5"
+      },
+      {
+        "frame": 11,
+        "sha256": "07bcd291f50accb1bcedcf11da61f429a36896ca1543ee9eb9a715bdf8af7c76"
+      },
+      {
+        "frame": 13,
+        "sha256": "8ff13598f95e0ee802363f1a50e93960acd225337ba84caab6e215628596e570"
+      },
+      {
+        "frame": 15,
+        "sha256": "9354b892d74ac43861718b935bf95cf9c8091852720f97355f6972121bbe1634"
+      },
+      {
+        "frame": 17,
+        "sha256": "558bb5be006701683f82b724e211762f7fe22dff73754e5d1a2adc6f8fac2bd6"
+      },
+      {
+        "frame": 19,
+        "sha256": "b9a7173f89e1407b7c72fbe9ff82129ee7f6dc1d1c55d29c808bef52375f6e00"
+      },
+      {
+        "frame": 21,
+        "sha256": "d65962258c3be1cc0753e9d4dcc3156017271af7665a97247920d1517c9da0c4"
+      },
+      {
+        "frame": 23,
+        "sha256": "da932c707b3e92a62cfa39430280ba81643cc4769634bc877e4770e6c94c3f5e"
+      },
+      {
+        "frame": 25,
+        "sha256": "67a4903d6d9a254f49913258a3e436cea55d199f839f045e8c3716bfb2aa8c32"
+      },
+      {
+        "frame": 27,
+        "sha256": "36e6f1d504d2df38141507c106d5d12d13fbe2c1ddf1494ba20842eef127dd86"
+      },
+      {
+        "frame": 29,
+        "sha256": "2634da82d69967aa07334fce439367ae96458674fe4cff7d78e3c7143c50b7eb"
+      },
+      {
+        "frame": 31,
+        "sha256": "28fb48f6a0404840aab001ecd2d597cd94dcaa4b8e5b2bae2cd391ce57a93ca6"
+      },
+      {
+        "frame": 33,
+        "sha256": "9195b5a40ca1914f89de6cfa0c8ddabc0091187d38cfec79f0f92191bbb81b32"
+      },
+      {
+        "frame": 35,
+        "sha256": "a41b8343c3b86d1342cb0d956a59e2f28e254a869b477730f08b5c6685b0530e"
+      },
+      {
+        "frame": 37,
+        "sha256": "e2e8f2cf4c479d80e4df13079a0dde00663b52f522e6c41c01aa9dcde8b00dae"
+      },
+      {
+        "frame": 39,
+        "sha256": "abd42c1f3376ec4938ff1d86e9ad95c2dc28494fb36379ca61f4d868df307068"
+      },
+      {
+        "frame": 41,
+        "sha256": "df703bd4521bb1d7a47d1c907f7a53cfd3495ee84afe71cecd4fdd80d6013f6b"
+      },
+      {
+        "frame": 43,
+        "sha256": "e18c7668d0a8945a17542e51836e771e14871361386f18653055e1e50da3f963"
+      },
+      {
+        "frame": 45,
+        "sha256": "81196669d8e8dba5c9873197eac2a2437d0cbab2361224c93ecd27ecddcd6dbc"
+      },
+      {
+        "frame": 47,
+        "sha256": "a3840399b8939b3489922e474ec9472fecc458de039231f51b1116e6d4a39446"
+      },
+      {
+        "frame": 49,
+        "sha256": "269b21a604ac3d7dd8c49a6bfe45968959a289c0f7d603e99385ee6221f680f7"
+      },
+      {
+        "frame": 51,
+        "sha256": "134c083ce3fc1c65f27120d82e2f5b1f7505fd7fd89fa8a9139df30ddaefe996"
+      },
+      {
+        "frame": 53,
+        "sha256": "48fe0fbd212c360fd7ed4843fa6f5fe99d0c407686cdf6fb03783a7c7fcd441e"
+      },
+      {
+        "frame": 55,
+        "sha256": "3f0451f40351f97d9cb87fd2d324ce58cba252140c5381a8230f43552406f759"
+      },
+      {
+        "frame": 57,
+        "sha256": "b117e6c1cf5faa67c99e5fda0a28ecccf47660bec61f6345c14a7863ca02c65a"
+      },
+      {
+        "frame": 59,
+        "sha256": "e45971076bc95a2d156d21450c2b4bd25de0e1b069bc9e729b26d8b2d8984f43"
+      },
+      {
+        "frame": 61,
+        "sha256": "3d4d36755a1f76fe0f1e4babc28269788bf471cdd5eb8ce32398a5bde73e1cb7"
+      },
+      {
+        "frame": 63,
+        "sha256": "62befed2433d5059104a2121b57884d5e582c256dfa800cc5044927aaf2bca6d"
+      },
+      {
+        "frame": 65,
+        "sha256": "295ac51b94118bcdbc3fd60506c7499991690f673d27d0acd01a0a5ff862552f"
+      },
+      {
+        "frame": 67,
+        "sha256": "026c5c4155a1ccb2f04574319fbd3b17776eac2450d91831b859e6699c58d900"
+      },
+      {
+        "frame": 69,
+        "sha256": "dc3f8134bcfe028518f4dfeddfc8e0361c171466a1498da11ec1fefa76303b90"
+      },
+      {
+        "frame": 71,
+        "sha256": "54bd2f752176cb55cdce121a79f81219157682ab2b6caa3292a0d4954a08912a"
+      }
+    ],
+    "resolution": [
+      480,
+      270
+    ],
+    "fps": 24,
+    "realtime_playback_reviewed": false
+  },
+  "native_spell_release_motion_viewed": {
+    "profile": "spell",
+    "frames": [
+      {
+        "frame": 59,
+        "sha256": "b3afe904bdb1810bf06deb222aeee3668498987304aac70c151078eb258a0128"
+      },
+      {
+        "frame": 61,
+        "sha256": "5c09a5d1d1d3abba09a8be65c22acd0dffa16be6b2aca9a253c2620c195ccca2"
+      },
+      {
+        "frame": 63,
+        "sha256": "41d06e09ed22f1c5cd511e316fdd372eec2e29da9969d187d537af78d30091ac"
+      },
+      {
+        "frame": 65,
+        "sha256": "7e3f3891509db67a82ad953a169b7ca1897319d1b97da97bdc4db496d2481e66"
+      },
+      {
+        "frame": 67,
+        "sha256": "700ffff422b0a00d8934b376ce2ed761ea9a8ba3f110e952234181762017507c"
+      },
+      {
+        "frame": 69,
+        "sha256": "bc8e6397d234547ba859c600b1d80fb62182219a3accd5f4842913537126fd4f"
+      },
+      {
+        "frame": 71,
+        "sha256": "50f8d98249a84e86477d2c44afb0fbe543db8ce5d5d076648bfe5a1227d1b6f8"
+      },
+      {
+        "frame": 73,
+        "sha256": "e5bf64a4be0a47df1125c7fd3c42af19a496f43e0c37da5e4a33963d288c98b0"
+      },
+      {
+        "frame": 75,
+        "sha256": "b4a3b6bc02059a402cd5791f0c5433a997c3f64c7b7ead2e33a5b666a96ca302"
+      },
+      {
+        "frame": 77,
+        "sha256": "7b558551b1f8bc9b085aad0845b0d9971e4871d738e6995b476d8cf326ac0659"
+      },
+      {
+        "frame": 79,
+        "sha256": "35cc4f1b8fdf50fcbe576ddb368d95953a464016e5d60bc6ed206c4533516905"
+      },
+      {
+        "frame": 81,
+        "sha256": "f860263c108ecca2b030cb7fa3237ff8304c707762b852c8520752df0beaa349"
+      },
+      {
+        "frame": 83,
+        "sha256": "d6e7386f0416081f9e53f61ac522a0f0e74839abae592e9fabc1022f2c6991ae"
+      },
+      {
+        "frame": 85,
+        "sha256": "cb1ddbb0ab1f2eab7d3e64e895efddba6538989258e1571321611b10a2a29055"
+      },
+      {
+        "frame": 87,
+        "sha256": "831793a558b489ff674dabbee2e0966669ee7c3a722a820615f140117fd6ef48"
+      },
+      {
+        "frame": 89,
+        "sha256": "afc3e72687b7b42a8247597e484a4300165f506ddfb02a279527cf5866a9224d"
+      },
+      {
+        "frame": 91,
+        "sha256": "81232286e39ab3b79e1b9d93fd7100753a1c59123a91f532c7c96c3a2de7120b"
+      },
+      {
+        "frame": 93,
+        "sha256": "2a1e7d4c5d519c911edc263ffa03138b0f617173511dffcf9c0c29f5586028a6"
+      },
+      {
+        "frame": 95,
+        "sha256": "42e0cdab50a95080fa93636286e5b7e9c5e807198d696851cd42c155e0451caf"
+      },
+      {
+        "frame": 97,
+        "sha256": "ec3a8b56fe7abb2bfd0204dfae0d7ce359f8ab41998f41d5935dcc76ae09ab0e"
+      },
+      {
+        "frame": 99,
+        "sha256": "20e3af17b5470c1bcdd4e50c5fe5043114f9ee9977353faf27ed20068d339e2e"
+      },
+      {
+        "frame": 101,
+        "sha256": "e854995fc95bcdcb248c62c751b915b69c5c3b97401233b1880d1961ad242de5"
+      },
+      {
+        "frame": 103,
+        "sha256": "0a0e59c280a52d3b07181e38e7abe5b71472dd1a29c95233d7bcc25b3a0a8bd2"
+      },
+      {
+        "frame": 105,
+        "sha256": "3797306812d7b9610c35a6b6ea8ecc4b8af9fdb1c0ae527bf9c7167edab585ee"
+      },
+      {
+        "frame": 107,
+        "sha256": "bd6b0db8c69244c4b944e08fea30e3be577f40e22b0338a420ad1f5dc2f52ef5"
+      }
+    ],
+    "resolution": [
+      480,
+      270
+    ],
+    "fps": 24,
+    "realtime_playback_reviewed": false
+  },
+  "assets": [
+    {
+      "path": "work/rooted-review/assets/fire-low.blend",
+      "sha256": "048204746d5a8fb429c95c834de938dbd910db1e0633c0b0bb08be7527c2db2c",
+      "quality": "low",
+      "preview_size": [
+        256,
+        256
+      ],
+      "preview_viewed": true,
+      "native_seek": [
+        8,
+        20,
+        8
+      ],
+      "clear_frame": 53
+    },
+    {
+      "path": "work/rooted-review/assets/fire-medium.blend",
+      "sha256": "0b600834d55325312f9f028120ac7de051709a403f9d8a892f274401864158e9",
+      "quality": "medium",
+      "preview_size": [
+        256,
+        256
+      ],
+      "preview_viewed": true,
+      "native_seek": [
+        8,
+        20,
+        8
+      ],
+      "clear_frame": 53
+    },
+    {
+      "path": "work/rooted-review/assets/fire-high.blend",
+      "sha256": "486497ed66dcb7b647576f0b20669c96ff8729d6be31ddc0ea556356849c5511",
+      "quality": "high",
+      "preview_size": [
+        256,
+        256
+      ],
+      "preview_viewed": true,
+      "native_seek": [
+        8,
+        20,
+        8
+      ],
+      "clear_frame": 53
+    }
+  ],
+  "preview_sha256": {
+    "low": "9db7f8827e3114e034069cb30264b42808d60022c7a57882bc738e9fa9197391",
+    "medium": "70686e6e93736a3c1df7e3e16d360d0cd5c92cdefb73ddf7a1699987bdb3387c",
+    "high": "915861555404ce9878ead67f86fcb77e5790dfc194bd49cd1cd7a32c740cb657"
+  },
+  "tests": {
+    "fire_behavior": 8,
+    "art_controls": 14,
+    "starter_library": 22,
+    "fire_native_reopen": true,
+    "starter_native_reopen": true,
+    "ruff": "0.14.1"
+  },
+  "combined_source_validation": {
+    "branch": "review/charge-fire",
+    "sha": "193af24abee630b7d3afd4f6993fbc141d774a05",
+    "starter_library": 24,
+    "fire_behavior": 8,
+    "native_reopen": true,
+    "all_150_files_formatted": true
+  },
+  "performance": {
+    "blender": "5.2.2 LTS",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "cpu_quota": "200000 100000",
+    "blender_threads": 2,
+    "lp_num_threads": "2",
+    "software_gl_requested": false,
+    "gl": {
+      "vendor": "Mesa",
+      "renderer": "llvmpipe (LLVM 19.1.7, 256 bits)",
+      "version": "4.5 (Core Profile) Mesa 25.0.7-2+deb13u1"
+    },
+    "engine": "BLENDER_EEVEE",
+    "resolution": [
+      960,
+      540
+    ],
+    "samples": 16,
+    "source_sha256": {
+      "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+      "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+      "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+      "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+      "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+      "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+      "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+      "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+      "blender_vfx_studio/dash.py": "cae04666618b5af84c54595c49e29c4f06c2295d1743f11584fda1d186c2afa1",
+      "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+      "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+      "blender_vfx_studio/impact.py": "c7718004d7a04e08de232b688f57fe9c140d8a87db5b286f934e15bca0029921",
+      "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+      "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+      "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+      "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+      "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+      "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+      "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+      "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+      "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+      "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+      "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+      "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+      "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+      "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+      "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+      "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+      "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+      "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+      "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+      "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+      "tools/fire_asset.py": "7ce04bf501e938879b15a5ad619a491f879cd999d42b16242f8e6d61996e1c19",
+      "tools/fire_preview.py": "b180cccc031c15d7f39c8c39517c98ba2c7409593942beb0b12d82a904dd5a4b",
+      "tools/character_scene.py": "48ecae8e01f86bbf554bf5f71c0ef987f9dc33311623ae7ec2658ac3de07b827",
+      "tools/charge_design.py": "dd869b6620e73ad801c5c847e7d1e21bfa729b532349b10a9f7a5b6472c2af51",
+      "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+      "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+      "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+      "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+    },
+    "evaluation": [
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 40,
+        "milliseconds": 0.5166179998923326
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 40,
+        "milliseconds": 0.47912199988786597
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 40,
+        "milliseconds": 0.44729300043400144
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 0.6391820006683702
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 0.486563000777096
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 0.4588310002873186
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 0.4432180003277608
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 0.535115999809932
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 0.4913499997201143
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 0.527593999322562
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 0.6888369998705457
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 0.4702179994637845
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 40,
+        "milliseconds": 4.11637800061726
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 40,
+        "milliseconds": 3.878139000335068
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 40,
+        "milliseconds": 4.150269000092521
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 3.7427160004881443
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 5.131957000230614
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 3.7770670005556894
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 4.364851999525854
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 3.882936000081827
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 3.744358000403736
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 5.274131999613019
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 3.9651999995840015
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 40,
+        "milliseconds": 3.732789999958186
+      }
+    ],
+    "evaluation_summary": {
+      "bare": {
+        "scene_evaluation_median_ms": 0.4913499997201143,
+        "scene_evaluation_p95_ms": 0.6391820006683702,
+        "measured_samples": 9
+      },
+      "fx": {
+        "scene_evaluation_median_ms": 3.882936000081827,
+        "scene_evaluation_p95_ms": 5.131957000230614,
+        "measured_samples": 9
+      }
+    },
+    "renders": [
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 40,
+        "seconds": 34.94041123399984
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 40,
+        "seconds": 11.171686959999533
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 40,
+        "seconds": 11.720056484000452
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 40,
+        "seconds": 14.876965838000615
+      }
+    ],
+    "limits": [
+      "Headless scene evaluation and render wall time, not viewport FPS",
+      "Two warmup renders and 1 matched frame pairs; too few for a render p95",
+      "The same saved scene is used; only its VFX collection is excluded",
+      "Evaluation excludes the collection from the viewport dependency graph; render comparison only excludes it from rendering"
+    ]
+  },
+  "source_sha256": {
+    "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+    "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+    "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+    "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+    "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+    "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+    "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+    "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+    "blender_vfx_studio/dash.py": "cae04666618b5af84c54595c49e29c4f06c2295d1743f11584fda1d186c2afa1",
+    "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+    "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+    "blender_vfx_studio/impact.py": "c7718004d7a04e08de232b688f57fe9c140d8a87db5b286f934e15bca0029921",
+    "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+    "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+    "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+    "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+    "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+    "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+    "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+    "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+    "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+    "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+    "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+    "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+    "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+    "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+    "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+    "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+    "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+    "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+    "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+    "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+    "tools/fire_asset.py": "7ce04bf501e938879b15a5ad619a491f879cd999d42b16242f8e6d61996e1c19",
+    "tools/fire_preview.py": "b180cccc031c15d7f39c8c39517c98ba2c7409593942beb0b12d82a904dd5a4b",
+    "tools/character_scene.py": "48ecae8e01f86bbf554bf5f71c0ef987f9dc33311623ae7ec2658ac3de07b827",
+    "tools/charge_design.py": "dd869b6620e73ad801c5c847e7d1e21bfa729b532349b10a9f7a5b6472c2af51",
+    "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+    "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+    "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+    "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+  },
+  "limits": [
+    "Local lower-body improvement; overall fire art acceptance incomplete",
+    "Large orange surfaces and thin upper sheets remain",
+    "Far thin tips and inner flow remain weak",
+    "Character preparation and complete release force remain limited",
+    "No realtime playback inspected",
+    "One matched render pair; not viewport FPS or a reliable render p95",
+    "No matched old/new performance claim"
+  ],
+  "pr": 199,
+  "issue": 198,
+  "integrated_source": "5ccc86f800c3a69903617f6ba5598fc6c2dd12e0",
+  "ci": {
+    "url": "https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41192883592",
+    "required_success": 12,
+    "release_job": "skipped",
+    "merged": true,
+    "merge_sha": "309065312dccd9de1c1375cbe85bb12e37adc8fe"
+  },
+  "ci_package": {
+    "artifact_id": 13040391360,
+    "run_id": 41192883592,
+    "sha256": "a4e0ee3366947675e5c561e2ad33c87dc13923f7535ca59f9d8debb91accc1d1",
+    "bytes": 4509797,
+    "packages": [
+      "blender-vfx-studio-0.22.3.zip",
+      "blender-vfx-studio-examples-0.22.3.zip"
+    ],
+    "fire_assets": {
+      "stylized-fire.blend": "7138a36e6c5a5d7970e70fa25417ffdc6f75dc7b924c2d4c4047c10812ee7f06",
+      "stylized-fire-low.blend": "6c1c178c54284b3fb9bf98e9c18b4b9e4c9f8a6de830b441905f33a17818aee5",
+      "stylized-fire-high.blend": "7bc3b080e6aa28100c5cb70145ce796dfd764ff40519d5f7cdbe0936b52be944"
+    },
+    "plugin_python_files_identical": 32,
+    "blend_count": 18,
+    "native_qualities_verified": [
+      "LOW",
+      "MEDIUM",
+      "HIGH"
+    ],
+    "custom_previews_actually_viewed": true,
+    "native_seek_frames": [
+      8,
+      20,
+      8
+    ],
+    "clear_frame": 53
+  },
+  "combined_motes_validation": {
+    "source": "99ebb992864656a5f69a975be9a73a95334c8058",
+    "library_tests": 25,
+    "fire_tests": 8,
+    "native_reopen": true
+  }
+}
