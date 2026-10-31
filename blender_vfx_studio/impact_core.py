@@ -104,10 +104,16 @@ def build(root, quality):
     hot_tint = graph.node("ShaderNodeCombineXYZ", "Heat Keeps The Editable Hue")
     for index in range(3):
         graph.connect(
-            graph.value(
+            graph.math(
                 f"Hot Color {index}",
-                expression="max(p,0)**0.3",
-                properties={"p": f"color_{index}"},
+                "POWER",
+                graph.math(
+                    f"Nonnegative Color {index}",
+                    "MAXIMUM",
+                    graph.value(f"Heat Tint {index}", f"color_{index}"),
+                    0,
+                ),
+                0.3,
             ),
             hot_tint.inputs[index],
         )
