@@ -607,6 +607,29 @@ def _surface(root, *, core=False, ground=False):
             0.65,
         )
         mask = g.m("Visible Plasma Field", "MULTIPLY", mask, view)
+        # The cross cap keeps the focus visible along its axis. During the
+        # needle-shaped release, its oblique projection must not cut a white
+        # belt across the two longitudinal fields. Keep a face-on cap intact.
+        cap = g.m("Transverse Plasma Field", "GREATER_THAN", lane, 0.375)
+        release = g.stage("Plasma Cap Follows Release", p, 0.84, 0.88)
+        cap_facing = g.m(
+            "Axial Plasma Cap Visibility",
+            "POWER",
+            g.m("Absolute Plasma Cap Facing", "ABSOLUTE", facing.outputs["Value"]),
+            4,
+        )
+        cap_loss = g.m(
+            "Oblique Cap Clears The Release",
+            "MULTIPLY",
+            g.m("Only The Releasing Cap Fades", "MULTIPLY", cap, release),
+            g.m("Cap Obliqueness", "SUBTRACT", 1, cap_facing),
+        )
+        mask = g.m(
+            "Unbroken Longitudinal Plasma",
+            "MULTIPLY",
+            mask,
+            g.m("Remaining Plasma Cap", "SUBTRACT", 1, cap_loss),
+        )
         alpha = g.m(
             "Focus Opacity Field",
             "MULTIPLY",
