@@ -6,9 +6,9 @@
 
 ## energy-charge
 
-![Energy Charge：第 32 帧](images/charge-plasma-after-32.png)
+![Energy Charge：第 32 帧](images/charge-fronts-after-32.png)
 
-向内流动的蓝色外圈围绕白热中心积蓄，随后沿剑刃收束。第 **32 帧**，本地角色镜头；[编辑、隔帧与实际检查](CHARGE_PLASMA_REVIEW.md)。前段中心仍弱，背侧转剑可能被角色遮挡，未观看实时播放。
+热芯在剑身上方积蓄，释放前回到剑刃；移动能量头与较弱连尾表示向内汇聚。第 **32 帧**，本地角色镜头；[编辑、隔帧与实际检查](CHARGE_FRONTS_REVIEW.md)。外围长碎片仍抢眼，背侧仍有遮挡，未观看实时播放。
 
 ## Arc Slash
 
