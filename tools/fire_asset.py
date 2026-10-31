@@ -182,7 +182,7 @@ def _flames(root, quality):
         "Spent Shoots Narrow Before Reset",
         "SUBTRACT",
         1,
-        g.stage("Updraft Spends The Shoot", shoot_phase, 0.70, 0.98),
+        g.stage("Updraft Spends The Shoot", shoot_phase, 0.38, 0.98),
     )
     branch_breadth = g.m(
         "Growing And Narrowing Shoot",
