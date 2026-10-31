@@ -234,6 +234,7 @@ jobs:
       LIBGL_ALWAYS_SOFTWARE: '1'
       EGL_PLATFORM: surfaceless
       LP_NUM_THREADS: '2'
+      MESA_SHADER_CACHE_DISABLE: 'true'
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-python@v7.1.0
@@ -284,6 +285,7 @@ jobs:
       LIBGL_ALWAYS_SOFTWARE: '1'
       EGL_PLATFORM: surfaceless
       LP_NUM_THREADS: '2'
+      MESA_SHADER_CACHE_DISABLE: 'true'
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-python@v7.1.0
@@ -332,6 +334,7 @@ jobs:
       LIBGL_ALWAYS_SOFTWARE: '1'
       EGL_PLATFORM: surfaceless
       LP_NUM_THREADS: '2'
+      MESA_SHADER_CACHE_DISABLE: 'true'
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-python@v7.1.0
@@ -349,6 +352,13 @@ jobs:
           MESA_SHADER_CACHE_DISABLE=true blender -b work/character-combat/light-near/character.blend --disable-autoexec --python-exit-code 1 -t 2 --python tests/character_visual_reopen.py
           MESA_SHADER_CACHE_DISABLE=true blender -b work/character-combat/light-near/character.blend --disable-autoexec --python-exit-code 1 -t 2 --python tools/character_performance.py
           python tools/character_review.py work/character-combat
+      - name: Preserve software renderer crash diagnostics
+        if: failure()
+        run: |
+          if [ -f /tmp/blender.crash.txt ]; then
+            mkdir -p work/character-combat
+            cp /tmp/blender.crash.txt work/character-combat/blender.crash.txt
+          fi
       - name: Preserve character shot, images and measured costs
         if: always()
         uses: actions/upload-artifact@v7.0.2
@@ -365,6 +375,7 @@ jobs:
       LIBGL_ALWAYS_SOFTWARE: '1'
       EGL_PLATFORM: surfaceless
       LP_NUM_THREADS: '2'
+      MESA_SHADER_CACHE_DISABLE: 'true'
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-python@v7.1.0
@@ -397,6 +408,7 @@ jobs:
       LIBGL_ALWAYS_SOFTWARE: '1'
       EGL_PLATFORM: surfaceless
       LP_NUM_THREADS: '2'
+      MESA_SHADER_CACHE_DISABLE: 'true'
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-python@v7.1.0
@@ -429,6 +441,7 @@ jobs:
       LIBGL_ALWAYS_SOFTWARE: '1'
       EGL_PLATFORM: surfaceless
       LP_NUM_THREADS: '2'
+      MESA_SHADER_CACHE_DISABLE: 'true'
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-python@v7.1.0
@@ -465,6 +478,7 @@ jobs:
       LIBGL_ALWAYS_SOFTWARE: '1'
       EGL_PLATFORM: surfaceless
       LP_NUM_THREADS: '2'
+      MESA_SHADER_CACHE_DISABLE: 'true'
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-python@v7.1.0
@@ -503,6 +517,7 @@ jobs:
       LIBGL_ALWAYS_SOFTWARE: '1'
       EGL_PLATFORM: surfaceless
       LP_NUM_THREADS: '2'
+      MESA_SHADER_CACHE_DISABLE: 'true'
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-python@v7.1.0
@@ -535,6 +550,7 @@ jobs:
       LIBGL_ALWAYS_SOFTWARE: '1'
       EGL_PLATFORM: surfaceless
       LP_NUM_THREADS: '2'
+      MESA_SHADER_CACHE_DISABLE: 'true'
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-python@v7.1.0
