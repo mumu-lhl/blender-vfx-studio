@@ -64,3 +64,9 @@ LP_NUM_THREADS=2 MESA_SHADER_CACHE_DISABLE=true blender -b -t 2 --factory-startu
 ```
 
 添加 `--dark`、`--far` 或 `--reverse` 检查不同条件。独立效果使用 `tools/impact_preview.py -- --engine BLENDER_EEVEE --view-transform AgX --frames 1 3 6 14`。输出位于忽略版本管理的 `work/`，不会覆盖已记录图片。
+
+## CI 与实际构建
+
+源码 `59f714e` 的 [CI 41230228945](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41230228945) 已完成全部 12 项必要检查并成功。此前首轮在远景图保存后退出 139，没有记为通过；合入完整软件渲染设置后重新检查成功，间歇崩溃仍由 #122 跟踪。
+
+已直接下载该构建的实际安装附件，校验压缩包摘要、33 个插件 Python 文件与源文件一致，原图字节一致，示例包有 18 个资产。包内 Impact Burst 纯原生追加确认五层、打包原图与活动相机节点；3→9→1→25→3 跳帧检查通过，核心与整体按各自寿命清空，未夹带相机或场景。实际嵌入缩略图已提取查看，上文缩略图采用该附件。文件摘要与检查结果在清单中；没有因此增加高清或实时播放的艺术验收范围。

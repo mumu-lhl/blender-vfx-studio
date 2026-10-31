@@ -16,7 +16,7 @@
     "impact-burning-stages.png": "f9a085e40d67d8f3da6d2c89fc5e0647696bde1d0a33e1da1f3bf2739599952c",
     "impact-burning-after-51.png": "ab23ac13920eeaea5a8d66576d0c8542c8e75df50baa957f8718fc2e4514fd19",
     "impact-burning-after-53.png": "fd84f5559ade412cd1bc6bdd47df6ed63aa044a4bd1f026002197bcd557ae280",
-    "impact-burning-preview.png": "fa72bc4dbb8d8a756939733a87a5de715b06bc2550da9c237c349489278e6e08",
+    "impact-burning-preview.png": "92bd913c976449d8207b2ff97d80dd8545274bf50449b89790e67b1eae21e8f2",
     "impact-burning-reverse-51.png": "caa2bc6135892e9904d3d51065b99439c6c0c31311a9c99a0accd830a98d80d3",
     "impact-burning-reverse-53.png": "7c5f773aff32f1fb93e2b8c13c5e27ffca0cac52f33660b4ec8d12851894a1b9"
   },
@@ -2113,6 +2113,39 @@
         "native_reopen_reached": false
       },
       "note": "Merge includes the validated renderer setting; a new CI run is required. Local image review does not turn the failed run into a pass."
+    },
+    "ci_success": {
+      "run": 41230228945,
+      "runtime_source": "59f714ef331d1f00e7e5eb86044ba7b792c2580b",
+      "required_success": 12,
+      "conditional_release": "skipped",
+      "first_attempt_failure_preserved": true
+    },
+    "actual_ci_package": {
+      "run": 41230228945,
+      "artifact_id": 13053928699,
+      "artifact_bytes": 6614479,
+      "artifact_sha256": "49a8c3aace9fbd84aa9a20d8bdc91da4938223b0c21beb262d5ae264a3ae1e89",
+      "extension_python_files": 33,
+      "native_assets": 18,
+      "impact_asset_sha256": "1f81473da5ffd65eeb945470e07dab0bd49d1bc2785f5fb9e0474a5e224cd30e",
+      "native": {
+        "addon_loaded": false,
+        "members": 5,
+        "packed_atlas_sha256": "c69a4801b217428d1740ae6d82c57ae612430f92ba4904208ee131f273adb5e4",
+        "native_camera_facing": true,
+        "clear_frame": 25,
+        "preview_size": [
+          256,
+          256
+        ],
+        "core_counts": {
+          "3": 4,
+          "9": 0,
+          "1": 4,
+          "25": 0
+        }
+      }
     }
   }
 }
