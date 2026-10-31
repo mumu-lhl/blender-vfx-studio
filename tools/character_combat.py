@@ -17,6 +17,7 @@ from tools.character_scene import FRAMES, add_effects, setup_base  # noqa: E402
 
 def source_hashes():
     paths = sorted((ROOT / "blender_vfx_studio").rglob("*.py"))
+    paths += sorted((ROOT / "blender_vfx_studio/assets").glob("*.png"))
     paths += [
         ROOT / "tools" / name
         for name in (
