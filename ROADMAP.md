@@ -97,4 +97,4 @@ PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 4070072
 
 历史提交、发布和详细检查见 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases)、GitHub Issues 与上述记录；使用和结构见 [README](README.md)、[DESIGN](DESIGN.md) 与 [CONTEXT](CONTEXT.md)。
 
-充能构建 [41194096447](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41194096447) 仍在运行，不记作全部通过。main 已合入火焰下部 [#199](https://github.com/mumu-lhl/blender-vfx-studio/pull/199)，其功能源码 12 项必要检查成功；实际附件包含 18 个示例、32 个插件文件，包内三档火焰与内嵌预览已检查。粒子主次 [#200](https://github.com/mumu-lhl/blender-vfx-studio/pull/200) 本地实图及必要检查完成，仍等待 CI；整体艺术问题保持开放。没有发布正式版本。
+main 已合入火焰下部 [#199](https://github.com/mumu-lhl/blender-vfx-studio/pull/199) 与汇聚粒子 [#200](https://github.com/mumu-lhl/blender-vfx-studio/pull/200)，两项各完成 12 项必要 CI。新的 main 构建 [41216079607](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41216079607) 仍在运行。角色预备 [#202](https://github.com/mumu-lhl/blender-vfx-studio/pull/202) 原 CI 的闪电时间平移断言失败，已修复并完成三项本地姿态／接触回归和整合场景的无插件高清复现，修复后的 CI 尚待完成。Impact 压力曲面及闭合热核试作的实图收益不足，保留在实验分支，没有进入 main。整体艺术品质未验收，没有发布正式版本。
