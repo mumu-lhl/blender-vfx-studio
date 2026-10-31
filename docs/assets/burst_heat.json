@@ -1,0 +1,21 @@
+{
+  "asset": "blender_vfx_studio/assets/burst_heat.png",
+  "sha256": "c69a4801b217428d1740ae6d82c57ae612430f92ba4904208ee131f273adb5e4",
+  "canvas": [
+    1774,
+    887
+  ],
+  "grid": [
+    4,
+    2
+  ],
+  "frames": 8,
+  "source": "Original AI-assisted artwork generated with image_gen; not extracted from third-party references",
+  "generation_date": "2026-10-31",
+  "prompt_summary": "Original grayscale heat/density flipbook on transparency, four columns and two rows. Tiny ignition; rapid opening; concentrated irregular peak with unequal curling gas tongues; expanding pressure with a negative-space centre; separated cooling lobes; torn outward wisps; faint scraps; empty final frame. Consistent centre and scale. No labels, grids, sparks, regular balls or rings. Preserve transparent cell margins. Shader supplies editable colors.",
+  "notes": [
+    "The source PNG is committed so clone and build do not need image generation or network access.",
+    "The existing project license applies.",
+    "Palette, opacity, frame range and timing remain native Blender node/controller data."
+  ]
+}

@@ -88,7 +88,7 @@ PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 4070072
 
 ## 下一步
 
-[#200](https://github.com/mumu-lhl/blender-vfx-studio/pull/200) 的粒子随汇聚比例拉长已完成七张高清、18 张动作样本、25 项资产与无插件检查；早段外围长片的视觉权重降低，主进流与背侧遮挡仍保留。见[粒子主次](docs/CHARGE_MOTES_REVIEW.md)，12 项必要 CI 已成功。
+[#200](https://github.com/mumu-lhl/blender-vfx-studio/pull/200) 的汇聚粒子已合入，12 项 CI 成功；早段外围长片的视觉权重降低，主进流与背侧遮挡仍保留。当前新增命中热气的本地角色、明暗／远景与连续抽帧已查看，正面中心改善，反向遮挡仍未解决；见[命中热气检查](docs/IMPACT_BURNING_REVIEW.md)，等待本分支 CI。
 
 1. 当前重点转向实际画面。[#174](https://github.com/mumu-lhl/blender-vfx-studio/issues/174) 修正刀光深度收尖，并按真实挥剑轨迹连接充能与释放；同帧角色图、连续隔帧、明暗／远景与原生复现已检查，方向衔接和遮挡改善，反向命中仍被角色遮住。实测成本和艺术边界见 [衔接检查](docs/COMBAT_HANDOFF_REVIEW.md)。
 2. [#176](https://github.com/mumu-lhl/blender-vfx-studio/issues/176) 的持续火焰已完成角色多阶段、两组各 11 张持续燃烧抽帧、明暗／远景与无插件高清复现。轮廓与退场改善，局部鼓包、色块和细节仍弱；见 [流动检查](docs/FIRE_FLOW_REVIEW.md)。命中主体、接触闪电和冲刺落地的首轮改动已合入；施法空间交接及错相分叉火舌已合入，并补查完整施法隔帧。充能焦点的首轮能量场改动已合入；早段焦点、进流主次和释放横带已合入 main，两个 PR 的功能源码各完成全部 12 项 CI；保留外围长碎片与身体蓄势问题。[#198](https://github.com/mumu-lhl/blender-vfx-studio/issues/198) 的下部热流改进已合入；圆团、薄片感和远景层次仍未全部解决。角色慢速预备 [#202](https://github.com/mumu-lhl/blender-vfx-studio/pull/202) 已完成完整隔帧、明暗／远景与 12 项必要 CI，保留原命中与收招；身体力量感仍待改善。暂缓继续整理参数。
@@ -99,6 +99,6 @@ PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 4070072
 
 main 已合入火焰下部 [#199](https://github.com/mumu-lhl/blender-vfx-studio/pull/199) 与汇聚粒子 [#200](https://github.com/mumu-lhl/blender-vfx-studio/pull/200)。main 构建 [41216079607](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41216079607) 已完成全部 12 项并成功；实际下载的插件包含 32 个与该构建源码相同的 Python 文件，18 文件资产包的充能与三档火焰已原生追加、跳帧和提取预览检查。
 
-角色预备 [#202](https://github.com/mumu-lhl/blender-vfx-studio/pull/202) 已完成三项本地姿态／接触回归、无插件高清复现，CI 重跑的 12 项必要检查全部成功。首次尝试曾在保存图像后以 139 退出，[#122](https://github.com/mumu-lhl/blender-vfx-studio/issues/122) 继续跟踪；扩大已有 Mesa 设置范围并保留日志的 [#205](https://github.com/mumu-lhl/blender-vfx-studio/pull/205) 尚待检查，不能宣称根治。
+角色预备 [#202](https://github.com/mumu-lhl/blender-vfx-studio/pull/202) 与渲染环境 [#205](https://github.com/mumu-lhl/blender-vfx-studio/pull/205) 均已完成各自 12 项必要检查并合入 main；退出崩溃仍由 [#122](https://github.com/mumu-lhl/blender-vfx-studio/issues/122) 跟踪，不宣称根治。
 
-命中热气 [#206](https://github.com/mumu-lhl/blender-vfx-studio/pull/206) 的本地正面角色焦点改善，反向遮挡仍弱，正在等待 CI。角色与热气联合的九张高清、47 张原生有序样本及三阶段高清复现已检查。火焰的冷缝开口候选收益不足，未采用；低供燃区带动完整火流生长的候选正在验证。整体艺术品质仍未验收，没有发布正式版本。
+本分支的命中热气 [#206](https://github.com/mumu-lhl/blender-vfx-studio/pull/206) 已完成本地正面角色检查，中心改善，反向遮挡仍弱。首轮 CI 在保存远景图后退出 139，未通过；现合入 #205 的完整软件渲染设置和崩溃日志保留，重新检查。角色与热气联合的九张高清、47 张原生有序样本及三阶段高清复现已检查。火焰的冷缝开口候选收益不足，未采用；低供燃区带动完整火流生长的候选正在检查重置边界，尚未采用。整体艺术品质仍未验收，没有发布正式版本。

@@ -48,11 +48,16 @@ with tempfile.TemporaryDirectory() as folder, zipfile.ZipFile(package) as archiv
         path.write_bytes(archive.read(member))
         bpy.ops.wm.read_factory_settings(use_empty=True)
         with bpy.data.libraries.load(str(path), link=False) as (available, requested):
-            assert not available.cameras and not available.images and not available.scenes
+            assert not available.cameras and not available.scenes
+            assert len(available.images) == (1 if key == "impact-burst" else 0)
             assert not available.worlds
             assert len(available.collections) == 1
             requested.collections = available.collections
         bundle = requested.collections[0]
+        if key == "impact-burst":
+            assert len(bpy.data.images) == 1
+            image = next(iter(bpy.data.images))
+            assert image.packed_file and image.get("vfx_burst_heat") == 1
         assert bundle["vfx_bundle_version"] == 1
         root = next(
             obj

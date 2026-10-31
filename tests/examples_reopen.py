@@ -22,6 +22,7 @@ for frame in (16, 0, 7, 81, 16):
         assert bundle.preview.is_image_custom
         assert bundle.preview.image_size[:] == (2, 2)
 assert len(bpy.data.cameras) == 0
-assert len(bpy.data.images) == 0
+assert len(bpy.data.images) == 1
+assert all(image.packed_file and image.get("vfx_burst_heat") == 1 for image in bpy.data.images)
 assert bpy.context.scene.compositing_node_group is None
 print("STARTER_LIBRARY_NATIVE_REOPEN_OK")
