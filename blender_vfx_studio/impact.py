@@ -1,7 +1,7 @@
 """Editable hit with distinct compression, burning core, pressure and embers."""
 
 from . import composition, core
-from .impact_core import build as burst_core
+from .impact_gas import create as gas_core
 from .impact_shape import flash as flash_shape
 from .impact_shape import jets
 from .impact_shape import wave as wave_shape
@@ -45,15 +45,16 @@ def create(context, quality="LOW"):
     )
     flash_shape(flash)
     burst = configure(
-        core.create_particle(context, quality),
+        gas_core(context, quality),
         "Impact • Burst Core",
         (1.0, 0.22, 0.025),
         duration=8.0,
-        size=0.35,
-        fade=1.0,
-        strength=1.5,
+        width=0.95,
+        height=0.95,
+        opacity=0.85,
+        fade=0.2,
+        strength=2.0,
     )
-    burst_core(burst, quality)
     shards = configure(
         core.create_particle(context, quality),
         "Impact • Main Shards",
