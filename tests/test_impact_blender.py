@@ -35,7 +35,7 @@ class ImpactTests(unittest.TestCase):
     def setUp(self):
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
-    def test_four_layers_and_cursor_placement_with_staggered_lifetimes(self):
+    def test_layers_and_cursor_placement_with_staggered_lifetimes(self):
         bpy.context.scene.cursor.location = (2, 3, 4)
         root = core.create(bpy.context, "IMPACT_BURST", "LOW")
         self.assertEqual(root["vfx_module"], "core.composition")
@@ -43,18 +43,19 @@ class ImpactTests(unittest.TestCase):
         self.assertEqual(root["duration"], 24.0)
         self.assertFalse(root["loop"])
         children = composition.members(root)
-        self.assertEqual(len(children), 4)
+        self.assertEqual(len(children), 5)
         self.assertTrue(all(child["vfx_quality"] == "LOW" for child in children))
         wave = next(child for child in children if child["vfx_module"] == "mesh.ring")
         self.assertAlmostEqual(wave.matrix_world.translation.z, 3.95, places=5)
         self.assertTrue(all(abs(child.matrix_world.translation.x - 2) < 1e-5 for child in children))
         for frame, active in (
             (0, 0),
-            (1, 2),
-            (2, 3),
-            (3, 4),
-            (4, 3),
-            (8, 3),
+            (1, 3),
+            (2, 4),
+            (3, 5),
+            (4, 4),
+            (8, 4),
+            (9, 3),
             (19, 2),
             (20, 1),
             (25, 0),
@@ -65,7 +66,45 @@ class ImpactTests(unittest.TestCase):
         self.assertEqual(sum(bool(p) for p in geometry(root, 5).values()), 3)
         self.assertFalse(any(geometry(root, 13).values()))
         update(root, loop=True)
-        self.assertEqual(sum(bool(p) for p in geometry(root, 13).values()), 2)
+        self.assertEqual(sum(bool(p) for p in geometry(root, 13).values()), 3)
+
+    def test_burst_core_expands_through_flash_handoff_and_retimes(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        burst = next(m for m in composition.members(root) if m.name.endswith("Burst Core"))
+        key = burst["vfx_id"]
+
+        def reach(frame):
+            points = geometry(root, frame)[key]
+            return max(sum(c * c for c in point) ** 0.5 for point in points)
+
+        self.assertGreater(reach(3), reach(1) * 3)
+        after_flash = geometry(root, 5)[key]
+        self.assertTrue(after_flash)
+        self.assertFalse(geometry(root, 9)[key])
+        update(root, duration=48.0)
+        self.assertEqual(geometry(root, 9)[key], after_flash)
+        update(root, duration=24.0)
+        self.assertEqual(geometry(root, 5)[key], after_flash)
+        before = reach(5)
+        update(burst, size=burst["size"] * 2)
+        self.assertAlmostEqual(reach(5), before * 2, places=5)
+
+    def test_burst_core_color_and_strength_change_actual_pixels(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        burst = next(m for m in composition.members(root) if m.name.endswith("Burst Core"))
+        for member in composition.members(root):
+            member.children[0].hide_render = member != burst
+        camera()
+        bpy.context.scene.camera.data.ortho_scale = 1.5
+        warm = render_pixels(3)
+        self.assertGreater(sum(warm[0::4]), sum(warm[2::4]))
+        update(burst, color_0=0.015, color_1=0.05, color_2=1.0)
+        blue = render_pixels(3)
+        self.assertGreater(sum(blue[2::4]), sum(blue[0::4]))
+        self.assertGreater(max(abs(a - b) for a, b in zip(warm, blue)), 0.1)
+        update(burst, strength=0.0)
+        dark = render_pixels(3)
+        self.assertLess(max(v for i, v in enumerate(dark) if i % 4 != 3), 1e-5)
 
     def test_wave_erosion_tracks_group_time_instead_of_absolute_keyframes(self):
         root = core.create(bpy.context, "IMPACT_BURST", "LOW")
@@ -98,7 +137,7 @@ class ImpactTests(unittest.TestCase):
         core.delete(root)
         children, retained = composition.ungroup_all(bpy.context, clone)
         self.assertFalse(retained)
-        self.assertEqual(len(children), 4)
+        self.assertEqual(len(children), 5)
         self.assertTrue(all(child.parent is None for child in children))
         for child in children:
             core.delete(child)
