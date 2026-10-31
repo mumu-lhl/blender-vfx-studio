@@ -12,7 +12,7 @@ def build(root, quality):
     sphere = bmesh.new()
     try:
         bmesh.ops.create_icosphere(
-            sphere, subdivisions={"LOW": 2, "MEDIUM": 3, "HIGH": 4}[quality], radius=1
+            sphere, subdivisions={"LOW": 3, "MEDIUM": 4, "HIGH": 5}[quality], radius=1
         )
         sphere.verts.ensure_lookup_table()
         sphere.verts.index_update()
@@ -85,23 +85,33 @@ def build(root, quality):
     tint = graph.node("ShaderNodeCombineXYZ", "Editable Core Color")
     for index in range(3):
         graph.connect(graph.value(f"Color {index}", f"color_{index}"), tint.inputs[index])
-    hot = graph.math("Heat In The Core", "MULTIPLY", facing, 0.7)
+    hot = graph.math("Heat In The Core", "MULTIPLY", facing, 0.35)
     hot = graph.math(
         "Gas Heat Variation",
         "ADD",
         hot,
-        graph.math("Local Heat", "MULTIPLY", noise.outputs["Fac"], 0.3),
+        graph.math("Local Heat", "MULTIPLY", noise.outputs["Fac"], 0.65),
     )
     heat = graph.node("ShaderNodeMapRange", "Hot Gas Pockets", interpolation_type="SMOOTHSTEP")
     graph.connect(hot, heat.inputs["Value"])
-    heat.inputs["From Min"].default_value = 0.65
-    heat.inputs["From Max"].default_value = 0.95
+    heat.inputs["From Min"].default_value = 0.45
+    heat.inputs["From Max"].default_value = 0.85
     cooling = graph.math("Core Cools To Its Tint", "SUBTRACT", 1, age, clamp=True)
     hot = graph.math("Cooling Heat Pockets", "MULTIPLY", heat.outputs[0], cooling)
     color = graph.node("ShaderNodeMixRGB", "Tinted Gas And Hot Pockets")
     graph.connect(hot, color.inputs[0])
     graph.connect(tint.outputs[0], color.inputs[1])
-    color.inputs[2].default_value = (1, 0.95, 0.8, 1)
+    hot_tint = graph.node("ShaderNodeCombineXYZ", "Heat Keeps The Editable Hue")
+    for index in range(3):
+        graph.connect(
+            graph.value(
+                f"Hot Color {index}",
+                expression="max(p,0)**0.3",
+                properties={"p": f"color_{index}"},
+            ),
+            hot_tint.inputs[index],
+        )
+    graph.connect(hot_tint.outputs[0], color.inputs[2])
     edge = graph.node("ShaderNodeMixRGB", "Pigmented Gas Edge")
     graph.connect(facing, edge.inputs[0])
     graph.connect(graph.vector("Dark Gas Tint", "SCALE", tint.outputs[0], 0.08), edge.inputs[1])
