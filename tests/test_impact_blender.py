@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 
 import bpy
+from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -68,26 +69,51 @@ class ImpactTests(unittest.TestCase):
         update(root, loop=True)
         self.assertEqual(sum(bool(p) for p in geometry(root, 13).values()), 3)
 
-    def test_burst_core_expands_through_flash_handoff_and_retimes(self):
+    def test_burst_core_plays_through_flash_handoff_and_retimes(self):
         root = core.create(bpy.context, "IMPACT_BURST", "LOW")
         burst = next(m for m in composition.members(root) if m.name.endswith("Burst Core"))
         key = burst["vfx_id"]
 
-        def reach(frame):
-            points = geometry(root, frame)[key]
-            return max(sum(c * c for c in point) ** 0.5 for point in points)
-
-        self.assertGreater(reach(3), reach(1) * 3)
+        for member in composition.members(root):
+            member.children[0].hide_render = member != burst
+        camera()
+        bpy.context.scene.camera.data.ortho_scale = 1.5
+        bpy.context.scene.render.dither_intensity = 0
+        early, peak = render_pixels(1), render_pixels(3)
+        self.assertGreater(sum(peak[0::4]), sum(early[0::4]) * 2)
         after_flash = geometry(root, 5)[key]
         self.assertTrue(after_flash)
         self.assertFalse(geometry(root, 9)[key])
         update(root, duration=48.0)
         self.assertEqual(geometry(root, 9)[key], after_flash)
+        retimed = render_pixels(5)
+        self.assertLess(max(abs(a - b) for a, b in zip(peak, retimed)), 1 / 255 + 1e-6)
         update(root, duration=24.0)
         self.assertEqual(geometry(root, 5)[key], after_flash)
-        before = reach(5)
-        update(burst, size=burst["size"] * 2)
-        self.assertAlmostEqual(reach(5), before * 2, places=5)
+        before = max(point[0] for point in geometry(root, 3)[key])
+        update(burst, width=burst["width"] * 2)
+        self.assertAlmostEqual(
+            max(point[0] for point in geometry(root, 3)[key]), before * 2, places=5
+        )
+
+    def test_burst_sprite_faces_camera_without_exporting_camera_data(self):
+        root = core.create(bpy.context, "IMPACT_BURST", "LOW")
+        burst = next(m for m in composition.members(root) if m.name.endswith("Burst Core"))
+        camera()
+        view = bpy.context.scene.camera
+        view.location = (3, -5, 4)
+        view.rotation_euler = (-view.location).to_track_quat("-Z", "Y").to_euler()
+        root.rotation_euler = (0.3, 0.7, 1.1)
+        geometry(root, 3)
+        layer = burst.children[0].evaluated_get(bpy.context.evaluated_depsgraph_get())
+        normal = layer.matrix_world.to_3x3().inverted().transposed() @ layer.data.polygons[0].normal
+        expected = view.matrix_world.to_3x3() @ Vector((0, 0, 1))
+        self.assertGreater(normal.normalized().dot(expected.normalized()), 0.9999)
+        path = ROOT / "work/impact-billboard.blend"
+        assets.write(path, root)
+        with bpy.data.libraries.load(str(path), link=False) as (available, requested):
+            self.assertFalse(available.cameras)
+            self.assertFalse(available.scenes)
 
     def test_burst_core_color_and_strength_change_actual_pixels(self):
         root = core.create(bpy.context, "IMPACT_BURST", "LOW")
