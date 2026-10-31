@@ -38,8 +38,33 @@ def create(context, quality):
     transform.location = (500, 200)
     tree.links.new(geometry, transform.inputs["Geometry"])
     tree.links.new(info.outputs["Rotation"], transform.inputs["Rotation"])
-    tree.links.new(transform.outputs[0], tree.nodes["Output"].inputs[0])
-    tree.nodes["Output"].location = (850, 200)
+    depth = tree.nodes.new("ShaderNodeSeparateXYZ")
+    depth.label = "Sprite Extent"
+    tree.links.new(tree.nodes["Sprite Size"].outputs[0], depth.inputs[0])
+    extent = tree.nodes.new("ShaderNodeMath")
+    extent.operation = "MINIMUM"
+    tree.links.new(depth.outputs["X"], extent.inputs[0])
+    tree.links.new(depth.outputs["Y"], extent.inputs[1])
+    clearance = tree.nodes.new("ShaderNodeMath")
+    clearance.operation = "MULTIPLY"
+    clearance.name = clearance.label = "Gas Front Depth"
+    clearance.inputs[1].default_value = 0.15
+    tree.links.new(extent.outputs[0], clearance.inputs[0])
+    direction = tree.nodes.new("ShaderNodeVectorMath")
+    direction.operation = "NORMALIZE"
+    tree.links.new(info.outputs["Location"], direction.inputs[0])
+    offset = tree.nodes.new("ShaderNodeVectorMath")
+    offset.operation = "SCALE"
+    tree.links.new(direction.outputs[0], offset.inputs[0])
+    tree.links.new(clearance.outputs[0], offset.inputs["Scale"])
+    front = tree.nodes.new("GeometryNodeSetPosition")
+    front.name = front.label = "Gas In Front Of Its Centre"
+    tree.links.new(transform.outputs[0], front.inputs["Geometry"])
+    tree.links.new(offset.outputs[0], front.inputs["Offset"])
+    tree.links.new(front.outputs[0], tree.nodes["Output"].inputs[0])
+    for index, item in enumerate((depth, extent, clearance, direction, offset, front)):
+        item.location = (index % 3 * 220, -750 - index // 3 * 220)
+    tree.nodes["Output"].location = (950, 200)
 
     material = layer.data.materials[0]
     material.surface_render_method = "BLENDED"
