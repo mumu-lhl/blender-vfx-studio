@@ -11,7 +11,7 @@ from particle_test_support import render_pixels
 assert not any("blender_vfx_studio" in name for name in sys.modules)
 root = bpy.data.objects["Persisted Impact"]
 children = [obj for obj in bpy.data.objects if obj.get("vfx_composition") == root]
-assert len(children) == 4
+assert len(children) == 5
 for frame in (14, 0, 5, 2, 25, 5):
     bpy.context.scene.frame_set(frame)
     graph = bpy.context.evaluated_depsgraph_get()

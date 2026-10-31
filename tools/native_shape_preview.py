@@ -37,6 +37,7 @@ CASES = {
 
 def hashes():
     paths = sorted((ROOT / "blender_vfx_studio").rglob("*.py"))
+    paths += sorted((ROOT / "blender_vfx_studio/assets").glob("*.png"))
     paths += [
         ROOT / "tools" / n
         for n in (

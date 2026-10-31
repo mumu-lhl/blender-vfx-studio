@@ -84,8 +84,18 @@ def main():
         parser.error("Frames must be positive")
     sources = [
         "blender_vfx_studio/" + name + ".py"
-        for name in ("impact", "impact_shape", "particle", "particle_shape", "nodes", "composition")
+        for name in (
+            "impact",
+            "impact_gas",
+            "impact_shape",
+            "flipbook",
+            "particle",
+            "particle_shape",
+            "nodes",
+            "composition",
+        )
     ]
+    sources.append("blender_vfx_studio/assets/burst_heat.png")
     sources.append("tools/impact_preview.py")
 
     def hashes():

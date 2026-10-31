@@ -18,9 +18,9 @@
 
 ## Impact Burst
 
-![Impact Burst：第 53 帧](images/impact-focus-after-53.png)
+![Impact Burst：第 53 帧](images/impact-burning-after-53.png)
 
-接触附近的翻卷压力面，配合较长的细喷射和稍后消散的余烬。第 **53 帧**，本地角色镜头；[同帧与动画抽帧检查](IMPACT_FOCUS_REVIEW.md)。压力面仍偏薄，远景细层较弱，未观看实时播放。
+接触中心的暖色热气正在卷散，细喷射和压力弧继续向外展开。第 **53 帧**，本地角色镜头；[同帧与连续抽帧检查](IMPACT_BURNING_REVIEW.md)。热气使用可换色的打包图集，仍有平面层的限制；未观看实时播放。
 
 ## lightning-strike
 
