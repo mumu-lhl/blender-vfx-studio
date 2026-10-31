@@ -2094,6 +2094,25 @@
       "native_validation_exit": 0,
       "installation_exit": 0,
       "runtime_source_commit": "b145afbe4ef58b2e7a905e0faff6002e4b7446c0"
+    },
+    "integrated_runtime": {
+      "reviewed_source_commit": "ef55e3faf3cb46050a529eef9581efb889b6dea0",
+      "merged_main": "b1d61d2f180f8d3eddacca5bb3b1b0b0f7c0c7b8",
+      "identical_paths": [
+        "blender_vfx_studio",
+        "tools",
+        "tests",
+        ".github/workflows"
+      ],
+      "raw_git_diff_quiet_exit": 0,
+      "ci_first_attempt": {
+        "run": 41225591563,
+        "failed_job": 124608954099,
+        "exit_code": 139,
+        "last_saved_frame": "light-far/80",
+        "native_reopen_reached": false
+      },
+      "note": "Merge includes the validated renderer setting; a new CI run is required. Local image review does not turn the failed run into a pass."
     }
   }
 }
