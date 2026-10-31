@@ -1,6 +1,5 @@
 """An original painted heat atlas using the existing native flipbook player."""
 
-import math
 from pathlib import Path
 
 import bpy
@@ -26,18 +25,20 @@ def create(context, quality):
     layer = root.children[0]
     tree = layer.modifiers[0].node_group
     geometry = tree.nodes["Outside Lifetime"].outputs[0]
-    join = tree.nodes.new("GeometryNodeJoinGeometry")
-    join.name = join.label = "Three Soft Gas Views"
-    join.location = (600, 200)
-    tree.links.new(geometry, join.inputs[0])
-    for index, rotation in enumerate(((math.pi / 2, 0, 0), (0, math.pi / 2, 0))):
-        transform = tree.nodes.new("GeometryNodeTransform")
-        transform.name = transform.label = f"Gas View {index + 2}"
-        transform.location = (200, -350 - index * 300)
-        transform.inputs["Rotation"].default_value = rotation
-        tree.links.new(geometry, transform.inputs["Geometry"])
-        tree.links.new(transform.outputs[0], join.inputs[0])
-    tree.links.new(join.outputs[0], tree.nodes["Output"].inputs[0])
+    camera = tree.nodes.new("GeometryNodeInputActiveCamera")
+    camera.label = "Native Active Camera"
+    camera.location = (-400, -400)
+    info = tree.nodes.new("GeometryNodeObjectInfo")
+    info.transform_space = "RELATIVE"
+    info.label = "Camera In Sprite Space"
+    info.location = (-150, -400)
+    tree.links.new(camera.outputs[0], info.inputs["Object"])
+    transform = tree.nodes.new("GeometryNodeTransform")
+    transform.name = transform.label = "Face The Active Camera"
+    transform.location = (500, 200)
+    tree.links.new(geometry, transform.inputs["Geometry"])
+    tree.links.new(info.outputs["Rotation"], transform.inputs["Rotation"])
+    tree.links.new(transform.outputs[0], tree.nodes["Output"].inputs[0])
     tree.nodes["Output"].location = (850, 200)
 
     material = layer.data.materials[0]
@@ -83,22 +84,6 @@ def create(context, quality):
     graph.connect(body.outputs[0], color.inputs[1])
     graph.connect(hot.outputs[0], color.inputs[2])
     graph.connect(color.outputs[0], tree.nodes["Emission"].inputs["Color"])
-    normal = graph.node("ShaderNodeNewGeometry", "Gas View Facing")
-    facing = graph.node("ShaderNodeVectorMath", "Soft View Weight", operation="DOT_PRODUCT")
-    graph.connect(normal.outputs["Normal"], facing.inputs[0])
-    graph.connect(normal.outputs["Incoming"], facing.inputs[1])
-    weight = graph.math(
-        "Oblique Cards Stay Subordinate",
-        "MULTIPLY",
-        facing.outputs["Value"],
-        facing.outputs["Value"],
-    )
-    graph.connect(
-        graph.math(
-            "Soft Gas Coverage", "MULTIPLY", tree.nodes["Lifetime Alpha"].outputs[0], weight
-        ),
-        tree.nodes["Sprite Surface"].inputs[0],
-    )
     created = set(tree.nodes) - before
     frame = tree.nodes.new("NodeFrame")
     frame.label = "Original gas heat and soft view coverage"
