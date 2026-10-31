@@ -97,8 +97,8 @@ PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 4070072
 
 历史提交、发布和详细检查见 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases)、GitHub Issues 与上述记录；使用和结构见 [README](README.md)、[DESIGN](DESIGN.md) 与 [CONTEXT](CONTEXT.md)。
 
-main 已合入火焰下部 [#199](https://github.com/mumu-lhl/blender-vfx-studio/pull/199) 与汇聚粒子 [#200](https://github.com/mumu-lhl/blender-vfx-studio/pull/200)。main 构建 [41216079607](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41216079607) 已完成全部 12 项并成功；实际下载的插件包含 32 个与该构建源码相同的 Python 文件，18 文件资产包的充能与三档火焰已原生追加、跳帧和提取预览检查。
+main 已合入角色预备 [#202](https://github.com/mumu-lhl/blender-vfx-studio/pull/202) 与完整软件渲染环境设置 [#205](https://github.com/mumu-lhl/blender-vfx-studio/pull/205)，两项各完成全部 12 项必要 CI。角色预备保留第 49 帧接触和原收招；身体力量感仍不足。渲染设置扩大已有 Mesa 磁盘缓存规避范围并保存崩溃报告，不代表 [#122](https://github.com/mumu-lhl/blender-vfx-studio/issues/122) 已根治。
 
-角色预备 [#202](https://github.com/mumu-lhl/blender-vfx-studio/pull/202) 已完成三项本地姿态／接触回归、无插件高清复现，CI 重跑的 12 项必要检查全部成功。首次尝试曾在保存图像后以 139 退出，[#122](https://github.com/mumu-lhl/blender-vfx-studio/issues/122) 继续跟踪；扩大已有 Mesa 设置范围并保留日志的 [#205](https://github.com/mumu-lhl/blender-vfx-studio/pull/205) 尚待检查，不能宣称根治。
+命中热气 [#206](https://github.com/mumu-lhl/blender-vfx-studio/pull/206) 尚未合入。本地已查看明暗／远景、反向和完整角色的 47 张原生样本，正面中心改善，反向仍被身体遮挡。首轮 CI 在保存远景图后退出 139，未通过；现已合入 #205 的设置，由新源码重新检查，不能用已有图像代替正常退出。
 
-命中热气 [#206](https://github.com/mumu-lhl/blender-vfx-studio/pull/206) 的本地正面角色焦点改善，反向遮挡仍弱，正在等待 CI。角色与热气联合的九张高清、47 张原生有序样本及三阶段高清复现已检查。火焰的冷缝开口候选收益不足，未采用；低供燃区带动完整火流生长的候选正在验证。整体艺术品质仍未验收，没有发布正式版本。
+火焰冷缝开口候选因收益不足未采用；低供燃区带动完整火流生长的候选正验证重置前的收颈与散去，并重做相关画面和原生检查。整体艺术品质仍未验收，没有发布正式版本。下一步继续以完整角色画面、真实生成器和可编辑原生资产为准，不扩展非必要骨架或 GUI 测试。
