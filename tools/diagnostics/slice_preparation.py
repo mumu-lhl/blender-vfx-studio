@@ -1,4 +1,4 @@
-"""Inspect a single native Slice action's slow preparation; VFX remain hidden."""
+"""Compare native Slice preparation poses; VFX remain hidden in this diagnostic."""
 
 import hashlib
 import json
@@ -33,7 +33,12 @@ strip.frame_start, strip.frame_end = 1, 69
 strip.blend_in, strip.blend_out = 12, 4
 strip.use_animated_time = True
 strip.use_animated_time_cyclic = False
-for frame, action_frame in ((1, start), (37, start + (end - start) * 0.18), (69, end)):
+for curve in strip.fcurves:
+    if curve.data_path == "strip_time":
+        curve.keyframe_points.clear()
+junction = 37 + (69 - 37) * 0.18
+time_keys = ((1, start), (junction, start + (end - start) * 0.18), (69, end))
+for frame, action_frame in time_keys:
     strip.strip_time = action_frame
     strip.keyframe_insert(data_path="strip_time", frame=frame)
 for curve in strip.fcurves:
@@ -52,7 +57,7 @@ bpy.ops.wm.save_as_mainfile(filepath=str(folder / "pose.blend"))
             "source_scene_sha256": source,
             "action": strip.action.name,
             "action_range": [start, end],
-            "time_keys": [[1, start], [37, start + (end - start) * 0.18], [69, end]],
+            "time_keys": time_keys,
             "vfx_hidden": True,
             "contact_retimed_or_validated": False,
             "art_acceptance": "pending actual image inspection",
