@@ -1116,7 +1116,7 @@ def core_shape(root):
         g.xyz("Roiling Flame Volume", *shaped, curled.outputs["Z"]),
         g.xyz("Nucleus Pressure Balance", counter_x, counter_x, counter_z),
     )
-    seed_size = g.value("Nucleus Seed Size", 0.85)
+    seed_size = g.value("Nucleus Seed Size", 0.78)
     stored_size = g.value("Nucleus Stored Size", 2.3)
     growth = g.m(
         "Nucleus Stores Incoming Energy",
