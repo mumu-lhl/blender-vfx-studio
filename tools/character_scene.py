@@ -94,7 +94,26 @@ def setup_base(*, light=True, far=False, view="front", engine="BLENDER_EEVEE"):
     scene.frame_start, scene.frame_end = 1, FRAMES
     caster = actor("Knight", "Caster • Knight", (-0.8, 0), math.pi / 2, sword=True)
     defender = actor("Rogue", "Defender • Rogue", (0.8, 0.08), -math.pi / 2)
-    clip(caster["rig"], caster["actions"]["2H_Melee_Attack_Slice"], 37, 69, blend=4)
+    attack = clip(caster["rig"], caster["actions"]["2H_Melee_Attack_Slice"], 1, 69, blend=4)
+    attack.blend_in = 12
+    attack.use_animated_time = True
+    attack.use_animated_time_cyclic = False
+    first, last = attack.action_frame_start, attack.action_frame_end
+    # Stretch only the original stroke's opening. From this junction onward
+    # the action time is identical to the original 37–69 frame stroke.
+    fraction = 0.18
+    junction = 37 + (69 - 37) * fraction
+    for frame, action_frame in (
+        (1, first),
+        (junction, first + (last - first) * fraction),
+        (69, last),
+    ):
+        attack.strip_time = action_frame
+        attack.keyframe_insert(data_path="strip_time", frame=frame)
+    for curve in attack.fcurves:
+        if curve.data_path == "strip_time":
+            for key in curve.keyframe_points:
+                key.interpolation = "LINEAR"
     # The actual blade trace determines contact; the reaction begins there.
     weapon = caster["weapon"]
     tip = max(weapon.data.vertices, key=lambda v: v.co.length_squared).co.copy()
