@@ -115,6 +115,8 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 ## Stylized Fire
 
+内焰较窄、较长，集中在主体附近；根部以上的宽窄和色带随 Flow Speed 上移。外焰主要提供橙红轮廓，较亮热区帮助辨认内部变化。实际角色图与当前限制见[下部热流检查](FIRE_ROOTED_REVIEW.md)。
+
 主火舌从共同下部错相伸长、分叉，沿内部冷缝形成不同的热流层次，并产生上升余烬。主焰在 48 帧内点燃、维持并断燃，退场先切断底部、留下上部火丝；余烬晚四帧结束，完整资产为 52 帧。
 
 **Width / Noise Scale / Strength / Dissolve / Fade** 控制宽度、流动色带、光量和退场。选择主焰层，在侧栏 **Shape / Motion** 使用 **Fire Height / Fire Flow Speed / Fire Curl** 调整高度、上卷节奏与火舌形变。
