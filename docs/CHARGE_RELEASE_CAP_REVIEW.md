@@ -24,4 +24,4 @@ Energy Charge 用三张相交的网格承载程序化能量场。释放时，两
 
 完整 Energy Charge 资产和 256×256 预览已重建并实际查看。新进程仅用原生 bpy 把资产集合链接到场景，确认混合透明、释放视角节点、37→13→37 可复现及第 49 帧清场，没有导出相机或灯光。没有新增性能或视口帧率结论。
 
-源码、图像摘要和原生检查见[记录](images/charge-release-cap-samples.json)。功能源码 `f4a6867`，含测试的源码 `61a6186`；CI 仍在运行。不以这项局部修复宣称整体艺术验收通过。早段主次和身体蓄势继续由 [#137](https://github.com/mumu-lhl/blender-vfx-studio/issues/137) 跟踪。
+源码、图像摘要和原生检查见[记录](images/charge-release-cap-samples.json)。功能源码 `f4a6867`，含测试的源码 `61a6186`；CI [41188164918](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41188164918) 已完成全部 12 项并成功，PR #196 已合入 main。不以这项局部修复宣称整体艺术验收通过。早段主次和身体蓄势继续由 [#137](https://github.com/mumu-lhl/blender-vfx-studio/issues/137) 跟踪。
