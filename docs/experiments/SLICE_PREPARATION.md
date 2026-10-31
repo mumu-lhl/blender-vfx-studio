@@ -37,3 +37,5 @@ Blender 的 NLA 可以用一条时间曲线控制动画片段的播放进度。S
 原 CI 的 11 项必要作业成功，闪电镜头的接触断言失败。原因是片段提前时没有平移新增的 NLA 时间曲线；现已同时平移片段、关键帧和控制柄，两个使用该操作的镜头共用此函数。新增回归比较两名角色平移前后的全部骨骼姿态与实际剑柄位置，原接触断言保留，三项检查通过。修复后的第 3 帧闪电高清已实际读取。
 
 随后合入当前 main 的火焰与汇聚粒子改动，重新生成角色第 16／32／49 帧并实际读取；无插件 49→16→32 高清 RGBA 完全一致，96 清场。原有同帧姿态对照保留其记录的源码，整合数据另列于检查清单。新增实图：[蓄力早段](../images/slice-preparation-integrated-16.png) · [收剑](../images/slice-preparation-integrated-32.png) · [命中](../images/slice-preparation-integrated-49.png)。修复源码 `999106a` 的远端检查仍待完成，未以本地结果代替 CI 或扩大艺术验收。
+
+修复源码 `999106a` 的 [CI 41216379817](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41216379817) 重跑已完成全部 12 项必要检查并成功，进程正常退出。首次尝试的角色任务曾在保存远景图后以 139 退出，仍由 [#122](https://github.com/mumu-lhl/blender-vfx-studio/issues/122) 跟踪，不以一次成功宣称崩溃已根治。与命中热气联合的九张高清和 47 张原生动作样本另见 [整镜头记录](https://github.com/mumu-lhl/blender-vfx-studio/blob/0076c1a180a536bed21abc419cb2807407fa531d/docs/COMBAT_COMBINED_REVIEW.md)；身体力量与整体艺术限制保持。
