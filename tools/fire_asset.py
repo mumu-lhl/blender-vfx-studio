@@ -178,6 +178,18 @@ def _flames(root, quality):
     section = g.v("Section Around Its Own Rising Path", "SUBTRACT", pos.outputs[0], center)
     section = g.v("Moving Bulges And Narrow Necks", "SCALE", section, pulse)
     branch_breadth = g.m("Shoots Thicken As They Rise", "SQRT", shoot_growth)
+    spent = g.m(
+        "Spent Shoots Narrow Before Reset",
+        "SUBTRACT",
+        1,
+        g.stage("Updraft Spends The Shoot", shoot_phase, 0.70, 0.98),
+    )
+    branch_breadth = g.m(
+        "Growing And Narrowing Shoot",
+        "MULTIPLY",
+        branch_breadth,
+        g.m("Spent Shoot Radius", "SQRT", spent),
+    )
     branch_breadth = g.m(
         "Shared Foot Keeps Its Breadth",
         "SUBTRACT",
