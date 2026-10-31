@@ -551,12 +551,12 @@ if not result.wasSuccessful():
 bpy.ops.wm.read_factory_settings(use_empty=True)
 root = core.create(bpy.context, "IMPACT_BURST", "LOW")
 root.name = "Persisted Impact"
+camera()
+bpy.context.scene.camera.data.ortho_scale = 5.5
 for frame in (2, 5, 14):
     state = geometry(root, frame)
     for child in composition.members(root):
         child[f"expected_shape_{frame}"] = [c for v in state[child["vfx_id"]] for c in v]
-camera()
-bpy.context.scene.camera.data.ortho_scale = 5.5
 for frame in (2, 5, 9, 11, 14):
     root[f"expected_pixels_{frame}"] = render_pixels(frame)
 addon.unregister()
