@@ -42,3 +42,8 @@ Blender 5.2.2、两核配额、两线程、Mesa 25.0.7 llvmpipe。在同一保�
 渲染为 960×540、Eevee 16 samples。这不是视口 FPS，也没有相同设备上的修改前后性能对照；一组渲染不足以计算可靠的分布或 p95。原始样本、源码与图像摘要见[检查清单](images/charge-fronts-samples.json)。
 
 功能源码 `5c3d17b`，后续 `248c15f` 仅合入已验证的横带说明与实图，运行时代码相同。CI [41189505385](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41189505385) 仍在运行。工作由 [#137](https://github.com/mumu-lhl/blender-vfx-studio/issues/137) 跟踪，PR 为 [#197](https://github.com/mumu-lhl/blender-vfx-studio/pull/197)，整体艺术问题保持未完成。
+
+
+已下载 PR 构建 `41189505385` 的实际安装附件 `13038493685` 并核对 SHA256，内含插件与示例两个 ZIP、18 个 `.blend`；插件 32 个 Python 文件与源码一致。直接打开包内 Energy Charge，仅用原生 bpy 链接集合，核对 0.78 初始尺寸、0.08 连尾权重、释放视角节点、37→13→37 与结束帧；实际嵌入预览已导出 PNG 并读取，上图采用该附件的预览。资产 SHA256 为 `832edd3aede41b19c1444fb122bcf7e5eb2cdf157e68ffab969d686a1bd98d8c`。
+
+与火焰改动合并到独立检查分支后，全库 Ruff、24 项资产、8 项火焰及原生回放均通过。CI 仍在完成其他镜头；没有发布正式版本。
