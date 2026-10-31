@@ -116,8 +116,18 @@ def build(root, quality):
     graph.connect(facing, edge.inputs[0])
     graph.connect(graph.vector("Dark Gas Tint", "SCALE", tint.outputs[0], 0.08), edge.inputs[1])
     graph.connect(color.outputs[0], edge.inputs[2])
+    density = graph.node(
+        "ShaderNodeMapRange", "Hot Pockets And Darker Gas", interpolation_type="SMOOTHSTEP"
+    )
+    graph.connect(noise.outputs["Fac"], density.inputs["Value"])
+    density.inputs["From Min"].default_value = 0.28
+    density.inputs["From Max"].default_value = 0.72
+    density.inputs["To Min"].default_value = 0.12
     emission = graph.node("ShaderNodeEmission", "Burning Core Emission")
-    graph.connect(edge.outputs[0], emission.inputs["Color"])
+    graph.connect(
+        graph.vector("Moving Gas Color Structure", "SCALE", edge.outputs[0], density.outputs[0]),
+        emission.inputs["Color"],
+    )
     graph.connect(graph.value("Strength", "strength"), emission.inputs["Strength"])
     transparent = graph.node("ShaderNodeBsdfTransparent", "Spent Gas")
     mix = graph.node("ShaderNodeMixShader", "Core Erodes Into Gaps")
