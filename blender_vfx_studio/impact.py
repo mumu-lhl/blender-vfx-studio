@@ -49,9 +49,9 @@ def create(context, quality="LOW"):
         "Impact • Burst Core",
         (1.0, 0.22, 0.025),
         duration=8.0,
-        width=1.6,
-        height=1.3,
-        opacity=1.0,
+        width=1.0,
+        height=1.0,
+        opacity=0.8,
         fade=0.2,
         strength=2.0,
     )

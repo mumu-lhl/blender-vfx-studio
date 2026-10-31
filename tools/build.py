@@ -11,7 +11,8 @@ output = ROOT / "dist" / f"blender-vfx-studio-{version}.zip"
 output.parent.mkdir(exist_ok=True)
 with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
     for path in sorted(SOURCE.rglob("*")):
-        if path.is_file() and (path.suffix in {".py", ".toml"}):
+        texture = path.parent == SOURCE / "assets" and path.suffix == ".png"
+        if path.is_file() and (path.suffix in {".py", ".toml"} or texture):
             info = zipfile.ZipInfo(path.relative_to(SOURCE).as_posix(), (2026, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(info, path.read_bytes())

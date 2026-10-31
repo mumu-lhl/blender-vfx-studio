@@ -1,104 +1,25 @@
-"""Original ray-marched gas frames, played with the existing native flipbook."""
+"""An original painted heat atlas using the existing native flipbook player."""
 
 import math
-from functools import lru_cache
+from pathlib import Path
 
 import bpy
-import numpy as np
 
 from . import core
 from .impact_shape import _Nodes
 
 
-def _noise(x, y, z):
-    ix, iy, iz = np.floor(x), np.floor(y), np.floor(z)
-    fx, fy, fz = x - ix, y - iy, z - iz
-    fx, fy, fz = (f * f * (3 - 2 * f) for f in (fx, fy, fz))
-    result = np.zeros_like(x)
-    for dx in (0, 1):
-        for dy in (0, 1):
-            for dz in (0, 1):
-                hashed = np.sin((ix + dx) * 127.1 + (iy + dy) * 311.7 + (iz + dz) * 74.7)
-                hashed *= 43758.5453
-                hashed -= np.floor(hashed)
-                result += (
-                    hashed
-                    * (fx if dx else 1 - fx)
-                    * (fy if dy else 1 - fy)
-                    * (fz if dz else 1 - fz)
-                )
-    return result
-
-
-@lru_cache(maxsize=3)
-def _pixels(resolution):
-    """Integrate density and heat through eight original 3D gas fields."""
-    axis = np.linspace(-1, 1, resolution, dtype=np.float32)
-    x, y = np.meshgrid(axis, axis)
-    atlas = np.zeros((resolution * 2, resolution * 4, 4), dtype=np.float32)
-    slices = 24
-    for frame in range(8):
-        age = frame / 7
-        envelope = (1 - math.exp(-age * 18)) * (1 - age) ** 0.65
-        if envelope == 0:
-            continue
-        travel = 1 - (1 - age) ** 3
-        transmittance = np.ones_like(x)
-        emitted = np.zeros_like(x)
-        for depth in np.linspace(1, -1, slices):
-            wx = x + 0.12 * np.sin(y * 4 + depth * 6 - age * 8)
-            wy = y + 0.12 * np.sin(depth * 5 + x * 3 + age * 6)
-            wz = np.full_like(x, depth) + 0.1 * np.cos(x * 4 + y * 3 - age * 5)
-            detail = (
-                0.65 * _noise(wx * 4 + age * 2, wy * 4, wz * 4)
-                + 0.25 * _noise(wx * 8, wy * 8 - age * 3, wz * 8)
-                + 0.1 * _noise(wx * 16, wy * 16, wz * 16 + age * 4)
-            )
-            field = 0.8 * math.exp(-age * 5) * np.exp(-(wx * wx + wy * wy + wz * wz) / 0.055)
-            for angle, reach, width, z in (
-                (0.7, 0.46, 0.27, 0.08),
-                (3.4, 0.34, 0.22, -0.10),
-                (5.1, 0.39, 0.24, 0.16),
-            ):
-                radius = width * (0.6 + 0.7 * math.sin(math.pi * age))
-                cx, cy = math.cos(angle) * reach * travel, math.sin(angle) * reach * travel
-                field += np.exp(
-                    -((wx - cx) ** 2 + (wy - cy) ** 2 / 0.8 + (wz - z * travel) ** 2 / 0.65)
-                    / radius**2
-                )
-            density = np.maximum(field - 0.35 - detail * 0.65, 0) * envelope
-            absorb = 1 - np.exp(-density * (18 / slices))
-            weight = transmittance * absorb
-            temperature = np.clip(0.3 + detail * 0.7 + field * 0.17 - age * 0.2, 0, 1)
-            emitted += weight * temperature**3
-            transmittance *= 1 - absorb
-        alpha = 1 - transmittance
-        heat = np.clip((emitted / np.maximum(alpha, 1e-6) - 0.06) / 0.65, 0, 1)
-        heat[alpha < 1e-5] = 0
-        row, column = 1 - frame // 4, frame % 4
-        tile = atlas[
-            row * resolution : (row + 1) * resolution,
-            column * resolution : (column + 1) * resolution,
-        ]
-        tile[:, :, :3] = heat[:, :, None]
-        tile[:, :, 3] = alpha
-    atlas.setflags(write=False)
-    return atlas
-
-
 def create(context, quality):
-    resolution = {"LOW": 128, "MEDIUM": 192, "HIGH": 256}[quality]
-    name = f"VFX • Original Burst Gas {resolution}"
-    image = bpy.data.images.get(name)
-    if image is None or image.get("vfx_burst_gas") != resolution:
-        image = bpy.data.images.new(name, width=resolution * 4, height=resolution * 2, alpha=True)
-        image.colorspace_settings.name = "Non-Color"
-        image.alpha_mode = "STRAIGHT"
-        image.pixels.foreach_set(_pixels(resolution).ravel())
-        image.update()
-        image["vfx_burst_gas"] = resolution
-        image.pack()
-    # Like user-supplied atlas images, this shared texture has no instance owner.
+    path = Path(__file__).with_name("assets") / "burst_heat.png"
+    if not path.is_file():
+        raise ValueError("The bundled burst atlas is missing; reinstall the extension")
+    image = bpy.data.images.load(str(path), check_existing=False)
+    image.name = "VFX • Original Burst Heat"
+    image.colorspace_settings.name = "Non-Color"
+    image.alpha_mode = "STRAIGHT"
+    image["vfx_burst_heat"] = 1
+    image.pack()
+    # Images keep Blender's ordinary sharing and user-data deletion behavior.
     root = core.create_flipbook(context, image, columns=4, rows=2)
     root["vfx_quality"] = quality
     root["vfx_parameter_keys"] = "width,height,opacity,fade,strength"
