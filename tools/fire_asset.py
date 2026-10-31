@@ -434,6 +434,15 @@ def _material(root):
         0.36,
     )
     threshold.node.inputs[2].default_value = 0.18
+    # The same winding cold channels carry air through the body, rather than
+    # only painting dark stripes onto an otherwise continuous orange shell.
+    # Their existing height envelope keeps the grounded fuel bed connected.
+    threshold = g.m(
+        "Cool Streams Open Into Air",
+        "ADD",
+        threshold,
+        g.m("Air In Rising Channels", "MULTIPLY", channel, g.value("Rising Air Channels", 0.5)),
+    )
     # Keep the narrow crown's leading edge. Eroding its whole height equally
     # leaves a round middle bulge after the pointed top has disappeared.
     threshold = g.m(
