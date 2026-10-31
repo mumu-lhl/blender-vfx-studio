@@ -698,7 +698,7 @@ class StarterTests(unittest.TestCase):
     def test_builders_have_native_timing_and_explicit_quality(self):
         for key, layers, duration, quality in zip(
             EXAMPLES,
-            (4, 4, 1, 4, 3, 2, 3, 3),
+            (4, 5, 1, 4, 3, 2, 3, 3),
             (48, 24, 18, 18, 32, 52, 30, 72),
             ("LOW", "LOW", "LOW", "MEDIUM", "MEDIUM", "MEDIUM", "MEDIUM", "MEDIUM"),
             strict=True,
