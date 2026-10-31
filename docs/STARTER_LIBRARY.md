@@ -30,7 +30,7 @@ examples ZIP 是资产库，**不是插件安装包**。
 
 ## Energy Charge
 
-中心是带蓝色流带的白热焦点。蓄力时亮区扩大并向内收紧，释放时沿本地 Z 轴拉伸，随后交给较暗的碎片消散。主进流把能量带向中心，外围短流和粒子作为辅助；整套效果由四层构成。
+中心是带蓝色流带的白热焦点。蓄力时亮区扩大并向内收紧，释放时沿本地 Z 轴拉伸，随后交给较暗的碎片消散。主进流用移动头部和较弱的连尾表示向内汇聚，外围短流和粒子作为辅助；整套效果由四层构成。
 
 粒子层的 **Spawn Radius** 控制出生距离，正的 **Velocity** 越大，抵达中心越快；抵达后停止，不穿过中心向外飞。粒子在控制器局部空间运动，移动整体也会移动已出生粒子，不保留角色走过的世界轨迹。
 
@@ -55,10 +55,11 @@ examples ZIP 是资产库，**不是插件安装包**。
 | Nucleus Seed Size / Nucleus Stored Size | 初始与蓄满尺寸 |
 | Release Pinch / Release Stretch | 释放时的形变 |
 | Nucleus White Threshold | 越高，核心白色区域越小 |
+| Intake Body Retention | 主进流连尾的透明权重；低值突出移动头部，1 不减弱连尾 |
 | Spiral Turns / Intake Vertical Reach | 外层路径的绕行角度与起始高度 |
 | Ground Intake Lift | 地面三条进流的抬升高度，默认 0.8 配合该层 Z=-0.8 |
 
-使用 **Save Complete Effect** 保存这些形状和节点控制；参数 JSON 不包含 Intake Weight 等私有节点数值。角色镜头、明暗背景与实际观看范围见 [充能焦点检查](CHARGE_PLASMA_REVIEW.md)。
+使用 **Save Complete Effect** 保存这些形状和节点控制；参数 JSON 不包含 Intake Weight 等私有节点数值。角色镜头、明暗背景与实际观看范围见 [热芯与汇流检查](CHARGE_FRONTS_REVIEW.md)。
 
 释放沿控制器的局部 **+Z** 方向前送。挂到武器或施法点时，将这个方向朝向能量要去的位置；可以给控制器旋转插关键帧，让积蓄转为沿剑刃或法术方向释放。
 

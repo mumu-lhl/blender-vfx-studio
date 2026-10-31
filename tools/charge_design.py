@@ -355,6 +355,32 @@ def _surface(root, *, core=False, ground=False):
                 ),
             ),
         )
+        # Energy travels as a broad advancing head with a quiet connected tail;
+        # opaque tubes with scrolling color read as static metal ribbons.
+        retention = g.value("Intake Body Retention", 0.08)
+        moving_body = g.m(
+            "Travelling Intake Body",
+            "MULTIPLY_ADD",
+            packet,
+            g.m("Intake Front Contrast", "SUBTRACT", 1, retention),
+        )
+        g.link(retention, moving_body.node.inputs[2])
+        alpha = g.m(
+            "Energy Fronts Carry The Intake",
+            "MULTIPLY",
+            alpha,
+            g.m(
+                "Keep The Supporting Wisps",
+                "ADD",
+                1,
+                g.m(
+                    "Only Primary Intake Travels",
+                    "MULTIPLY",
+                    primary,
+                    g.m("Intake Body From Full Coverage", "SUBTRACT", moving_body, 1),
+                ),
+            ),
+        )
         # Three illustrated values describe volume without a glossy gradient.
         mid = g.m("Lit Midtone", "GREATER_THAN", facing.outputs["Value"], 0.05)
         bright = g.m("Narrow Lit Face", "GREATER_THAN", facing.outputs["Value"], 0.55)
@@ -607,6 +633,29 @@ def _surface(root, *, core=False, ground=False):
             0.65,
         )
         mask = g.m("Visible Plasma Field", "MULTIPLY", mask, view)
+        # The cross cap keeps the focus visible along its axis. During the
+        # needle-shaped release, its oblique projection must not cut a white
+        # belt across the two longitudinal fields. Keep a face-on cap intact.
+        cap = g.m("Transverse Plasma Field", "GREATER_THAN", lane, 0.375)
+        release = g.stage("Plasma Cap Follows Release", p, 0.84, 0.88)
+        cap_facing = g.m(
+            "Axial Plasma Cap Visibility",
+            "POWER",
+            g.m("Absolute Plasma Cap Facing", "ABSOLUTE", facing.outputs["Value"]),
+            4,
+        )
+        cap_loss = g.m(
+            "Oblique Cap Clears The Release",
+            "MULTIPLY",
+            g.m("Only The Releasing Cap Fades", "MULTIPLY", cap, release),
+            g.m("Cap Obliqueness", "SUBTRACT", 1, cap_facing),
+        )
+        mask = g.m(
+            "Unbroken Longitudinal Plasma",
+            "MULTIPLY",
+            mask,
+            g.m("Remaining Plasma Cap", "SUBTRACT", 1, cap_loss),
+        )
         alpha = g.m(
             "Focus Opacity Field",
             "MULTIPLY",
@@ -625,8 +674,8 @@ def _surface(root, *, core=False, ground=False):
         )
         heat = g.m("Connected Plasma Heat", "SUBTRACT", 1, radius.outputs["Value"])
         stored = g.stage("Heat Accumulates In The Focus", p, 0.18, 0.78)
-        charge_heat = g.m("Stored Heat Concentration", "MULTIPLY_ADD", stored, 0.8)
-        charge_heat.node.inputs[2].default_value = 0.2
+        charge_heat = g.m("Stored Heat Concentration", "MULTIPLY_ADD", stored, 0.35)
+        charge_heat.node.inputs[2].default_value = 0.65
         heat = g.m("Focus Stores Heat", "MULTIPLY", heat, charge_heat)
         white_threshold = g.value("Nucleus White Threshold", 0.35)
         white = g.stage("Coherent Plasma Heart", heat, 0.35, 0.55)
@@ -1067,7 +1116,7 @@ def core_shape(root):
         g.xyz("Roiling Flame Volume", *shaped, curled.outputs["Z"]),
         g.xyz("Nucleus Pressure Balance", counter_x, counter_x, counter_z),
     )
-    seed_size = g.value("Nucleus Seed Size", 0.65)
+    seed_size = g.value("Nucleus Seed Size", 0.78)
     stored_size = g.value("Nucleus Stored Size", 2.3)
     growth = g.m(
         "Nucleus Stores Incoming Energy",

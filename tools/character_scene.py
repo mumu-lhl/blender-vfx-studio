@@ -193,6 +193,12 @@ def add_effects(fixture):
     scene.collection.objects.link(socket)
     follow = socket.constraints.new("COPY_LOCATION")
     follow.target = midpoint
+    # Keep the gathering focus just above the blade rather than inside its
+    # opaque surface. It settles onto the weapon before the release begins.
+    follow.use_offset = True
+    for frame, height in ((1, 0.12), (37, 0.12), (47, 0.0)):
+        socket.location.z = height
+        socket.keyframe_insert(data_path="location", index=2, frame=frame)
     scene.frame_set(1)
     charge = create_effect("energy-charge")
     # Place this asset's native discharge peak at measured blade contact.
