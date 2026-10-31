@@ -51,7 +51,7 @@ def create(context, quality="LOW"):
         duration=8.0,
         width=0.95,
         height=0.95,
-        opacity=0.85,
+        opacity=1.0,
         fade=0.2,
         strength=2.0,
     )

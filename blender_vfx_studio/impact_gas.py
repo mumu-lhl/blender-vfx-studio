@@ -95,6 +95,7 @@ def create(context, quality):
         image.colorspace_settings.name = "Non-Color"
         image.alpha_mode = "STRAIGHT"
         image.pixels.foreach_set(_pixels(resolution).ravel())
+        image.update()
         image["vfx_burst_gas"] = resolution
         image.pack()
     # Like user-supplied atlas images, this shared texture has no instance owner.
@@ -136,12 +137,29 @@ def create(context, quality):
             ),
             hot.inputs[index],
         )
-    color = graph.node("ShaderNodeMixRGB", "Burning Pockets And Darker Gas")
-    graph.connect(graph.math("Heat Pockets", "MULTIPLY", heat, heat), color.inputs[0])
-    graph.connect(
-        graph.vector("Subordinate Gas Tint", "SCALE", tree.nodes["Sprite Tint"].outputs[0], 0.3),
-        color.inputs[1],
+    warm = graph.node(
+        "ShaderNodeMapRange", "Cold Gas To Saturated Heat", interpolation_type="SMOOTHSTEP"
     )
+    graph.connect(heat, warm.inputs["Value"])
+    warm.inputs["From Min"].default_value = 0.1
+    warm.inputs["From Max"].default_value = 0.45
+    body = graph.node("ShaderNodeMixRGB", "Dark Gas And Burning Body")
+    graph.connect(warm.outputs[0], body.inputs[0])
+    graph.connect(
+        graph.vector("Subordinate Gas Tint", "SCALE", tree.nodes["Sprite Tint"].outputs[0], 0.08),
+        body.inputs[1],
+    )
+    tint = graph.node("ShaderNodeCombineXYZ", "Editable Burning Gas Color")
+    for index in range(3):
+        graph.connect(graph.value(f"Body Tint {index}", f"color_{index}"), tint.inputs[index])
+    graph.connect(tint.outputs[0], body.inputs[2])
+    pockets = graph.node("ShaderNodeMapRange", "Local Hot Pockets", interpolation_type="SMOOTHSTEP")
+    graph.connect(heat, pockets.inputs["Value"])
+    pockets.inputs["From Min"].default_value = 0.55
+    pockets.inputs["From Max"].default_value = 0.9
+    color = graph.node("ShaderNodeMixRGB", "Burning Body And Hot Pockets")
+    graph.connect(pockets.outputs[0], color.inputs[0])
+    graph.connect(body.outputs[0], color.inputs[1])
     graph.connect(hot.outputs[0], color.inputs[2])
     graph.connect(color.outputs[0], tree.nodes["Emission"].inputs["Color"])
     normal = graph.node("ShaderNodeNewGeometry", "Gas View Facing")

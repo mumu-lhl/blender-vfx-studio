@@ -306,6 +306,8 @@ def add_effects(fixture):
     body.children[0].modifiers[0].node_group.nodes["Pressure Surface Alignment"].inputs[
         "Rotation"
     ].default_value = (plane.inverted() @ surface).to_euler()
+    gas = next(child for child in impact.children if child.name.endswith("Burst Core"))
+    gas.location += (plane.inverted() @ Vector(contact["hits"][0]["normal"])) * 0.08
     for effect in (charge, slash, impact):
         effect.update_tag()
     collection = bpy.data.collections.new("Combat VFX • toggle for comparison")
