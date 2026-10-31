@@ -1,5 +1,6 @@
 """Compare real complete spell stages after native addon-free out-of-order seeking."""
 
+import argparse
 import hashlib
 import json
 import sys
@@ -12,7 +13,10 @@ assert not any("blender_vfx_studio" in name for name in sys.modules)
 folder = Path(bpy.data.filepath).parent
 record = json.loads((folder / "spell-settings.json").read_text())
 scene = bpy.context.scene
-for frame in (96, 16, 64):
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--frames", type=int, nargs="+", default=[96, 16, 64])
+args = parser.parse_args(sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else [])
+for frame in args.frames:
     assert frame in record["frames"]
     scene.frame_set(frame)
     native = folder / "native"
@@ -35,7 +39,7 @@ assert not any(
     json.dumps(
         {
             "native_render_verified": True,
-            "frames": [96, 16, 64],
+            "frames": args.frames,
             "clear_frame": 104,
             "scene_sha256": hashlib.sha256(Path(bpy.data.filepath).read_bytes()).hexdigest(),
         },

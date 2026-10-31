@@ -36,9 +36,9 @@
 
 ## stylized-fire
 
-![stylized-fire：第 40 帧](images/stylized-fire.png)
+![stylized-fire：第 40 帧](images/fire-rooted-after-40.png)
 
-从共享下部交替伸长的分叉与热流，尖端在断裂前先侵蚀。第 **40 帧**，本地角色镜头；[完整抽帧与实际检查](FIRE_FORK_REVIEW.md)。底部团块和局部薄边仍需改善，远景细余烬较弱。
+较窄内焰接入共同主体，分叉与下部宽窄持续变化。第 **40 帧**，本地角色镜头；[实际抽帧与原生检查](FIRE_ROOTED_REVIEW.md)。前方亮色圆团收敛，较完整的橙色面、薄片边缘和远景细节仍待完善。
 
 ## dash-echoes
 

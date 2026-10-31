@@ -46,8 +46,8 @@ def _flames(root, quality):
             (0, 0.03, 1, 0.50, -0.12, 0),
             (-0.26, 0, 0.83, 0.29, -0.20, 0),
             (0.28, 0.04, 0.68, 0.25, 0.24, 0),
-            (0, -0.25, 0.52, 0.24, 0.17, 1),
-            (0.06, 0.26, 0.44, 0.22, -0.14, 1),
+            (0, -0.14, 0.68, 0.15, 0.17, 1),
+            (0.06, 0.13, 0.60, 0.13, -0.14, 1),
         )
     ):
         split = {0: 0.28, 1: 0.38}.get(index)
@@ -61,7 +61,11 @@ def _flames(root, quality):
             segment_rows = max(4, math.ceil(rows * (last - first)))
             for row in range(segment_rows + 1):
                 u = first + (last - first) * row / segment_rows
-                radius = max(0.002, (0.6 + 0.4 * math.sin(math.pi * u)) * (1 - u) ** 0.85 * breadth)
+                # Narrow roots feed rising bellies; the inner streams stay
+                # inside the main silhouette instead of forming front bulbs.
+                radius = max(
+                    0.002, (0.38 + 0.62 * math.sin(math.pi * u)) * (1 - u) ** 0.85 * breadth
+                )
                 cx = x * (1 - u) + bend * math.sin(math.pi * u) + 0.22 * math.sin(u * 5) * u
                 cy = y * (1 - u * 0.5) + 0.13 * math.sin(u * 4 + index) * u
                 fork = (0, 0, 0)
@@ -156,7 +160,7 @@ def _flames(root, quality):
         g.m(
             "Necks Above The Foot",
             "MULTIPLY",
-            g.stage("Neck Starts Above Ground", u, 0.08, 0.35),
+            g.stage("Neck Starts Above Ground", u, 0.02, 0.26),
             g.m("Travelling Neck Depth", "SUBTRACT", pulse, 1),
         ),
     )
@@ -343,7 +347,7 @@ def _material(root):
     inner = g.n("ShaderNodeAttribute", "Hot Inner Tongue", attribute_name="fire_inner").outputs[
         "Fac"
     ]
-    heat = g.m("Hotter Flame Base", "SUBTRACT", 1.08, g.m("Cooler Tips", "MULTIPLY", u, 0.52))
+    heat = g.m("Hotter Flame Base", "SUBTRACT", 0.96, g.m("Cooler Tips", "MULTIPLY", u, 0.40))
     heat = g.m(
         "Heat Folds",
         "ADD",
@@ -389,7 +393,7 @@ def _material(root):
         "Keep The Hot Foot Together",
         "MULTIPLY",
         channel,
-        g.stage("Flow Separation Above Ground", u, 0.08, 0.4),
+        g.stage("Flow Separation Above Ground", u, 0.02, 0.28),
     )
     heat = g.m(
         "Heat Has Flowing Internal Structure",
