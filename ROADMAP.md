@@ -14,7 +14,7 @@
 
 - **Energy Charge**：小热芯在早段可见，移动进流与原生回刃安排已完成 14 张角色高清、28 张原生隔帧、完整资产及成本检查；外围长碎片、背侧遮挡与身体张力仍未解决。见[热芯与汇流](docs/CHARGE_FRONTS_REVIEW.md)，[#197](https://github.com/mumu-lhl/blender-vfx-studio/pull/197) 已合入 main，功能源码 CI 全部 12 项成功。释放横向白带的局部修复见 [#196](https://github.com/mumu-lhl/blender-vfx-studio/pull/196)。
 - **Arc Slash**：刀光平面跟随真实剑刃，转向时的大蓝片错位已修复；命中画面仍有多层重叠。见[空间对齐](docs/SLASH_PLANE_REVIEW.md)。
-- **持续火焰与施法**：分叉火舌和空间交接已进入完整角色动作；底部团块、局部色块和远景细节仍弱。见[流动检查](docs/FIRE_FLOW_REVIEW.md)及[施法交接](docs/SPELL_TRANSFER_REVIEW.md)。
+- **持续火焰与施法**：分叉与交接保留，前方亮色圆团收敛，较完整橙色面、薄片感与远景细节仍弱。36 张燃烧周期和 25 张施法释放隔帧、三档完整资产及成本已检查；见[下部热流](docs/FIRE_ROOTED_REVIEW.md)，[#199](https://github.com/mumu-lhl/blender-vfx-studio/pull/199) 等待 CI。
 - **角色蓄势**：[预备动作草稿 #190](https://github.com/mumu-lhl/blender-vfx-studio/pull/190) 没有证明中心可读性和身体力量优于主线。下劈开头的[原生动作复查](https://github.com/mumu-lhl/blender-vfx-studio/blob/45b05e1/docs/experiments/WINDUP_FIELD.md)也有回落再后摆的问题，暂不采用。
 
 ## 已有功能与边界
@@ -29,6 +29,8 @@
 | M5 稳定性 | Windows/Linux/macOS 后台测试、保存重开、部分 Linux 窗口检查 | Windows/macOS 实际窗口与更多 UI 缩放未验收，见 [GUI 记录](docs/GUI_CHECKS.md) |
 
 ## 资产库首轮视觉检查
+
+持续火焰下部的圆团收敛已完成 16 张高清、36 张燃烧周期隔帧、25 张施法释放隔帧、原生复现、三档完整资产和成本检查；完整橙色面与薄片感仍待改善。见[下部热流](docs/FIRE_ROOTED_REVIEW.md)，[#199](https://github.com/mumu-lhl/blender-vfx-studio/pull/199) 等待 CI。
 
 | 效果 | 合并 PR | 实际读取的最终视频隔帧图 | 编辑、成本与未解决问题 |
 | --- | --- | ---: | --- |
