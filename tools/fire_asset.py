@@ -533,7 +533,7 @@ def _material(root):
         "ADD",
         threshold,
         g.m(
-            "Shoot Erosion", "MULTIPLY", g.m("Shoot Heat Runs Out", "SUBTRACT", 1, shoot_life), 0.8
+            "Shoot Erosion", "MULTIPLY", g.m("Shoot Heat Runs Out", "SUBTRACT", 1, shoot_life), 0.15
         ),
     )
     alive = g.stage(
@@ -542,6 +542,7 @@ def _material(root):
         0,
         0.035,
     )
+    alive = g.m("Each Shoot Spends Its Visible Heat", "MULTIPLY", alive, shoot_life)
     air = g.n("ShaderNodeBsdfTransparent", "Air Between Flame Tongues")
     mix = g.n("ShaderNodeMixShader", "Flame Erosion")
     g.link(alive, mix.inputs[0])
