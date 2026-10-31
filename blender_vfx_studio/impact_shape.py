@@ -247,7 +247,7 @@ def jets(root, quality):
         base = len(vertices)
         rings = {"LOW": 12, "MEDIUM": 21, "HIGH": 28}[quality]
         sides = {"LOW": 7, "MEDIUM": 11, "HIGH": 15}[quality]
-        turn = (1.25, -1.65, 1.4)[index]
+        turn = (2.35, -2.7, 2.15)[index]
         for i in range(rings):
             u = i / (rings - 1)
             phase = turn * u
@@ -258,7 +258,9 @@ def jets(root, quality):
             local_side = side * math.cos(phase) - direction * math.sin(phase)
             # Pressure occupies the contact rather than beginning as three
             # empty points. A short curling crown hands off to the long rays.
-            profile = (0.52 + 0.48 * math.sin(math.pi * u**0.85)) * (1 - u) ** 0.55
+            # A narrow attachment opens into a curled pressure front rather
+            # than carrying a broad leaf from the contact to its pointed tip.
+            profile = (0.30 + 0.70 * math.sin(math.pi * u**0.72)) * (1 - u) ** 0.45
             for j in range(sides):
                 across = j / (sides - 1) * 2 - 1
                 billow = (
@@ -781,6 +783,9 @@ def _erode(root):
         "Editable Pressure Fracture", "MULTIPLY", young, fracture.outputs[0]
     )
     fracture_amount = graph.math("Only Pressure Fractures", "MULTIPLY", fracture_amount, primary)
+    fracture_amount = graph.math(
+        "Pressure Edges Split Before The Body", "MULTIPLY", fracture_amount, shade
+    )
     cutoff = graph.math("Broken Pressure Body", "ADD", cutoff, fracture_amount)
     tear = graph.math("Torn Flow Cutoff", "MULTIPLY", region, cutoff)
     cutoff = graph.math("Flow Then Release", "ADD", tear, release)
