@@ -54,3 +54,6 @@
 | 预热后同帧渲染 | 11.72 s | 14.88 s |
 
 分辨率为 960×540、Eevee 16 samples。这不是视口 FPS，没有修改前后同设备性能对照；一组渲染不足以计算可靠的分布或 p95。将充能与火焰改动合并到独立检查分支后，全库 Ruff、24 项资产、8 项火焰及原生回放也通过。原始数据、图像与源码摘要见[检查清单](images/fire-rooted-samples.json)。功能源码为 `e5d93cc`，选帧工具修复为 `136f76e`。由 [#198](https://github.com/mumu-lhl/blender-vfx-studio/issues/198) 跟踪，PR 为 [#199](https://github.com/mumu-lhl/blender-vfx-studio/pull/199)。
+
+
+组合源码 `5ccc86f` 的 [CI 41192883592](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41192883592) 正在运行；它合入已验证充能与文档，火焰生成器保持上述功能源码不变。先前仅含火焰与选帧工具的构建被这次组合构建取代。

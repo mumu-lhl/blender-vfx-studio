@@ -772,5 +772,6 @@
   ],
   "pr": 199,
   "issue": 198,
-  "ci_pending": "https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41191555664"
+  "ci_pending": "https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41192883592",
+  "integrated_source": "5ccc86f800c3a69903617f6ba5598fc6c2dd12e0"
 }
