@@ -446,10 +446,25 @@
     "Local secondary hierarchy improvement, not overall art acceptance",
     "No realtime playback inspection",
     "Only selected motion ranges: odd7..35 and47/49/51",
-    "Reverse face-crossing intake is unchanged",
+    "Reverse particle projection across face remains",
     "Body preparation remains weak",
     "No new render performance comparison; CPU scene evaluation only"
   ],
   "pr": 200,
-  "issue": 137
+  "issue": 137,
+  "layer_diagnosis": {
+    "five_isolation_images_viewed": true,
+    "face_crossing_source": "particle layer",
+    "offending_particle_local_radius": 1.45587,
+    "convergence_fraction": 0.37895,
+    "at_focus": false,
+    "default_changed": false,
+    "radius_1_2_test": {
+      "front16_and_reverse32_viewed": true,
+      "adopted": false,
+      "reason": "Reverse face clears but front fragments overlap the focal area and defender"
+    },
+    "image_sha256": "c9da43bb5440f124bde01755b5c2c236d0173fbe588d3dbbfc0971ca14d2a09d"
+  },
+  "ci_pending": "https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41193749586"
 }
