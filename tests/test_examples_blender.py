@@ -81,6 +81,28 @@ class StarterTests(unittest.TestCase):
         bpy.context.view_layer.update()
         self.assertGreater(particles(ordinary, 7)[0][0].length, particles(ordinary, 1)[0][0].length)
 
+    def test_charge_motes_stretch_with_inward_motion_at_the_same_age(self):
+        charge = create_effect("energy-charge")
+        motes = next(
+            r for r in composition.members(charge) if r["vfx_module"] == "particle.emitter"
+        )
+        for key, value in dict(
+            rate=0.1, lifetime=1.0, emission_seconds=3.0, randomness=0.0, spawn_radius=1.4
+        ).items():
+            motes[key] = value
+
+        def span(velocity):
+            motes["velocity"] = velocity
+            motes.update_tag()
+            bpy.context.view_layer.update()
+            self.assertEqual(len(particles(motes, 7)), 1)
+            vertices = [v.co.copy() for v in mesh(motes, 7).vertices]
+            return max((a - b).length for a in vertices for b in vertices)
+
+        quiet = span(0)
+        self.assertGreater(span(2.6), quiet * 2)
+        self.assertAlmostEqual(span(0), quiet, places=6)
+
     def test_charge_motes_follow_their_curved_velocity_with_less_geometry(self):
         charge = create_effect("energy-charge")
         motes = next(

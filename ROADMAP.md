@@ -88,6 +88,8 @@ PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 4070072
 
 ## 下一步
 
+[#200](https://github.com/mumu-lhl/blender-vfx-studio/pull/200) 的粒子随汇聚比例拉长已完成七张高清、18 张动作样本、25 项资产与无插件检查；早段外围长片的视觉权重降低，主进流与背侧遮挡仍保留。见[粒子主次](docs/CHARGE_MOTES_REVIEW.md)，等待 CI。
+
 1. 当前重点转向实际画面。[#174](https://github.com/mumu-lhl/blender-vfx-studio/issues/174) 修正刀光深度收尖，并按真实挥剑轨迹连接充能与释放；同帧角色图、连续隔帧、明暗／远景与原生复现已检查，方向衔接和遮挡改善，反向命中仍被角色遮住。实测成本和艺术边界见 [衔接检查](docs/COMBAT_HANDOFF_REVIEW.md)。
 2. [#176](https://github.com/mumu-lhl/blender-vfx-studio/issues/176) 的持续火焰已完成角色多阶段、两组各 11 张持续燃烧抽帧、明暗／远景与无插件高清复现。轮廓与退场改善，局部鼓包、色块和细节仍弱；见 [流动检查](docs/FIRE_FLOW_REVIEW.md)。命中主体、接触闪电和冲刺落地的首轮改动已合入；施法空间交接及错相分叉火舌已合入，并补查完整施法隔帧。充能焦点的首轮能量场改动已合入；早段焦点、进流主次和释放横带已合入 main，两个 PR 的功能源码各完成全部 12 项 CI；保留外围长碎片与身体蓄势问题。[#198](https://github.com/mumu-lhl/blender-vfx-studio/issues/198) 的下部热流改进已合入；圆团、薄片感和远景层次仍未全部解决。角色慢速预备 [#202](https://github.com/mumu-lhl/blender-vfx-studio/pull/202) 正在检查完整隔帧及明暗／远景，保留原命中与收招。暂缓继续整理参数。
 3. 保留质量选择，在可用设备测量有／无特效成本；需要更高复杂度时以画面收益判断，不用低顶点数代替性能证据。
@@ -95,4 +97,4 @@ PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 4070072
 
 历史提交、发布和详细检查见 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases)、GitHub Issues 与上述记录；使用和结构见 [README](README.md)、[DESIGN](DESIGN.md) 与 [CONTEXT](CONTEXT.md)。
 
-充能构建 [41194096447](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41194096447) 仍在运行，不记作全部通过。main 已合入火焰下部 [#199](https://github.com/mumu-lhl/blender-vfx-studio/pull/199)，其功能源码 12 项必要检查成功；实际附件包含 18 个示例、32 个插件文件，包内三档火焰与内嵌预览已检查。粒子主次 [#200](https://github.com/mumu-lhl/blender-vfx-studio/pull/200) 本地实图及必要检查完成，仍等待 CI；整体艺术问题保持开放。没有发布正式版本。
+main 已合入火焰下部 [#199](https://github.com/mumu-lhl/blender-vfx-studio/pull/199) 与汇聚粒子 [#200](https://github.com/mumu-lhl/blender-vfx-studio/pull/200)，两项各完成 12 项必要 CI。新的 main 构建 [41216079607](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41216079607) 仍在运行。角色预备 [#202](https://github.com/mumu-lhl/blender-vfx-studio/pull/202) 原 CI 的闪电时间平移断言失败，已修复并完成三项本地姿态／接触回归和整合场景的无插件高清复现，修复后的 CI 尚待完成。Impact 压力曲面及闭合热核试作的实图收益不足，保留在实验分支，没有进入 main。整体艺术品质未验收，没有发布正式版本。

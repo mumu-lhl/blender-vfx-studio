@@ -1521,4 +1521,9 @@ def spiral_motes(root):
         "Mote Birth And Lifetime Size", "MULTIPLY", tree.nodes["Particle Scale"].outputs[0], birth
     )
     g.link(size, tree.nodes["Mote Proportions"].inputs["Scale"])
-    tree.nodes["Mote Proportions"].inputs[0].default_value = (0.5, 0.5, 3.8)
+    length = g.m("Motes Stretch As They Accelerate Inward", "MULTIPLY_ADD", phase, 2.6)
+    length.node.inputs[2].default_value = 1.2
+    g.link(
+        g.xyz("Mote Width And Inward Stretch", 0.5, 0.5, length),
+        tree.nodes["Mote Proportions"].inputs[0],
+    )
