@@ -20,6 +20,19 @@ class CharacterTimingTests(unittest.TestCase):
         hit = fixture["contact"]["frame"]
         member = bpy.data.objects["Charge • Compressed Core"]
         tree = member.children[0].modifiers[0].node_group
+        for frame, height in ((16, 0.12), (37, 0.12), (43, 0.048), (47, 0), (49, 0), (16, 0.12)):
+            scene.frame_set(frame)
+            graph = bpy.context.evaluated_depsgraph_get()
+            socket = bpy.data.objects["Charge socket • world up"].evaluated_get(graph)
+            midpoint = bpy.data.objects["Charge socket • blade midpoint"].evaluated_get(graph)
+            offset = socket.matrix_world.translation - midpoint.matrix_world.translation
+            self.assertLess((offset - Vector((0, 0, height))).length, 1e-6)
+            self.assertLess(
+                (
+                    fixture["effects"][0].matrix_world.translation - socket.matrix_world.translation
+                ).length,
+                1e-6,
+            )
         peak = tree.nodes["Release Pinch Begins"].inputs["From Max"].default_value
         scene.frame_set(hit - 2)
         self.assertLess(tree.nodes["Charge Clock"].outputs[0].default_value, peak - 0.02)

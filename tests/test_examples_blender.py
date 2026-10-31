@@ -534,6 +534,31 @@ class StarterTests(unittest.TestCase):
             self.assertGreater(sum(visible), sum(hidden) + 1)
             self.assertLess(max(v for i, v in enumerate(hidden) if i % 4 != 3), 1e-5)
 
+    def test_intake_fronts_reduce_the_solid_body_without_changing_geometry(self):
+        charge = create_effect("energy-charge")
+        member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
+        for other in composition.members(charge):
+            other.children[0].hide_render = other != member
+        camera()
+        scene = bpy.context.scene
+        scene.camera.data.ortho_scale = 2.4
+        scene.render.resolution_x = scene.render.resolution_y = 96
+        scene.render.film_transparent = True
+        scene.render.dither_intensity = 0
+        retention = (
+            member.children[0].data.materials[0].node_tree.nodes["Intake Body Retention"].outputs[0]
+        )
+        retention.default_value = 1
+        solid = render_pixels(16)
+        before = [tuple(v.co) for v in mesh(member, 16).vertices]
+        retention.default_value = 0.08
+        moving = render_pixels(16)
+        self.assertLess(sum(moving[3::4]), sum(solid[3::4]) * 0.99)
+        self.assertGreater(sum(moving[3::4]), sum(solid[3::4]) * 0.25)
+        self.assertEqual(before, [tuple(v.co) for v in mesh(member, 16).vertices])
+        retention.default_value = 1
+        self.assertEqual(solid, render_pixels(16))
+
     def test_release_cap_clears_oblique_views_and_remains_visible_on_axis(self):
         charge = create_effect("energy-charge")
         member = next(r for r in composition.members(charge) if r["vfx_module"] == "shader.shield")
