@@ -1,22 +1,21 @@
 # 开发进度与后续计划
 
-更新：2026-10-30（UTC）。目标 **Blender 5.2 LTS**，优先 Eevee，兼容 Cycles。**项目尚未正式分发，仅提供开发构建。** 当前实现可以调整，过时生成器和兼容性专用代码无需保留。
+更新：2026-10-31（UTC）。目标 **Blender 5.2 LTS**，优先 Eevee，兼容 Cycles。**项目尚未正式分发，仅提供开发构建。** 当前实现可以调整，过时生成器和兼容性专用代码无需保留。
 
 ## 当前重点
 
-**完整库已由三套扩充至八套。** 闪电、烟尘、火焰、冲刺残影和魔法阵已完成首轮真实角色图像、隔帧动画及原生文件检查并合并；与原三套合计 18 个质量文件。不同质量不计作新种类。入口、参数和画面见 [入门指南](docs/STARTER_LIBRARY.md) 与 [角色图集](docs/LIBRARY_GALLERY.md)。
+**内置八套完整可编辑特效，共 18 个质量文件。** 已完成首轮真实角色图像、隔帧动画及原生文件检查。不同质量不计作新种类。入口、参数和画面见 [入门指南](docs/STARTER_LIBRARY.md) 与 [角色图集](docs/LIBRARY_GALLERY.md)。
 
 艺术表现仍是首要目标。允许有价值的几何、材质和粒子增加开销，用质量选择和实测成本说明取舍，不设统一低成本或顶点上限。复杂骨架、跨平台 GUI 扩展和新的模拟类型暂缓。
 
 ## 当前艺术判断
 
-接触时序已由 [#188](https://github.com/mumu-lhl/blender-vfx-studio/pull/188) 合入；17 张高清、48 张整段原生隔帧及无插件三阶段像素复现已检查，功能源码 CI 十二项成功。分叉火焰在完整施法中的 54 张视频隔帧也已补查。它们不代表整库已达到成熟游戏品质，未观看实时视频。
+**整库仍未达到成熟二次元游戏特效的目标。** 已检查真实角色图像、视频隔帧和无插件播放数据；尚未观看实时视频，不把功能测试或抽帧数量当作艺术验收。
 
-**Energy Charge 的主体仍未达到目标。** [#186](https://github.com/mumu-lhl/blender-vfx-studio/pull/186) 的压力核、流动曲面与密度方案没有形成清楚的聚能主体，密度原型还会在 Cycles 检查中崩溃，已关闭而不合入。源码、失败实图和复现见[独立归档](https://github.com/mumu-lhl/blender-vfx-studio/blob/c57df84977dd1d02ced5e67bac1849fd18ec9cb8/docs/experiments/CHARGE_DENSITY.md)，这些失败不属于 main 的可用功能。
-
-[#190](https://github.com/mumu-lhl/blender-vfx-studio/pull/190) 的预备动作与剑柄交接完成高清明暗／远景、22 张前奏隔帧及无插件复现，但中心可读性没有明确优于主线，继续保持草稿。新能量场已改善手边焦点，但原生下劈开头的复查仍存在回落再后摆、身体压重不足的问题；[新实图与原生轨迹检查](https://github.com/mumu-lhl/blender-vfx-studio/blob/45b05e1/docs/experiments/WINDUP_FIELD.md)继续保持草稿。后续以完整动作的连续性判断取舍，不因姿态变多就宣布力量感通过。
-
-[#193](https://github.com/mumu-lhl/blender-vfx-studio/pull/193) 修复角色刀光在中间转向帧偏离剑刃平面的问题。16 张高清对照、48 张整段原生隔帧与三个阶段无插件高清像素复现已检查；头部的大蓝片错位消除，多层重叠仍存在。功能源码 `639edfc` 的 CI 已完成全部 12 项并成功，详见[空间对齐](docs/SLASH_PLANE_REVIEW.md)。充能的火瓣和实体候选均已拒绝并[独立归档](https://github.com/mumu-lhl/blender-vfx-studio/blob/9474a9b/docs/experiments/CHARGE_FLARE.md)；[#194](https://github.com/mumu-lhl/blender-vfx-studio/pull/194) 的程序化能量场已完成 16 张新版高清图、28 张充能周期原生隔帧、22 项入门库、无插件高清复现与完整资产预览检查；中心清晰度改善，前段和背侧遮挡仍有限制。CI 已完成全部 12 项并成功，另已读完实际 CI 视频的 48 张隔帧，已合入，见[能量场检查](docs/CHARGE_PLASMA_REVIEW.md)。
+- **Energy Charge**：程序化能量场让手边焦点更集中，释放按实际剑刃接触交接；早段中心仍弱、外围偏硬，背侧存在角色遮挡。见[能量场检查](docs/CHARGE_PLASMA_REVIEW.md)。释放横向白带的真实生成器修复由 [#196](https://github.com/mumu-lhl/blender-vfx-studio/pull/196) 验证中。
+- **Arc Slash**：刀光平面跟随真实剑刃，转向时的大蓝片错位已修复；命中画面仍有多层重叠。见[空间对齐](docs/SLASH_PLANE_REVIEW.md)。
+- **持续火焰与施法**：分叉火舌和空间交接已进入完整角色动作；底部团块、局部色块和远景细节仍弱。见[流动检查](docs/FIRE_FLOW_REVIEW.md)及[施法交接](docs/SPELL_TRANSFER_REVIEW.md)。
+- **角色蓄势**：[预备动作草稿 #190](https://github.com/mumu-lhl/blender-vfx-studio/pull/190) 没有证明中心可读性和身体力量优于主线。下劈开头的[原生动作复查](https://github.com/mumu-lhl/blender-vfx-studio/blob/45b05e1/docs/experiments/WINDUP_FIELD.md)也有回落再后摆的问题，暂不采用。
 
 ## 已有功能与边界
 
@@ -94,4 +93,4 @@ PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 4070072
 
 历史提交、发布和详细检查见 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases)、GitHub Issues 与上述记录；使用和结构见 [README](README.md)、[DESIGN](DESIGN.md) 与 [CONTEXT](CONTEXT.md)。
 
-当前 main 的开发包构建 [41091740203](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41091740203) 正在运行；新能量场功能源码的 PR 构建已完成全部 12 项并成功，18 个示例的实际附件已下载并原生核对。本轮没有发布正式版本。
+当前 main 的开发包构建 [41091740203](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41091740203) 已完成全部 12 项并成功；新能量场功能源码的 PR 构建已完成全部 12 项并成功，18 个示例的实际附件已下载并原生核对。本轮没有发布正式版本。
