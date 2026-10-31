@@ -16,12 +16,16 @@ def build(root, quality):
         )
         sphere.verts.ensure_lookup_table()
         sphere.verts.index_update()
-        vertices = []
+        vertices, outflow, tips = [], [], []
         for vertex in sphere.verts:
             direction = vertex.co.normalized()
             angle = math.atan2(direction.y, direction.x)
             radius = 0.8 + 0.18 * math.sin(angle * 3 + direction.z * 1.7)
             radius += 0.12 * math.cos(direction.z * 5 + angle)
+            tip = max(0, math.sin(angle * 3 + direction.z * 1.7)) ** 3
+            tip *= 1 - 0.6 * abs(direction.z)
+            tips.append(tip)
+            outflow.append(tuple(direction * tip))
             vertices.append(
                 (
                     direction.x * radius * (1 + direction.z * 0.18),
@@ -32,24 +36,23 @@ def build(root, quality):
         faces = [tuple(v.index for v in face.verts) for face in sphere.faces]
     finally:
         sphere.free()
-    layer = _mesh(root, vertices, faces, {}, [(0, 0)] * len(vertices))
+    layer = _mesh(
+        root,
+        vertices,
+        faces,
+        {"impact_core_outflow": ("FLOAT_VECTOR", outflow), "impact_core_tip": ("FLOAT", tips)},
+        [(0, 0)] * len(vertices),
+    )
     for face in layer.data.polygons:
         face.use_smooth = True
     graph, position = _geometry(root, "Expanding Burst Core")
     progress = graph.value("Burst Core Progress", expression=PROGRESS)
-    grow = graph.node(
-        "ShaderNodeMapRange", "Compression Opens Quickly", interpolation_type="SMOOTHSTEP"
-    )
-    graph.connect(progress, grow.inputs["Value"])
-    grow.inputs["From Max"].default_value = 0.25
-    grow.inputs["To Min"].default_value = 0.18
-    age = graph.math("Editable Cooling Age", "MULTIPLY", progress, graph.value("Fade", "fade"))
-    remaining = graph.math(
-        "Core Loses Mass", "SUBTRACT", 1, graph.math("Mass Loss Rate", "MULTIPLY", age, 0.7)
-    )
-    remaining = graph.math("No Inverted Core", "MAXIMUM", remaining, 0)
-    size = graph.math("Core Envelope", "MULTIPLY", grow.outputs[0], remaining)
-    size = graph.math("Core Art Size", "MULTIPLY", size, graph.value("Size", "size"))
+    remaining = graph.math("Time Before The Gas Stops", "SUBTRACT", 1, progress, clamp=True)
+    drag = graph.math("Rapid Outflow Then Drag", "POWER", remaining, 3)
+    travel = graph.math("Gas Keeps Moving Outward", "SUBTRACT", 1, drag)
+    size = graph.math("Compressed Core Opens", "ADD", travel, 0.18)
+    art_size = graph.value("Size", "size")
+    size = graph.math("Core Art Size", "MULTIPLY", size, art_size)
     original = graph.node("GeometryNodeInputPosition", "Unequal Pressure Lobes").outputs[0]
     noise = graph.node("ShaderNodeTexNoise", "Rolling Core Surface", noise_dimensions="4D")
     graph.connect(original, noise.inputs["Vector"])
@@ -59,7 +62,22 @@ def build(root, quality):
     bulge = graph.math("Surface Bulges", "MULTIPLY", noise.outputs["Fac"], 0.4)
     bulge = graph.math("Preserve Core Mass", "ADD", bulge, 0.8)
     size = graph.math("Moving Core Silhouette", "MULTIPLY", size, bulge)
-    graph.connect(graph.vector("Expanding Lobes", "SCALE", original, size), position)
+    outflow = graph.math("Unequal Front Travel", "MULTIPLY", travel, art_size)
+    outflow = graph.math("Separating Gas Tongues", "MULTIPLY", outflow, 0.4)
+    graph.connect(
+        graph.vector(
+            "Gas Leaves The Contact",
+            "ADD",
+            graph.vector("Expanding Lobes", "SCALE", original, size),
+            graph.vector(
+                "Outward Moving Fronts",
+                "SCALE",
+                graph.attribute("impact_core_outflow", "FLOAT_VECTOR"),
+                outflow,
+            ),
+        ),
+        position,
+    )
 
     material = layer.data.materials[0]
     material.node_tree.animation_data_clear()
@@ -81,7 +99,12 @@ def build(root, quality):
     squared = graph.math("Erosion Accelerates After Expansion", "MULTIPLY", age, age)
     cutoff = graph.math("Gas Breakup Range", "MULTIPLY", squared, 0.75)
     cutoff = graph.math("Gas Breakup Threshold", "ADD", cutoff, 0.13)
-    visible = graph.math("Remaining Burning Gas", "GREATER_THAN", noise.outputs["Fac"], cutoff)
+    tips = graph.node("ShaderNodeAttribute", "Ejected Gas Fronts", attribute_name="impact_core_tip")
+    coverage = graph.math(
+        "Fronts Outlive The Connecting Gas", "MULTIPLY", tips.outputs["Fac"], 0.12
+    )
+    coverage = graph.math("Unequal Gas Coverage", "ADD", noise.outputs["Fac"], coverage)
+    visible = graph.math("Remaining Burning Gas", "GREATER_THAN", coverage, cutoff)
     tint = graph.node("ShaderNodeCombineXYZ", "Editable Core Color")
     for index in range(3):
         graph.connect(graph.value(f"Color {index}", f"color_{index}"), tint.inputs[index])
@@ -94,8 +117,8 @@ def build(root, quality):
     )
     heat = graph.node("ShaderNodeMapRange", "Hot Gas Pockets", interpolation_type="SMOOTHSTEP")
     graph.connect(hot, heat.inputs["Value"])
-    heat.inputs["From Min"].default_value = 0.45
-    heat.inputs["From Max"].default_value = 0.85
+    heat.inputs["From Min"].default_value = 0.4
+    heat.inputs["From Max"].default_value = 0.75
     cooling = graph.math("Core Cools To Its Tint", "SUBTRACT", 1, age, clamp=True)
     hot = graph.math("Cooling Heat Pockets", "MULTIPLY", heat.outputs[0], cooling)
     color = graph.node("ShaderNodeMixRGB", "Tinted Gas And Hot Pockets")
@@ -126,8 +149,8 @@ def build(root, quality):
         "ShaderNodeMapRange", "Hot Pockets And Darker Gas", interpolation_type="SMOOTHSTEP"
     )
     graph.connect(noise.outputs["Fac"], density.inputs["Value"])
-    density.inputs["From Min"].default_value = 0.28
-    density.inputs["From Max"].default_value = 0.72
+    density.inputs["From Min"].default_value = 0.34
+    density.inputs["From Max"].default_value = 0.62
     density.inputs["To Min"].default_value = 0.12
     emission = graph.node("ShaderNodeEmission", "Burning Core Emission")
     graph.connect(
