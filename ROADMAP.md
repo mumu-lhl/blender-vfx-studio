@@ -97,7 +97,7 @@ PR #167 的 CI 40693445113、PR #169 的 CI 40694847951、PR #171 的 CI 4070072
 
 历史提交、发布和详细检查见 [Releases](https://github.com/mumu-lhl/blender-vfx-studio/releases)、GitHub Issues 与上述记录；使用和结构见 [README](README.md)、[DESIGN](DESIGN.md) 与 [CONTEXT](CONTEXT.md)。
 
-充能构建 [41194096447](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41194096447) 仍在运行，不记作全部通过。main 已合入火焰下部 [#199](https://github.com/mumu-lhl/blender-vfx-studio/pull/199) 与汇聚粒子 [#200](https://github.com/mumu-lhl/blender-vfx-studio/pull/200)。main 构建 [41216079607](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41216079607) 已完成全部 12 项并成功；实际下载的插件包含 32 个与该构建源码相同的 Python 文件，18 文件资产包的充能与三档火焰已原生追加、跳帧和提取预览检查。
+main 已合入火焰下部 [#199](https://github.com/mumu-lhl/blender-vfx-studio/pull/199) 与汇聚粒子 [#200](https://github.com/mumu-lhl/blender-vfx-studio/pull/200)。main 构建 [41216079607](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41216079607) 已完成全部 12 项并成功；实际下载的插件包含 32 个与该构建源码相同的 Python 文件，18 文件资产包的充能与三档火焰已原生追加、跳帧和提取预览检查。
 
 角色预备 [#202](https://github.com/mumu-lhl/blender-vfx-studio/pull/202) 已完成三项本地姿态／接触回归、无插件高清复现，CI 重跑的 12 项必要检查全部成功。首次尝试曾在保存图像后以 139 退出，[#122](https://github.com/mumu-lhl/blender-vfx-studio/issues/122) 继续跟踪；扩大已有 Mesa 设置范围并保留日志的 [#205](https://github.com/mumu-lhl/blender-vfx-studio/pull/205) 尚待检查，不能宣称根治。
 
