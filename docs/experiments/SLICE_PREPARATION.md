@@ -31,3 +31,9 @@ Blender 的 NLA 可以用一条时间曲线控制动画片段的播放进度。S
 图像、源码摘要与原生检查见[检查清单](../images/slice-preparation-samples.json)。
 
 方案由 [PR #202](https://github.com/mumu-lhl/blender-vfx-studio/pull/202) 提交，远端检查仍在运行；跟踪 [#189](https://github.com/mumu-lhl/blender-vfx-studio/issues/189)。充能进流和外围粒子的整体艺术问题继续由原问题跟踪，本实验不代替真实生成器的改进。
+
+## 闪电镜头与整合检查
+
+原 CI 的 11 项必要作业成功，闪电镜头的接触断言失败。原因是片段提前时没有平移新增的 NLA 时间曲线；现已同时平移片段、关键帧和控制柄，两个使用该操作的镜头共用此函数。新增回归比较两名角色平移前后的全部骨骼姿态与实际剑柄位置，原接触断言保留，三项检查通过。修复后的第 3 帧闪电高清已实际读取。
+
+随后合入当前 main 的火焰与汇聚粒子改动，重新生成角色第 16／32／49 帧并实际读取；无插件 49→16→32 高清 RGBA 完全一致，96 清场。原有同帧姿态对照保留其记录的源码，整合数据另列于检查清单。新增实图：[蓄力早段](../images/slice-preparation-integrated-16.png) · [收剑](../images/slice-preparation-integrated-32.png) · [命中](../images/slice-preparation-integrated-49.png)。修复源码 `999106a` 的远端检查仍待完成，未以本地结果代替 CI 或扩大艺术验收。
