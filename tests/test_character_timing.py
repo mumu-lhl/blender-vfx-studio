@@ -9,10 +9,40 @@ from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from tools.character_scene import add_effects, setup_base  # noqa: E402
+from tools.character_scene import add_effects, setup_base, shift_actor_timeline  # noqa: E402
 
 
 class CharacterTimingTests(unittest.TestCase):
+    def test_lightning_timeline_shift_preserves_both_actors_at_contact(self):
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        fixture = setup_base()
+        scene = bpy.context.scene
+        offset = fixture["contact"]["frame"] - 3
+
+        def pose(frame):
+            scene.frame_set(frame)
+            graph = bpy.context.evaluated_depsgraph_get()
+            return [
+                component
+                for actor in (fixture["caster"], fixture["defender"])
+                for bone in actor["rig"].evaluated_get(graph).pose.bones
+                for row in bone.matrix
+                for component in row
+            ]
+
+        expected = {frame: pose(frame) for frame in (49, 52, 63)}
+        shift_actor_timeline(fixture, offset)
+        for frame, before in expected.items():
+            actual = pose(frame - offset)
+            self.assertEqual(len(actual), len(before))
+            self.assertLess(max(abs(a - b) for a, b in zip(actual, before)), 1e-5)
+        scene.frame_set(3)
+        weapon = fixture["caster"]["weapon"].evaluated_get(bpy.context.evaluated_depsgraph_get())
+        self.assertLess(
+            (weapon.matrix_world.translation - Vector(fixture["contact"]["hilt"])).length,
+            1e-5,
+        )
+
     def test_preparation_preserves_the_original_cut_and_recovery(self):
         bpy.ops.wm.read_factory_settings(use_empty=True)
         fixture = setup_base()

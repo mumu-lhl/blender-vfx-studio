@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from blender_vfx_studio import composition, ui  # noqa: E402
 from tools.build_examples import create_effect  # noqa: E402
-from tools.character_scene import add_effects, setup_base  # noqa: E402
+from tools.character_scene import add_effects, setup_base, shift_actor_timeline  # noqa: E402
 
 CASES = {
     "charge": (
@@ -63,11 +63,7 @@ def setup(effect, light, far):
         group = add_effects(fixture)["effects"][0 if effect == "charge" else 2]
     else:
         offset = fixture["contact"]["frame"] - 3
-        for actor in (fixture["caster"], fixture["defender"]):
-            for track in actor["rig"].animation_data.nla_tracks:
-                for strip in track.strips:
-                    strip.frame_start_raw -= offset
-                    strip.frame_end_raw -= offset
+        shift_actor_timeline(fixture, offset)
         scene.frame_set(1)
         group = create_effect("lightning-strike")
         group.location = (0.8, 0.08, 0.03)

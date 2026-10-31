@@ -78,6 +78,21 @@ def clip(rig, action, start, end, *, blend=0, loop=False):
     return strip
 
 
+def shift_actor_timeline(fixture, offset):
+    """Move native clips and their scene-time curves without changing poses."""
+    for actor in (fixture["caster"], fixture["defender"]):
+        for track in actor["rig"].animation_data.nla_tracks:
+            for strip in track.strips:
+                strip.frame_start_raw -= offset
+                strip.frame_end_raw -= offset
+                for curve in strip.fcurves:
+                    for key in curve.keyframe_points:
+                        key.co.x -= offset
+                        key.handle_left.x -= offset
+                        key.handle_right.x -= offset
+                    curve.update()
+
+
 def material(name, color):
     mat = bpy.data.materials.new(name)
     mat.diffuse_color = (*color, 1)

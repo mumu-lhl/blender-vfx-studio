@@ -13,7 +13,7 @@ from mathutils import Vector
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.build_examples import create_effect  # noqa: E402
-from tools.character_scene import setup_base  # noqa: E402
+from tools.character_scene import setup_base, shift_actor_timeline  # noqa: E402
 
 FRAMES = (1, 2, 3, 4, 7, 8, 12, 16, 19, 28)
 
@@ -52,12 +52,7 @@ def main():
     fixture = setup_base(light=not args.dark)
     scene = bpy.context.scene
     offset = fixture["contact"]["frame"] - 3
-    # Translate the existing NLA strips without stretching their action ranges.
-    for actor in (fixture["caster"], fixture["defender"]):
-        for track in actor["rig"].animation_data.nla_tracks:
-            for strip in track.strips:
-                strip.frame_start_raw -= offset
-                strip.frame_end_raw -= offset
+    shift_actor_timeline(fixture, offset)
     scene.frame_set(3)
     weapon = fixture["caster"]["weapon"].evaluated_get(bpy.context.evaluated_depsgraph_get())
     assert (weapon.matrix_world.translation - Vector(fixture["contact"]["hilt"])).length < 1e-5
