@@ -1,0 +1,1275 @@
+{
+  "functional_commit": "4f73d019503d830d72fbfe79031675c3ccb4601f",
+  "integration_commit": "5eede88feb79d01f374176a9e73137905421cf38",
+  "baseline_commit": "5dd92a52dac59ac3042512d3614c3328a6140901",
+  "verification_exit": 0,
+  "realtime_playback_reviewed": false,
+  "hd_settings": {
+    "light-near": {
+      "engine": "BLENDER_EEVEE",
+      "blender_version": "5.2.2 LTS",
+      "frames": [
+        43,
+        44,
+        45,
+        47,
+        52,
+        60,
+        76
+      ],
+      "fps": 24,
+      "fps_base": 1,
+      "resolution": [
+        960,
+        540
+      ],
+      "samples": 32,
+      "view_transform": "AgX",
+      "look": "None",
+      "bloom": false,
+      "dark": false,
+      "far": false,
+      "contact": {
+        "frame": 44,
+        "foot_trace": [
+          {
+            "frame": 18,
+            "lowest_foot_z": 0.023628227412700653
+          },
+          {
+            "frame": 19,
+            "lowest_foot_z": -0.04902937263250351
+          },
+          {
+            "frame": 20,
+            "lowest_foot_z": -0.05590803176164627
+          },
+          {
+            "frame": 21,
+            "lowest_foot_z": -0.018782272934913635
+          },
+          {
+            "frame": 22,
+            "lowest_foot_z": 0.0002244231291115284
+          },
+          {
+            "frame": 23,
+            "lowest_foot_z": 0.1304149329662323
+          },
+          {
+            "frame": 24,
+            "lowest_foot_z": 0.24829939007759094
+          },
+          {
+            "frame": 25,
+            "lowest_foot_z": 0.35376378893852234
+          },
+          {
+            "frame": 26,
+            "lowest_foot_z": 0.4473700523376465
+          },
+          {
+            "frame": 27,
+            "lowest_foot_z": 0.5304854512214661
+          },
+          {
+            "frame": 28,
+            "lowest_foot_z": 0.6043809652328491
+          },
+          {
+            "frame": 29,
+            "lowest_foot_z": 0.6640328764915466
+          },
+          {
+            "frame": 30,
+            "lowest_foot_z": 0.7074213027954102
+          },
+          {
+            "frame": 31,
+            "lowest_foot_z": 0.7384130954742432
+          },
+          {
+            "frame": 32,
+            "lowest_foot_z": 0.7566055655479431
+          },
+          {
+            "frame": 33,
+            "lowest_foot_z": 0.7607815861701965
+          },
+          {
+            "frame": 34,
+            "lowest_foot_z": 0.7517927885055542
+          },
+          {
+            "frame": 35,
+            "lowest_foot_z": 0.7306066751480103
+          },
+          {
+            "frame": 36,
+            "lowest_foot_z": 0.6974280476570129
+          },
+          {
+            "frame": 37,
+            "lowest_foot_z": 0.6524573564529419
+          },
+          {
+            "frame": 38,
+            "lowest_foot_z": 0.5954450368881226
+          },
+          {
+            "frame": 39,
+            "lowest_foot_z": 0.5272563099861145
+          },
+          {
+            "frame": 40,
+            "lowest_foot_z": 0.4466817378997803
+          },
+          {
+            "frame": 41,
+            "lowest_foot_z": 0.35371270775794983
+          },
+          {
+            "frame": 42,
+            "lowest_foot_z": 0.2483423948287964
+          },
+          {
+            "frame": 43,
+            "lowest_foot_z": 0.1304129660129547
+          },
+          {
+            "frame": 44,
+            "lowest_foot_z": -0.00028842478059232235
+          },
+          {
+            "frame": 45,
+            "lowest_foot_z": -0.0007810225943103433
+          },
+          {
+            "frame": 46,
+            "lowest_foot_z": -7.62087875045836e-05
+          },
+          {
+            "frame": 47,
+            "lowest_foot_z": -0.002324499888345599
+          },
+          {
+            "frame": 48,
+            "lowest_foot_z": -0.003149867057800293
+          },
+          {
+            "frame": 49,
+            "lowest_foot_z": -0.0021193702705204487
+          },
+          {
+            "frame": 50,
+            "lowest_foot_z": -3.869703505188227e-06
+          },
+          {
+            "frame": 51,
+            "lowest_foot_z": -1.8147402442991734e-06
+          },
+          {
+            "frame": 52,
+            "lowest_foot_z": -2.898741513490677e-07
+          },
+          {
+            "frame": 53,
+            "lowest_foot_z": -5.05475327372551e-07
+          },
+          {
+            "frame": 54,
+            "lowest_foot_z": -3.2915850169956684e-06
+          },
+          {
+            "frame": 55,
+            "lowest_foot_z": -6.420537829399109e-06
+          },
+          {
+            "frame": 56,
+            "lowest_foot_z": -7.278867997229099e-06
+          },
+          {
+            "frame": 57,
+            "lowest_foot_z": -3.7451391108334064e-06
+          },
+          {
+            "frame": 58,
+            "lowest_foot_z": -5.422451067715883e-06
+          },
+          {
+            "frame": 59,
+            "lowest_foot_z": -2.8964714147150517e-06
+          },
+          {
+            "frame": 60,
+            "lowest_foot_z": 2.5371555238962173e-06
+          }
+        ],
+        "pose": "KayKit Running_A / Jump_Full_Short / idle",
+        "sample_frames": [
+          6.0,
+          15.0,
+          24.0
+        ],
+        "echo_tail": 20.0,
+        "root_motion": "Native X travel -2.6 to 1.75; 0.75 m jump arc, frames 22–44"
+      },
+      "source_sha256": {
+        "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+        "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+        "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+        "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+        "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+        "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+        "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+        "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+        "blender_vfx_studio/dash.py": "cae04666618b5af84c54595c49e29c4f06c2295d1743f11584fda1d186c2afa1",
+        "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+        "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+        "blender_vfx_studio/impact.py": "a83bafc048945f16667fe197c94b2ea75d748e08965e64134442a84613d0eac4",
+        "blender_vfx_studio/impact_gas.py": "2317cfb38c41addb0b80e9ec515c288ac4a72deab8d71050dbed6a1a16089398",
+        "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+        "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+        "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+        "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+        "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+        "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+        "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+        "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+        "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+        "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+        "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+        "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+        "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+        "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+        "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+        "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+        "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+        "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+        "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+        "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+        "tools/dust_asset.py": "061e0f2f677304a1af33d63aa310e9cba460edff1d91e20f37724831d7382030",
+        "tools/dash_landing_preview.py": "5e5e12716b5b3d885a5606682dad651748d951fc735e1cc7b43b355121ca1e39",
+        "tools/character_scene.py": "5326cc327739c73d595b77ecf621d758c7bbb05635123fe7f5f17fc40d67bb2b",
+        "tools/charge_design.py": "b54106f67f5bca3854fc1536a7f6af020b24825ac1e63dcefab4904ca187401d",
+        "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+        "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+        "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+        "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+      },
+      "saved_frame": 44,
+      "render_timings": [
+        {
+          "frame": 43,
+          "seconds": 65.45059381099418
+        },
+        {
+          "frame": 44,
+          "seconds": 21.055228559998795
+        },
+        {
+          "frame": 45,
+          "seconds": 30.008182163001038
+        },
+        {
+          "frame": 47,
+          "seconds": 31.07922164100455
+        },
+        {
+          "frame": 52,
+          "seconds": 32.43228260199976
+        },
+        {
+          "frame": 60,
+          "seconds": 33.272217762001674
+        },
+        {
+          "frame": 76,
+          "seconds": 26.735330755000177
+        }
+      ],
+      "realtime_playback_reviewed": false,
+      "sampled": false,
+      "sample_step": null,
+      "method": "Actual timeline PNG samples; realtime playback unreviewed"
+    },
+    "dark-near": {
+      "engine": "BLENDER_EEVEE",
+      "blender_version": "5.2.2 LTS",
+      "frames": [
+        45,
+        47
+      ],
+      "fps": 24,
+      "fps_base": 1,
+      "resolution": [
+        960,
+        540
+      ],
+      "samples": 32,
+      "view_transform": "AgX",
+      "look": "None",
+      "bloom": false,
+      "dark": true,
+      "far": false,
+      "contact": {
+        "frame": 44,
+        "foot_trace": [
+          {
+            "frame": 18,
+            "lowest_foot_z": 0.023628227412700653
+          },
+          {
+            "frame": 19,
+            "lowest_foot_z": -0.04902937263250351
+          },
+          {
+            "frame": 20,
+            "lowest_foot_z": -0.05590803176164627
+          },
+          {
+            "frame": 21,
+            "lowest_foot_z": -0.018782272934913635
+          },
+          {
+            "frame": 22,
+            "lowest_foot_z": 0.0002244231291115284
+          },
+          {
+            "frame": 23,
+            "lowest_foot_z": 0.1304149329662323
+          },
+          {
+            "frame": 24,
+            "lowest_foot_z": 0.24829939007759094
+          },
+          {
+            "frame": 25,
+            "lowest_foot_z": 0.35376378893852234
+          },
+          {
+            "frame": 26,
+            "lowest_foot_z": 0.4473700523376465
+          },
+          {
+            "frame": 27,
+            "lowest_foot_z": 0.5304854512214661
+          },
+          {
+            "frame": 28,
+            "lowest_foot_z": 0.6043809652328491
+          },
+          {
+            "frame": 29,
+            "lowest_foot_z": 0.6640328764915466
+          },
+          {
+            "frame": 30,
+            "lowest_foot_z": 0.7074213027954102
+          },
+          {
+            "frame": 31,
+            "lowest_foot_z": 0.7384130954742432
+          },
+          {
+            "frame": 32,
+            "lowest_foot_z": 0.7566055655479431
+          },
+          {
+            "frame": 33,
+            "lowest_foot_z": 0.7607815861701965
+          },
+          {
+            "frame": 34,
+            "lowest_foot_z": 0.7517927885055542
+          },
+          {
+            "frame": 35,
+            "lowest_foot_z": 0.7306066751480103
+          },
+          {
+            "frame": 36,
+            "lowest_foot_z": 0.6974280476570129
+          },
+          {
+            "frame": 37,
+            "lowest_foot_z": 0.6524573564529419
+          },
+          {
+            "frame": 38,
+            "lowest_foot_z": 0.5954450368881226
+          },
+          {
+            "frame": 39,
+            "lowest_foot_z": 0.5272563099861145
+          },
+          {
+            "frame": 40,
+            "lowest_foot_z": 0.4466817378997803
+          },
+          {
+            "frame": 41,
+            "lowest_foot_z": 0.35371270775794983
+          },
+          {
+            "frame": 42,
+            "lowest_foot_z": 0.2483423948287964
+          },
+          {
+            "frame": 43,
+            "lowest_foot_z": 0.1304129660129547
+          },
+          {
+            "frame": 44,
+            "lowest_foot_z": -0.00028842478059232235
+          },
+          {
+            "frame": 45,
+            "lowest_foot_z": -0.0007810225943103433
+          },
+          {
+            "frame": 46,
+            "lowest_foot_z": -7.62087875045836e-05
+          },
+          {
+            "frame": 47,
+            "lowest_foot_z": -0.002324499888345599
+          },
+          {
+            "frame": 48,
+            "lowest_foot_z": -0.003149867057800293
+          },
+          {
+            "frame": 49,
+            "lowest_foot_z": -0.0021193702705204487
+          },
+          {
+            "frame": 50,
+            "lowest_foot_z": -3.869703505188227e-06
+          },
+          {
+            "frame": 51,
+            "lowest_foot_z": -1.8147402442991734e-06
+          },
+          {
+            "frame": 52,
+            "lowest_foot_z": -2.898741513490677e-07
+          },
+          {
+            "frame": 53,
+            "lowest_foot_z": -5.05475327372551e-07
+          },
+          {
+            "frame": 54,
+            "lowest_foot_z": -3.2915850169956684e-06
+          },
+          {
+            "frame": 55,
+            "lowest_foot_z": -6.420537829399109e-06
+          },
+          {
+            "frame": 56,
+            "lowest_foot_z": -7.278867997229099e-06
+          },
+          {
+            "frame": 57,
+            "lowest_foot_z": -3.7451391108334064e-06
+          },
+          {
+            "frame": 58,
+            "lowest_foot_z": -5.422451067715883e-06
+          },
+          {
+            "frame": 59,
+            "lowest_foot_z": -2.8964714147150517e-06
+          },
+          {
+            "frame": 60,
+            "lowest_foot_z": 2.5371555238962173e-06
+          }
+        ],
+        "pose": "KayKit Running_A / Jump_Full_Short / idle",
+        "sample_frames": [
+          6.0,
+          15.0,
+          24.0
+        ],
+        "echo_tail": 20.0,
+        "root_motion": "Native X travel -2.6 to 1.75; 0.75 m jump arc, frames 22–44"
+      },
+      "source_sha256": {
+        "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+        "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+        "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+        "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+        "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+        "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+        "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+        "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+        "blender_vfx_studio/dash.py": "cae04666618b5af84c54595c49e29c4f06c2295d1743f11584fda1d186c2afa1",
+        "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+        "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+        "blender_vfx_studio/impact.py": "a83bafc048945f16667fe197c94b2ea75d748e08965e64134442a84613d0eac4",
+        "blender_vfx_studio/impact_gas.py": "2317cfb38c41addb0b80e9ec515c288ac4a72deab8d71050dbed6a1a16089398",
+        "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+        "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+        "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+        "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+        "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+        "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+        "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+        "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+        "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+        "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+        "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+        "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+        "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+        "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+        "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+        "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+        "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+        "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+        "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+        "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+        "tools/dust_asset.py": "061e0f2f677304a1af33d63aa310e9cba460edff1d91e20f37724831d7382030",
+        "tools/dash_landing_preview.py": "5e5e12716b5b3d885a5606682dad651748d951fc735e1cc7b43b355121ca1e39",
+        "tools/character_scene.py": "5326cc327739c73d595b77ecf621d758c7bbb05635123fe7f5f17fc40d67bb2b",
+        "tools/charge_design.py": "b54106f67f5bca3854fc1536a7f6af020b24825ac1e63dcefab4904ca187401d",
+        "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+        "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+        "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+        "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+      },
+      "saved_frame": 44,
+      "render_timings": [
+        {
+          "frame": 45,
+          "seconds": 44.643542557998444
+        },
+        {
+          "frame": 47,
+          "seconds": 31.01995449000242
+        }
+      ],
+      "realtime_playback_reviewed": false,
+      "sampled": false,
+      "sample_step": null,
+      "method": "Actual timeline PNG samples; realtime playback unreviewed"
+    },
+    "light-far": {
+      "engine": "BLENDER_EEVEE",
+      "blender_version": "5.2.2 LTS",
+      "frames": [
+        45,
+        47
+      ],
+      "fps": 24,
+      "fps_base": 1,
+      "resolution": [
+        960,
+        540
+      ],
+      "samples": 32,
+      "view_transform": "AgX",
+      "look": "None",
+      "bloom": false,
+      "dark": false,
+      "far": true,
+      "contact": {
+        "frame": 44,
+        "foot_trace": [
+          {
+            "frame": 18,
+            "lowest_foot_z": 0.023628227412700653
+          },
+          {
+            "frame": 19,
+            "lowest_foot_z": -0.04902937263250351
+          },
+          {
+            "frame": 20,
+            "lowest_foot_z": -0.05590803176164627
+          },
+          {
+            "frame": 21,
+            "lowest_foot_z": -0.018782272934913635
+          },
+          {
+            "frame": 22,
+            "lowest_foot_z": 0.0002244231291115284
+          },
+          {
+            "frame": 23,
+            "lowest_foot_z": 0.1304149329662323
+          },
+          {
+            "frame": 24,
+            "lowest_foot_z": 0.24829939007759094
+          },
+          {
+            "frame": 25,
+            "lowest_foot_z": 0.35376378893852234
+          },
+          {
+            "frame": 26,
+            "lowest_foot_z": 0.4473700523376465
+          },
+          {
+            "frame": 27,
+            "lowest_foot_z": 0.5304854512214661
+          },
+          {
+            "frame": 28,
+            "lowest_foot_z": 0.6043809652328491
+          },
+          {
+            "frame": 29,
+            "lowest_foot_z": 0.6640328764915466
+          },
+          {
+            "frame": 30,
+            "lowest_foot_z": 0.7074213027954102
+          },
+          {
+            "frame": 31,
+            "lowest_foot_z": 0.7384130954742432
+          },
+          {
+            "frame": 32,
+            "lowest_foot_z": 0.7566055655479431
+          },
+          {
+            "frame": 33,
+            "lowest_foot_z": 0.7607815861701965
+          },
+          {
+            "frame": 34,
+            "lowest_foot_z": 0.7517927885055542
+          },
+          {
+            "frame": 35,
+            "lowest_foot_z": 0.7306066751480103
+          },
+          {
+            "frame": 36,
+            "lowest_foot_z": 0.6974280476570129
+          },
+          {
+            "frame": 37,
+            "lowest_foot_z": 0.6524573564529419
+          },
+          {
+            "frame": 38,
+            "lowest_foot_z": 0.5954450368881226
+          },
+          {
+            "frame": 39,
+            "lowest_foot_z": 0.5272563099861145
+          },
+          {
+            "frame": 40,
+            "lowest_foot_z": 0.4466817378997803
+          },
+          {
+            "frame": 41,
+            "lowest_foot_z": 0.35371270775794983
+          },
+          {
+            "frame": 42,
+            "lowest_foot_z": 0.2483423948287964
+          },
+          {
+            "frame": 43,
+            "lowest_foot_z": 0.1304129660129547
+          },
+          {
+            "frame": 44,
+            "lowest_foot_z": -0.00028842478059232235
+          },
+          {
+            "frame": 45,
+            "lowest_foot_z": -0.0007810225943103433
+          },
+          {
+            "frame": 46,
+            "lowest_foot_z": -7.62087875045836e-05
+          },
+          {
+            "frame": 47,
+            "lowest_foot_z": -0.002324499888345599
+          },
+          {
+            "frame": 48,
+            "lowest_foot_z": -0.003149867057800293
+          },
+          {
+            "frame": 49,
+            "lowest_foot_z": -0.0021193702705204487
+          },
+          {
+            "frame": 50,
+            "lowest_foot_z": -3.869703505188227e-06
+          },
+          {
+            "frame": 51,
+            "lowest_foot_z": -1.8147402442991734e-06
+          },
+          {
+            "frame": 52,
+            "lowest_foot_z": -2.898741513490677e-07
+          },
+          {
+            "frame": 53,
+            "lowest_foot_z": -5.05475327372551e-07
+          },
+          {
+            "frame": 54,
+            "lowest_foot_z": -3.2915850169956684e-06
+          },
+          {
+            "frame": 55,
+            "lowest_foot_z": -6.420537829399109e-06
+          },
+          {
+            "frame": 56,
+            "lowest_foot_z": -7.278867997229099e-06
+          },
+          {
+            "frame": 57,
+            "lowest_foot_z": -3.7451391108334064e-06
+          },
+          {
+            "frame": 58,
+            "lowest_foot_z": -5.422451067715883e-06
+          },
+          {
+            "frame": 59,
+            "lowest_foot_z": -2.8964714147150517e-06
+          },
+          {
+            "frame": 60,
+            "lowest_foot_z": 2.5371555238962173e-06
+          }
+        ],
+        "pose": "KayKit Running_A / Jump_Full_Short / idle",
+        "sample_frames": [
+          6.0,
+          15.0,
+          24.0
+        ],
+        "echo_tail": 20.0,
+        "root_motion": "Native X travel -2.6 to 1.75; 0.75 m jump arc, frames 22–44"
+      },
+      "source_sha256": {
+        "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+        "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+        "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+        "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+        "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+        "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+        "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+        "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+        "blender_vfx_studio/dash.py": "cae04666618b5af84c54595c49e29c4f06c2295d1743f11584fda1d186c2afa1",
+        "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+        "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+        "blender_vfx_studio/impact.py": "a83bafc048945f16667fe197c94b2ea75d748e08965e64134442a84613d0eac4",
+        "blender_vfx_studio/impact_gas.py": "2317cfb38c41addb0b80e9ec515c288ac4a72deab8d71050dbed6a1a16089398",
+        "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+        "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+        "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+        "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+        "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+        "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+        "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+        "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+        "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+        "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+        "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+        "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+        "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+        "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+        "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+        "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+        "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+        "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+        "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+        "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+        "tools/dust_asset.py": "061e0f2f677304a1af33d63aa310e9cba460edff1d91e20f37724831d7382030",
+        "tools/dash_landing_preview.py": "5e5e12716b5b3d885a5606682dad651748d951fc735e1cc7b43b355121ca1e39",
+        "tools/character_scene.py": "5326cc327739c73d595b77ecf621d758c7bbb05635123fe7f5f17fc40d67bb2b",
+        "tools/charge_design.py": "b54106f67f5bca3854fc1536a7f6af020b24825ac1e63dcefab4904ca187401d",
+        "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+        "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+        "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+        "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+      },
+      "saved_frame": 44,
+      "render_timings": [
+        {
+          "frame": 45,
+          "seconds": 43.46509108500322
+        },
+        {
+          "frame": 47,
+          "seconds": 28.845836690998112
+        }
+      ],
+      "realtime_playback_reviewed": false,
+      "sampled": false,
+      "sample_step": null,
+      "method": "Actual timeline PNG samples; realtime playback unreviewed"
+    }
+  },
+  "native_hd": {
+    "frames": [
+      52,
+      43,
+      45
+    ],
+    "pixels_identical": true,
+    "clear_frame": 84,
+    "scene_sha256": "ed75677b39513b1fab5e8a7cd5ab8625e318e03e27833b17e5a84ec057706799",
+    "source_frame_sha256": {
+      "52": "55e997f7cffc528b5af697ad6ff526481d5ee22140925a148b55fb68fce922ff",
+      "43": "527e7dfca92f6e1c506505945e04e6b4961c72dc97cbc2c9b7b3b2ca9aba0c1b",
+      "45": "ebd4b804f5d836f5d29020424a75c9eb8ff1eabf476b0b7d2fb627965cae54bc"
+    }
+  },
+  "motion": {
+    "frames": [
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      58,
+      60,
+      62,
+      64,
+      66,
+      68,
+      70,
+      72,
+      74,
+      76,
+      84
+    ],
+    "resolution": [
+      480,
+      270
+    ],
+    "samples": 16,
+    "addon_loaded": false,
+    "realtime_playback_reviewed": false,
+    "scene_sha256": "ed75677b39513b1fab5e8a7cd5ab8625e318e03e27833b17e5a84ec057706799"
+  },
+  "all_25_motion_samples_viewed": true,
+  "assets": [
+    {
+      "quality": "low",
+      "native_seek": [
+        2,
+        9,
+        2
+      ],
+      "clear_frame": 33,
+      "density_zero_clears": true,
+      "preview_size": [
+        256,
+        256
+      ]
+    },
+    {
+      "quality": "medium",
+      "native_seek": [
+        2,
+        9,
+        2
+      ],
+      "clear_frame": 33,
+      "density_zero_clears": true,
+      "preview_size": [
+        256,
+        256
+      ]
+    },
+    {
+      "quality": "high",
+      "native_seek": [
+        2,
+        9,
+        2
+      ],
+      "clear_frame": 33,
+      "density_zero_clears": true,
+      "preview_size": [
+        256,
+        256
+      ]
+    }
+  ],
+  "all_three_embedded_previews_viewed": true,
+  "embedded_previews_equal_builder_rgb": true,
+  "prototype_generator_match": {
+    "frame": 45,
+    "prototype_equals_real_generator_rgba": true,
+    "max_8bit_difference": 0
+  },
+  "performance": {
+    "blender": "5.2.2 LTS",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "cpu_quota": "200000 100000",
+    "blender_threads": 2,
+    "lp_num_threads": "2",
+    "software_gl_requested": false,
+    "gl": {
+      "vendor": "Mesa",
+      "renderer": "llvmpipe (LLVM 19.1.7, 256 bits)",
+      "version": "4.5 (Core Profile) Mesa 25.0.7-2+deb13u1"
+    },
+    "engine": "BLENDER_EEVEE",
+    "resolution": [
+      960,
+      540
+    ],
+    "samples": 32,
+    "source_sha256": {
+      "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+      "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+      "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+      "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+      "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+      "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+      "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+      "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+      "blender_vfx_studio/dash.py": "cae04666618b5af84c54595c49e29c4f06c2295d1743f11584fda1d186c2afa1",
+      "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+      "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+      "blender_vfx_studio/impact.py": "a83bafc048945f16667fe197c94b2ea75d748e08965e64134442a84613d0eac4",
+      "blender_vfx_studio/impact_gas.py": "2317cfb38c41addb0b80e9ec515c288ac4a72deab8d71050dbed6a1a16089398",
+      "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+      "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+      "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+      "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+      "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+      "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+      "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+      "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+      "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+      "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+      "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+      "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+      "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+      "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+      "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+      "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+      "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+      "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+      "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+      "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+      "tools/dust_asset.py": "061e0f2f677304a1af33d63aa310e9cba460edff1d91e20f37724831d7382030",
+      "tools/dash_landing_preview.py": "5e5e12716b5b3d885a5606682dad651748d951fc735e1cc7b43b355121ca1e39",
+      "tools/character_scene.py": "5326cc327739c73d595b77ecf621d758c7bbb05635123fe7f5f17fc40d67bb2b",
+      "tools/charge_design.py": "b54106f67f5bca3854fc1536a7f6af020b24825ac1e63dcefab4904ca187401d",
+      "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+      "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+      "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+      "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+    },
+    "evaluation": [
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 45,
+        "milliseconds": 0.7414069987135008
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 45,
+        "milliseconds": 0.610308998147957
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 45,
+        "milliseconds": 0.5715910010621883
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 0.573133998841513
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 0.49638799828244373
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 0.6022279994795099
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 0.4880049964413047
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 0.4907300026388839
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 0.46820499846944585
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 0.5573490052483976
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 0.6182209981488995
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 0.6279160006670281
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 45,
+        "milliseconds": 53.867050002736505
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 45,
+        "milliseconds": 52.42225399706513
+      },
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 45,
+        "milliseconds": 54.86910000036005
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 53.87217800307553
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 56.084780997480266
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 54.025100005674176
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 53.57159000413958
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 53.18430699844612
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 54.2282310052542
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 52.858164002827834
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 53.25908799568424
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 45,
+        "milliseconds": 52.85585099773016
+      }
+    ],
+    "evaluation_summary": {
+      "bare": {
+        "scene_evaluation_median_ms": 0.5573490052483976,
+        "scene_evaluation_p95_ms": 0.6182209981488995,
+        "measured_samples": 9
+      },
+      "fx": {
+        "scene_evaluation_median_ms": 53.57159000413958,
+        "scene_evaluation_p95_ms": 54.2282310052542,
+        "measured_samples": 9
+      }
+    },
+    "renders": [
+      {
+        "fx": true,
+        "warmup": true,
+        "frame": 45,
+        "seconds": 45.15200402500341
+      },
+      {
+        "fx": false,
+        "warmup": true,
+        "frame": 45,
+        "seconds": 22.287568487998215
+      },
+      {
+        "fx": false,
+        "warmup": false,
+        "frame": 45,
+        "seconds": 19.32691737899586
+      },
+      {
+        "fx": true,
+        "warmup": false,
+        "frame": 45,
+        "seconds": 30.19202390999999
+      }
+    ],
+    "limits": [
+      "Headless scene evaluation and render wall time, not viewport FPS",
+      "Two warmup renders and 1 matched frame pairs; too few for a render p95",
+      "The same saved scene is used; only its VFX collection is excluded",
+      "Evaluation excludes the collection from the viewport dependency graph; render comparison only excludes it from rendering"
+    ]
+  },
+  "images": [
+    {
+      "path": "docs/images/dust-contact-context.png",
+      "source": "work/contact-crown/context.png",
+      "sha256": "5b2419e30970b74709752e462205800cba505da99ce502e98777864c44afa950"
+    },
+    {
+      "path": "docs/images/dust-contact-comparison.png",
+      "source": "work/contact-crown/comparison.png",
+      "sha256": "5f390d47f548e07ee4c23a771a63f5292a644a3f150d2ff5c7a61acfd913c7a9"
+    },
+    {
+      "path": "docs/images/dust-contact-stages.png",
+      "source": "work/contact-crown/near-stages.png",
+      "sha256": "5fb8d613ddb27c0997d3da9a7f603c9529abc74f6a9bb4cde63a555686986f97"
+    },
+    {
+      "path": "docs/images/dust-contact-previews.png",
+      "source": "work/contact-crown/assets/actual-previews.png",
+      "sha256": "7b6defe82d95bbbbc72d3919e28e72c5ce3edea2a23ad3fad0f6623af6ae9e10"
+    },
+    {
+      "path": "docs/images/dust-contact-motion-01.png",
+      "source": "work/contact-crown/motion-01.png",
+      "sha256": "851dc64081aebc4aaca106d79a38221e4bc3c22d76a4d1f3b298becd9a1b4c98"
+    },
+    {
+      "path": "docs/images/dust-contact-motion-02.png",
+      "source": "work/contact-crown/motion-02.png",
+      "sha256": "5ae402e71381eda48d225ca9149f78a504d4cd796ac9144482071ce0e822f918"
+    },
+    {
+      "path": "docs/images/dust-contact-motion-03.png",
+      "source": "work/contact-crown/motion-03.png",
+      "sha256": "15f3c4f96e71b4f5804fe7073fe24bab19fe5eaaf6fb6b48facf706bd0db458c"
+    },
+    {
+      "path": "docs/images/dust-contact-motion-04.png",
+      "source": "work/contact-crown/motion-04.png",
+      "sha256": "2178264f6f968959bdc9e358a36045d6319bf056f2f147cc9ffffc526d73413b"
+    },
+    {
+      "path": "docs/images/dust-contact-motion-05.png",
+      "source": "work/contact-crown/motion-05.png",
+      "sha256": "a96891ab662c8914bd7e94835f01eafb63798f4b9494a924014b7dd5b177948c"
+    },
+    {
+      "path": "docs/images/dust-contact-after-45.png",
+      "source": "work/dash-landing-review/light-near/dash-landing-0045.png",
+      "sha256": "ebd4b804f5d836f5d29020424a75c9eb8ff1eabf476b0b7d2fb627965cae54bc"
+    },
+    {
+      "path": "docs/images/dust-contact-after-47.png",
+      "source": "work/dash-landing-review/light-near/dash-landing-0047.png",
+      "sha256": "e13ef5adbfd8c5c410ac1d685b46af11374d62c91e909b791568b7b46691e487"
+    },
+    {
+      "path": "docs/images/dust-contact-after-52.png",
+      "source": "work/dash-landing-review/light-near/dash-landing-0052.png",
+      "sha256": "55e997f7cffc528b5af697ad6ff526481d5ee22140925a148b55fb68fce922ff"
+    },
+    {
+      "path": "docs/images/dust-contact-decay-68.png",
+      "source": "work/contact-crown/decay-0068.png",
+      "sha256": "034210b97df4b20c6e4b69cfc79daeb061b31afaa62140bc2c651d17039b4130"
+    }
+  ],
+  "rejected_sampling": {
+    "baseline_resolution": {
+      "X": 32,
+      "Y": 32,
+      "Z": 24
+    },
+    "reference_resolution": [
+      96,
+      96,
+      72
+    ],
+    "same_medium_density_field": true,
+    "frame": 45
+  },
+  "baseline45_47_equal_previous_review_rgba": true,
+  "art_accepted": false,
+  "native_hd_decay": {
+    "frame": 68,
+    "resolution": [
+      960,
+      540
+    ],
+    "samples": 32,
+    "addon_loaded": false,
+    "scene_sha256": "ed75677b39513b1fab5e8a7cd5ab8625e318e03e27833b17e5a84ec057706799",
+    "realtime_playback_reviewed": false,
+    "exit_code": 0,
+    "actually_viewed": true
+  }
+}

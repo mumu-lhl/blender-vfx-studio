@@ -106,3 +106,5 @@ main 已合入角色预备 [#202](https://github.com/mumu-lhl/blender-vfx-studio
 整体艺术品质仍未验收，没有发布正式版本。下一步继续以完整角色画面、真实生成器和可编辑原生资产为准，不扩展非必要骨架或 GUI 测试。
 
 闪电复击的线宽响应由 [#209](https://github.com/mumu-lhl/blender-vfx-studio/issues/209) 跟进：已完成七项行为检查、无插件原生与三个高清阶段复现、三档资产及实际嵌入预览检查；九张高清角色图和全部 28 张连续样本已实际读取。第一峰值像素保持不变，较弱复击线条更清楚，脚部遮挡和远景末端细枝仍弱。见[实图记录](docs/LIGHTNING_COVERAGE_REVIEW.md)；CI 尚待执行，不作为整套艺术验收通过。
+
+落地侧尘 [#211](https://github.com/mumu-lhl/blender-vfx-studio/issues/211)／[PR #212](https://github.com/mumu-lhl/blender-vfx-studio/pull/212) 已完成本地六项行为、无插件重开、三张高清像素复现、三档完整资产与实际嵌入预览检查。12 张高清角色图和全部 25 张有序样本已实际读取，另实测 Medium 场景成本；近景第一帧侧尘更及时，远景反馈、云团轮廓与身体力量感仍弱。见[接触检查](docs/DUST_CONTACT_REVIEW.md)，CI 仍在执行，不作为整体艺术验收通过。
