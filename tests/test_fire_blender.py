@@ -100,6 +100,42 @@ class FireTests(unittest.TestCase):
         held = render_pixels(44)
         self.assertGreater(sum(held[0::4]), sum(faded[0::4]) * 1.5)
 
+    def test_camera_facing_body_respects_effect_axis_and_camera_fallback(self):
+        scene = bpy.context.scene
+        scene.camera = bpy.data.objects.new("Review camera", bpy.data.cameras.new("Review camera"))
+        scene.collection.objects.link(scene.camera)
+        scene.camera.location = (4, -6, 3.5)
+        scene.camera.rotation_euler = (
+            (Vector((0, 0, 1)) - scene.camera.location).to_track_quat("-Z", "Y").to_euler()
+        )
+        root = create(bpy.context)
+        root.rotation_euler = (0.2, 0.7, 0.3)
+        member = main_member(root)
+        scene.frame_set(12)
+        bpy.context.view_layer.update()
+        layer = member.children[0].evaluated_get(bpy.context.evaluated_depsgraph_get())
+        mesh = layer.data
+        identity = mesh.attributes["fire_body"].data
+        uv = mesh.attributes["fire_body_uv"].data
+        bottom, top = [], []
+        for loop in mesh.loops:
+            if identity[loop.vertex_index].value > 0.5:
+                point = layer.matrix_world @ mesh.vertices[loop.vertex_index].co
+                (top if uv[loop.index].vector.y > 0.5 else bottom).append(point)
+        self.assertTrue(top and bottom)
+        axis = (sum(top, Vector()) / len(top) - sum(bottom, Vector()) / len(bottom)).normalized()
+        expected = (member.matrix_world.to_3x3() @ Vector((0, 0, 1))).normalized()
+        self.assertGreater(
+            axis.dot(expected), 0.9999, "Facing the camera must preserve the effect's up axis"
+        )
+        scene.camera = None
+        bpy.context.view_layer.update()
+        layer = member.children[0].evaluated_get(bpy.context.evaluated_depsgraph_get())
+        self.assertTrue(layer.data.vertices, "Without a camera the sculpted flame must remain")
+        identity = layer.data.attributes.get("fire_body")
+        if identity:
+            self.assertFalse(any(v.value > 0.5 for v in identity.data))
+
     def test_native_fork_reach_preserves_the_shared_foot(self):
         member = main_member(create(bpy.context))
         layer = member.children[0]

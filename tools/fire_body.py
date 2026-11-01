@@ -1,5 +1,6 @@
 """Build a flowing painted flame body inside the existing native fire layer."""
 
+import math
 from pathlib import Path
 
 import bpy
@@ -10,8 +11,13 @@ def geometry(g, original, material, width, height):
     camera = g.n("GeometryNodeInputActiveCamera", "Fire Body Camera")
     info = g.n("GeometryNodeObjectInfo", "Camera In Flame Space", transform_space="RELATIVE")
     g.link(camera.outputs[0], info.inputs["Object"])
-    distance = g.n("ShaderNodeVectorMath", "Camera Distance", operation="LENGTH")
-    g.link(info.outputs["Location"], distance.inputs[0])
+    direction = g.n("ShaderNodeSeparateXYZ", "Camera Around The Fire Axis")
+    g.link(info.outputs["Location"], direction.inputs[0])
+    distance = g.n("ShaderNodeVectorMath", "Camera Distance From Fire Axis", operation="LENGTH")
+    g.link(
+        g.xyz("Camera In The Fuel Plane", direction.outputs["X"], direction.outputs["Y"], 0),
+        distance.inputs[0],
+    )
     available = g.m("Camera Can See The Body", "GREATER_THAN", distance.outputs["Value"], 0.00001)
 
     def store(name, mesh, value, *, vector=False, domain="POINT"):
@@ -56,7 +62,18 @@ def geometry(g, original, material, width, height):
     )
     face = g.n("GeometryNodeTransform", "Painted Flame Faces Camera")
     g.link(move.outputs[0], face.inputs["Geometry"])
-    g.link(info.outputs["Rotation"], face.inputs["Rotation"])
+    yaw = g.m(
+        "Camera Heading Around Fire", "ARCTAN2", direction.outputs["Y"], direction.outputs["X"]
+    )
+    g.link(
+        g.xyz(
+            "Preserve The Fire Up Axis",
+            math.pi / 2,
+            0,
+            g.m("Face Camera Around Fire Axis", "ADD", yaw, math.pi / 2),
+        ),
+        face.inputs["Rotation"],
+    )
     assign = g.n("GeometryNodeSetMaterial", "Shared Editable Fire Material")
     assign.inputs["Material"].default_value = material
     g.link(face.outputs[0], assign.inputs["Geometry"])
