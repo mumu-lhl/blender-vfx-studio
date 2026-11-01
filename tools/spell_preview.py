@@ -26,12 +26,14 @@ def hashes():
         ROOT / "tools" / n
         for n in (
             "fire_asset.py",
+            "fire_body.py",
             "magic_asset.py",
             "spell_preview.py",
             "character_scene.py",
             "charge_design.py",
         )
     ]
+    paths += sorted((ROOT / "blender_vfx_studio/assets").glob("*.png"))
     paths += sorted((ROOT / "assets/character-review/kaykit").iterdir())
     return {
         p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()

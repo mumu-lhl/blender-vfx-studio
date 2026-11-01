@@ -1,5 +1,6 @@
 """Validate the actual rendered starter ZIP with native Blender only."""
 
+import hashlib
 import sys
 import tempfile
 import tomllib
@@ -41,6 +42,10 @@ with tempfile.TemporaryDirectory() as folder, zipfile.ZipFile(package) as archiv
         "LICENSE",
     }
     for key, (module, duration) in expected.items():
+        fire = key == "stylized-fire" or key.startswith("quality/stylized-fire-")
+        texture_marker = (
+            "vfx_fire_density" if fire else "vfx_burst_heat" if key == "impact-burst" else None
+        )
         member = key + ".blend"
         assert 0 < archive.getinfo(member).file_size <= 16 * 1024 * 1024
         path = Path(folder) / member
@@ -49,15 +54,19 @@ with tempfile.TemporaryDirectory() as folder, zipfile.ZipFile(package) as archiv
         bpy.ops.wm.read_factory_settings(use_empty=True)
         with bpy.data.libraries.load(str(path), link=False) as (available, requested):
             assert not available.cameras and not available.scenes
-            assert len(available.images) == (1 if key == "impact-burst" else 0)
+            assert len(available.images) == (1 if texture_marker else 0)
             assert not available.worlds
             assert len(available.collections) == 1
             requested.collections = available.collections
         bundle = requested.collections[0]
-        if key == "impact-burst":
+        if texture_marker:
             assert len(bpy.data.images) == 1
             image = next(iter(bpy.data.images))
-            assert image.packed_file and image.get("vfx_burst_heat") == 1
+            assert image.packed_file and image.get(texture_marker) == 1
+            if fire:
+                assert hashlib.sha256(image.packed_file.data).hexdigest() == (
+                    "e8a42b39c31a9a57139dea6225d2a469bb20cd077fcfeebf4e8049b1e96a09df"
+                )
         assert bundle["vfx_bundle_version"] == 1
         root = next(
             obj

@@ -769,11 +769,21 @@ class StarterTests(unittest.TestCase):
                 self.assertEqual(available.cameras, [])
                 self.assertEqual(available.scenes, [])
                 self.assertNotIn(image.name, available.images)
-                self.assertEqual(len(available.images), 1 if key == "impact-burst" else 0)
+                self.assertEqual(
+                    len(available.images), 1 if key in {"impact-burst", "stylized-fire"} else 0
+                )
                 self.assertEqual(available.worlds, [])
             a, b = assets.load(bpy.context, file), assets.load(bpy.context, file)
             self.assertEqual(len({root["vfx_id"], a["vfx_id"], b["vfx_id"]}), 3)
             self.assertEqual(vertex_count(a, 7), vertex_count(b, 7))
+            if key == "stylized-fire":
+                original = (ROOT / "blender_vfx_studio/assets/fire_density.png").read_bytes()
+                for instance in (root, a, b):
+                    flame = next(m for m in composition.members(instance) if "Fire Height" in m)
+                    material = flame.children[0].data.materials[0]
+                    density = material.node_tree.nodes["Original Flame Density 0"].image
+                    self.assertTrue(density.packed_file)
+                    self.assertEqual(density.packed_file.data, original)
             if key == "energy-charge":
                 for instance in (a, b):
                     for member in composition.members(instance):

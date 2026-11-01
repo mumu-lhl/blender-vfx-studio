@@ -36,9 +36,9 @@
 
 ## stylized-fire
 
-![stylized-fire：第 40 帧](images/fire-heat-streams-after-40.png)
+![stylized-fire：第 40 帧](images/fire-body-after-40.png)
 
-从根部长起的火流交替拉长，旧火流收细并散去，内部冷热流带随上升方向变化。第 **40 帧**，本地角色镜头；[连续抽帧与原生检查](FIRE_HEAT_STREAMS_REVIEW.md)。火带仍偏薄，远景细节与整体艺术品质仍待完善。
+卷曲主体形成更集中的火团，内部热流上升，三维火丝在上部散开。第 **40 帧**，本地角色镜头；[连续抽帧与原生检查](FIRE_BODY_REVIEW.md)。主体绕自身上轴朝向相机；初生与退场在浅背景偏弱，固定主轮廓和整体艺术品质仍待完善。
 
 ## dash-echoes
 
@@ -54,9 +54,9 @@
 
 ## 施法与火焰释放
 
-![符记汇聚后点燃：第 62 帧](images/spell-transfer-after-62.png)
+![符记释放后的火焰：第 64 帧](images/fire-body-spell-after-64.png)
 
-符记从施法位置向剑前汇聚，火焰开始接入。第 **62 帧**，本地角色镜头；[多阶段与原生节点检查](SPELL_TRANSFER_REVIEW.md)。聚拢线条仍有重叠，初生火焰仍偏片状，未观看实时播放。
+符记释放后，火焰在剑前形成，地面魔法阵逐渐散去。第 **64 帧**，本地角色镜头；[多阶段、连续抽帧与原生检查](FIRE_BODY_REVIEW.md)。交接线条和身体发力仍偏弱，未观看实时播放。
 
 ## 复现图像
 

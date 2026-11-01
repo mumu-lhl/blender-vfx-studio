@@ -1,5 +1,6 @@
 """Native starter playback after saving, without the authoring extension."""
 
+import hashlib
 import sys
 
 import bpy
@@ -22,7 +23,13 @@ for frame in (16, 0, 7, 81, 16):
         assert bundle.preview.is_image_custom
         assert bundle.preview.image_size[:] == (2, 2)
 assert len(bpy.data.cameras) == 0
-assert len(bpy.data.images) == 1
-assert all(image.packed_file and image.get("vfx_burst_heat") == 1 for image in bpy.data.images)
+assert len(bpy.data.images) == 2
+for marker in ("vfx_burst_heat", "vfx_fire_density"):
+    images = [image for image in bpy.data.images if image.get(marker) == 1]
+    assert len(images) == 1 and images[0].packed_file
+    if marker == "vfx_fire_density":
+        assert hashlib.sha256(images[0].packed_file.data).hexdigest() == (
+            "e8a42b39c31a9a57139dea6225d2a469bb20cd077fcfeebf4e8049b1e96a09df"
+        )
 assert bpy.context.scene.compositing_node_group is None
 print("STARTER_LIBRARY_NATIVE_REOPEN_OK")

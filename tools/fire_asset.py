@@ -5,6 +5,7 @@ import math
 from blender_vfx_studio import composition, core
 from blender_vfx_studio.nodes import ACTIVE, PROGRESS, drive
 from blender_vfx_studio.palettes import FIRE_PALETTES, FIRE_STOPS
+from tools import fire_body
 from tools.charge_design import _Fields, _geometry, _mesh
 
 
@@ -316,7 +317,10 @@ def _flames(root, quality):
     inactive = g.m("Outside Lifetime", "LESS_THAN", g.value("Active", expression=ACTIVE), 0.5)
     empty = g.m("No Fuel", "LESS_THAN", envelope, 0.005)
     dissolved = g.m("Fully Dissolved", "GREATER_THAN", g.value("Dissolve", prop="dissolve"), 0.9999)
-    g.link(deform.outputs[0], hide.inputs["Geometry"])
+    g.link(
+        fire_body.geometry(g, deform.outputs[0], layer.data.materials[0], width, height),
+        hide.inputs["Geometry"],
+    )
     g.link(
         g.m(
             "Hide Flame", "MAXIMUM", inactive, g.m("Off Or Dissolved", "MAXIMUM", empty, dissolved)
@@ -334,7 +338,7 @@ def _material(root):
     material.name = "VFX • Painted Flame Heat"
     material.node_tree.animation_data_clear()
     material.node_tree.nodes.clear()
-    material.surface_render_method = "DITHERED"
+    material.surface_render_method = "BLENDED"
     g = _Fields(material.node_tree, root)
     p = g.value("Fire Clock", expression=PROGRESS)
     clock = g.m("Shared Flame Clock", "MULTIPLY", p, g.value("Flow Speed", prop="Fire Flow Speed"))
@@ -424,6 +428,14 @@ def _material(root):
         "SUBTRACT",
         heat,
         g.m("Edge Contrast", "MULTIPLY", normal.outputs["Facing"], 0.24),
+    )
+    body_heat, body_coverage, body_flag, body_available = fire_body.shader(g, p, clock)
+    sculpted = g.m("Sculpted Flame Identity", "SUBTRACT", 1, body_flag)
+    heat = g.m(
+        "Shared Heat Palette Input",
+        "ADD",
+        g.m("Sculpted Heat", "MULTIPLY", heat, sculpted),
+        g.m("Painted Body Heat", "MULTIPLY", body_heat, body_flag),
     )
     ramp = g.n("ShaderNodeValToRGB", "Painted Red Orange Yellow")
     colors = tuple(zip(FIRE_STOPS, FIRE_PALETTES["ORANGE"]))
@@ -545,6 +557,34 @@ def _material(root):
         0.035,
     )
     alive = g.m("Each Shoot Spends Its Visible Heat", "MULTIPLY", alive, shoot_life)
+    tips = g.m(
+        "Upper Fire Tips Support The Body",
+        "MULTIPLY",
+        g.stage("Body Leaves Fine Upper Tongues", u, 0.65, 0.95),
+        0.65,
+    )
+    support = g.m(
+        "Sculpted Flame Or Camera Support",
+        "SUBTRACT",
+        1,
+        g.m(
+            "Body Subordinates Sculpted Surface",
+            "MULTIPLY",
+            body_available,
+            g.m("Body Replaces Lower Sculpted Fire", "SUBTRACT", 1, tips),
+        ),
+    )
+    alive = g.m(
+        "Shared Fire Coverage",
+        "ADD",
+        g.m(
+            "Sculpted Support Coverage",
+            "MULTIPLY",
+            g.m("Sculpted Or Fallback Coverage", "MULTIPLY", alive, support),
+            sculpted,
+        ),
+        g.m("Painted Body Coverage", "MULTIPLY", body_coverage, body_flag),
+    )
     air = g.n("ShaderNodeBsdfTransparent", "Air Between Flame Tongues")
     mix = g.n("ShaderNodeMixShader", "Flame Erosion")
     g.link(alive, mix.inputs[0])
