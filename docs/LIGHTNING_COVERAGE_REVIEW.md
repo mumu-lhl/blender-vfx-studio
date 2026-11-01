@@ -46,7 +46,7 @@
 
 首次有特效准备与渲染为 25.787 秒。这是整套 Medium 场景的成本，不是新旧节点的性能比较；单组渲染不能提供稳定分布，也不能换算为视口 FPS。功能验证不代替上面的艺术判断。
 
-功能源码 `5adff51`，基线为 main `5dd92a5`，随后与火焰分支组合；闪电生成器和本镜头调用的代码未变。设置、源码与图像摘要见[清单](images/lightning-coverage-samples.json)。工作由 [#209](https://github.com/mumu-lhl/blender-vfx-studio/issues/209) 跟踪，整体艺术品质仍由 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 跟踪；CI 尚待执行。
+功能源码 `5adff51`，基线为 main `5dd92a5`，随后与火焰分支组合；闪电生成器和本镜头调用的代码未变。设置、源码与图像摘要见[清单](images/lightning-coverage-samples.json)。工作由 [#209](https://github.com/mumu-lhl/blender-vfx-studio/issues/209) 跟踪，整体艺术品质仍由 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 跟踪；CI 正在对组合源码 `6467388` 执行；合入 main 的后续提交仅更新文档与检查记录。
 
 复现高清角色阶段：
 

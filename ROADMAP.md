@@ -101,8 +101,8 @@ main 已合入角色预备 [#202](https://github.com/mumu-lhl/blender-vfx-studio
 
 命中热气 [#206](https://github.com/mumu-lhl/blender-vfx-studio/pull/206) 的源码 `59f714e` 已完成全部 12 项必要 CI。实际下载的安装附件已核对 33 个插件 Python 文件、原图和 18 文件资产包；包内 Impact Burst 的五层、打包贴图、原生取帧、清场与实际嵌入预览通过检查。首轮退出 139 的失败记录保留，不因此宣称 #122 根治。
 
-角色与热气联合的九张高清、47 张原生有序样本及高清复现已实际检查；正面中心改善，反向仍被身体遮挡，整体力量感尚不足。火焰 [#208](https://github.com/mumu-lhl/blender-vfx-studio/pull/208) 已完成本地 15 张高清、36 张原生样本、六张高清复现及三档资产检查，薄片感和快速收尾仍明显，见[火流生长检查](docs/FIRE_SHOOT_LIFE_REVIEW.md)；现与已合入命中热气组合，重新执行 CI。
+角色与热气联合的九张高清、47 张原生有序样本及高清复现已实际检查；正面中心改善，反向仍被身体遮挡，整体力量感尚不足。火焰 [#208](https://github.com/mumu-lhl/blender-vfx-studio/pull/208) 已完成本地 15 张高清、36 张原生样本、六张高清复现及三档资产检查，薄片感和快速收尾仍明显，见[火流生长检查](docs/FIRE_SHOOT_LIFE_REVIEW.md)；现与已合入命中热气组合，源码 `183b75b` 的全部 12 项必要 CI 已成功；实际安装附件的 33 个插件 Python 文件、打包原图、18 份资产，以及包内三档火焰原生取帧和实际嵌入预览也已核对。
 
 整体艺术品质仍未验收，没有发布正式版本。下一步继续以完整角色画面、真实生成器和可编辑原生资产为准，不扩展非必要骨架或 GUI 测试。
 
-闪电复击的线宽响应由 [#209](https://github.com/mumu-lhl/blender-vfx-studio/issues/209) 跟进：已完成七项行为检查、无插件原生与三个高清阶段复现、三档资产及实际嵌入预览检查；九张高清角色图和全部 28 张连续样本已实际读取。第一峰值像素保持不变，较弱复击线条更清楚，脚部遮挡和远景末端细枝仍弱。见[实图记录](docs/LIGHTNING_COVERAGE_REVIEW.md)；CI 尚待执行，不作为整套艺术验收通过。
+闪电复击的线宽响应由 [#209](https://github.com/mumu-lhl/blender-vfx-studio/issues/209) 跟进：已完成七项行为检查、无插件原生与三个高清阶段复现、三档资产及实际嵌入预览检查；九张高清角色图和全部 28 张连续样本已实际读取。第一峰值像素保持不变，较弱复击线条更清楚，脚部遮挡和远景末端细枝仍弱。见[实图记录](docs/LIGHTNING_COVERAGE_REVIEW.md)；[PR #210](https://github.com/mumu-lhl/blender-vfx-studio/pull/210) 的 CI 正在执行，不作为整套艺术验收通过。
