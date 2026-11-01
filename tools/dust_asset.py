@@ -257,13 +257,13 @@ def _density(g, position, quality):
         age = g.m(prefix + " Nonnegative Age", "MAXIMUM", age, 0)
         age = g.m(prefix + " Bounded Age", "MINIMUM", age, 1)
         contact_bank = index in (1, 2)
-        grow = g.stage(prefix + " Rolls Up", age, 0, 0.09 if contact_bank else 0.23)
+        grow = g.stage(prefix + " Rolls Up", age, 0, 0.045 if contact_bank else 0.23)
         if contact_bank:
             height_fraction = g.stage(prefix + " Unfolds From Ground", age, 0, 0.22)
             height_fraction = g.m(
-                prefix + " Low Contact Crown", "MULTIPLY_ADD", height_fraction, 0.75
+                prefix + " Low Contact Crown", "MULTIPLY_ADD", height_fraction, 0.55
             )
-            height_fraction.node.inputs[2].default_value = 0.25
+            height_fraction.node.inputs[2].default_value = 0.45
         loss = g.m(
             prefix + " Density Loss",
             "MULTIPLY",
@@ -281,10 +281,10 @@ def _density(g, position, quality):
             "SUBTRACT",
             1,
             g.m(
-                prefix + " Motion Cube",
+                prefix + " Outward Ease Power",
                 "POWER",
                 g.m(prefix + " Remaining Time", "SUBTRACT", 1, age),
-                3,
+                6 if contact_bank else 3,
             ),
         )
         distance = g.m(

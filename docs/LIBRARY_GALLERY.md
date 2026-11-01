@@ -30,9 +30,9 @@
 
 ## dust-impact
 
-![dust-impact：第 39 帧](images/dust-impact.png)
+![Dust Impact：落地后第 47 帧](images/dust-contact-after-47.png)
 
-落地后的体积烟尘；主体不发光，需要场景灯光。 第 **39 帧**；[编辑与实际检查](DUST_REVIEW.md) · [原始 Actions 附件](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/40519038623)。
+接触后，两侧低矮尘团向脚外展开，再接上翻滚云团；主体不发光，需要场景灯光。第 **47 帧**，本地角色镜头；[多阶段与连续抽帧](DUST_CONTACT_REVIEW.md)。远景第一帧和次级轮廓仍弱，未观看实时播放。
 
 ## stylized-fire
 
