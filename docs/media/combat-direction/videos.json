@@ -1,0 +1,26 @@
+{
+  "before": {
+    "width": 480,
+    "height": 270,
+    "r_frame_rate": "24/1",
+    "duration": "4.000000",
+    "nb_frames": "96",
+    "source_sequence_sha256": "5ce865534bd42145cbebfa2fe86b342cc4a7b96d12e342a104930e05fb3090b7",
+    "movie_sha256": "84e77af3438220e9733fbadf006a30cb59fd9e29ed55aeee0d077e5fec65534e",
+    "realtime_playback_reviewed": false,
+    "preview_only": true,
+    "source_commit": "b8d2ea5b5e5fb36e9633bfdfa69f2b2768b09049"
+  },
+  "after": {
+    "width": 480,
+    "height": 270,
+    "r_frame_rate": "24/1",
+    "duration": "4.000000",
+    "nb_frames": "96",
+    "source_sequence_sha256": "abb2640d502938dfb49c36eb20befb0ec1955056305bd9ee6bea72481b9d0d77",
+    "movie_sha256": "033a541bfed6918db6fe09322e9ac18e88f7f6e755b452b17878875f442f07f2",
+    "realtime_playback_reviewed": false,
+    "preview_only": true,
+    "source_commit": "3df710511ee042fe62522ecbb5e0009cc6441001"
+  }
+}
