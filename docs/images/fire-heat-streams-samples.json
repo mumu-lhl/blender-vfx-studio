@@ -1112,5 +1112,101 @@
       "sha256": "ad8c2f1c72f8e468edc2d7b55ff82faea28fcc20538e3057b70456768d0791c0",
       "bytes": 1175414
     }
-  ]
+  ],
+  "ci_package": {
+    "workflow_run": 41275533599,
+    "source_commit": "bc98a9fce183bda053be067760174403b2927aa6",
+    "artifact_id": 13072115526,
+    "artifact_bytes": 6635541,
+    "artifact_sha256": "99df615bdddf0b377e5bf4451be244570407cc91404adeb8286989ee7268bc23",
+    "addon_python_files_matched": 33,
+    "packed_original_image_matched": true,
+    "example_assets": 18,
+    "fire_assets": [
+      {
+        "path": "stylized-fire.blend",
+        "bytes": 225283,
+        "sha256": "b8df4aac2cd14b4544b75298fdcf076a4664921e1640383747e13e18ce1bb6e1"
+      },
+      {
+        "path": "quality/stylized-fire-low.blend",
+        "bytes": 192210,
+        "sha256": "250c1150829007f49a5291a71c8f57c2b329cf4f844d209324b8fbdaedd103b2"
+      },
+      {
+        "path": "quality/stylized-fire-high.blend",
+        "bytes": 270579,
+        "sha256": "b33479d9d0a553c308aabe40374dd0668ad91aad066fa7842a74372fe4d6d26e"
+      }
+    ],
+    "native": [
+      {
+        "quality": "LOW",
+        "main_static_height_fraction": 0.11999999731779099,
+        "preview_size": [
+          256,
+          256
+        ],
+        "native_seek_frames": [
+          8,
+          20,
+          8
+        ],
+        "clear_frame": 53
+      },
+      {
+        "quality": "MEDIUM",
+        "main_static_height_fraction": 0.11999999731779099,
+        "preview_size": [
+          256,
+          256
+        ],
+        "native_seek_frames": [
+          8,
+          20,
+          8
+        ],
+        "clear_frame": 53
+      },
+      {
+        "quality": "HIGH",
+        "main_static_height_fraction": 0.11999999731779099,
+        "preview_size": [
+          256,
+          256
+        ],
+        "native_seek_frames": [
+          8,
+          20,
+          8
+        ],
+        "clear_frame": 53
+      }
+    ],
+    "addon_loaded": false,
+    "preview_comparison": [
+      {
+        "quality": "low",
+        "rgb_identical_to_local": false,
+        "max_8bit_channel_difference": 1
+      },
+      {
+        "quality": "medium",
+        "rgb_identical_to_local": false,
+        "max_8bit_channel_difference": 1
+      },
+      {
+        "quality": "high",
+        "rgb_identical_to_local": true,
+        "max_8bit_channel_difference": 0
+      }
+    ]
+  },
+  "ci": {
+    "source_commit": "bc98a9fce183bda053be067760174403b2927aa6",
+    "run_id": 41275533599,
+    "necessary_successful_jobs": 12,
+    "conditional_release_skipped": true,
+    "later_commits_docs_only": true
+  }
 }

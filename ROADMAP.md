@@ -109,4 +109,4 @@ main 已合入角色预备 [#202](https://github.com/mumu-lhl/blender-vfx-studio
 
 落地侧尘 [#211](https://github.com/mumu-lhl/blender-vfx-studio/issues/211)／[PR #212](https://github.com/mumu-lhl/blender-vfx-studio/pull/212) 已完成本地六项行为、无插件重开、三张高清像素复现、三档完整资产与实际嵌入预览检查。12 张高清角色图和全部 25 张有序样本已实际读取，另实测 Medium 场景成本；近景第一帧侧尘更及时，远景反馈、云团轮廓与身体力量感仍弱。见[接触检查](docs/DUST_CONTACT_REVIEW.md)，源码 `5eede88` 的全部 12 项必要 CI 已成功，实际安装附件与包内三档烟尘也已核对；不作为整体艺术验收通过。
 
-火焰冷热流 [PR #213](https://github.com/mumu-lhl/blender-vfx-studio/pull/213) 已完成本地 22 项相关行为检查、六张无插件高清像素复现、三档完整资产与实际嵌入预览；16 张高清、36 张燃烧与 28 张施法原生样本已实际读取，成本已测量。内部亮带有局部收益，主体薄片感仍未解决；继续比较更集中的原生主体轮廓，PR 保持草稿，CI 尚在运行。见[检查记录](docs/FIRE_HEAT_STREAMS_REVIEW.md)。
+火焰冷热流 [PR #213](https://github.com/mumu-lhl/blender-vfx-studio/pull/213) 已完成本地 22 项相关行为检查、六张无插件高清像素复现、三档完整资产与实际嵌入预览；16 张高清、36 张燃烧与 28 张施法原生样本已实际读取，成本已测量。内部亮带有局部收益，主体薄片感仍未解决；功能源码 `bc98a9f` 的全部 12 项必要 CI 已成功，实际安装附件与包内三档火焰也已核对。主体重设计已进入草稿 [PR #214](https://github.com/mumu-lhl/blender-vfx-studio/pull/214)，尚未验收。见[检查记录](docs/FIRE_HEAT_STREAMS_REVIEW.md)。
