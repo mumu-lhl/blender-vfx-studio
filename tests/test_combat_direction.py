@@ -82,6 +82,42 @@ class DirectedCombatTests(unittest.TestCase):
         self.assertLess(max(abs(a - b) for a, b in zip(*recovery)), 1e-5)
         print("DIRECTED_GROUND_MINIMA", minima)
 
+    def test_body_load_moves_hips_while_both_soles_stay_planted(self):
+        shot = setup_base(directed=True)
+        rig = shot["caster"]["rig"]
+        constraints = [c for bone in rig.pose.bones for c in bone.constraints]
+        for frame in (12, 28, 32, 39, 43, 46):
+            states = []
+            for muted in (True, False):
+                for constraint in constraints:
+                    constraint.mute = muted
+                bpy.context.scene.frame_set(frame)
+                bpy.context.view_layer.update()
+                evaluated = rig.evaluated_get(bpy.context.evaluated_depsgraph_get())
+                states.append(
+                    {
+                        name: rig.matrix_world @ evaluated.pose.bones[name].matrix
+                        for name in ("hips", "foot.l", "foot.r")
+                    }
+                )
+            for name in ("foot.l", "foot.r"):
+                self.assertLess(
+                    (states[0][name].translation - states[1][name].translation).length,
+                    0.001,
+                    f"The planted foot slid at {frame}",
+                )
+                self.assertLess(
+                    states[0][name]
+                    .to_quaternion()
+                    .rotation_difference(states[1][name].to_quaternion())
+                    .angle,
+                    0.001,
+                )
+            if frame in (28, 32, 39):
+                self.assertLess(
+                    states[1]["hips"].translation.z, states[0]["hips"].translation.z - 0.04
+                )
+
     def test_energy_reaches_contact_and_slash_contains_blade(self):
         shot = fixture()
         scene = bpy.context.scene

@@ -158,9 +158,10 @@ def setup_base(*, light=True, far=False, view="front", engine="BLENDER_EEVEE", d
             for key in curve.keyframe_points:
                 key.interpolation = "LINEAR"
     if directed:
-        from tools.combat_direction import prepare_attack
+        from tools.combat_direction import plant_preparation, prepare_attack
 
         prepare_attack(attack)
+        plant_preparation(caster["rig"])
     # The actual blade trace determines contact; the reaction begins there.
     weapon = caster["weapon"]
     tip = max(weapon.data.vertices, key=lambda v: v.co.length_squared).co.copy()

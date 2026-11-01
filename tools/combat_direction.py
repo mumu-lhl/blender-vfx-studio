@@ -1,6 +1,9 @@
 """Author one combat shot using existing native clips, effects and cel materials."""
 
+import math
+
 import bpy
+from mathutils import Vector
 
 
 def _time_curve(strip, keys, end):
@@ -44,6 +47,110 @@ def prepare_reaction(strip, hit):
     _time_curve(strip, ((hit, 0), (hit + 2, 0), (hit + 24, 1)), hit + 26)
 
 
+def plant_preparation(rig):
+    """Load the hips while native IK keeps the original soles on the ground."""
+    from blender_vfx_studio.animation import curves
+
+    scene = bpy.context.scene
+    samples = {}
+    for frame in range(1, 48):
+        scene.frame_set(frame)
+        evaluated = rig.evaluated_get(bpy.context.evaluated_depsgraph_get())
+        samples[frame] = {}
+        for side in ("l", "r"):
+            hip = rig.matrix_world @ evaluated.pose.bones["upperleg." + side].head
+            knee = rig.matrix_world @ evaluated.pose.bones["lowerleg." + side].head
+            ankle = rig.matrix_world @ evaluated.pose.bones["foot." + side].head
+            axis = (ankle - hip).normalized()
+            bend = knee - hip - axis * (knee - hip).dot(axis)
+            direction = bend.normalized() if bend.length > 0.005 else Vector((1, 0, 0))
+            samples[frame][side] = (
+                rig.matrix_world @ evaluated.pose.bones["foot." + side].matrix,
+                knee.copy(),
+                knee + direction * 0.75,
+            )
+    collection = bpy.data.collections.new("Combat • Pose Controls")
+    scene.collection.children.link(collection)
+    controls, constraints = [], []
+
+    def control(name):
+        obj = bpy.data.objects.new(name, None)
+        collection.objects.link(obj)
+        obj.empty_display_size = 0.08
+        controls.append(obj)
+        return obj
+
+    for side in ("l", "r"):
+        goal = control("Foot plant • " + side)
+        pole = control("Knee direction • " + side)
+        goal.rotation_mode = "QUATERNION"
+        previous = None
+        for frame in range(1, 48):
+            matrix, _, point = samples[frame][side]
+            goal.location = matrix.translation
+            rotation = matrix.to_quaternion()
+            if previous is not None:
+                rotation.make_compatible(previous)
+            previous = rotation.copy()
+            goal.rotation_quaternion = rotation
+            pole.location = point
+            goal.keyframe_insert(data_path="location", frame=frame)
+            goal.keyframe_insert(data_path="rotation_quaternion", frame=frame)
+            pole.keyframe_insert(data_path="location", frame=frame)
+        leg = rig.pose.bones["lowerleg." + side]
+        rig.pose.bones["upperleg." + side].ik_stretch = leg.ik_stretch = 0
+        ik = leg.constraints.new("IK")
+        ik.name = "Native planted leg"
+        ik.target, ik.pole_target = goal, pole
+        ik.chain_count, ik.use_stretch = 2, False
+        constraints.append(ik)
+        rotation = rig.pose.bones["foot." + side].constraints.new("COPY_ROTATION")
+        rotation.name, rotation.target = "Preserve planted sole", goal
+        rotation.owner_space = rotation.target_space = "WORLD"
+        constraints.append(rotation)
+        # glTF preserves the limb axes. Choose the matching native pole roll
+        # at zero load, rather than assuming both legs use the same roll.
+        trials = []
+        for angle in (0, math.pi / 2, -math.pi / 2, math.pi):
+            ik.pole_angle = angle
+            scene.frame_set(1)
+            bpy.context.view_layer.update()
+            evaluated = rig.evaluated_get(bpy.context.evaluated_depsgraph_get())
+            knee = rig.matrix_world @ evaluated.pose.bones["lowerleg." + side].head
+            trials.append(((knee - samples[1][side][1]).length, angle))
+        ik.pole_angle = min(trials)[1]
+    shift = control("Body load • edit location keys")
+    offset = rig.pose.bones["hips"].constraints.new("COPY_LOCATION")
+    offset.name, offset.target = "Load without moving the feet", shift
+    offset.owner_space = offset.target_space = "WORLD"
+    offset.use_offset = True
+    constraints.append(offset)
+    for frame, location in (
+        (1, (0, 0, 0)),
+        (12, (-0.015, 0, -0.01)),
+        (28, (-0.06, 0, -0.06)),
+        (39, (-0.08, 0, -0.07)),
+        (43, (-0.03, 0, -0.025)),
+        (47, (0, 0, 0)),
+        (96, (0, 0, 0)),
+    ):
+        shift.location = location
+        shift.keyframe_insert(data_path="location", frame=frame)
+    for constraint in constraints:
+        for frame, value in ((1, 1), (46, 1), (47, 0), (96, 0)):
+            constraint.influence = value
+            constraint.keyframe_insert(data_path="influence", frame=frame)
+    for obj in controls:
+        for curve in curves(obj):
+            for key in curve.keyframe_points:
+                key.interpolation = "LINEAR"
+    for curve in curves(rig):
+        if ".constraints[" in curve.data_path:
+            for key in curve.keyframe_points:
+                key.interpolation = "LINEAR"
+    scene.frame_set(1)
+
+
 def _node_keys(socket, values):
     for frame, value in values:
         socket.default_value = value
@@ -52,8 +159,6 @@ def _node_keys(socket, values):
 
 def direct_effects(fixture):
     """Let gathered energy reach the cut, then separate flash and aftermath."""
-    from mathutils import Vector
-
     from blender_vfx_studio import composition
     from blender_vfx_studio.animation import curves
 
