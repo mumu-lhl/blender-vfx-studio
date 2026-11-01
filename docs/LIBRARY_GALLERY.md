@@ -36,9 +36,9 @@
 
 ## stylized-fire
 
-![stylized-fire：第 40 帧](images/fire-rooted-after-40.png)
+![stylized-fire：第 40 帧](images/fire-shoot-life-after-40.png)
 
-较窄内焰接入共同主体，分叉与下部宽窄持续变化。第 **40 帧**，本地角色镜头；[实际抽帧与原生检查](FIRE_ROOTED_REVIEW.md)。前方亮色圆团收敛，较完整的橙色面、薄片边缘和远景细节仍待完善。
+从根部长起的火流交替拉长，旧火流收细并散去，内部保留热芯与空隙。第 **40 帧**，本地角色镜头；[连续抽帧与原生检查](FIRE_SHOOT_LIFE_REVIEW.md)。火带仍偏薄，远景细节与整体艺术品质仍待完善。
 
 ## dash-echoes
 
