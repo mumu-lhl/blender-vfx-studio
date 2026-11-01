@@ -23,5 +23,6 @@
     "volume-only-open-0040": "7f59484f9bf0924e6b8f22c416a3259871472d0433a92cbe27608f82923519e5",
     "volume-only-capped-0040": "9d5cf56fef369cda1f653020bc3dd9c7e9024601b5f434c79522deb3ecd3a013",
     "capped-combined-0040": "d35d7adc7c806b47e166c7db788e23034d99761c735b5dde055e510dc12f7ba2"
-  }
+  },
+  "baseline40_equals_main_review_rgba": true
 }
