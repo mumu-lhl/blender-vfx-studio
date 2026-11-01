@@ -55,9 +55,11 @@ def build(base):
             )
             + "</section>"
         )
+    style = "三段明暗 Cel Shading" if record.get("cel") else "原有材质"
+    direction = "蓄势停顿、能量回刃与命中停顿" if record.get("directed") else "原有动作编排"
     page = f"""<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>角色战斗 VFX 检查</title>
 <style>body{{max-width:1100px;margin:2rem auto;padding:1rem;font:16px system-ui;background:#20232a;color:#eee}}a{{color:#91caff}}video{{max-width:100%}}section{{display:flex;flex-wrap:wrap}}figure{{margin:.5rem}}img{{max-width:100%}}</style>
-<h1>充能 → 挥剑 → 命中 → 消散</h1><p>96 帧，24 fps，960×540，软件 Eevee，AgX，无辉光。两名 KayKit CC0 低多边形蒙皮角色使用原生 NLA 动画；这不能代替正式二次元角色的最终验收。充能跟随剑身，刀光对齐挥剑，命中在实际剑刃接触帧 {record["contact"]["frame"]} 开始。</p>
+<h1>充能 → 挥剑 → 命中 → 消散</h1><p>96 帧，24 fps，960×540，软件 Eevee，AgX，无辉光。两名 KayKit CC0 低多边形蒙皮角色使用原生 NLA 动画；这不能代替正式二次元角色的最终验收。角色材质：{style}；动作：{direction}。充能跟随剑身，刀光对齐挥剑，命中在实际剑刃接触帧 {record["contact"]["frame"]} 开始。</p>
 <p>本页面不自动批准视觉质量。编码、解码和无插件重开成功不代表已实时观看；下方为视频每隔一帧的解码图。骨架、材质、节点和关键帧均可编辑，播放不需要插件或自动执行脚本。</p>
 <video controls width="960" height="540" src="light-near/character.mp4"></video>
 <p><a href="light-near/performance.json">同场景有／无特效的实测耗时</a> · <a href="light-near/native-check.json">无插件比较记录</a> · <a href="light-near/video-info.json">编码记录</a> · <a href="https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0">角色来源与 CC0 许可</a></p>

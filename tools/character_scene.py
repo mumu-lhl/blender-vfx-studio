@@ -103,7 +103,35 @@ def material(name, color):
     return mat
 
 
-def setup_base(*, light=True, far=False, view="front", engine="BLENDER_EEVEE"):
+def _blade_hits(defender, a, b, graph):
+    hits = []
+    for body in defender["rig"].children:
+        if body.type != "MESH" or body.parent_type == "BONE":
+            continue
+        target_mesh = body.evaluated_get(graph)
+        inverse = target_mesh.matrix_world.inverted()
+        local_a, local_b = inverse @ a, inverse @ b
+        delta = local_b - local_a
+        hit, position, normal, _ = target_mesh.ray_cast(
+            local_a, delta.normalized(), distance=delta.length
+        )
+        if hit:
+            point = target_mesh.matrix_world @ position
+            world_normal = (
+                target_mesh.matrix_world.to_3x3().inverted().transposed() @ normal
+            ).normalized()
+            hits.append(
+                {
+                    "position": list(point),
+                    "normal": list(world_normal),
+                    "mesh": body.name,
+                    "distance": (point - a).length,
+                }
+            )
+    return hits
+
+
+def setup_base(*, light=True, far=False, view="front", engine="BLENDER_EEVEE", directed=False):
     scene = bpy.context.scene
     scene.render.fps = 24
     scene.frame_start, scene.frame_end = 1, FRAMES
@@ -129,6 +157,10 @@ def setup_base(*, light=True, far=False, view="front", engine="BLENDER_EEVEE"):
         if curve.data_path == "strip_time":
             for key in curve.keyframe_points:
                 key.interpolation = "LINEAR"
+    if directed:
+        from tools.combat_direction import prepare_attack
+
+        prepare_attack(attack)
     # The actual blade trace determines contact; the reaction begins there.
     weapon = caster["weapon"]
     tip = max(weapon.data.vertices, key=lambda v: v.co.length_squared).co.copy()
@@ -137,30 +169,7 @@ def setup_base(*, light=True, far=False, view="front", engine="BLENDER_EEVEE"):
         scene.frame_set(frame)
         evaluated = weapon.evaluated_get(bpy.context.evaluated_depsgraph_get())
         a, b = evaluated.matrix_world.translation, evaluated.matrix_world @ tip
-        hits = []
-        for body in defender["rig"].children:
-            if body.type != "MESH" or body.parent_type == "BONE":
-                continue
-            target_mesh = body.evaluated_get(bpy.context.evaluated_depsgraph_get())
-            inverse = target_mesh.matrix_world.inverted()
-            local_a, local_b = inverse @ a, inverse @ b
-            delta = local_b - local_a
-            hit, position, normal, _ = target_mesh.ray_cast(
-                local_a, delta.normalized(), distance=delta.length
-            )
-            if hit:
-                point = target_mesh.matrix_world @ position
-                world_normal = (
-                    target_mesh.matrix_world.to_3x3().inverted().transposed() @ normal
-                ).normalized()
-                hits.append(
-                    {
-                        "position": list(point),
-                        "normal": list(world_normal),
-                        "mesh": body.name,
-                        "distance": (point - a).length,
-                    }
-                )
+        hits = _blade_hits(defender, a, b, bpy.context.evaluated_depsgraph_get())
         trace.append(
             {
                 "frame": frame,
@@ -180,13 +189,23 @@ def setup_base(*, light=True, far=False, view="front", engine="BLENDER_EEVEE"):
     intersections = [sample for sample in trace if sample["hits"]]
     contact = intersections[0] if intersections else min(trace, key=distance)
     contact["verified_intersection"] = bool(intersections)
-    clip(
+    reaction = clip(
         defender["rig"],
         defender["actions"]["Hit_A"],
         contact["frame"],
         contact["frame"] + 22,
         blend=1,
     )
+    if directed:
+        from tools.combat_direction import prepare_reaction
+
+        prepare_reaction(reaction, contact["frame"])
+        scene.frame_set(contact["frame"])
+        graph = bpy.context.evaluated_depsgraph_get()
+        hits = _blade_hits(defender, Vector(contact["hilt"]), Vector(contact["tip"]), graph)
+        if not hits:
+            raise RuntimeError("Directed contact misses after the reaction pose is applied")
+        contact["hits"] = sorted(hits, key=lambda h: h["distance"])
     # Discard unused imported clips, keeping the native NLA actions that play.
     for action in list(bpy.data.actions):
         action.use_fake_user = False
