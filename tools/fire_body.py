@@ -36,8 +36,8 @@ def geometry(g, original, material, width, height):
         return node.outputs["Geometry"]
 
     original = store("fire_body_available", original, available)
-    body_width = g.m("Painted Body Width", "MULTIPLY", width, 1.8)
-    body_height = g.m("Painted Body Height", "MULTIPLY", height, 0.95)
+    body_width = g.m("Painted Body Width", "MULTIPLY", width, 2.08)
+    body_height = g.m("Painted Body Height", "MULTIPLY", height, 1.10)
     grid = g.n("GeometryNodeMeshGrid", "Painted Flame Carrier")
     grid.inputs["Vertices X"].default_value = grid.inputs["Vertices Y"].default_value = 2
     g.link(body_width, grid.inputs["Size X"])
@@ -55,9 +55,9 @@ def geometry(g, original, material, width, height):
     body = store("fire_body", body, 1)
     move = g.n("GeometryNodeTransform", "Anchor Painted Fuel At The Root")
     g.link(body, move.inputs["Geometry"])
-    # With the texture margin, the authored fuel begins near V=0.13.
+    # With the texture margin, the authored fuel begins near V=0.18.
     g.link(
-        g.xyz("Fuel Anchor", 0, g.m("Authored Fuel Position", "MULTIPLY", body_height, 0.37), 0),
+        g.xyz("Fuel Anchor", 0, g.m("Authored Fuel Position", "MULTIPLY", body_height, 0.32), 0),
         move.inputs["Translation"],
     )
     face = g.n("GeometryNodeTransform", "Painted Flame Faces Camera")
@@ -147,8 +147,8 @@ def shader(g, p, clock):
     sample = g.v(
         "Painted Tip Margin",
         "ADD",
-        g.v("Painted UV Margin", "SCALE", warped, 1.3),
-        (-0.15, -0.15, 0),
+        g.v("Painted UV Margin", "SCALE", warped, 1.5),
+        (-0.25, -0.25, 0),
     )
     path = Path(__file__).resolve().parents[1] / "blender_vfx_studio/assets/fire_density.png"
     image = bpy.data.images.load(str(path), check_existing=False)
@@ -157,10 +157,20 @@ def shader(g, p, clock):
     image["vfx_fire_density"] = 1
     image.pack()
     phase = g.m(
-        "Painted Updraft Cycle", "FRACT", g.m("Painted Updraft Time", "MULTIPLY", clock, 0.12)
+        "Painted Updraft Cycle", "FRACT", g.m("Painted Updraft Time", "MULTIPLY", clock, 0.20)
     )
     other = g.m("Painted Staggered Cycle", "FRACT", g.m("Painted Other Phase", "ADD", phase, 0.5))
-    flow = g.xyz("Painted Upward Travel", 0, g.m("Painted Flow Above Fuel", "MULTIPLY", y, 0.13), 0)
+    flow = g.xyz(
+        "Painted Upward Travel",
+        0,
+        g.m(
+            "Root Anchored Painted Flow",
+            "MULTIPLY",
+            g.m("Painted Flow Above Fuel", "MULTIPLY", y, 0.30),
+            g.stage("Painted Flow Starts Above Fuel", y, 0.18, 0.45),
+        ),
+        0,
+    )
     textures = []
     for index, cycle in enumerate((phase, other)):
         texture = g.n("ShaderNodeTexImage", f"Original Flame Density {index}")
@@ -217,6 +227,17 @@ def shader(g, p, clock):
     )
     coverage = g.m(
         "Painted Fuel Catches", "MULTIPLY", coverage, g.stage("Painted Ignition", p, 0.01, 0.1)
+    )
+    coverage = g.m(
+        "Painted Flow Leaves The Crown",
+        "MULTIPLY",
+        coverage,
+        g.m(
+            "Painted Crown Drifts Away",
+            "SUBTRACT",
+            1,
+            g.stage("Painted Crown Boundary", y, 0.94, 1),
+        ),
     )
     heat = g.m("Painted Density Into Heat", "MULTIPLY_ADD", density, 1.15)
     heat.node.inputs[2].default_value = 0.04
