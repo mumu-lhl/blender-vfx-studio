@@ -24,9 +24,9 @@
 
 ## lightning-strike
 
-![Lightning Strike：第 8 帧](images/lightning-strike.png)
+![Lightning Strike：第 12 帧](images/lightning-coverage-near-after-12.png)
 
-主干复击时，地表分叉电弧重新展开。第 **8 帧**，本地角色镜头；[同帧与动画抽帧检查](LIGHTNING_CONTACT_REVIEW.md)。远景第三次放电和细枝仍偏弱，未观看实时播放。
+第三次放电保留蓝色主干与较细分叉，脚边地表电弧再次展开。第 **12 帧**，本地角色镜头；[同帧与连续抽帧检查](LIGHTNING_COVERAGE_REVIEW.md)。脚部遮挡和远景末端细枝仍偏弱，未观看实时播放。
 
 ## dust-impact
 
@@ -36,9 +36,9 @@
 
 ## stylized-fire
 
-![stylized-fire：第 40 帧](images/fire-rooted-after-40.png)
+![stylized-fire：第 40 帧](images/fire-shoot-life-after-40.png)
 
-较窄内焰接入共同主体，分叉与下部宽窄持续变化。第 **40 帧**，本地角色镜头；[实际抽帧与原生检查](FIRE_ROOTED_REVIEW.md)。前方亮色圆团收敛，较完整的橙色面、薄片边缘和远景细节仍待完善。
+从根部长起的火流交替拉长，旧火流收细并散去，内部保留热芯与空隙。第 **40 帧**，本地角色镜头；[连续抽帧与原生检查](FIRE_SHOOT_LIFE_REVIEW.md)。火带仍偏薄，远景细节与整体艺术品质仍待完善。
 
 ## dash-echoes
 

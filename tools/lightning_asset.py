@@ -197,7 +197,12 @@ def _bolt(root, quality):
     center = g.v("Discharging Centerline", "ADD", scaled, jitter)
     width = g.m("Bolt Full Width", "MULTIPLY", g.value("Width", prop="width"), 0.5)
     width = g.m("Main And Fine Branch Width", "MULTIPLY", width, g.attr("bolt_width"))
-    width = g.m("Discharge Thickness", "MULTIPLY", width, pulse)
+    width = g.m(
+        "Discharge Thickness",
+        "MULTIPLY",
+        width,
+        g.m("Weak Discharge Width", "SQRT", pulse),
+    )
     shaped = g.n("GeometryNodeSetPosition", "Native Bolt Shape")
     g.link(geometry, shaped.inputs["Geometry"])
     g.link(
@@ -407,7 +412,12 @@ def _contact_corona(root, quality):
     )
     root_width = g.value("Return Width", prop="width")
     width = g.m("Contact Width", "MULTIPLY", root_width, g.attr("contact_width"))
-    width = g.m("Contact Pulse Width", "MULTIPLY", width, pulse)
+    width = g.m(
+        "Contact Pulse Width",
+        "MULTIPLY",
+        width,
+        g.m("Weak Return Width", "SQRT", pulse),
+    )
     width = g.m(
         "Main Strike Reaches Contact",
         "MULTIPLY",
