@@ -36,9 +36,9 @@
 
 ## stylized-fire
 
-![stylized-fire：第 40 帧](images/fire-shoot-life-after-40.png)
+![stylized-fire：第 40 帧](images/fire-heat-streams-after-40.png)
 
-从根部长起的火流交替拉长，旧火流收细并散去，内部保留热芯与空隙。第 **40 帧**，本地角色镜头；[连续抽帧与原生检查](FIRE_SHOOT_LIFE_REVIEW.md)。火带仍偏薄，远景细节与整体艺术品质仍待完善。
+从根部长起的火流交替拉长，旧火流收细并散去，内部冷热流带随上升方向变化。第 **40 帧**，本地角色镜头；[连续抽帧与原生检查](FIRE_HEAT_STREAMS_REVIEW.md)。火带仍偏薄，远景细节与整体艺术品质仍待完善。
 
 ## dash-echoes
 
