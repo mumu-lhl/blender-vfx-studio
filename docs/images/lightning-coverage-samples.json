@@ -863,5 +863,11 @@
       "medium": 0,
       "high": 1
     }
+  },
+  "ci": {
+    "run": 41256427566,
+    "source_commit": "6467388d37acbf4a22e3ec55025e41e4f2ba25fd",
+    "required_jobs_succeeded": 12,
+    "conditional_release_skipped": true
   }
 }
