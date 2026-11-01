@@ -359,7 +359,7 @@ def _material(root):
     inner = g.n("ShaderNodeAttribute", "Hot Inner Tongue", attribute_name="fire_inner").outputs[
         "Fac"
     ]
-    heat = g.m("Hotter Flame Base", "SUBTRACT", 0.96, g.m("Cooler Tips", "MULTIPLY", u, 0.40))
+    heat = g.m("Hotter Flame Base", "SUBTRACT", 0.88, g.m("Cooler Tips", "MULTIPLY", u, 0.25))
     heat = g.m(
         "Heat Folds",
         "ADD",
@@ -368,11 +368,12 @@ def _material(root):
             "Broad Heat Variation",
             "MULTIPLY",
             g.m("Cool Clefts And Hot Streams", "SUBTRACT", noise.outputs["Fac"], 0.5),
-            0.5,
+            0.12,
         ),
     )
     # Periodic rest-section attributes avoid an angular seam at the closed ring.
-    # The cool channel winds upward with the same editable flow clock.
+    # A moving crest heats the surface while its valley cools it. Small noise
+    # variations sit beneath these broad rising streams instead of defining them.
     side_sin = g.n(
         "ShaderNodeAttribute", "Across Flame Sine", attribute_name="fire_side_sin"
     ).outputs["Fac"]
@@ -400,7 +401,8 @@ def _material(root):
         g.m("Section Sine", "MULTIPLY", side_sin, g.m("Stream Cosine", "COSINE", stream_phase)),
         g.m("Section Cosine", "MULTIPLY", side_cos, g.m("Stream Sine", "SINE", stream_phase)),
     )
-    channel = g.stage("Narrow Cool Flow Between Hot Streams", channel, 0.35, 0.9)
+    channel = g.stage("Hot And Cool Flow", channel, -0.8, 0.8)
+    channel.node.inputs["To Min"].default_value = -1
     channel = g.m(
         "Keep The Hot Foot Together",
         "MULTIPLY",
