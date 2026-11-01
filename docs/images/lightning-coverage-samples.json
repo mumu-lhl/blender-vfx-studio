@@ -793,5 +793,75 @@
       "sha256": "33d9feb20d56c8da20929c798c7a5fa12625e209c201c4760032959788b345da"
     }
   ],
-  "realtime_playback_reviewed": false
+  "realtime_playback_reviewed": false,
+  "actual_ci_package": {
+    "run": 41256427566,
+    "source_commit": "6467388d37acbf4a22e3ec55025e41e4f2ba25fd",
+    "artifact_id": 13064405537,
+    "bytes": 6629026,
+    "sha256": "556b65469bc14a9f689a4bb5c085daa7f4a64990ef0f411a65eb2d91f86970df",
+    "extension_python_files": 33,
+    "native_asset_files": 18,
+    "lightning_assets": {
+      "lightning-strike-low.blend": "8dc771b816e1bcd1edc82347a865883a9d745530d0241a1394e6c2a93b128cc4",
+      "lightning-strike-high.blend": "1a021bf6c4199e2ad3812f672682aa61a9c44dee7b9364bcd63b3c222c4619a7",
+      "lightning-strike.blend": "173669be8b3fcc1c262885d7b1b0afd46f9611022688bb7632c8ef77ef6d1777"
+    },
+    "native": [
+      {
+        "quality": "low",
+        "native_seek": [
+          3,
+          8,
+          3
+        ],
+        "clear_frame": 19,
+        "preview": [
+          256,
+          256
+        ],
+        "native_width_response": true
+      },
+      {
+        "quality": "medium",
+        "native_seek": [
+          3,
+          8,
+          3
+        ],
+        "clear_frame": 19,
+        "preview": [
+          256,
+          256
+        ],
+        "native_width_response": true
+      },
+      {
+        "quality": "high",
+        "native_seek": [
+          3,
+          8,
+          3
+        ],
+        "clear_frame": 19,
+        "preview": [
+          256,
+          256
+        ],
+        "native_width_response": true
+      }
+    ],
+    "addon_loaded": false,
+    "actual_embedded_previews_viewed": true,
+    "embedded_rgb_equal_local": {
+      "low": false,
+      "medium": true,
+      "high": false
+    },
+    "preview_rgb_max_delta": {
+      "low": 1,
+      "medium": 0,
+      "high": 1
+    }
+  }
 }
