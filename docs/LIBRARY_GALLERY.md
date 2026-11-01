@@ -24,9 +24,9 @@
 
 ## lightning-strike
 
-![Lightning Strike：第 8 帧](images/lightning-strike.png)
+![Lightning Strike：第 12 帧](images/lightning-coverage-near-after-12.png)
 
-主干复击时，地表分叉电弧重新展开。第 **8 帧**，本地角色镜头；[同帧与动画抽帧检查](LIGHTNING_CONTACT_REVIEW.md)。远景第三次放电和细枝仍偏弱，未观看实时播放。
+第三次放电保留蓝色主干与较细分叉，脚边地表电弧再次展开。第 **12 帧**，本地角色镜头；[同帧与连续抽帧检查](LIGHTNING_COVERAGE_REVIEW.md)。脚部遮挡和远景末端细枝仍偏弱，未观看实时播放。
 
 ## dust-impact
 
