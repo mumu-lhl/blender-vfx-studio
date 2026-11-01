@@ -50,11 +50,11 @@ def _flames(root, quality):
             (0.06, 0.13, 0.60, 0.13, -0.14, 1),
         )
     ):
-        split = {0: 0.28, 1: 0.38}.get(index)
-        # A shared lower tongue feeds two unequal shoots. Their short overlap
-        # keeps the junction filled without booleans or frame-by-frame rebuilding.
+        split = {0: 0.08, 1: 0.11}.get(index)
+        # A low fuel bed feeds the whole rising shoots. Keeping a large static
+        # lower trunk would leave an orange bulb while only its tips regrow.
         sections = (
-            [(0, 1, 0)] if split is None else [(0, split + 0.1, 0), (split, 1, -1), (split, 1, 1)]
+            [(0, 1, 0)] if split is None else [(0, split + 0.04, 0), (split, 1, -1), (split, 1, 1)]
         )
         for first, last, branch in sections:
             base = len(vertices)
@@ -178,6 +178,18 @@ def _flames(root, quality):
     section = g.v("Section Around Its Own Rising Path", "SUBTRACT", pos.outputs[0], center)
     section = g.v("Moving Bulges And Narrow Necks", "SCALE", section, pulse)
     branch_breadth = g.m("Shoots Thicken As They Rise", "SQRT", shoot_growth)
+    spent = g.m(
+        "Spent Shoots Narrow Before Reset",
+        "SUBTRACT",
+        1,
+        g.stage("Updraft Spends The Shoot", shoot_phase, 0.38, 0.98),
+    )
+    branch_breadth = g.m(
+        "Growing And Narrowing Shoot",
+        "MULTIPLY",
+        branch_breadth,
+        g.m("Spent Shoot Radius", "SQRT", spent),
+    )
     branch_breadth = g.m(
         "Shared Foot Keeps Its Breadth",
         "SUBTRACT",
@@ -521,7 +533,7 @@ def _material(root):
         "ADD",
         threshold,
         g.m(
-            "Shoot Erosion", "MULTIPLY", g.m("Shoot Heat Runs Out", "SUBTRACT", 1, shoot_life), 0.8
+            "Shoot Erosion", "MULTIPLY", g.m("Shoot Heat Runs Out", "SUBTRACT", 1, shoot_life), 0.15
         ),
     )
     alive = g.stage(
@@ -530,6 +542,7 @@ def _material(root):
         0,
         0.035,
     )
+    alive = g.m("Each Shoot Spends Its Visible Heat", "MULTIPLY", alive, shoot_life)
     air = g.n("ShaderNodeBsdfTransparent", "Air Between Flame Tongues")
     mix = g.n("ShaderNodeMixShader", "Flame Erosion")
     g.link(alive, mix.inputs[0])
