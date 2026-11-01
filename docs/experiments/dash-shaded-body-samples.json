@@ -1,0 +1,31 @@
+{
+  "base_commit": "5dd92a52dac59ac3042512d3614c3328a6140901",
+  "adopted": false,
+  "viewed_hd_frames": [
+    18,
+    35
+  ],
+  "realtime_playback_reviewed": false,
+  "images": [
+    {
+      "image": "work/dash-landing-review/light-near/dash-landing-0018.png",
+      "sha256": "1a525de96caff86beef01b1b8fa85f057a29ac4b59c7d3c7f4602eb8de8a932d"
+    },
+    {
+      "image": "work/dash-body/dark-body-0018.png",
+      "sha256": "1916d07a003522016144ae5184bbcaf2b9d9b636532feb6200d377aa3fda67e5"
+    },
+    {
+      "image": "work/dash-landing-review/light-near/dash-landing-0035.png",
+      "sha256": "b8bf527e18fc0ac4aa780c9d2e50fe08954c07b77f7df23f8e4fe1038cdae99f"
+    },
+    {
+      "image": "work/dash-body/dark-body-0035.png",
+      "sha256": "8ac0bb5f7083ba7a8694efbcfd2c8e03fbd1d1e4baeba714eb7440ac218baf44"
+    }
+  ],
+  "temporary_native_script_sha256": {
+    "prototype": "aca65445fb62003ca1eb8a0044051d6c657f0b5a34934e5b532d9e2375e8dcd0",
+    "dark-body": "a2d9e87b5b000252a937ccbde5442a4854a65b3747c32152461e494012adcd3d"
+  }
+}
