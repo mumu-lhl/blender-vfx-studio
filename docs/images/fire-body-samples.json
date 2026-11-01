@@ -1204,5 +1204,73 @@
   "packages": {
     "blender-vfx-studio-0.22.3.zip": "5d0909a578d2257361da7b50b824ff9310f93bc51da801b08f1be621c09c429a",
     "blender-vfx-studio-examples-0.22.3.zip": "cc8ae04c4305adc08b5ed24b8068a30acaeafd4486f4ba1df6851cbf07a1658e"
-  }
+  },
+  "ci_jobs": [
+    {
+      "name": "Charge to hit · software Eevee",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Stylized Fire · native asset and Eevee",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Magic circle to fire · native character sequence",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Blender · ubuntu-24.04",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Blender · windows-2025",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Character Dash Echoes · native asset and Eevee",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Lightning Strike · native asset and Eevee",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Blender · macos-15",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Calligraphic Magic Circle · native asset and Eevee",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Dust Impact · native asset and Eevee",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Rigged character combat · software Eevee",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Combat shots · software Eevee and Cycles",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "release",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "ci_conclusion": "success"
 }

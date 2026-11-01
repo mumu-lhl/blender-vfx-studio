@@ -14,7 +14,7 @@
 
 - **Energy Charge**：小热芯在早段可见，移动进流与原生回刃安排已完成 14 张角色高清、28 张原生隔帧、完整资产及成本检查；外围长碎片、背侧遮挡与身体张力仍未解决。见[热芯与汇流](docs/CHARGE_FRONTS_REVIEW.md)，[#197](https://github.com/mumu-lhl/blender-vfx-studio/pull/197) 已合入 main，功能源码 CI 全部 12 项成功。释放横向白带的局部修复见 [#196](https://github.com/mumu-lhl/blender-vfx-studio/pull/196)。
 - **Arc Slash**：刀光平面跟随真实剑刃，转向时的大蓝片错位已修复；命中画面仍有多层重叠。见[空间对齐](docs/SLASH_PLANE_REVIEW.md)。
-- **持续火焰与施法**：原创密度图形成较集中的卷曲主体，上升热流与三维火丝分层。18 张高清阶段／交接图、35 张原生火焰与 16 张施法样本已实际查看；三档资产、实际安装包与实测成本已核对。初生与退场在浅背景偏弱，固定主轮廓和身体力量感仍未解决。见[主体检查](docs/FIRE_BODY_REVIEW.md)，[PR #214](https://github.com/mumu-lhl/blender-vfx-studio/pull/214) 仍等待全部视觉 CI。
+- **持续火焰与施法**：原创密度图形成较集中的卷曲主体，上升热流与三维火丝分层。18 张高清阶段／交接图、35 张原生火焰与 16 张施法样本已实际查看；三档资产、实际安装包与实测成本已核对。初生与退场在浅背景偏弱，固定主轮廓和身体力量感仍未解决。见[主体检查](docs/FIRE_BODY_REVIEW.md)，[PR #214](https://github.com/mumu-lhl/blender-vfx-studio/pull/214) 的全部 12 项必要 CI 已成功。
 - **角色蓄势**：[预备动作草稿 #190](https://github.com/mumu-lhl/blender-vfx-studio/pull/190) 没有证明中心可读性和身体力量优于主线。下劈开头的[原生动作复查](https://github.com/mumu-lhl/blender-vfx-studio/blob/45b05e1/docs/experiments/WINDUP_FIELD.md)也有回落再后摆的问题，暂不采用。
 
 ## 已有功能与边界
@@ -111,4 +111,4 @@ main 已合入角色预备 [#202](https://github.com/mumu-lhl/blender-vfx-studio
 
 火焰冷热流 [PR #213](https://github.com/mumu-lhl/blender-vfx-studio/pull/213) 已完成本地 22 项相关行为检查、六张无插件高清像素复现、三档完整资产与实际嵌入预览；16 张高清、36 张燃烧与 28 张施法原生样本已实际读取，成本已测量。内部亮带有局部收益，主体薄片感仍未解决；功能源码 `bc98a9f` 的全部 12 项必要 CI 已成功，实际安装附件与包内三档火焰也已核对。主体重设计已进入草稿 [PR #214](https://github.com/mumu-lhl/blender-vfx-studio/pull/214)，尚未验收。见[检查记录](docs/FIRE_HEAT_STREAMS_REVIEW.md)。
 
-火焰主体 [PR #214](https://github.com/mumu-lhl/blender-vfx-studio/pull/214) 已完成 9 项火焰、14 项艺术控制及 25 项入门资产检查、六张无插件高清像素复现、18 文件原生打包检查、三档实际嵌入预览，以及 46→47→48 帧高清交接补查。最终本地批次与实际 CI 包内资产检查正常退出；源码 `aa85bd1` 的部分视觉 CI 仍在运行。仅接受主体集中与流动的收益，不宣布整体艺术验收通过，详见[记录](docs/FIRE_BODY_REVIEW.md)。
+火焰主体 [PR #214](https://github.com/mumu-lhl/blender-vfx-studio/pull/214) 已完成 9 项火焰、14 项艺术控制及 25 项入门资产检查、六张无插件高清像素复现、18 文件原生打包检查、三档实际嵌入预览，以及 46→47→48 帧高清交接补查。最终本地批次与实际 CI 包内资产检查正常退出；源码 `aa85bd1` 的全部 12 项必要 CI 已成功。仅接受主体集中与流动的收益，不宣布整体艺术验收通过，详见[记录](docs/FIRE_BODY_REVIEW.md)。
