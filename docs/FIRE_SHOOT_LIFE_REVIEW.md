@@ -54,7 +54,7 @@
 
 首次有特效准备与渲染为 33.405 秒。这里只测默认 Medium 的整套角色场景，不是各质量档位或新旧版本的性能比较；单组渲染不足以报告 p95，也不能换算为视口 FPS。原始设置、源码与图像摘要见[清单](images/fire-shoot-life-samples.json)。
 
-火焰源码为 `8e9cbb2`；随后合入 main 时确认本镜头调用的角色、动作片段、布景函数及核心构建代码未变，分项图像保留原始摘要。工作由 [#198](https://github.com/mumu-lhl/blender-vfx-studio/issues/198) 跟踪；远端 CI 尚待运行。
+火焰源码为 `8e9cbb2`；随后合入 main 时确认本镜头调用的角色、动作片段、布景函数及核心构建代码未变，分项图像保留原始摘要。工作由 [#198](https://github.com/mumu-lhl/blender-vfx-studio/issues/198) 跟踪；远端 CI 的完整状态以下方记录为准。
 
 复现：
 
@@ -63,3 +63,13 @@ LP_NUM_THREADS=2 MESA_SHADER_CACHE_DISABLE=true blender -b -t 2 --factory-startu
 ```
 
 添加 `--dark` 或 `--far` 检查其他条件。完整施法使用 `tools/spell_preview.py -- --frames 64 76 92`，输出均位于忽略版本管理的 `work/`。
+
+## 实际 CI 附件
+
+已下载 [CI 41254784156](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41254784156) 为源码 `183b75b` 生成的安装附件，核对全部 33 个插件 Python 文件、打包原图和 18 份示例资产。包内 Low／Medium／High 火焰在没有加载插件的新进程中完成 8→20→8 几何复现和第 53 帧清场；低位共同根部、火流可见度节点与 256×256 自定义预览均保留，没有导出相机、场景或预览图片数据。进程正常退出。
+
+以下直接提取包内三份 `.blend` 的嵌入预览并已实际读取，只放大排列，没有调色；不将缩略图当成高清艺术验收：
+
+![实际 CI 包内三档火焰预览](images/fire-shoot-life-ci-previews.png)
+
+附件为 6,627,591 字节，SHA-256 为 `cc580dc3456d6cb1f0dc3ee01cb54fddbc5769c1b45e56b6c1754a1aa34b6b9d`，文件与资产摘要保留在上面的检查清单。该源码的全部 12 项必要 CI 已成功，包括三平台后台、独立火焰、完整施法与其余角色视觉作业；条件发布步骤跳过符合当前非发布构建。所有失败检查仍会保留，不能据此宣称 #122 已根治。

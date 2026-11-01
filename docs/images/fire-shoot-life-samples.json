@@ -913,5 +913,66 @@
       "setup_stage"
     ],
     "ci_note": "A new combined CI replaces the in-progress pre-integration run; no old run is counted as a pass."
+  },
+  "actual_ci_package": {
+    "run": 41254784156,
+    "head": "183b75b8019d3ff0711aef8ee8dfe8b4bde6f5ef",
+    "artifact_id": 13063461212,
+    "bytes": 6627591,
+    "sha256": "cc580dc3456d6cb1f0dc3ee01cb54fddbc5769c1b45e56b6c1754a1aa34b6b9d",
+    "python_files": 33,
+    "native_asset_files": 18,
+    "fire_assets": {
+      "stylized-fire-low.blend": "3219cf93dbf435552c13ba2252df2d730ee0f9b851b2c4734c1c841050220a60",
+      "stylized-fire-high.blend": "175c58da61acaf4ed535853364fd529b252bbd31ad3911a40bba6fc3a4c6ca11",
+      "stylized-fire.blend": "f5a1eae4da491caebf2fe40485bd259e6a51e716bef63818974bb298b61d71b6"
+    },
+    "native": [
+      {
+        "quality": "LOW",
+        "main_static_height_fraction": 0.11999999731779099,
+        "preview_size": [
+          256,
+          256
+        ],
+        "native_seek_frames": [
+          8,
+          20,
+          8
+        ],
+        "clear_frame": 53
+      },
+      {
+        "quality": "MEDIUM",
+        "main_static_height_fraction": 0.11999999731779099,
+        "preview_size": [
+          256,
+          256
+        ],
+        "native_seek_frames": [
+          8,
+          20,
+          8
+        ],
+        "clear_frame": 53
+      },
+      {
+        "quality": "HIGH",
+        "main_static_height_fraction": 0.11999999731779099,
+        "preview_size": [
+          256,
+          256
+        ],
+        "native_seek_frames": [
+          8,
+          20,
+          8
+        ],
+        "clear_frame": 53
+      }
+    ],
+    "addon_loaded": false,
+    "embedded_previews_viewed": true,
+    "preview_sha256": "f7f950cde8fafb044f0c333ffedd1682a290c28cda8eece2df485d91253f000e"
   }
 }
