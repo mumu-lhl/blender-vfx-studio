@@ -1,0 +1,119 @@
+{
+  "native_only": true,
+  "clear_frames": [
+    1,
+    70
+  ],
+  "hd_frame": 40,
+  "motion_resolution": [
+    480,
+    270
+  ],
+  "samples": [
+    {
+      "frame": 1,
+      "sha256": "61cd827ffed71c9ddc552a65fc26c929a4b307163d0e13fadecb27c2395fbcdf"
+    },
+    {
+      "frame": 17,
+      "sha256": "fa7d2e45e942105d1356688d7bd1ccfd948ed8de5d2191534023a394c1fc8686"
+    },
+    {
+      "frame": 19,
+      "sha256": "4ea256e7c4e487773d9c8b23465a4591f12ca82477a92dfb90cce60fd5505949"
+    },
+    {
+      "frame": 23,
+      "sha256": "19f939118fff29300f1b02bba1f505638b6d3eb99350c186ec60d196412ed8fe"
+    },
+    {
+      "frame": 27,
+      "sha256": "40c5e37b2724b9c8ee5294ae937f4a4f292537d8f037542d61c876739b3d8978"
+    },
+    {
+      "frame": 31,
+      "sha256": "897a6d0e3a958dcd7b82e01b161e50103f0244871dc798034b170d4fa2ac2302"
+    },
+    {
+      "frame": 35,
+      "sha256": "79edfdf251d33105677c4dbd2be3a4943b549823e7fef92c0185a81dd8219336"
+    },
+    {
+      "frame": 39,
+      "sha256": "3d0b98adb7dd8ab85ab08855a293434bb39424e4685dcd5510973165cf93d203"
+    },
+    {
+      "frame": 43,
+      "sha256": "6bae35fd6b641163d81ac1a2d5ccaa60b2e3e4811c7857ffc072afbd31e05fac"
+    },
+    {
+      "frame": 47,
+      "sha256": "0cf9d70af077c909ff3be040b65e8d72e0377aa8638df52b617d61784e6ebead"
+    },
+    {
+      "frame": 51,
+      "sha256": "aa52f4eebda7173ae1de9859f7990f82377f5a53d00dabcf39532c1265ed7522"
+    },
+    {
+      "frame": 55,
+      "sha256": "c7214a658cd6e4d865bcd72ed36e250a8cc3eaa1cdda4e84d7743e80028436bd"
+    },
+    {
+      "frame": 59,
+      "sha256": "86cdab319175fb981ec8185d392e67fd66707e0174802da90352dccbc828b71f"
+    },
+    {
+      "frame": 63,
+      "sha256": "776a9f0b90e9c5383eadecc246232ba352c9e0bf6b3a83285654c8de0d733e46"
+    },
+    {
+      "frame": 67,
+      "sha256": "f819a726d746df4b51d7b715e3c1d9b5174c252d11b1e2da0d8aeb4a22fe81ea"
+    },
+    {
+      "frame": 71,
+      "sha256": "df9f9974a556c5ace72608ebe6eb29e9c2e7e146db9caffcb0f0ba98465d8fc7"
+    }
+  ],
+  "realtime_playback_reviewed": false,
+  "whole_effect_art_approved": false,
+  "hd_rgba_identical": true,
+  "viewed_pages": 3,
+  "viewed_hd_frames": [
+    36,
+    40,
+    45
+  ],
+  "source_sha256": {
+    "tools/experiments/fire_field_study.py": "e816db334fc955ccc3f59c48163dd78083d9642514063f8693c15c6c45293a26",
+    "tools/experiments/fire_field_reopen.py": "97926ccb5b695e5ab1ea7833c63faeadad85ea7997712e2a5c95e16bcbb6810f"
+  },
+  "art_findings": [
+    "Coherent centre, but a flat icon-like body",
+    "Ignition reaches full carrier height too early",
+    "Pale remnants of the original broad auxiliary tongue",
+    "No realtime video review and no library acceptance"
+  ],
+  "evidence": [
+    {
+      "path": "docs/experiments/fire-field-40.png",
+      "sha256": "a2eadb693366f4d67edef4d41503708bf0e653b83bfef1397dd9692e3540687d"
+    },
+    {
+      "path": "docs/experiments/fire-field-comparison.jpg",
+      "sha256": "4ed71df432816431daa6c4a43bb2f73d46f96217ab04e7319955f3f690041e9c"
+    },
+    {
+      "path": "docs/experiments/fire-field-motion-01.jpg",
+      "sha256": "cb71b4b32beeb215cea680ccc8b6609c555b26a96b153dc4f42ec0f19cf297f4"
+    },
+    {
+      "path": "docs/experiments/fire-field-motion-02.jpg",
+      "sha256": "45e3044bd069bcfc8ac071e4d8a7cc6427079b11009312cad337ace876bf7530"
+    },
+    {
+      "path": "docs/experiments/fire-field-motion-03.jpg",
+      "sha256": "631bd2d1bde83b991518cd25a0d1a471866b565212588d3cd300a3872047afd8"
+    }
+  ]
+}
