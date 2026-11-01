@@ -72,7 +72,7 @@
 | Impact Burst | 命中爆发与冲击扩散 | 短闪、翻卷热气、压力面、喷射与余烬分层 |
 | Lightning Strike | 分支落雷、短闪和逐次减弱的复击 | 分支形状、复击时序与线宽 |
 | Dust Impact | 落地、踩踏的体积烟尘与碎屑 | 原生密度场、抬升与扩散 |
-| Stylized Fire | 点燃、持续燃烧与断燃余烬 | 火舌、热色色带与上卷运动 |
+| Stylized Fire | 点燃、持续燃烧与断燃余烬 | 卷曲主体、上升热流与可编辑热色色带 |
 | Character Dash Echoes | 捕获角色姿态，制作冲刺残影 | 捕获自己的角色姿态 |
 | Calligraphic Magic Circle | 逐笔形成、转动与立体符记释放 | 笔画形成、反向转动与符记升起 |
 

@@ -44,7 +44,7 @@ Shader Nodes 继续使用截面的周期属性和现有流动时钟。`Hot And C
 | 求值 p95 | 0.489 ms | 2.940 ms |
 | 配对高清渲染 | 10.220 s | 13.879 s |
 
-首次有特效准备与渲染为 31.637 秒。这是 Medium 整套镜头的成本，不是新旧材质比较；单组渲染不能提供稳定分布，也不能换算成视口 FPS。原始设置、源码／图像摘要和测量见[清单](images/fire-heat-streams-samples.json)。CI 仍在运行，暂不宣称成功。
+首次有特效准备与渲染为 31.637 秒。这是 Medium 整套镜头的成本，不是新旧材质比较；单组渲染不能提供稳定分布，也不能换算成视口 FPS。原始设置、源码／图像摘要和测量见[清单](images/fire-heat-streams-samples.json)。功能源码 `bc98a9f` 的全部 12 项必要 CI 已成功；后续文档提交不改变插件、生成器、测试或 CI 配置。
 
 复现高清阶段：
 
@@ -55,3 +55,13 @@ LP_NUM_THREADS=2 MESA_SHADER_CACHE_DISABLE=true blender -b -t 2 --factory-startu
 分别添加 `--dark`、`--far` 或 `--palette BLUE` 检查相应条件。完整施法用 `tools/spell_preview.py -- --frames 64 76 92`。
 
 基线 main 为 `37b94e4`，运行代码为 `bc98a9f`。[PR #213](https://github.com/mumu-lhl/blender-vfx-studio/pull/213) 引用 [#198](https://github.com/mumu-lhl/blender-vfx-studio/issues/198)；后续仍以完整角色画面的收益为准，避免围绕单个材质无限微调。
+
+## 实际 CI 安装附件
+
+已下载功能源码 `bc98a9f` 的 [CI 41275533599](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41275533599) 安装附件，核对全部 33 个插件 Python 文件、打包原图与 18 份示例资产。包内三档火焰已无插件追加，8→20→8 可复现、53 清场，冷热流节点、自定义预览和低位共同根部保留；检查进程退出 0。
+
+以下直接提取实际附件的嵌入预览，已读取，没有调色。High 与本地 RGB 一致，Low／Medium 最大单通道差为 1，不能把它们说成跨设备逐像素相同。
+
+![实际 CI 包内三档预览](images/fire-heat-streams-ci-previews.png)
+
+附件为 6,635,541 字节，SHA-256 为 `99df615bdddf0b377e5bf4451be244570407cc91404adeb8286989ee7268bc23`。该源码全部 12 项必要 CI 已成功，条件发布步骤跳过符合非发布构建。没有因此关闭整体艺术问题或间歇崩溃问题。
