@@ -65,3 +65,13 @@ LP_NUM_THREADS=2 MESA_SHADER_CACHE_DISABLE=true blender -b -t 2 --factory-startu
 ```
 
 添加 `--dark` 或 `--far` 生成背景与距离对照；输出位于忽略版本管理的 `work/`。
+
+## 实际 CI 交付包
+
+已下载组合源码 `5eede88` 的 [CI 41257852017](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41257852017) 安装附件，核对全部 33 个插件 Python 文件、打包原图和 18 份原生资产。包内三档烟尘在无插件新进程完成 2→9→2 几何复现、第 33 帧清场与 Density=0 关闭，新的接触生长和外移节点保留；没有导出场景、相机或图片数据，进程正常退出。
+
+三档嵌入预览已实际提取、读取，与本地预览的 RGB 最大差异均为 1 个 8-bit 色阶；下图直接来自实际附件，不当作三档高清艺术验收：
+
+![实际 CI 包内三档烟尘预览](images/dust-contact-ci-previews.png)
+
+附件为 6,633,608 字节，SHA-256 为 `d0ff7716f894e29b54b1f901d2fc25f90c5a60b21a5f6e5faaa5801d43280648`。各文件、原生检查与预览差异已补入检查清单；其他长 CI 作业仍在执行。

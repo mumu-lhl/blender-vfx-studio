@@ -1271,5 +1271,70 @@
     "realtime_playback_reviewed": false,
     "exit_code": 0,
     "actually_viewed": true
+  },
+  "actual_ci_package": {
+    "run": 41257852017,
+    "source_commit": "5eede88feb79d01f374176a9e73137905421cf38",
+    "artifact_id": 13064354592,
+    "bytes": 6633608,
+    "sha256": "d0ff7716f894e29b54b1f901d2fc25f90c5a60b21a5f6e5faaa5801d43280648",
+    "extension_python_files": 33,
+    "native_asset_files": 18,
+    "dust_assets": {
+      "dust-impact-low.blend": "c6f07791152fd043e50a2dcb912cea9a5fab585791680628dd868d36aec0cbeb",
+      "dust-impact-high.blend": "e1663121533bfb22309b524fbfb59f8aed3eb0688eb16b63471bc4bf6c002e13",
+      "dust-impact.blend": "864e0804ab081a927663faea22401d94140b00cfc5e8efc7951b41ed8d57c13e"
+    },
+    "native": [
+      {
+        "quality": "low",
+        "native_seek": [
+          2,
+          9,
+          2
+        ],
+        "clear_frame": 33,
+        "density_zero_clears": true,
+        "preview_size": [
+          256,
+          256
+        ]
+      },
+      {
+        "quality": "medium",
+        "native_seek": [
+          2,
+          9,
+          2
+        ],
+        "clear_frame": 33,
+        "density_zero_clears": true,
+        "preview_size": [
+          256,
+          256
+        ]
+      },
+      {
+        "quality": "high",
+        "native_seek": [
+          2,
+          9,
+          2
+        ],
+        "clear_frame": 33,
+        "density_zero_clears": true,
+        "preview_size": [
+          256,
+          256
+        ]
+      }
+    ],
+    "addon_loaded": false,
+    "actual_embedded_previews_viewed": true,
+    "preview_rgb_max_delta": {
+      "low": 1,
+      "medium": 1,
+      "high": 1
+    }
   }
 }
