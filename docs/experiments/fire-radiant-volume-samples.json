@@ -1,0 +1,27 @@
+{
+  "source_commit": "4d379452d4a13795b865e5cb52702ef3594577f8",
+  "adopted": false,
+  "realtime_playback_reviewed": false,
+  "render_exits": {
+    "probe": 0,
+    "shared": 0,
+    "components": 0
+  },
+  "components": {
+    "boundary_edges_before": 156,
+    "boundary_edges_after": 0,
+    "new_faces": 13,
+    "realtime_playback_reviewed": false
+  },
+  "cap_volume_max_rgb_delta": 1,
+  "actually_viewed_images": {
+    "before-0040": "4e5dc787624bdb35c69ffee11f49210dbd22dafe3e68da01905aca83d1783f0b",
+    "after-0040": "bd83fcae27af7e3c9960b7c9fa4453f87e403e8a138e323a26d76b2b816f77c6",
+    "after-0036": "96f5f8148e34f8ecea44156e9933e4af1332ad9bc8ff6d969adf9edafeb493f5",
+    "shared-0040": "acab23d4b916bce0e4413953d835f9867fbd423900a56b2d5c7f7523560e9606",
+    "shared-0036": "88b4503ea4a2d37e8d08090dba6aae5842fdde0f1cdb46718a45d57d723b0481",
+    "volume-only-open-0040": "7f59484f9bf0924e6b8f22c416a3259871472d0433a92cbe27608f82923519e5",
+    "volume-only-capped-0040": "9d5cf56fef369cda1f653020bc3dd9c7e9024601b5f434c79522deb3ecd3a013",
+    "capped-combined-0040": "d35d7adc7c806b47e166c7db788e23034d99761c735b5dde055e510dc12f7ba2"
+  }
+}
