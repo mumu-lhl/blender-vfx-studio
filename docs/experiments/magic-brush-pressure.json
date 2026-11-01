@@ -1,0 +1,57 @@
+{
+  "accepted": false,
+  "baseline_main": "e5e8cc788cb3cdaae7779c09c567828658c00a2e",
+  "workflow_run": 41284030499,
+  "artifact_id": 13076000904,
+  "artifact_sha256": "d88f7ace1fc70b13dd43605b9050d7c93d936ef03beccf429b313f389306b987",
+  "realtime_playback_reviewed": false,
+  "native_batch_exit_code": 0,
+  "rendered_resolution": [
+    960,
+    540
+  ],
+  "frame": 40,
+  "actual_before_and_after_images_viewed": 6,
+  "animation_reviewed": false,
+  "prototype_source_sha256": "b33bbe65b64e1d8e761e6c21d4662e6b306cbb45ed7a56e6ee414c67b7ef70b9",
+  "retained_script_sha256": "2b7ba0935fdb909fa574116c22ab4a5d785447184735db992783db63ea6945fe",
+  "retained_script_note": "Same native operations; import grouping, formatting and a module docstring only.",
+  "scenes": [
+    {
+      "mode": "light-near",
+      "probe": {
+        "source_scene_sha256": "ea586fc6c268b3653e3bc76acc8eb7b5a006709d41cd4ab72f21146d64b67a4f",
+        "changed_primary_strokes": 6,
+        "geometry_vertices": 1186,
+        "strength": 2.0,
+        "frame": 40
+      },
+      "ci_png_sha256": "fdbb4254cc1ff679cb4441bdee48aa032866cf7c3843f3348672b38abf07171e",
+      "probe_png_sha256": "5721e9a7aeac8d00e00ac624ebbca32aed70f34594d9f5f9f1cc264956fff511"
+    },
+    {
+      "mode": "light-far",
+      "probe": {
+        "source_scene_sha256": "e479bd8e716d2a8f1048eccc82c241cec8b3d6cee030e9c77ce06b4ecf2c6473",
+        "changed_primary_strokes": 6,
+        "geometry_vertices": 1186,
+        "strength": 2.0,
+        "frame": 40
+      },
+      "ci_png_sha256": "e548bc5a1af418c4a0a3f9070e3244f9a48e5a28d3bcf40dae02da7a29353c5d",
+      "probe_png_sha256": "1bcdfb8eb695da7f836ae9bdc0463d6c7f417f1320d8edaca07da50c5145109f"
+    },
+    {
+      "mode": "dark-near",
+      "probe": {
+        "source_scene_sha256": "a101e01b48e8a14dc84899c00cdd0b18dcedddb5e3a3cb5be8a8c0ade8874661",
+        "changed_primary_strokes": 6,
+        "geometry_vertices": 1186,
+        "strength": 2.0,
+        "frame": 40
+      },
+      "ci_png_sha256": "3cf3cba03b3a1ecfe719d3d1ae349ffc9658b8ff191699f3f678abc2ab029def",
+      "probe_png_sha256": "dc790db4aab89a50e6657008f4995da46f252b7a9cdebbf2fd6385259018ad07"
+    }
+  ]
+}
