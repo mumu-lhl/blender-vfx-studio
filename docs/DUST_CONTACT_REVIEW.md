@@ -38,7 +38,7 @@
 
 ## 功能、完整资产与成本
 
-六项烟尘行为和无插件原生重开通过。新进程按 52→43→45 乱序重渲染，三张高清 RGBA 与原图完全一致，角色原生位移继续运行，第 84 帧所有效果清空。Low／Medium／High 完整资产已重建并原生追加，2→9→2 可复现，第 33 帧清场，Density=0 关闭主体；没有导出场景、相机或预览用图片。
+六项烟尘行为和无插件原生重开通过。新进程按 52→43→45 乱序重渲染，三张高清 RGBA 与原图完全一致，角色原生位移继续运行，第 84 帧所有效果清空。Low／Medium／High 完整资产已重建并原生追加，2→9→2 可复现，第 33 帧清场，Dust Density=0 关闭主体；没有导出场景、相机或预览用图片。
 
 三档实际嵌入预览已从 `.blend` 提取并实际查看，RGB 与构建时的 PNG 完全一致。缩略图仅用于资产辨识，不代替高清角色判断：
 
@@ -56,7 +56,7 @@
 
 功能源码 `4f73d01`，组合检查源码 `5eede88`；工作由 [#211](https://github.com/mumu-lhl/blender-vfx-studio/issues/211)／[PR #212](https://github.com/mumu-lhl/blender-vfx-studio/pull/212) 跟踪，整体艺术品质仍由 [#89](https://github.com/mumu-lhl/blender-vfx-studio/issues/89) 跟踪。
 
-设置、原生重开、源码和图像摘要见[清单](images/dust-contact-samples.json)。远端 CI 仍在执行。
+设置、原生重开、源码和图像摘要见[清单](images/dust-contact-samples.json)。组合源码 `5eede88` 的全部 12 项必要 CI 已成功；最终提交仅补充文档与实图，插件、生成器、测试和 CI 配置与该成功源码一致。
 
 复现角色阶段：
 
@@ -68,10 +68,10 @@ LP_NUM_THREADS=2 MESA_SHADER_CACHE_DISABLE=true blender -b -t 2 --factory-startu
 
 ## 实际 CI 交付包
 
-已下载组合源码 `5eede88` 的 [CI 41257852017](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41257852017) 安装附件，核对全部 33 个插件 Python 文件、打包原图和 18 份原生资产。包内三档烟尘在无插件新进程完成 2→9→2 几何复现、第 33 帧清场与 Density=0 关闭，新的接触生长和外移节点保留；没有导出场景、相机或图片数据，进程正常退出。
+已下载组合源码 `5eede88` 的 [CI 41257852017](https://github.com/mumu-lhl/blender-vfx-studio/actions/runs/41257852017) 安装附件，核对全部 33 个插件 Python 文件、打包原图和 18 份原生资产。包内三档烟尘在无插件新进程完成 2→9→2 几何复现、第 33 帧清场与 Dust Density=0 关闭，新的接触生长和外移节点保留；没有导出场景、相机或图片数据，进程正常退出。
 
 三档嵌入预览已实际提取、读取，与本地预览的 RGB 最大差异均为 1 个 8-bit 色阶；下图直接来自实际附件，不当作三档高清艺术验收：
 
 ![实际 CI 包内三档烟尘预览](images/dust-contact-ci-previews.png)
 
-附件为 6,633,608 字节，SHA-256 为 `d0ff7716f894e29b54b1f901d2fc25f90c5a60b21a5f6e5faaa5801d43280648`。各文件、原生检查与预览差异已补入检查清单；其他长 CI 作业仍在执行。
+附件为 6,633,608 字节，SHA-256 为 `d0ff7716f894e29b54b1f901d2fc25f90c5a60b21a5f6e5faaa5801d43280648`。各文件、原生检查与预览差异已补入检查清单；该源码的全部 12 项必要 CI 已成功；条件发布步骤跳过符合当前非发布构建。
