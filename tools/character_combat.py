@@ -23,6 +23,7 @@ def source_hashes():
         for name in (
             "character_scene.py",
             "character_combat.py",
+            "combat_direction.py",
             "build_examples.py",
             "charge_design.py",
         )
@@ -37,6 +38,9 @@ def source_hashes():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--cel", action="store_true")
+    parser.add_argument("--directed", action="store_true")
+    parser.add_argument("--preview", action="store_true")
     parser.add_argument("--dark", action="store_true")
     parser.add_argument("--far", action="store_true")
     parser.add_argument("--reverse", action="store_true")
@@ -50,9 +54,25 @@ def main():
     frozen = source_hashes()
     bpy.ops.wm.read_factory_settings(use_empty=True)
     fixture = add_effects(
-        setup_base(light=not args.dark, far=args.far, view="reverse" if args.reverse else "front")
+        setup_base(
+            light=not args.dark,
+            far=args.far,
+            view="reverse" if args.reverse else "front",
+            directed=args.directed,
+        )
     )
+    if args.directed:
+        from tools.combat_direction import direct_effects
+
+        direct_effects(fixture)
+    if args.cel:
+        from tools.combat_direction import cel_materials
+
+        cel_materials()
     scene = bpy.context.scene
+    if args.preview:
+        scene.render.resolution_x, scene.render.resolution_y = 480, 270
+        scene.eevee.taa_render_samples = 8
     fixture["effects_collection"].hide_render = args.no_fx
     hit = fixture["contact"]["frame"]
     frames = (
@@ -65,6 +85,8 @@ def main():
     variant = ("dark" if args.dark else "light") + ("-far" if args.far else "-near")
     variant += "-reverse" if args.reverse else ""
     variant += "-no-fx" if args.no_fx else ""
+    variant += ("-cel" if args.cel else "") + ("-directed" if args.directed else "")
+    variant += "-preview" if args.preview else ""
     folder = args.output or ROOT / "work/character-combat" / variant
     folder.mkdir(parents=True, exist_ok=True)
     record = folder / "character-settings.json"
@@ -89,7 +111,10 @@ def main():
             {
                 "engine": scene.render.engine,
                 "blender_version": bpy.app.version_string,
-                "resolution": [960, 540],
+                "resolution": [scene.render.resolution_x, scene.render.resolution_y],
+                "cel": args.cel,
+                "directed": args.directed,
+                "direction": fixture.get("direction"),
                 "samples": scene.eevee.taa_render_samples,
                 "fps": scene.render.fps,
                 "fps_base": scene.render.fps_base,
