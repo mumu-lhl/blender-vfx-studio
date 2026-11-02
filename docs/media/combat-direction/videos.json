@@ -11,7 +11,7 @@
     "preview_only": true,
     "source_commit": "b8d2ea5b5e5fb36e9633bfdfa69f2b2768b09049"
   },
-  "after": {
+  "previous": {
     "width": 480,
     "height": 270,
     "r_frame_rate": "24/1",
@@ -22,5 +22,17 @@
     "realtime_playback_reviewed": false,
     "preview_only": true,
     "source_commit": "3df710511ee042fe62522ecbb5e0009cc6441001"
+  },
+  "after": {
+    "width": 480,
+    "height": 270,
+    "duration": "4.000000",
+    "source_sequence_sha256": "51033a55c629c5a7a8ebdb69492084560525336912938f2d3c82c9516693df94",
+    "movie_sha256": "4ca46eb4b51ef65d4cf9aadb32ba95ab4643f32eece993ddab49f28178c6e884",
+    "realtime_playback_reviewed": false,
+    "preview_only": true,
+    "source_commit": "32a7a30e3976528ee268f12a644c8bc0d07fa37b",
+    "r_frame_rate": "24/1",
+    "nb_frames": "96"
   }
 }
