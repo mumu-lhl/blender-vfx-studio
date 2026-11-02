@@ -48,12 +48,12 @@ def prepare_reaction(strip, hit):
 
 
 def plant_preparation(rig):
-    """Load the hips while native IK keeps the original soles on the ground."""
+    """Load and follow through while native IK preserves the original soles."""
     from blender_vfx_studio.animation import curves
 
     scene = bpy.context.scene
     samples = {}
-    for frame in range(1, 48):
+    for frame in range(1, 62):
         scene.frame_set(frame)
         evaluated = rig.evaluated_get(bpy.context.evaluated_depsgraph_get())
         samples[frame] = {}
@@ -85,7 +85,7 @@ def plant_preparation(rig):
         pole = control("Knee direction • " + side)
         goal.rotation_mode = "QUATERNION"
         previous = None
-        for frame in range(1, 48):
+        for frame in range(1, 62):
             matrix, _, point = samples[frame][side]
             goal.location = matrix.translation
             rotation = matrix.to_quaternion()
@@ -132,12 +132,17 @@ def plant_preparation(rig):
         (39, (-0.08, 0, -0.07)),
         (43, (-0.03, 0, -0.025)),
         (47, (0, 0, 0)),
+        (48, (0, 0, 0)),
+        (49, (0.08, 0, -0.065)),
+        (51, (0.08, 0, -0.065)),
+        (55, (0.12, 0, -0.065)),
+        (61, (0, 0, 0)),
         (96, (0, 0, 0)),
     ):
         shift.location = location
         shift.keyframe_insert(data_path="location", frame=frame)
     for constraint in constraints:
-        for frame, value in ((1, 1), (46, 1), (47, 0), (96, 0)):
+        for frame, value in ((1, 1), (60, 1), (61, 0), (96, 0)):
             constraint.influence = value
             constraint.keyframe_insert(data_path="influence", frame=frame)
     for obj in controls:

@@ -86,7 +86,7 @@ class DirectedCombatTests(unittest.TestCase):
         shot = setup_base(directed=True)
         rig = shot["caster"]["rig"]
         constraints = [c for bone in rig.pose.bones for c in bone.constraints]
-        for frame in (12, 28, 32, 39, 43, 46):
+        for frame in (12, 28, 32, 39, 43, 46, 49, 51, 55, 60):
             states = []
             for muted in (True, False):
                 for constraint in constraints:
@@ -113,9 +113,13 @@ class DirectedCombatTests(unittest.TestCase):
                     .angle,
                     0.001,
                 )
-            if frame in (28, 32, 39):
+            if frame in (28, 32, 39, 49, 51, 55):
                 self.assertLess(
                     states[1]["hips"].translation.z, states[0]["hips"].translation.z - 0.04
+                )
+            if frame in (49, 51, 55):
+                self.assertGreater(
+                    states[1]["hips"].translation.x, states[0]["hips"].translation.x + 0.06
                 )
 
     def test_energy_reaches_contact_and_slash_contains_blade(self):
