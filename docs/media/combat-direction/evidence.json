@@ -1,18 +1,18 @@
 {
-  "source_commit": "32a7a30e3976528ee268f12a644c8bc0d07fa37b",
+  "source_commit": "10266b4831ba47c91cf65647943b4e751eff9d55",
   "native": {
     "native_render_verified": true,
     "frames": [
       51,
       32,
-      53
+      55
     ],
     "clear_frame": 96,
-    "scene_sha256": "6910297838c917a0d6b8bcd84e30c8b7e718cfe19941ffef54b600e59e878a96",
+    "scene_sha256": "6887cbf0ca0475a906eebe274b388803f5ece959ed99eff245ddbe316cb534e2",
     "source_frame_sha256": {
-      "character-0051.png": "2e759eb54a19918158ad2105189b1459a763e0c9da0f84bfb5be44fb05aa0ee8",
-      "character-0032.png": "d1a9871d7129f9a391e13699ea81fed291ab8b6d0b40fc4a3af3fa306e0ce5d5",
-      "character-0053.png": "a6a441fba0d0190badaa6f3024af1b0567c2bfa8c88e2b75a02ec4a3b243c7ee"
+      "character-0051.png": "0727b1f37840c1f4acce6aac076dfc94bfec695091e46416fffdb8d396cdb4b7",
+      "character-0032.png": "e051f5373e60423b2e9f445bd000e379cb489797860ecfa352abfcd7638745c7",
+      "character-0055.png": "f8425a6e8fcd8ace097a68ed0305d1d4423abaebebceb5ee43c68d03418474a9"
     }
   },
   "source_sha256": {
@@ -53,7 +53,7 @@
     "blender_vfx_studio/assets/fire_density.png": "e8a42b39c31a9a57139dea6225d2a469bb20cd077fcfeebf4e8049b1e96a09df",
     "tools/character_scene.py": "63435512c8b0d48f7730dc38047d98f6c9445a9af44b929267f99d0d374420ae",
     "tools/character_combat.py": "f6e73adb32f27a8b55253b9c621601447b118b8c65366cbf85e107a7a674fb2a",
-    "tools/combat_direction.py": "b4e7c558690811de443b997d076567d5c720fc83049806929c7bd4cf3b120b23",
+    "tools/combat_direction.py": "d502e8d23b9295bc43b7dd8cf2e70d529e68b1142ede30c91307557ea81fbf67",
     "tools/build_examples.py": "6d32fc3a62a25e31ac4210558027fa9b1314de9035dc3d10dcad765a0560dfb5",
     "tools/charge_design.py": "b54106f67f5bca3854fc1536a7f6af020b24825ac1e63dcefab4904ca187401d",
     "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
@@ -133,45 +133,48 @@
     ]
   },
   "hd_frames": [
-    51,
     49,
+    55,
+    51,
+    47,
+    48,
     50,
     52,
     53,
-    16,
+    61,
     32,
     43,
-    47,
-    48,
-    54,
-    55,
-    61,
     80,
     96
   ],
   "normal_speed_video_viewed": false,
   "local_render_batch_exit": 0,
-  "contact_comparison": {
-    "baseline": {
-      "source_commit": "3df710511ee042fe62522ecbb5e0009cc6441001",
-      "native_scene_sha256": "da2998de1cbae256824eb2927661fd49567a6d2e95acd35595a5d0a66dccb079",
-      "frames": [
-        50,
-        51
-      ],
-      "resolution": [
-        960,
-        540
-      ],
-      "method": "Unmodified saved baseline, fresh bpy-only process on the same local renderer"
-    },
-    "before_png_sha256": {
-      "50": "ec16811d742d195dfbea85a7520fd9fa9f60c87b03e716134b18ce5ecceede14",
-      "51": "a2fc2645cff30bfe9fb563bcac8e66353208f71c2e1ed97e5e5d57b21e0c3a48"
-    },
-    "after_png_sha256": {
-      "50": "90ac65baea9a95ba7b37c3d2fdc72fbd87afb4269a9e3bec86e2f6a0ed2535f6",
-      "51": "2e759eb54a19918158ad2105189b1459a763e0c9da0f84bfb5be44fb05aa0ee8"
-    }
+  "behavior_checks": {
+    "cases_passed": 6,
+    "ground_minimum_baseline_m": -0.0012209401465952396,
+    "ground_minimum_candidate_m": -0.0012209626147523522,
+    "foot_position_asserted_tolerance_m": 0.001,
+    "foot_rotation_asserted_tolerance_radians": 0.001,
+    "tested_foot_frames": [
+      12,
+      28,
+      32,
+      39,
+      43,
+      46,
+      49,
+      51,
+      55,
+      60
+    ]
+  },
+  "body_comparison": {
+    "before_source_commit": "32a7a30e3976528ee268f12a644c8bc0d07fa37b",
+    "after_source_commit": "10266b4831ba47c91cf65647943b4e751eff9d55",
+    "viewed_frames": [
+      49,
+      55,
+      61
+    ]
   }
 }

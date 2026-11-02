@@ -1,0 +1,82 @@
+{
+  "source_commit": "32a7a30e3976528ee268f12a644c8bc0d07fa37b",
+  "run_id": 41459196130,
+  "all_required_jobs_passed": true,
+  "jobs": [
+    {
+      "name": "Lightning Strike · native asset and Eevee",
+      "conclusion": "success"
+    },
+    {
+      "name": "Character Dash Echoes · native asset and Eevee",
+      "conclusion": "success"
+    },
+    {
+      "name": "Directed cel combat · software Eevee",
+      "conclusion": "success"
+    },
+    {
+      "name": "Magic circle to fire · native character sequence",
+      "conclusion": "success"
+    },
+    {
+      "name": "Charge to hit · software Eevee",
+      "conclusion": "success"
+    },
+    {
+      "name": "Dust Impact · native asset and Eevee",
+      "conclusion": "success"
+    },
+    {
+      "name": "Combat shots · software Eevee and Cycles",
+      "conclusion": "success"
+    },
+    {
+      "name": "Blender · windows-2025",
+      "conclusion": "success"
+    },
+    {
+      "name": "Stylized Fire · native asset and Eevee",
+      "conclusion": "success"
+    },
+    {
+      "name": "Calligraphic Magic Circle · native asset and Eevee",
+      "conclusion": "success"
+    },
+    {
+      "name": "Blender · macos-15",
+      "conclusion": "success"
+    },
+    {
+      "name": "Blender · ubuntu-24.04",
+      "conclusion": "success"
+    }
+  ],
+  "artifact": {
+    "id": 13155255997,
+    "name": "character-combat-review",
+    "size_in_bytes": 101973461,
+    "url": "https://api.github.com/repos/mumu-lhl/blender-vfx-studio/actions/artifacts/13155255997",
+    "archive_download_url": "https://api.github.com/repos/mumu-lhl/blender-vfx-studio/actions/artifacts/13155255997/zip",
+    "expired": false,
+    "created_at": "2026-11-02T15:20:43Z",
+    "expires_at": "2027-01-31T14:09:03Z",
+    "updated_at": "2026-11-02T15:20:43Z",
+    "digest": "sha256:9a1d5e13b6679041d23d9442aada86b10acacb4ab74ef5e01ad76f169b9bad54",
+    "workflow_run": {
+      "id": 41459196130,
+      "repository_id": 1428617252,
+      "head_repository_id": 1428617252,
+      "head_branch": "art/character-combat-beats",
+      "head_sha": "32a7a30e3976528ee268f12a644c8bc0d07fa37b"
+    }
+  },
+  "source_hashes_verified_against_git_commit": true,
+  "native_pixel_frames_verified": [
+    53,
+    16,
+    32,
+    51
+  ],
+  "normal_speed_video_viewed": false
+}

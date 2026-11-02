@@ -1,0 +1,255 @@
+{
+  "blender": "5.2.2 LTS",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "cpu_quota": "200000 100000",
+  "blender_threads": 2,
+  "lp_num_threads": "2",
+  "software_gl_requested": false,
+  "gl": {
+    "vendor": "Mesa",
+    "renderer": "llvmpipe (LLVM 19.1.7, 256 bits)",
+    "version": "4.5 (Core Profile) Mesa 25.0.7-2+deb13u1"
+  },
+  "engine": "BLENDER_EEVEE",
+  "resolution": [
+    960,
+    540
+  ],
+  "samples": 16,
+  "source_sha256": {
+    "blender_vfx_studio/__init__.py": "bb9610ce7fac0377fb2d843245718c65542678210a6bfe3c73cb0bb84e20a6d8",
+    "blender_vfx_studio/animation.py": "4b61462dfc9dadc400483d6caa54d5980f8699978948c0025ac5867208ce6a1b",
+    "blender_vfx_studio/asset_browser.py": "8ecf193ce5d37f6564078c90102e0a3094d266214805eda1b575c26e0e8fb03c",
+    "blender_vfx_studio/asset_preview.py": "1a01cd4a91380c3d33cdeec07533cb939566a8c596a0ceba7f0706344532f822",
+    "blender_vfx_studio/assets.py": "f7b61ef8e6fd1349daa011757464ef1b251477773979a4e1108cdf5dafc48a6c",
+    "blender_vfx_studio/binding.py": "abc8812aeca7e0278c5560f39caa2960c26980d12f9fcd673c77e997ebcf23f8",
+    "blender_vfx_studio/composition.py": "3a7a5d6ee0ef78192898dbad0d85512dd02a2ed8b5e80cdc7988a2d764cb9b36",
+    "blender_vfx_studio/core.py": "3ccfa5c1f64c212ebe769edd46f2ff49e38fca81878208a8c5c13667985786dc",
+    "blender_vfx_studio/dash.py": "cae04666618b5af84c54595c49e29c4f06c2295d1743f11584fda1d186c2afa1",
+    "blender_vfx_studio/emitter.py": "f489d1fcfb33706fc8fac5e039e05258e5224aa8a74f1cee72c80827f0e8776b",
+    "blender_vfx_studio/flipbook.py": "3576a9d36a7a09103e8c176073975dd02aa9bb7402f2e9a4e9ea7fdafd44f607",
+    "blender_vfx_studio/impact.py": "a83bafc048945f16667fe197c94b2ea75d748e08965e64134442a84613d0eac4",
+    "blender_vfx_studio/impact_gas.py": "2317cfb38c41addb0b80e9ec515c288ac4a72deab8d71050dbed6a1a16089398",
+    "blender_vfx_studio/impact_shape.py": "71d72bf310b03f446e571421aeff16bb710a283d7a212b7a08f9e443f312ff63",
+    "blender_vfx_studio/library.py": "016b55ac3a4e698d97aa9e9a35a438d7570fe0f65d854bab07d82f69f38992e3",
+    "blender_vfx_studio/library_ui.py": "50ad9733d8c29bd00c3e09eae5486ab9b69e259d149113e9251df069fb696824",
+    "blender_vfx_studio/nodes.py": "756c376421b29edc39a170e76bdd874032738a87f74700f6185f5de6249a52d7",
+    "blender_vfx_studio/palettes.py": "5654ac04f18d50d3924dec414ac5e414372c384504a39aa294ec41f477ffda46",
+    "blender_vfx_studio/parameters.py": "08a0b1b59e1f2357a6ec3afe73d3faca0f9c4b58bfc617b14fd7c00f7c494307",
+    "blender_vfx_studio/particle.py": "06bc132c79df2584b65b8b36dc946ce1b74bddf674f37f478608f372b53712da",
+    "blender_vfx_studio/particle_shape.py": "ddd50ea4f0f4eadc5109b7026820149c83c992bd6606a854cf2691da13576f98",
+    "blender_vfx_studio/presets.py": "8810161f19f6b163bbe9087ef02c893f7b05b383e730d880827b6d3d42710c20",
+    "blender_vfx_studio/registry.py": "2884e936d806d073e4dcaa2231b3307ed482e0e2a0c28f022c62e3e7d8408534",
+    "blender_vfx_studio/screen.py": "8ad0501d259d1b1f016222758f956431131de3bdf9398136012071099ac6c3f9",
+    "blender_vfx_studio/sequence.py": "5813047f538e1dfa8f3c689b0f8e4aaebbdfb7391ea8d82f428e1255823c7105",
+    "blender_vfx_studio/shield.py": "2e777e7ecba4572859d2a82afbf982c59f10666fe3a44662912ebc6b70011c36",
+    "blender_vfx_studio/simulation.py": "1f45983a960ffdf27ec5632ca966e95a42f349f9542591adca276806b8c7f2a6",
+    "blender_vfx_studio/slash.py": "0e0fb3835f4a9f1f5e540486110bb03195ae3bcfbd9bc32671cc31ad5b33ce4a",
+    "blender_vfx_studio/slash_shader.py": "1877baa88940f03450241dd893d72b0dc46c5496b022f9e96004821856845504",
+    "blender_vfx_studio/slash_shape.py": "9cfed27c90915f88f36dccd0794777baf541099f19020c404e7190804bc92171",
+    "blender_vfx_studio/timing.py": "1b818e5feb96374dd3d230ec0443dfb12f95fff3bbb3632bc5c47956e4c45a32",
+    "blender_vfx_studio/trail.py": "4a3f20744a5c7114d086e9485601fb464c2ef78cf23c119c6d00827340248a39",
+    "blender_vfx_studio/ui.py": "92347dc299d8e72523d4e07925984d82dc44090e7f3b9965f7fa8a49c5e0032a",
+    "blender_vfx_studio/assets/burst_heat.png": "c69a4801b217428d1740ae6d82c57ae612430f92ba4904208ee131f273adb5e4",
+    "blender_vfx_studio/assets/fire_density.png": "e8a42b39c31a9a57139dea6225d2a469bb20cd077fcfeebf4e8049b1e96a09df",
+    "tools/character_scene.py": "63435512c8b0d48f7730dc38047d98f6c9445a9af44b929267f99d0d374420ae",
+    "tools/character_combat.py": "f6e73adb32f27a8b55253b9c621601447b118b8c65366cbf85e107a7a674fb2a",
+    "tools/combat_direction.py": "d502e8d23b9295bc43b7dd8cf2e70d529e68b1142ede30c91307557ea81fbf67",
+    "tools/build_examples.py": "6d32fc3a62a25e31ac4210558027fa9b1314de9035dc3d10dcad765a0560dfb5",
+    "tools/charge_design.py": "b54106f67f5bca3854fc1536a7f6af020b24825ac1e63dcefab4904ca187401d",
+    "assets/character-review/kaykit/Knight.glb": "60428e3abc09ba83e595d256e3af8c5c976b46cdae599f0802fc82b4a3445168",
+    "assets/character-review/kaykit/LICENSE.txt": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+    "assets/character-review/kaykit/Rogue.glb": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+    "assets/character-review/kaykit/provenance.json": "6d5747b2eb68bc6fde25258c884b85916da1c1ea3749c713f360a18eadeb40f9"
+  },
+  "evaluation": [
+    {
+      "fx": false,
+      "warmup": true,
+      "frame": 51,
+      "milliseconds": 1.130704000388505
+    },
+    {
+      "fx": false,
+      "warmup": true,
+      "frame": 51,
+      "milliseconds": 0.9225200001310441
+    },
+    {
+      "fx": false,
+      "warmup": true,
+      "frame": 51,
+      "milliseconds": 1.1793670000770362
+    },
+    {
+      "fx": false,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 0.9192550005536759
+    },
+    {
+      "fx": false,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 0.9423189994777204
+    },
+    {
+      "fx": false,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 0.9251740002582665
+    },
+    {
+      "fx": false,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 0.9278879997509648
+    },
+    {
+      "fx": false,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 0.9762010004124022
+    },
+    {
+      "fx": false,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 0.9226410002156626
+    },
+    {
+      "fx": false,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 0.9762509998836322
+    },
+    {
+      "fx": false,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 0.931323000258999
+    },
+    {
+      "fx": false,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 0.9727659999043681
+    },
+    {
+      "fx": true,
+      "warmup": true,
+      "frame": 51,
+      "milliseconds": 10.75929000035103
+    },
+    {
+      "fx": true,
+      "warmup": true,
+      "frame": 51,
+      "milliseconds": 11.332463999679021
+    },
+    {
+      "fx": true,
+      "warmup": true,
+      "frame": 51,
+      "milliseconds": 11.583614000301168
+    },
+    {
+      "fx": true,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 8.946124000431155
+    },
+    {
+      "fx": true,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 8.6472290004167
+    },
+    {
+      "fx": true,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 8.871095999893441
+    },
+    {
+      "fx": true,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 8.855000999574258
+    },
+    {
+      "fx": true,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 9.05540299936547
+    },
+    {
+      "fx": true,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 8.65956699999515
+    },
+    {
+      "fx": true,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 8.709552999789594
+    },
+    {
+      "fx": true,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 8.528899999873829
+    },
+    {
+      "fx": true,
+      "warmup": false,
+      "frame": 51,
+      "milliseconds": 9.36312799967709
+    }
+  ],
+  "evaluation_summary": {
+    "bare": {
+      "scene_evaluation_median_ms": 0.931323000258999,
+      "scene_evaluation_p95_ms": 0.9762010004124022,
+      "measured_samples": 9
+    },
+    "fx": {
+      "scene_evaluation_median_ms": 8.855000999574258,
+      "scene_evaluation_p95_ms": 9.05540299936547,
+      "measured_samples": 9
+    }
+  },
+  "renders": [
+    {
+      "fx": true,
+      "warmup": true,
+      "frame": 51,
+      "seconds": 61.17685090899977
+    },
+    {
+      "fx": false,
+      "warmup": true,
+      "frame": 51,
+      "seconds": 13.24826530700011
+    },
+    {
+      "fx": false,
+      "warmup": false,
+      "frame": 51,
+      "seconds": 13.151290814999811
+    },
+    {
+      "fx": true,
+      "warmup": false,
+      "frame": 51,
+      "seconds": 23.961883209000007
+    }
+  ],
+  "limits": [
+    "Headless scene evaluation and render wall time, not viewport FPS",
+    "Two warmup renders and 1 matched frame pairs; too few for a render p95",
+    "The same saved scene is used; only its VFX collection is excluded",
+    "Evaluation excludes the collection from the viewport dependency graph; render comparison only excludes it from rendering"
+  ]
+}
