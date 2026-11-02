@@ -21,9 +21,10 @@ def build(base):
     if not record["contact"]["verified_intersection"]:
         raise ValueError("The saved sequence must contain actual blade/character contact")
     native = json.loads((primary / "native-check.json").read_text())
+    required_frames = [53, 16, 32] + ([51] if record.get("directed") else [])
     if (
         native.get("native_render_verified") is not True
-        or native.get("frames") != [53, 16, 32]
+        or native.get("frames") != required_frames
         or native.get("clear_frame") != 96
         or native.get("scene_sha256")
         != hashlib.sha256((primary / "character.blend").read_bytes()).hexdigest()

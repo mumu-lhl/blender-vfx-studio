@@ -155,6 +155,29 @@ class DirectedCombatTests(unittest.TestCase):
                 tree.nodes["Nucleus Stored Size"].outputs[0].default_value, expected, places=5
             )
 
+    def test_contact_focus_bridges_pose_hold_and_retimes_with_impact(self):
+        shot = fixture()
+        impact = shot["effects"][2]
+        flash = next(o for o in composition.members(impact) if o.name.endswith("Core Flash"))
+        layer = flash.children[0]
+        scene = bpy.context.scene
+
+        def extent(frame):
+            scene.frame_set(frame)
+            mesh = layer.evaluated_get(bpy.context.evaluated_depsgraph_get()).data
+            if not mesh.vertices:
+                return 0.0
+            return max(v.co.x for v in mesh.vertices) - min(v.co.x for v in mesh.vertices)
+
+        for start, scale in ((49, 1), (61, 2)):
+            impact["start"], impact["duration"] = float(start), 24.0 * scale
+            impact.update_tag()
+            beginning = extent(start)
+            self.assertGreater(beginning, 0.1)
+            self.assertAlmostEqual(extent(start + 2 * scale), beginning, places=5)
+            self.assertAlmostEqual(extent(start + 3 * scale), beginning * 0.25, places=5)
+            self.assertEqual(extent(start + 4 * scale), 0.0)
+
 
 if __name__ == "__main__":
     result = unittest.TextTestRunner(verbosity=2).run(

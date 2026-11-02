@@ -209,7 +209,7 @@ def direct_effects(fixture):
     slash["afterimage"] = 0.24
     # Existing independent layer clocks remain native composition drivers.
     timings = {
-        "Core Flash": (0, 2),
+        "Core Flash": (0, 4),
         "Burst Core": (1, 10),
         "Main Shards": (1, 14),
         "Shockwave": (2, 16),
@@ -225,6 +225,18 @@ def direct_effects(fixture):
             member["size"] = 0.3
             for index, value in enumerate((1.0, 0.86, 0.62)):
                 member[f"color_{index}"] = value
+            # Keep the contact focus through the pose hold, then compress it
+            # as pressure opens. Use layer progress so composition retiming
+            # carries the envelope with it, without scene-frame keyframes.
+            tree = member.children[0].modifiers[0].node_group
+            hold = tree.nodes.new("ShaderNodeMapRange")
+            hold.name = hold.label = "Contact Hold Then Compression"
+            hold.location = (200, -650)
+            hold.clamp = True
+            hold.inputs["From Min"].default_value = 0.5
+            hold.inputs["From Max"].default_value = 5 / 6
+            tree.links.new(tree.nodes["Progress"].outputs[0], hold.inputs["Value"])
+            tree.links.new(hold.outputs[0], tree.nodes["Editable Collapse"].inputs[0])
         elif member.name.endswith("Burst Core"):
             member["opacity"] = 0.65
         elif member.name.endswith("Shockwave"):
